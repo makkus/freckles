@@ -338,7 +338,7 @@ function install_freckles_non_root_conda {
 
     # check python in conda environment
      if echo "$packages" | grep -q "^python\s*$CONDA_PYTHON_VERSION"; then
-       output = "  - python already installed in conda environment '$PROFILE_NAME'"
+       output =  - python already installed in conda environment '$PROFILE_NAME'"
     else
        output "  * installing python (version $CONDA_PYTHON_VERSION) into conda environment '$PROFILE_NAME'"
        execute_log "conda install --name $PROFILE_NAME -y python=$CONDA_PYTHON_VERSION" "Could not install python in conda environment."
