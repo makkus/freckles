@@ -49,10 +49,37 @@ else
     FRECKLES_USER="$SUDO_USER"
 fi
 
+PROFILE_NAME="$1"
+
+# profile dependent
+if [ "$PROFILE_NAME" == "frkl" ]; then
+  # conda
+  CONDA_PYTHON_VERSION="2.7"
+  CONDA_DEPENDENCIES="pip git"
+  CONDA_PKGS_EXIST_CHECK_PATH="$CONDA_FRECKLES_ENV_PATH/bin/git"
+  CONDA_EXECUTABLES_TO_LINK="$PROFILE_NAME"
+  # deb
+  DEB_DEPENDENCIES="build-essential git python-dev python-virtualenv libssl-dev libffi-dev"
+  # rpm
+  RPM_DEPENDENCIES="epel-release wget git python-virtualenv openssl-devel stow gcc libffi-devel python-devel ope  nssl-devel"
+  # pip requirements
+  PIP_DEPENDENCIES="pyyaml frkl"
+elif [ "$PROFILE_NAME" == "freckles" ]; then
+  # conda
+  CONDA_PYTHON_VERSION="2.7"
+  CONDA_DEPENDENCIES="pip cryptography pycrypto git"
+  CONDA_PKGS_EXIST_CHECK_PATH="$CONDA_FRECKLES_ENV_PATH/bin/git"
+  CONDA_EXECUTABLES_TO_LINK="$PROFILE_NAME"
+  # deb
+  DEB_DEPENDENCIES="build-essential git python-dev python-virtualenv libssl-dev libffi-dev"
+  # rpm
+  RPM_DEPENDENCIES="epel-release wget git python-virtualenv openssl-devel stow gcc libffi-devel python-devel ope  nssl-devel"
+  # pip requirements
+  PIP_DEPENDENCIES="freckles"
+fi
+
 # General variables
 DEBUG=false
-
-PROFILE_NAME="frkl"
 
 FRECKLES_USER_HOME="`eval echo ~$FRECKLES_USER`"
 
@@ -78,19 +105,6 @@ CONDA_PATH="$CONDA_BASE_DIR/bin"
 CONDA_ROOT_EXE="$CONDA_BASE_DIR/bin/conda"
 CONDA_FRECKLES_ENV_PATH="$CONDA_BASE_DIR/envs/$PROFILE_NAME"
 CONDA_FRECKLES_ENV_EXE="$CONDA_FRECKLES_ENV_PATH/bin/conda"
-
-# profile dependent
-# conda
-CONDA_PYTHON_VERSION="2.7"
-CONDA_DEPENDENCIES="pip git"
-CONDA_PKGS_EXIST_CHECK_PATH="$CONDA_FRECKLES_ENV_PATH/bin/git"
-CONDA_EXECUTABLES_TO_LINK="$PROFILE_NAME"
-# deb
-DEB_DEPENDENCIES="build-essential git python-dev python-virtualenv libssl-dev libffi-dev"
-# rpm
-RPM_DEPENDENCIES="epel-release wget git python-virtualenv openssl-devel stow gcc libffi-devel python-devel openssl-devel"
-# pip requirements
-PIP_DEPENDENCIES="pyyaml frkl"
 
 mkdir -p "$INSTALL_LOG_DIR"
 touch "$SCRIPT_LOG_FILE"
@@ -226,7 +240,6 @@ function install_xcode {
 function install_freckles_mac_root {
     output "  * MacOS X-based system detected."
     install_xcode
-    install_stow_from_source
     output "  * installing pip & virtualenv"
     if ! command_exists pip; then
         execute_log "easy_install pip" "Could not install pip"
@@ -293,8 +306,11 @@ function link_path {
 }
 
 function link_required_executables {
+    echo "LINK $CONDA_EXECUTABLES_TO_LINK"
+    echo "$PROFILE_NAME"
     for pkgName in $CONDA_EXECUTABLES_TO_LINK
     do
+      echo "LINK $1 to $pkgName"
       link_path "$1" "$pkgName"
     done
 }
@@ -318,17 +334,26 @@ function install_freckles_non_root_conda {
         output "  - '$PROFILE_NAME' conda environment already exists, not creating again"
     fi
 
-    if [ ! -e "$CONDA_PKGS_EXIST_CHECK_PATH" ]; then
-        output "  * installing python (version $CONDA_PYTHON_VERSION) into conda environment"
-        execute_log "conda install --name $PROFILE_NAME -y python=$CONDA_PYTHON_VERSION" "Could not install python in conda environment."
-        for pkgName in $CONDA_DEPENDENCIES
-        do
-                output "  * installing $pkgName into conda environment"
-                execute_log "conda install --name $PROFILE_NAME -y $pkgName" "Could not install $pkgName in conda environment."
-        done
+    packages=`conda list --name "$PROFILE_NAME"`
+
+    # check python in conda environment
+     if echo "$packages" | grep -q "^python\s*$CONDA_PYTHON_VERSION"; then
+       output = "  - python already installed in conda environment '$PROFILE_NAME'"
     else
-        output "  - base requirements already installed, not installing again"
+       output "  * installing python (version $CONDA_PYTHON_VERSION) into conda environment '$PROFILE_NAME'"
+       execute_log "conda install --name $PROFILE_NAME -y python=$CONDA_PYTHON_VERSION" "Could not install python in conda environment."
     fi
+
+    # check conda dependencies
+    for pkgName in $CONDA_DEPENDENCIES
+    do
+        if echo $packages | grep -q "$pkgName"; then
+            output "  - package '$pkgName' already present in conda environment '$PROFILE_NAME'"
+         else
+            output "  * installing $pkgName into conda environment '$PROFILE_NAME'"
+            execute_log "conda install --name $PROFILE_NAME -y $pkgName" "Could not install $pkgName in conda environment."
+         fi
+    done
 
     execute_log "source activate $PROFILE_NAME" "Could not activate '$PROFILE_NAME' conda environment"
 
