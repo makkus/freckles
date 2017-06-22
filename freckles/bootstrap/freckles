@@ -36,7 +36,7 @@ function error_exit
     #	----------------------------------------------------------------
 
 
-	  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+	  error_output "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
 	  exit 1
 }
 
@@ -117,12 +117,14 @@ function log () {
 
 function output() {
     log $@
-    echo "$@"
+    if ! [ "${QUIET}" = true ]; then
+      echo "$@"
+    fi
 }
 
 function error_output() {
     log $1
-    echo "$@"
+    (>&2 echo "$@")
 }
 
 function command_exists {
@@ -191,7 +193,7 @@ function install_freckles_deb {
     output "  * Debian-based system detected"
     output "  * updating apt cache"
     execute_log "apt-get update" "Could not update apt repository cache"
-    output "  * installing dependencies:\n\t$DEB_DEPENDENCIES"
+    output "  * installing dependencies:$DEB_DEPENDENCIES"
     execute_log "apt-get install -y $DEB_DEPENDENCIES" "Error installing dependencies via apt."
     output "  * creating '$PROFILE_NAME' virtual environment"
     create_virtualenv
@@ -205,7 +207,7 @@ function install_freckles_deb {
 
 function install_freckles_rpm {
     output "  * RedHat-based system detected."
-    output "  * installing dependencies:\n\t$RPM_DEPENDENCIES"
+    output "  * installing dependencies: $RPM_DEPENDENCIES"
     execute_log "yum install -y epel-release" "Error installing dependencies via yum."
     execute_log "yum install -y $RPM_DEPENDENCIES" "Error installing dependencies via yum."
     output "  * creating '$PROFILE_NAME' virtual environment"
@@ -302,15 +304,14 @@ function install_freckles_root {
 
 function link_path {
     rm -f "$FRECKLES_PATH/$2"
+    output "  * linking $1/$2 to $FRECKLES_PATH/$2"
     ln -s "$1/$2" "$FRECKLES_PATH/$2"
 }
 
 function link_required_executables {
-    echo "LINK $CONDA_EXECUTABLES_TO_LINK"
-    echo "$PROFILE_NAME"
+
     for pkgName in $CONDA_EXECUTABLES_TO_LINK
     do
-      echo "LINK $1 to $pkgName"
       link_path "$1" "$pkgName"
     done
 }
@@ -338,7 +339,7 @@ function install_freckles_non_root_conda {
 
     # check python in conda environment
      if echo "$packages" | grep -q "^python\s*$CONDA_PYTHON_VERSION"; then
-       output =  - python already installed in conda environment '$PROFILE_NAME'"
+       output "  - python already installed in conda environment '$PROFILE_NAME'"
     else
        output "  * installing python (version $CONDA_PYTHON_VERSION) into conda environment '$PROFILE_NAME'"
        execute_log "conda install --name $PROFILE_NAME -y python=$CONDA_PYTHON_VERSION" "Could not install python in conda environment."
@@ -404,9 +405,9 @@ if [ -d "$FRECKLES_PATH" ]; then
 fi
 EOF
 
-       output "\nAdded path to freckles bin dir to .profile. You'll need to logout and login again to see the effect. Or you can just execute:\n\n  source $HOME/.profile"
+       output "Added path to freckles bin dir to .profile. You'll need to logout and login again to see the effect. Or you can just execute:"
        output ""
-       output ""
+       output "   source ~/.profile"
     fi
 }
 
@@ -429,10 +430,11 @@ if ! command_exists $1; then
     output ""
     install_freckles "$using_sudo"
     output ""
-    output "Bootstrapping finished, running '$1'..."
-    output ""
     add_freckles_path
-    output "Starting '$1' with arguments: $@"
+    output ""
+    output "Bootstrapping finished, now attempting to run '$1' (like so: '$@')"
+    output ""
+    output "========================================================================"
     output ""
 fi
 
