@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", id: "vagrant"
   config.vm.synced_folder "../../", "/freckles", id: "freckles"
   config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl"
-  config.vm.synced_folder "../../../nsbl", "/frkl", id: "nsbl"
+  config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
   config.vm.synced_folder "~/.pip", "/pip", id: "pip"
 
   # Provider-specific configuration so you can fine-tune various
@@ -92,5 +92,5 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
-  #config.vm.provision :shell, path: "vagrant_bootstrap.sh", privileged: false
+  config.vm.provision :shell, path: "vagrant_bootstrap.sh", privileged: false
 end
