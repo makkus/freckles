@@ -33,7 +33,8 @@ setup(
                  'freckles'},
     entry_points={
         'console_scripts': [
-            'freckles=freckles.cli:cli'
+            'freckles=freckles.cli:cli',
+            'frecklecute=freckles.frecklecute_cli:cli'
         ]
     },
     include_package_data=True,
