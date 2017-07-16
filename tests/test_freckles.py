@@ -8,13 +8,12 @@ test_freckles
 Tests for `freckles` module.
 """
 
-import pytest
-
 from contextlib import contextmanager
+
+import pytest
 from click.testing import CliRunner
 
-from freckles import freckles
-from freckles import cli
+from freckles import cli, freckles
 
 
 @pytest.fixture
@@ -33,9 +32,7 @@ def test_content(response):
     # assert 'GitHub' in BeautifulSoup(response.content).title.string
 def test_command_line_interface():
     runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert 'freckles.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
+    result = runner.invoke(cli.cli)
+    help_result = runner.invoke(cli.cli, ['--help'])
     assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
+    assert 'Show this message and exit.' in help_result.output
