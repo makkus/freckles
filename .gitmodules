@@ -12,4 +12,4 @@
 	url = https://github.com/geerlingguy/ansible-role-homebrew.git
 [submodule "freckles/external/default_role_repo/makkus.freckles"]
 	path = freckles/external/default_role_repo/makkus.freckles
-	url = git@github.com:makkus/freckles_ansible.git
+        url = https://github.com/makkus/freckles_ansible.git
