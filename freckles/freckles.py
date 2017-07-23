@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 
+import nsbl.defaults
 from frkl.frkl import PLACEHOLDER, Frkl, UrlAbbrevProcessor
 from nsbl.nsbl import Nsbl, NsblRunner
+
+# TODO: this is ugly, probably have refactor how role repos are used
+nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 
 DEFAULT_ABBREVIATIONS = {
     'gh':
@@ -31,8 +35,9 @@ def freckles(repo_urls, profiles=[], role_repos=[], task_descs=[], target=None):
         else:
                 temp = expanded_repos
 
-        repo_vars = [{"vars": {"freckles_repo": temp}, "tasks": ["freckles"]}]
+        repo_vars = [{"vars": {"freckles_repos": temp}, "tasks": ["freckles"]}]
 
+        #runner.run(target, force=force, ansible_verbose="", ask_become_pass=ask_become_pass, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.nsbl/runs/current", no_run=no_run)
         nsbl_obj = Nsbl.create(repo_vars, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[])
         runner = NsblRunner(nsbl_obj)
 

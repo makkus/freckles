@@ -3,3 +3,5 @@
 __author__ = """Markus Binsteiner"""
 __email__ = 'makkus@posteo.net'
 __version__ = '0.1.74'
+
+from .commands import FRECKLES_REPO

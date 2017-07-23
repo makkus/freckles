@@ -1,0 +1,15 @@
+[submodule "freckles/external/default_role_repo/makkus.install-nix"]
+	path = freckles/external/default_role_repo/makkus.install-nix
+	url = git@github.com:makkus/install-nix.git
+[submodule "freckles/external/default_role_repo/makkus.install-conda"]
+	path = freckles/external/default_role_repo/makkus.install-conda
+	url = git@github.com:makkus/install-conda.git
+[submodule "freckles/external/default_role_repo/elliotweiser.osx-command-line-tools"]
+	path = freckles/external/default_role_repo/elliotweiser.osx-command-line-tools
+	url = https://github.com/elliotweiser/ansible-osx-command-line-tools.git
+[submodule "freckles/external/default_role_repo/geerlingguy.homebrew"]
+	path = freckles/external/default_role_repo/geerlingguy.homebrew
+	url = https://github.com/geerlingguy/ansible-role-homebrew.git
+[submodule "freckles/external/default_role_repo/makkus.freckles"]
+	path = freckles/external/default_role_repo/makkus.freckles
+	url = git@github.com:makkus/freckles_ansible.git
