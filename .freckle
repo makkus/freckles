@@ -1,5 +1,6 @@
 vars:   
-   freckle_type: python-dev
+   freckle_profiles:
+      - python-dev
    pkg_mgr: conda
    conda_environment: freckles-dev
    packages:
