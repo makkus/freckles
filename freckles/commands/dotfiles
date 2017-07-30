@@ -1,0 +1,29 @@
+doc:
+   help: "Checks out a dotfile repository (which should adhere to certain standards), installs any applications configured in it, and (optionally) stows the configuration files"
+   short_help: "checkout dotfiles repo and setup working env described in it"
+args:
+  freckles_profiles:
+    arg_name: profile
+    help: list of profiles to use, will use all available if not specified
+    type: str
+    multiple: true
+    required: false
+    default: []
+    is_var: true
+  freckles_repos:
+    arg_name: repo
+    type: freckles.FRECKLES_REPO
+    required: true
+    is_argument: true
+    is_var: true
+  freckles_stow:
+    arg_name: stow
+    default: false
+    required: false
+    is_flag: true
+    is_var: true
+vars:
+    freckles_types:
+      - dotfiles
+tasks:
+  - freckles

@@ -34,7 +34,8 @@ setup(
     entry_points={
         'console_scripts': [
             'freckles=freckles.cli:cli',
-            'frecklecute=freckles.frecklecute_cli:cli'
+            'frecklecute=freckles.frecklecute_cli:cli',
+            'dermatoscope=freckles.freckles_dev_cli:cli'
         ]
     },
     include_package_data=True,

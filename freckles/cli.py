@@ -43,14 +43,22 @@ for arg in sys.argv[1:]:
     current_command = arg
     break
 
+FRECKLES_HELP_TEXT = "TO BE DONE"
+FRECKLES_EPILOG_TEXT = "For more information please visit: https://frkl.io"
+
 class FrecklesCommand(click.MultiCommand):
 
     def __init__(self, current_command, command_repos=[], **kwargs):
 
-        super(FrecklesCommand, self).__init__(kwargs)
+        click.MultiCommand.__init__(self, "freckles", **kwargs)
+
+        debug_option = click.Option(param_decls=["--debug", "-d"], required=False, default=False, is_flag=True)
+        self.params = [debug_option]
+
         self.command_repo = CommandRepo(command_repos)
         self.current_command = current_command
         self.command_names = self.command_repo.commands.keys()
+        self.command_names.sort()
         if self.current_command:
             self.command_names.insert(0, self.current_command)
 
@@ -67,7 +75,7 @@ class FrecklesCommand(click.MultiCommand):
             return None
 
 
-cli = FrecklesCommand(current_command, help="Test")
+cli = FrecklesCommand(current_command, help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
 
 if __name__ == "__main__":
     cli()

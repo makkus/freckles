@@ -37,10 +37,7 @@ echo source "$FRECKLES_VIRTUALENV_ACTIVATE" >> "$HOME/.bashrc"
 source "$FRECKLES_VIRTUALENV_ACTIVATE"
 cd /freckles
 pip install -r requirements_dev.txt
-python setup.py develop
-if [ -d "/nsbl" ]; then
-    pip install -e "/nsbl"
-fi
-if [ -d "/frkl" ]; then
-    pip install -e "/frkl"
-fi
+#if [ -d "/frkl" ]; then
+    #pip install -e "/frkl"
+#fi
+#python setup.py develop

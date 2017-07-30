@@ -8,6 +8,9 @@ tasks:
           - state
       vars:
         state: present
+  - git:
+      meta:
+        task-desc: checking out git repository
   - install-nix:
         meta:
           task-desc: installing 'nix' package manager
@@ -29,6 +32,16 @@ tasks:
   - yum:
       meta:
         become: yes
+  - install-pkg-mgrs:
+      meta:
+        default-key: pkg_mgrs
+        task-desc: installing package managers
+        task-name: makkus.install-pkg-mgrs
+        task-roles:
+           - makkus.install-nix
+           - makkus.install-conda
+           - geerlingguy.homebrew
+           - elliotweiser.osx-command-line-tools
   - freckles:
       meta:
         task-desc: setting up environment using freckles repo(s)
@@ -47,7 +60,6 @@ tasks:
         var-keys:
           - packages
           - pkg_mgr
-
   - checkout-git:
       meta:
         default-key: repos
@@ -100,12 +112,25 @@ tasks:
       meta:
          default-key: free_form
          task-name: shell
+         task-desc: running shell command
          var-keys:
            - free_form
            - chdir
            - creates
            - executable
            - removes
+  - command:
+      meta:
+         default-key: free_form
+         task-name: command
+         task-desc: running command
+         var-keys:
+           - free_form
+           - chdir
+           - creates
+           - executable
+           - removes
+           - warn
   - add-user:
       meta:
          default-key: name

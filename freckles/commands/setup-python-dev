@@ -1,0 +1,28 @@
+doc:
+  help: "Checks out a git repository containing a (standard) python project, creates a conda virtual environment for it, installs all necessary requirements and the project code itself into it."
+  short_help: checkout python project and setup dev env
+  epilog: "For more information, visit:\nhttps://frkl.io/freckles/commands/setup-python-dev"
+args:
+  local_dest:
+    arg_name: dest
+    help: the target directory
+    type: str
+    multiple: False
+    required: True
+    is_var: False
+  repo_url:
+    arg_name: repo
+    type: freckles.FRECKLES_REPO
+    required: true
+    is_argument: false
+    is_var: false
+vars:
+  freckles_types:
+    - python-dev-env
+  freckles_repos:
+    dest: "{{ local_dest }}"
+    repo: "{{ repo_url }}"
+  freckles_project_dir: "{{ local_dest  }}"
+tasks:
+  tasks:
+    - freckles
