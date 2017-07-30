@@ -1,0 +1,11 @@
+- vars:
+    pkg_mgr: conda
+    conda_environment: freckles-dev
+    packages:
+      - python
+      - pip
+      - cryptography
+      - pycrypto
+      - git
+
+

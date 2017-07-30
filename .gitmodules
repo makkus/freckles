@@ -13,3 +13,6 @@
 [submodule "freckles/external/default_role_repo/makkus.freckles"]
 	path = freckles/external/default_role_repo/makkus.freckles
         url = https://github.com/makkus/freckles_ansible.git
+[submodule "freckles/external/default_role_repo/makkus.install-pkg-mgrs"]
+	path = freckles/external/default_role_repo/makkus.install-pkg-mgrs
+	url = https://github.com/makkus/install-pkg-mgrs.git
