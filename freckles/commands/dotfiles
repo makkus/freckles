@@ -2,9 +2,9 @@ doc:
    help: "Checks out a dotfile repository (which should adhere to certain standards), installs any applications configured in it, and (optionally) stows the configuration files"
    short_help: "checkout dotfiles repo and setup working env described in it"
 args:
-  freckles_profiles:
-    arg_name: profile
-    help: list of profiles to use, will use all available if not specified
+  freckles_folders:
+    arg_name: folders
+    help: list of (sub-)folders to use, will use all available if not specified
     type: str
     multiple: true
     required: false
