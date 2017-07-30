@@ -1,7 +1,8 @@
-freckle_type: python-dev
-pkg_mgr: conda
-conda_environment: freckles-dev
-packages:
+vars:   
+   freckle_type: python-dev
+   pkg_mgr: conda
+   conda_environment: freckles-dev
+   packages:
       - python
       - pip
       - cryptography
