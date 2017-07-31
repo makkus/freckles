@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import logging
 import os
 import pprint
 import sys
 
 import click
-
 import nsbl
-import yaml
 from nsbl.nsbl import Nsbl, NsblRunner, ensure_git_repo_format
+
+import yaml
 
 from . import __version__ as VERSION
 from .commands import CommandRepo, RepoType
-from .freckles import freckles
 
 log = logging.getLogger("freckles")
 
