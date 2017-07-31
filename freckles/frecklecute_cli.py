@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import logging
 import os
@@ -9,10 +8,10 @@ import sys
 from pydoc import locate
 
 import click
-
-import yaml
 from frkl.frkl import PLACEHOLDER, Frkl, UrlAbbrevProcessor
 from nsbl.nsbl import Nsbl, NsblRunner
+
+import yaml
 
 from . import __version__ as VERSION
 

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import logging
 import os
 import sys
 
 import click
+from nsbl.nsbl import Nsbl
 
 import yaml
-from nsbl.nsbl import Nsbl
 
 from . import __version__ as VERSION
 from .commands import CommandRepo
