@@ -13,7 +13,7 @@ from contextlib import contextmanager
 import pytest
 from click.testing import CliRunner
 
-from freckles import cli, freckles
+# from freckles import cli, freckles
 
 
 @pytest.fixture
@@ -25,14 +25,14 @@ def response():
     # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
 
 
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument.
-    """
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-def test_command_line_interface():
-    runner = CliRunner()
-    result = runner.invoke(cli.cli)
-    help_result = runner.invoke(cli.cli, ['--help'])
-    assert help_result.exit_code == 0
-    assert 'Show this message and exit.' in help_result.output
+# def test_content(response):
+#     """Sample pytest test function with the pytest fixture as an argument.
+#     """
+#     # from bs4 import BeautifulSoup
+#     # assert 'GitHub' in BeautifulSoup(response.content).title.string
+# def test_command_line_interface():
+#     runner = CliRunner()
+#     result = runner.invoke(cli.cli)
+#     help_result = runner.invoke(cli.cli, ['--help'])
+#     assert help_result.exit_code == 0
+#     assert 'Show this message and exit.' in help_result.output
