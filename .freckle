@@ -4,10 +4,20 @@ vars:
    pkg_mgr: conda
    conda_environment: freckles-dev
    packages:
-      - gcc
-      - python
-      - pip
-      - cryptography
-      - pycrypto
-
+      - base_dependencies:
+          pkg:
+            debian:
+              - build-essential
+              - git
+              - python-dev
+              - python-virtualenv
+              - libssl-dev
+              - libffi-dev
+              - libsqlite3-dev
+            conda:
+              - gcc
+              - python
+              - pip
+              - cryptography
+              - pycrypto
 
