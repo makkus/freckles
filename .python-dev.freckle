@@ -1,7 +1,5 @@
-vars:   
-   freckle_profiles:
-      - python-dev
-   pkg_mgr: conda
+vars:
+   #pkg_mgr: conda
    conda_environment: freckles-dev
    packages:
       - base_dependencies:
@@ -9,7 +7,7 @@ vars:
           pkgs:
             debian:
               - build-essential
-      - dependencies:
+      - build-dependencies:
           pkgs:
             debian:
               - python-dev
@@ -17,6 +15,7 @@ vars:
               - libssl-dev
               - libffi-dev
               - libsqlite3-dev
+              - python-pip
             conda:
               - python
               - pip
