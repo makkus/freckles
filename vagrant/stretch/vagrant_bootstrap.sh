@@ -19,7 +19,7 @@ FRECKLES_VIRTUALENV_ACTIVATE="$FRECKLES_VIRTUALENV/bin/activate"
 export WORKON_HOME="$FRECKLES_VIRTUALENV"
 
 sudo apt-get update || sudo apt-get update
-sudo apt-get install -y build-essential git python-dev python-virtualenv libssl-dev libffi-dev stow libsqlite3-dev
+sudo apt-get install -y build-essential git python-dev python-virtualenv libssl-dev libffi-dev libsqlite3-dev
 
 mkdir -p "$FRECKLES_VIRTUALENV"
 cd "$FRECKLES_VIRTUALENV_BASE"
