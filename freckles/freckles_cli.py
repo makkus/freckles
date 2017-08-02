@@ -40,22 +40,34 @@ def find_supported_profiles():
 @click.version_option(version=VERSION, message="%(version)s")
 @click.option('--no-ask-pass', help='force not asking the user for a sudo password, if not specified freckles will try to do an educated guess (which could potentially fail)', is_flag=True, default=False, flag_value=True)
 @click.option('--profile', '-p', help='ignore remote freckle profile(s), force using this/those one(s)', multiple=True, metavar='PROFILE', default=[], type=click.Choice(find_supported_profiles()))
-@click.option('--target', '-t', help='target folder for freckle checkout (if remote url provided). if multiple freckles are specified, this will be used as a parent folder, defaults to users home', type=str, metavar='PATH', default=None)
+@click.option('--target', '-t', help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home', type=str, metavar='PATH')
+@click.option('--local-target-folder', help='in case only one freckle url is provided and the target folder should have a different basename, this option can be used to specify the full local path', required=False)
 @click.option('--folder_filter', '-f', help='if specified, only process folders that end with one of the specified strings', type=str, metavar='FILTER_STRING', default=[])
 @click.option('--debug', '-d', help="debug output, using ansible default callback", default=False, is_flag=True)
 @click.argument("freckle_urls", required=True, type=RepoType(), nargs=-1, metavar="URL_OR_PATH")
-def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
+def cli(freckle_urls, profile, folder_filter, target, local_target_folder, no_ask_pass, debug):
     """Freckles manages your dotfiles (and other aspects of your local machine).
 
     For information about how to use and configure Freckles, please visit: XXX
     """
 
-    if len(freckle_urls) == 1:
-        target_is_parent = False
-    else:
-        target_is_parent = True
+    target_is_parent = True
 
-    vars = {}
+    if local_target_folder:
+
+        if target:
+            click.echo("'--target/-t' and '--local-target-folder' options can't be used at the same time")
+            sys.exit(1)
+        if len(freckle_urls) > 1:
+            click.echo("'--local-target-folder' can only be used when exactly one freckle url is provided")
+            sys.exit(1)
+
+        else:
+            target = local_target_folder
+            target_is_parent = False
+
+    if not target:
+        target = "~/freckles"
 
     repos = []
 
@@ -66,7 +78,7 @@ def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
         is_local = url_is_local(freckle_url)
 
         if is_local:
-            freckle_repo["path"] = freckle_url
+            freckle_repo["path"] = os.path.abspath(freckle_url)
             freckle_repo["url"] = None
         else:
             repo = ensure_git_repo_format(freckle_url, target, target_is_parent)
@@ -78,11 +90,14 @@ def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
 
         repos.append(freckle_repo)
 
+    # pprint.pprint(repos)
+    # sys.exit(0)
+
     task_config = [{"vars": {"freckles": repos}, "tasks": ["freckles"]}]
 
     nsbl_obj = Nsbl.create(task_config, [], [], wrap_into_localhost_env=True, pre_chain=[])
     runner = NsblRunner(nsbl_obj)
-    target = os.path.expanduser("~/.freckles/runs/archive/run")
+    run_target = os.path.expanduser("~/.freckles/runs/archive/run")
     if debug:
         stdout_callback = "default"
         ansible_verbose = "-vvvv"
@@ -94,7 +109,7 @@ def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
     display_sub_tasks = True
     display_skipped_tasks = False
     ask_become_pass = not no_ask_pass
-    runner.run(target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current", no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks)
+    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current", no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks)
 
 if __name__ == "__main__":
     cli()
