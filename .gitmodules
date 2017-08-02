@@ -16,3 +16,6 @@
 [submodule "freckles/external/default_role_repo/makkus.install-pkg-mgrs"]
 	path = freckles/external/default_role_repo/makkus.install-pkg-mgrs
 	url = https://github.com/makkus/install-pkg-mgrs.git
+[submodule "freckles/external/default_role_repo/makkus.box-basics"]
+	path = freckles/external/default_role_repo/makkus.box-basics
+	url = https://github.com/makkus/box-basics.git
