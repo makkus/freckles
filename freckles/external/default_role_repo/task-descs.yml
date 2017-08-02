@@ -47,6 +47,8 @@ tasks:
         task-desc: setting up environment using freckles repo(s)
         task-name: makkus.freckles
         task-roles:
+           - makkus.box-basics
+           - makkus.install-pkg-mgrs
            - makkus.install-nix
            - makkus.install-conda
            - geerlingguy.homebrew
