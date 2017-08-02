@@ -9,7 +9,7 @@
 	url = https://github.com/elliotweiser/ansible-osx-command-line-tools.git
 [submodule "freckles/external/default_role_repo/geerlingguy.homebrew"]
 	path = freckles/external/default_role_repo/geerlingguy.homebrew
-	url = https://github.com/geerlingguy/ansible-role-homebrew.git
+	url = https://github.com/makkus/ansible-role-homebrew.git
 [submodule "freckles/external/default_role_repo/makkus.freckles"]
 	path = freckles/external/default_role_repo/makkus.freckles
         url = https://github.com/makkus/freckles_ansible.git

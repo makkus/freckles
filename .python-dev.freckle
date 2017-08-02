@@ -1,5 +1,5 @@
 vars:
-   #pkg_mgr: conda
+   pkg_mgr: conda
    conda_environment: freckles-dev
    packages:
       - base_dependencies:
@@ -7,6 +7,7 @@ vars:
           pkgs:
             debian:
               - build-essential
+            other: omit
       - build-dependencies:
           pkgs:
             debian:
@@ -21,3 +22,4 @@ vars:
               - pip
               - cryptography
               - pycrypto
+            other: ignore
