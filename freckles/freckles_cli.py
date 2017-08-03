@@ -21,6 +21,8 @@ log = logging.getLogger("freckles")
 # TODO: this is ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 
+SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]
+
 def url_is_local(url):
 
     if url.startswith("~") or url.startswith(os.sep):
@@ -44,8 +46,9 @@ def find_supported_profiles():
 @click.option('--local-target-folder', help='in case only one freckle url is provided and the target folder should have a different basename, this option can be used to specify the full local path', required=False)
 @click.option('--folder_filter', '-f', help='if specified, only process folders that end with one of the specified strings', type=str, metavar='FILTER_STRING', default=[])
 @click.option('--debug', '-d', help="debug output, using ansible default callback", default=False, is_flag=True)
+@click.option('--pkg-mgr', '-p', help="default package manager to use", type=click.Choice(SUPPORTED_PKG_MGRS), default="auto", multiple=False, required=False)
 @click.argument("freckle_urls", required=True, type=RepoType(), nargs=-1, metavar="URL_OR_PATH")
-def cli(freckle_urls, profile, folder_filter, target, local_target_folder, no_ask_pass, debug):
+def cli(freckle_urls, profile, folder_filter, target, local_target_folder, pkg_mgr, no_ask_pass, debug):
     """Freckles manages your dotfiles (and other aspects of your local machine).
 
     For information about how to use and configure Freckles, please visit: XXX
@@ -93,7 +96,7 @@ def cli(freckle_urls, profile, folder_filter, target, local_target_folder, no_as
     # pprint.pprint(repos)
     # sys.exit(0)
 
-    task_config = [{"vars": {"freckles": repos}, "tasks": ["freckles"]}]
+    task_config = [{"vars": {"freckles": repos, "pkg_mgr": pkg_mgr}, "tasks": ["freckles"]}]
 
     nsbl_obj = Nsbl.create(task_config, [], [], wrap_into_localhost_env=True, pre_chain=[])
     runner = NsblRunner(nsbl_obj)
