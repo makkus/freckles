@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name='freckles',
-    version='0.1.81',
+    version='0.1.82',
     description="a dotfile manager, and more; quite qute",
     long_description=readme + '\n\n' + history,
     author="Markus Binsteiner",
