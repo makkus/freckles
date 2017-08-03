@@ -1,5 +1,5 @@
 vars:
-   pkg_mgr: conda
+   #pkg_mgr: conda
    conda_environment: freckles-dev
    packages:
       - base_dependencies:
