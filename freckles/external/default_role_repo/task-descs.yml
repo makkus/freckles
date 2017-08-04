@@ -13,12 +13,19 @@ tasks:
         task-desc: checking out git repository
   - install-nix:
         meta:
+          task-type: ansible-role
           task-desc: installing 'nix' package manager
           task-name: makkus.install-nix
   - install-conda:
         meta:
+          task-type: ansible-role
           task-desc: installing 'conda' package manager
           task-name: makkus.install-conda
+  - install-vagrant:
+        meta:
+          task-type: ansible-role
+          task-desc: installing Vagrant
+          task-name: makkus.install-vagrant
   - install-homebrew:
         meta:
           task-type: ansible-role
@@ -40,6 +47,7 @@ tasks:
         task-roles:
            - makkus.install-nix
            - makkus.install-conda
+           - makkus.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - freckles:
@@ -51,6 +59,7 @@ tasks:
            - makkus.install-pkg-mgrs
            - makkus.install-nix
            - makkus.install-conda
+           - makkus.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - install:
