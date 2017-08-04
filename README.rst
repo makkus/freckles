@@ -33,6 +33,8 @@ Features
 Credits
 ---------
 
+mac_pkg: Spencer Gibb ( https://github.com/spencergibb/battleschool )
+
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
