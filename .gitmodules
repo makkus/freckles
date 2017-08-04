@@ -19,3 +19,6 @@
 [submodule "freckles/external/default_role_repo/makkus.box-basics"]
 	path = freckles/external/default_role_repo/makkus.box-basics
 	url = https://github.com/makkus/box-basics.git
+[submodule "freckles/external/default_role_repo/makkus.install-vagrant"]
+	path = freckles/external/default_role_repo/makkus.install-vagrant
+	url = https://github.com/makkus/install-vagrant.git
