@@ -6,7 +6,7 @@
         url = https://github.com/makkus/install-conda.git
 [submodule "freckles/external/default_role_repo/elliotweiser.osx-command-line-tools"]
 	path = freckles/external/default_role_repo/elliotweiser.osx-command-line-tools
-	url = https://github.com/elliotweiser/ansible-osx-command-line-tools.git
+	url = https://github.com/makkus/ansible-osx-command-line-tools.git
 [submodule "freckles/external/default_role_repo/geerlingguy.homebrew"]
 	path = freckles/external/default_role_repo/geerlingguy.homebrew
 	url = https://github.com/makkus/ansible-role-homebrew.git
