@@ -115,12 +115,14 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
         ansible_verbose = "-vvvv"
     elif format == "ansible":
         stdout_callback = "default"
-        ignore_task_strings = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting"]
     elif format == "skippy":
         stdout_callback = "skippy"
     elif format == "default_full":
         stdout_callback = "nsbl_internal"
         display_skipped_tasks = True
+    elif format == "default":
+        ignore_task_strings = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting"]
+        stdout_callback = "nsbl_internal"
 
     no_run = False
     force = True
