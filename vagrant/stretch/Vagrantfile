@@ -97,5 +97,6 @@ Vagrant.configure("2") do |config|
      python -c "import sys; print(sys.stdout.isatty())"
      apt-get update || apt-get update
      wget -O - https://frkl.io | bash -s -- freckles /freckles
+     echo '. "~/.local/virtualenvs/freckles-dev/bin/activate"' >> /home/vagrant/.bashrc
   SHELL
 end
