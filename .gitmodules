@@ -22,3 +22,6 @@
 [submodule "freckles/external/default_role_repo/makkus.install-vagrant"]
 	path = freckles/external/default_role_repo/makkus.install-vagrant
 	url = https://github.com/makkus/install-vagrant.git
+[submodule "freckles/external/freckles_extra_plugins"]
+	path = freckles/external/freckles_extra_plugins
+	url = https://github.com/makkus/freckles_extra_plugins.git
