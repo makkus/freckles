@@ -24,6 +24,8 @@ nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "exte
 SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]
 SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
 
+DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for executable", "preparing profiles", "starting profile execution", "auto-detect package managers"]
+
 def url_is_local(url):
 
     if url.startswith("~") or url.startswith(os.sep):
@@ -121,7 +123,7 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
         stdout_callback = "nsbl_internal"
         display_skipped_tasks = True
     elif format == "default":
-        ignore_task_strings = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting"]
+        ignore_task_strings = DEFAULT_IGNORE_STRINGS
         stdout_callback = "nsbl_internal"
 
     no_run = False
