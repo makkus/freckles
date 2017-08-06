@@ -16,7 +16,7 @@ args:
     required: true
     is_argument: false
     is_var: false
-vars:
+vars_template:
   freckles_types:
     - python-dev-env
   freckles_repos:

@@ -1,0 +1,53 @@
+doc:
+   help: "Checks out a freckle repository (which should adhere to certain standards), installs any applications configured in it, and runs any profiles this repo possibly contains"
+   short_help: "checkout freckle repo and setup working env described in it"
+args:
+  include:
+    help: list of (sub-)folders to include
+    type: str
+    multiple: true
+    required: false
+    default: []
+    is_var: false
+  exclude:
+    help: list of (sub-)folders to exclude
+    type: str
+    multiple: true
+    required: false
+    default: []
+    is_var: false
+  profiles:
+    help: list of profiles to run, default is to run all profiles that are being found
+    type: str
+    multiple: true
+    required: false
+    default: []
+    is_var: false
+  freckle_urls:
+    arg_name: url
+    type: freckles.FRECKLES_REPO
+    required: false
+    is_argument: true
+    nargs: -1
+    is_var: false
+  freckle_path:
+    arg_name: target
+    type: freckles.FRECKLES_REPO
+    required: false
+    default: "~/freckles"
+    is_var: false
+  freckles_dotfiles_stow:
+    arg_name: stow
+    default: true
+    required: false
+    is_flag: true
+    is_var: true
+
+vars:
+  freckles: >
+    {% for freckle_url in freckle_urls %}
+    - {{ freckle_url | to_freckle_desc(freckle_path, true, profiles, include, exclude) | to_nice_json() }}
+    {% endfor %}
+
+tasks:
+  - freckles

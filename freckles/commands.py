@@ -11,78 +11,29 @@ import sys
 from pydoc import locate
 
 import click
+from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
+                       EnsureUrlProcessor, Frkl, MergeDictResultCallback,
+                       UrlAbbrevProcessor, YamlTextSplitProcessor, dict_merge)
 from jinja2 import Environment, PackageLoader, Template
 from six import string_types
 
 import yaml
-from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
-                       EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor)
-from nsbl.nsbl import Nsbl, NsblRunner
+
+from .jinja_filters import utils as jinja_utils
+from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
+                    create_and_run_nsbl_runner, create_freckle_desc,
+                    find_supported_profiles, render_dict, render_vars_template,
+                    url_is_local)
 
 log = logging.getLogger("freckles")
 
+
 COMMAND_SEPERATOR = "-"
-DEFAULT_ABBREVIATIONS = {
-    'gh':
-        ["https://github.com/", PLACEHOLDER, "/", PLACEHOLDER, ".git"],
-    'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"]
-}
-
-
-def replace_string(template_string, replacement_dict):
-
-    return Environment().from_string(template_string).render(replacement_dict)
-
-def render_dict(obj, replacement_dict):
-
-    if isinstance(obj, dict):
-        # dictionary
-        ret = {}
-        for k, v in obj.iteritems():
-            ret[render_dict(k, replacement_dict)] = render_dict(v, replacement_dict)
-        return ret
-    elif isinstance(obj, string_types):
-        # string
-        return replace_string(obj, replacement_dict)
-    elif isinstance(obj, (list, tuple)):
-        # list (or the like)
-        ret = []
-        for item in obj:
-            ret.append(render_dict(item, replacement_dict))
-        return ret
-    else:
-        # anything else
-        return obj
-
-class RepoType(click.ParamType):
-
-    name = 'repo'
-
-    def convert(self, value, param, ctx):
-
-        if isinstance(value, string_types):
-            is_string = True
-        elif isinstance(value, (list, tuple)):
-            is_string = False
-        else:
-            raise Exception("Not a supported type (only string or list are accepted): {}".format(value))
-        try:
-            frkl_obj = Frkl(value, [UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
-            result = frkl_obj.process()
-            if is_string:
-                return result[0]
-            else:
-                return result
-        except:
-            self.fail('%s is not a valid repo url' % value, param, ctx)
-FRECKLES_REPO = RepoType()
-
-DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "commands")
+DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecute_commands")
 
 class CommandRepo(object):
 
-    def __init__(self, paths):
+    def __init__(self, paths=[DEFAULT_COMMAND_REPO], no_run=False):
         if not isinstance(paths, (list, tuple)):
             paths = [paths]
 
@@ -91,9 +42,9 @@ class CommandRepo(object):
         if DEFAULT_COMMAND_REPO not in self.paths:
             self.paths.insert(0, DEFAULT_COMMAND_REPO)
 
-        self.commands = self.get_commands()
+        self.commands = self.get_commands(no_run)
 
-    def get_commands(self):
+    def get_commands(self, no_run=False):
 
         commands = {}
         for path in self.paths:
@@ -106,7 +57,7 @@ class CommandRepo(object):
                 path = root.split(os.sep)
                 for f in files:
                     command_name = COMMAND_SEPERATOR.join(path[path_tokens:] + [f])
-                    command = self.create_command(command_name, os.path.join(root, f))
+                    command = self.create_command(command_name, os.path.join(root, f), no_run)
                     commands[command_name] = command
 
         return commands
@@ -119,54 +70,53 @@ class CommandRepo(object):
         task_vars = self.commands[command_name]["vars"]
         doc = self.commands[command_name]["doc"]
         args_that_are_vars = self.commands[command_name]["args_that_are_vars"]
+        no_run = self.commands[command_name]["no_run"]
 
         def command_callback(**kwargs):
-
             # exchange arg_name with var name
+
             new_args = {}
             for key, value in key_map.items():
                 temp = kwargs.pop(key)
                 if key not in args_that_are_vars:
+                    if isinstance(temp, tuple):
+                        temp = list(temp)
                     new_args[value] = temp
                 else:
                     task_vars[value] = temp
 
-            rendered_vars = render_dict(task_vars, new_args)
+            final_vars = {}
+
+            for key, template in task_vars.items():
+                if isinstance(template, string_types) and "{" in template:
+                    template_var_string = render_vars_template(template, new_args)
+                    try:
+                        template_var_new = yaml.safe_load(template_var_string)
+                        final_vars[key] = template_var_new
+                    except (Exception) as e:
+                        raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
+                else:
+                    final_vars[key] = template
+
             rendered_tasks = render_dict(tasks, new_args)
 
-            log.debug("Args: {}".format(new_args))
-            log.debug("Vars: {}".format(rendered_vars))
+            # log.debug("Args: {}".format(new_args))
+            log.debug("Vars: {}".format(final_vars))
             log.debug("Tasks to execute, with arguments replaced: {}".format(rendered_tasks))
 
-            # print("ARGS")
-            # pprint.pprint(new_args)
-            # print("VARS")
-            # pprint.pprint(rendered_vars)
-            # print("TASKS")
-            # pprint.pprint(rendered_tasks)
-            # sys.exit(0)
+            task_config = [{"vars": final_vars, "tasks": rendered_tasks}]
 
-            # if not rendered_vars:
-                # rendered_vars = kwargs
+            if no_run:
+                click.echo("")
+                click.echo("Task config:")
+                click.echo("")
+                pprint.pprint(task_config)
+                click.echo("")
+                return
 
-            task_config = [{"vars": rendered_vars, "tasks": rendered_tasks}]
+            log.debug("Final task config: {}".format(task_config))
 
-            debug = ctx.params["debug"]
-            nsbl_obj = Nsbl.create(task_config, [], [], wrap_into_localhost_env=True, pre_chain=[])
-            runner = NsblRunner(nsbl_obj)
-            target = os.path.expanduser("~/.freckles/runs/archive/run")
-            ask_become_pass = True
-            if debug:
-                stdout_callback = "default"
-                ansible_verbose = "-vvvv"
-            else:
-                stdout_callback = "nsbl_internal"
-                ansible_verbose = ""
-            no_run = False
-            force = True
-            display_sub_tasks = True
-            display_skipped_tasks = False
-            runner.run(target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current", no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks)
+            create_and_run_nsbl_runner(task_config, "default", False)
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
@@ -175,7 +125,7 @@ class CommandRepo(object):
         command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog, callback=command_callback)
         return command
 
-    def create_command(self, command_name, yaml_file):
+    def create_command(self, command_name, yaml_file, no_run=False):
 
         log.debug("Loading command file '{}'...".format(yaml_file))
 
@@ -234,4 +184,4 @@ class CommandRepo(object):
                 o = click.Option(param_decls=["--{}".format(key)], **opt_details)
             options_list.append(o)
 
-        return {"options": options_list, "key_map": key_map, "command_file": yaml_file, "tasks": tasks, "vars": vars, "doc": doc, "args_that_are_vars": args_that_are_vars}
+        return {"options": options_list, "key_map": key_map, "command_file": yaml_file, "tasks": tasks, "vars": vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
