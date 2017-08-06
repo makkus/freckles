@@ -7,12 +7,13 @@ import subprocess
 import sys
 
 import click
+from frkl import frkl
 
 import click_log
 import yaml
-from frkl import frkl
 
 from . import __version__ as VERSION
+from .commands import CommandRepo
 
 
 def output(python_object, format="raw", pager=False):
@@ -64,3 +65,17 @@ def debug_last(ctx, pager):
 
     for line in iter(proc.stdout.readline, ''):
         click.echo(line, nl=False)
+
+@cli.command('frecklecute-command')
+@click.option('--command', '-c', help="the command to debug", required=True)
+@click.option('--args-file', '-f', help="the file containing example args", type=click.File(), required=True)
+@click.pass_context
+def debug_frecklecute_command(ctx, command, args_file):
+
+    repo = CommandRepo(no_run=True)
+    command = repo.get_command(None, command)
+
+    args = yaml.safe_load(args_file)
+    print(args)
+
+    command.callback(**args)

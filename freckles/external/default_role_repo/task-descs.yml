@@ -52,7 +52,7 @@ tasks:
            - elliotweiser.osx-command-line-tools
   - freckles:
       meta:
-        task-desc: getting, if necessary, and applying freckle(s)
+        task-desc: getting and installing freckle(s)
         task-name: makkus.freckles
         task-roles:
            - makkus.box-basics
