@@ -19,7 +19,6 @@ from six import string_types
 
 import yaml
 
-from .jinja_filters import utils as jinja_utils
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     find_supported_profiles, render_dict, render_vars_template,

@@ -13,7 +13,6 @@ import yaml
 
 from . import __version__ as VERSION
 from .commands import CommandRepo
-from .freckles import freckles
 
 log = logging.getLogger("freckles")
 
