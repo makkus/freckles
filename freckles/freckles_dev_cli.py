@@ -68,14 +68,24 @@ def debug_last(ctx, pager):
 
 @cli.command('frecklecute-command')
 @click.option('--command', '-c', help="the command to debug", required=True)
-@click.option('--args-file', '-f', help="the file containing example args", type=click.File(), required=True)
+@click.option('--args-file', '-f', help="the file containing example args", type=click.File(), required=False, default=None)
 @click.pass_context
 def debug_frecklecute_command(ctx, command, args_file):
 
-    repo = CommandRepo(no_run=True)
-    command = repo.get_command(None, command)
+    if args_file:
+        args = yaml.safe_load(args_file)
+        print(args)
+    else:
+        args = {}
 
-    args = yaml.safe_load(args_file)
-    print(args)
+    if os.path.exists(command):
+        current_command = command
+        current_command_path = os.path.abspath(command)
+    else:
+        current_command = None
+        current_command_path = None
+
+    repo = CommandRepo(no_run=True, additional_commands=[(current_command, current_command_path)])
+    command = repo.get_command(None, command)
 
     command.callback(**args)

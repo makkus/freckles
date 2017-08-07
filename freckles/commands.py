@@ -64,6 +64,8 @@ class CommandRepo(object):
         for command in self.additional_commands:
             command_name = command[0]
             command_file = command[1]
+            if not command_name or not command_file:
+                continue
             path = command_file.split(os.sep)
             command = self.create_command(command_file, command_file, no_run)
             commands[command_name] = command
@@ -76,6 +78,7 @@ class CommandRepo(object):
         key_map = self.commands[command_name]["key_map"]
         tasks = self.commands[command_name]["tasks"]
         task_vars = self.commands[command_name]["vars"]
+        default_vars = self.commands[command_name]["default_vars"]
         doc = self.commands[command_name]["doc"]
         args_that_are_vars = self.commands[command_name]["args_that_are_vars"]
         no_run = self.commands[command_name]["no_run"]
@@ -92,6 +95,9 @@ class CommandRepo(object):
                     new_args[value] = temp
                 else:
                     task_vars[value] = temp
+
+            # now overimpose the new_args over template_vars
+            new_args = dict_merge(default_vars, new_args)
 
             final_vars = {}
 
@@ -156,6 +162,7 @@ class CommandRepo(object):
         options = config_content.get("args", {})
         vars = config_content.get("vars", {})
         tasks = config_content.get("tasks", None)
+        default_vars = config_content.get("defaults", {})
 
         if not tasks:
             click.echo("No tasks included in command, doing nothing.")
@@ -192,4 +199,4 @@ class CommandRepo(object):
                 o = click.Option(param_decls=["--{}".format(key)], **opt_details)
             options_list.append(o)
 
-        return {"options": options_list, "key_map": key_map, "command_file": yaml_file, "tasks": tasks, "vars": vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
+        return {"options": options_list, "key_map": key_map, "command_file": yaml_file, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
