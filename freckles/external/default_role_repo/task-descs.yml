@@ -8,6 +8,39 @@ tasks:
           - state
       vars:
         state: present
+  - download:
+      meta:
+        task-desc: downloading file
+        task-type: ansible-task
+        become: no
+        task-name: get_url
+        var-keys:
+          - attributes
+          - backup
+          - checksum
+          - client_cert
+          - client_key
+          - dest
+          - force
+          - force_basic_auth
+          - group
+          - headers
+          - mode
+          - others
+          - owner
+          - selevel
+          - serole
+          - setype
+          - seuser
+          - sha256sum
+          - timeout
+          - tmp_dst
+          - unsafe_writes
+          - url
+          - url_password
+          - url_username
+          - use_proxy
+          - validate_certs
   - git:
       meta:
         task-desc: checking out git repository
