@@ -32,7 +32,7 @@ DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecute_comm
 
 class CommandRepo(object):
 
-    def __init__(self, paths=[DEFAULT_COMMAND_REPO], no_run=False):
+    def __init__(self, paths=[DEFAULT_COMMAND_REPO], no_run=False, additional_commands=[]):
         if not isinstance(paths, (list, tuple)):
             paths = [paths]
 
@@ -40,6 +40,8 @@ class CommandRepo(object):
 
         if DEFAULT_COMMAND_REPO not in self.paths:
             self.paths.insert(0, DEFAULT_COMMAND_REPO)
+
+        self.additional_commands = additional_commands
 
         self.commands = self.get_commands(no_run)
 
@@ -58,6 +60,13 @@ class CommandRepo(object):
                     command_name = COMMAND_SEPERATOR.join(path[path_tokens:] + [f])
                     command = self.create_command(command_name, os.path.join(root, f), no_run)
                     commands[command_name] = command
+
+        for command in self.additional_commands:
+            command_name = command[0]
+            command_file = command[1]
+            path = command_file.split(os.sep)
+            command = self.create_command(command_file, command_file, no_run)
+            commands[command_name] = command
 
         return commands
 
