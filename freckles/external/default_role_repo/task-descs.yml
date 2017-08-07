@@ -69,6 +69,13 @@ tasks:
              - elliotweiser.osx-command-line-tools
         vars:
           homebrew_cask_apps: []
+  - install-oracle-java:
+      meta:
+        task-type: ansible-role
+        task-desc: installing oracle java
+        task-name: ansiblebit.oracle-java
+        task-roles:
+          - ansiblebit.oracle-java
   - yum:
       meta:
         become: yes
