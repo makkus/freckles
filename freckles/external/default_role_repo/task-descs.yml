@@ -44,6 +44,16 @@ tasks:
   - git:
       meta:
         task-desc: checking out git repository
+  - update-freckles:
+      meta:
+        task-type: ansible-role
+        task_desc: updating freckles
+        task-name: makkus.install-freckles
+        task-roles:
+          - makkus.install-conda
+      vars:
+        update: true
+        install_method: auto
   - install-nix:
         meta:
           task-type: ansible-role
