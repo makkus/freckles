@@ -28,3 +28,6 @@
 [submodule "freckles/external/default_role_repo/ansiblebit.oracle-java"]
 	path = freckles/external/default_role_repo/ansiblebit.oracle-java
 	url = https://github.com/makkus/oracle-java.git
+[submodule "freckles/external/default_role_repo/makkus.install-freckles"]
+	path = freckles/external/default_role_repo/makkus.install-freckles
+	url = https://github.com/makkus/install-freckles.git
