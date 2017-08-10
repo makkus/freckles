@@ -22,7 +22,7 @@ import yaml
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
-DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for executable", "preparing profiles", "starting profile execution", "auto-detect package managers"]
+DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
