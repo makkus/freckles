@@ -1,0 +1,3 @@
+tasks:
+  - update-freckles:
+     install_method: auto
