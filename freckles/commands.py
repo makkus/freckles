@@ -28,7 +28,7 @@ log = logging.getLogger("freckles")
 
 
 COMMAND_SEPERATOR = "-"
-DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecute_commands")
+DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecutables")
 
 class CommandRepo(object):
 
