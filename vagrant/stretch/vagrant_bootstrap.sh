@@ -21,7 +21,8 @@ export WORKON_HOME="$FRECKLES_VIRTUALENV"
 sudo apt-get update || sudo apt-get update
 sudo apt-get install -y build-essential git python-dev python-virtualenv libssl-dev libffi-dev libsqlite3-dev
 
-mkdir -p "$FRECKLES_VIRTUALENV"
+sudo mkdir -p "$FRECKLES_VIRTUALENV"
+sudo chown -R vagrant "$FRECKLES_VIRTUALENV"
 cd "$FRECKLES_VIRTUALENV_BASE"
 virtualenv freckles
 
