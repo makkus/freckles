@@ -100,6 +100,18 @@ tasks:
            - makkus.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
+  - install-packages:
+      meta:
+        default-key: packages
+        task-desc: installing packages
+        task-name: makkus.install-packages
+        task-roles:
+           - makkus.install-pkg-mgrs
+           - makkus.install-nix
+           - makkus.install-conda
+           - makkus.install-vagrant
+           - geerlingguy.homebrew
+           - elliotweiser.osx-command-line-tools
   - freckles:
       meta:
         task-desc: getting and installing freckle(s)
@@ -107,6 +119,7 @@ tasks:
         task-roles:
            - makkus.box-basics
            - makkus.install-pkg-mgrs
+           - makkus.install-packages
            - makkus.install-nix
            - makkus.install-conda
            - makkus.install-vagrant
