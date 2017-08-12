@@ -31,3 +31,6 @@
 [submodule "freckles/external/default_role_repo/makkus.install-freckles"]
 	path = freckles/external/default_role_repo/makkus.install-freckles
 	url = https://github.com/makkus/install-freckles.git
+[submodule "freckles/external/default_role_repo/makkus.install-packages"]
+	path = freckles/external/default_role_repo/makkus.install-packages
+	url = https://github.com/makkus/install-packages.git
