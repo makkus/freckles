@@ -20,8 +20,6 @@ freckles
 
 *freckles* is configuration management for your development environment (physical box, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
-As its a tad hard to explain --in sufficient detail and without loosing your interest -- what *freckles* is and when it might be a good idea to use it, here are some links:
-
 - Documentation: https://freckles.readthedocs.io
 - Github: https://github.com/makkus/freckles
 - pypi: https://pypi.python.org/pypi/freckles
@@ -34,7 +32,7 @@ Really quick-start
 
    curl https://frkl.io | bash -s -- freckles --help
 
-This bootstraps *freckles*, and displays it's help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``.
+This bootstraps *freckles*, and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features
 --------
@@ -49,7 +47,7 @@ Features
 Examples
 --------
 
-Best to show what *freckles* is, and what it can do using Examples, right?
+Best to show what *freckles* is, and what it can do using examples, right?
 
 Example #1, manage your dotfiles and the setup of your development machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,13 +59,13 @@ Example #1, manage your dotfiles and the setup of your development machine
 This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
 
 - bootstraps *freckles* itself, then straight away executes it
-- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (optional to have a short url, but I grew to like those short ones)
-- checks out the repository to $HOME/freckles/dotfiles (this is configurable of course)
+- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
+- checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
-- installs all the packages it found in the metadata (btw, same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X)
-- metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which it also installs if not present already)
+- installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
+- metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which *freckles* also installs if not present already)
 
-My *dotfiles* are a bit more involved that
+I've organized My *dotfiles* into subfolders (to be able to exclude applications I don't need for certain scenarios -- e.g. X-applications in a VM), but that is more complicated than necessary. You can certainly just have a flatter folder-structure, with on subfolder per application.
 
 Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
