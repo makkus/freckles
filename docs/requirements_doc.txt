@@ -21,4 +21,4 @@ PyYAML==3.12
 pytest==3.2.1
 ipython==6.1.0
 
-requests
+requests==2.18.3
