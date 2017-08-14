@@ -1,5 +1,5 @@
 Click>=6.0'
-jinja2<2.9'
+jinja2==2.9.6
 ansible>=2.2.0'
 cookiecutter>=1.5.1'
 stevedore>=1.18.0'
