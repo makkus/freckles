@@ -16,7 +16,7 @@ coverage==4.4.1
 Sphinx==1.6.3
 sphinx-autobuild==0.7.1
 docutils==0.14
-cryptography==1.4
+cryptography==2.0.3
 PyYAML==3.11
 pytest==2.9.2
 ipython==5.1.0
