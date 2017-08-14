@@ -38,10 +38,10 @@ Features
 --------
 
 * one-line setup of a new environment, including freckles bootstrap
-* minimal and (hopefully) intuitive config file format, using ``yaml`` syntax
+* minimal requirements: only ``curl`` or ``wget``
 * supports Linux & MacOS X (and probably the Ubuntu subsystem on Windows 10)
-* share the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
-* support for systems where you don't have root/sudo access via the conda_ package manager or nix_ (or if you just think it's a good idea to use any of them)
+* uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
+* support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations) -- or if you just link one or both of them
 * direct support for all ansible_ modules and roles
 
 Examples
@@ -69,10 +69,10 @@ I've organized My *dotfiles* into subfolders (to be able to exclude applications
 
 Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
-Example #2, setting up the environment for a development project
+Example #2, setting up the environment for a Python development project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now, after setting up my machine with all the apps and configuration I use, I want to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which I have to start working on *freckles* again, see. Thus:
+Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which is why I have to start working on *freckles* again, see. Thus:
 
 .. code-block:: console
 
@@ -85,9 +85,10 @@ Here's what happens:
 - checks out the repository to $HOME/freckles/freckles
 - reads the metadata, installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
 - also figures out this is a python dev project, so it:
-- creates a virtualenv
-- installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
-- executes ``python setup.py develop`` within that same virtualenv
+
+  - creates a virtualenv
+  - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
+  - executes ``python setup.py develop`` within that same virtualenv
 
 
 Other
