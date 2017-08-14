@@ -1,0 +1,8 @@
+tasks:
+  - install-redis:
+      meta:
+        become: yes
+        task-roles:
+            install-redis: bennojoy.redis
+      vars:
+        redis_port: 11244

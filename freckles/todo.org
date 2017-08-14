@@ -1,0 +1,4 @@
+* check what to do if no python is installed
+* what to do with path and session logins
+* link frecklecute
+f

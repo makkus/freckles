@@ -1,0 +1,160 @@
+==> default: Running provisioner: shell...
+    default: Running: inline script
+==> default: Ign:1 http://deb.debian.org/debian stretch InRelease
+==> default: Hit:2 http://deb.debian.org/debian stretch Release
+==> default: Hit:3 http://security.debian.org/debian-security stretch/updates InRelease
+==> default: Hit:5 http://cdn-fastly.deb.debian.org/debian sid InRelease
+==> default: Reading package lists...
+==> default: --2017-08-03 10:32:26--  https://frkl.io/
+==> default: Resolving frkl.io (frkl.io)... 
+==> default: 72.249.49.249
+==> default: Connecting to frkl.io (frkl.io)|72.249.49.249|:443... 
+==> default: connected.
+==> default: HTTP request sent, awaiting response... 
+==> default: 200 OK
+==> default: Length: 16039 (16K) [application/octet-stream]
+==> default: Saving to: ‘STDOUT’
+==> default: 
+==> default:      0K ........
+==> default: .. .....                                      100% 65.1K=0.2s
+==> default: 
+==> default: 2017-08-03 10:32:27 (65.1 KB/s) - written to stdout [16039/16039]
+==> default: [?25l
+==> default: * starting tasks for environment 'localhost'...
+==> default:  * applying role 'freckles'...
+==> default:    - update apt cache => 
+==> default: ok (no change)
+==> default:    - check required executables => 
+==> default: ok (no change)
+==> default:    - Am I running on Mac OS X? => 
+==> default:    - Remove existing Command Line Tools installation => 
+==> default:    - Check that the Command Line Tools path is present => 
+==> default:    - Is the C++ compiler useable? => 
+==> default:    - Check the Command Line Tools package metadata => 
+==> default:    - Prepare to install Command Line Tools => 
+==> default:    - Check for Command Line Tools in Software Update list => 
+==> default:    - Install Command Line Tools => 
+==> default:    - Ensure Homebrew parent directory has correct permissions (on High Sier...
+==> default:    - Ensure Homebrew parent directory has correct permissions (on non-'High...
+==> default:    - Ensure Homebrew directory exists. => 
+==> default:    - Ensure Homebrew is installed. => 
+==> default:    - Ensure proper permissions and ownership on homebrew_brew_bin_path dirs...
+==> default:    - Ensure proper ownership on homebrew_install_path subdirs. => 
+==> default:    - Check if homebrew binary is already in place. => 
+==> default:    - Symlink brew to homebrew_brew_bin_path. => 
+==> default:    - Force update brew after installation. => 
+==> default:    - Ensure configured taps are tapped. => 
+==> default:    - Ensure configured homebrew packages are installed. => 
+==> default:    - Ensure blacklisted homebrew packages are not installed. => 
+==> default:    - Upgrade all homebrew packages (if configured). => 
+==> default:    - Install configured cask applications. => 
+==> default:    - Check for Brewfile. => 
+==> default:    - Install from Brewfile. => 
+==> default:    - test whether nix binary exists => 
+==> default:    - create /nix directory => 
+==> default:    - install nix dependencies for Debian-based systems => 
+==> default:    - install nix dependencies for Redhat-based systems => 
+==> default:    - download nix installer script => 
+==> default:    - enable nix install as root => 
+==> default:    - run nix installer => 
+==> default:    - run nix installer on Mac OS X => 
+==> default:    - test whether conda executable exists => 
+==> default:    - install conda dependencies for Debian-based systems => 
+==> default:    - install conda dependencies for Redhat-based systems => 
+==> default:    - create conda parent directory => 
+==> default:    - download linux miniconda install => 
+==> default:    - download macos miniconda install => 
+==> default:    - run miniconda installer => 
+==> default:    - add conda path => 
+==> default:    - update conda => 
+==> default:    - install git => 
+==> default:    - checkout freckle(s) => 
+==> default:    - finding freckles folders => 
+==> default: ok (no change)
+==> default:    - processing freckles folders => 
+==> default: ok (no change)
+==> default:    - retrieving freckles facts => 
+==> default: ok (no change)
+==> default:    - augmenting freckles profile metadata => 
+==> default: ok (no change)
+==> default:    - calculating package list => 
+==> default: ok (no change)
+==> default:    - auto-detect package managers => 
+==> default: ok (no change)
+==> default:    - check required executables => 
+==> default: ok (no change)
+==> default:    - Am I running on Mac OS X? => 
+==> default:    - Remove existing Command Line Tools installation => 
+==> default:    - Check that the Command Line Tools path is present => 
+==> default:    - Is the C++ compiler useable? => 
+==> default:    - Check the Command Line Tools package metadata => 
+==> default:    - Prepare to install Command Line Tools => 
+==> default:    - Check for Command Line Tools in Software Update list => 
+==> default:    - Install Command Line Tools => 
+==> default:    - Ensure Homebrew parent directory has correct permissions (on High Sier...
+==> default:    - Ensure Homebrew parent directory has correct permissions (on non-'High...
+==> default:    - Ensure Homebrew directory exists. => 
+==> default:    - Ensure Homebrew is installed. => 
+==> default:    - Ensure proper permissions and ownership on homebrew_brew_bin_path dirs...
+==> default:    - Ensure proper ownership on homebrew_install_path subdirs. => 
+==> default:    - Check if homebrew binary is already in place. => 
+==> default:    - Symlink brew to homebrew_brew_bin_path. => 
+==> default:    - Force update brew after installation. => 
+==> default:    - Ensure configured taps are tapped. => 
+==> default:    - Ensure configured homebrew packages are installed. => 
+==> default:    - Ensure blacklisted homebrew packages are not installed. => 
+==> default:    - Upgrade all homebrew packages (if configured). => 
+==> default:    - Install configured cask applications. => 
+==> default:    - Check for Brewfile. => 
+==> default:    - Install from Brewfile. => 
+==> default:    - test whether nix binary exists => 
+==> default:    - create /nix directory => 
+==> default:    - install nix dependencies for Debian-based systems => 
+==> default:    - install nix dependencies for Redhat-based systems => 
+==> default:    - download nix installer script => 
+==> default:    - enable nix install as root => 
+==> default:    - run nix installer => 
+==> default:    - run nix installer on Mac OS X => 
+==> default:    - test whether conda executable exists => 
+==> default:    - install conda dependencies for Debian-based systems => 
+==> default:    - install conda dependencies for Redhat-based systems => 
+==> default:    - create conda parent directory => 
+==> default:    - download linux miniconda install => 
+==> default:    - download macos miniconda install => 
+==> default:    - run miniconda installer => 
+==> default:    - add conda path => 
+==> default:    - update conda => 
+==> default:    - install git => 
+==> default:    - install freckle packages => 
+==> default: 
+==> default:        - build-essential (using: apt) => 
+==> default: ok (no change)
+==> default:        - python-pip (using: apt) => 
+==> default: ok (no change)
+==> default:        - libssl-dev (using: apt) => 
+==> default: ok (no change)
+==> default:        - libffi-dev (using: apt) => 
+==> default: ok (no change)
+==> default:        - libsqlite3-dev (using: apt) => 
+==> default: ok (no change)
+==> default:        - python-virtualenv (using: apt) => 
+==> default: ok (no change)
+==> default:        - python-dev (using: apt) => 
+==> default: ok (no change)
+==> default:    - preparing profiles => 
+==> default: ok (no change)
+==> default:    - setting up environment for Mac OS X => 
+==> default:    - starting profile execution => 
+==> default: ok (no change)
+==> default:    - setting project name => 
+==> default: ok (no change)
+==> default:    - install python dev requirements (into conda environment) => 
+==> default:    - install python dev requirements (into virtualenv) => 
+==> default: 
+==> default:        - /freckles/requirements_dev.txt (using: pip) => 
+==> default: ok (no change)
+==> default:    - running 'python setup.py develop' in conda environment => 
+==> default:    - running 'python setup.py develop' in project virtualenv => 
+==> default: ok (changed)
+==> default:    => ok (changed)
+==> default: [?25h

@@ -1,0 +1,12 @@
+args:
+  pkg_mgr:
+    help: the package manager to use for installing the emacs package
+    default: auto
+tasks:
+  - install:
+     packages:
+       - emacs
+       - spacemacs:
+           pkg_mgr: git
+           repo: https://github.com/syl20bnr/spacemacs
+           dest: ~/.emacs.d

@@ -1,0 +1,14 @@
+vars:
+  profile:
+    key: freckles_profiles
+    help: list of profiles to use, will use all available if not specified
+    type: list
+    required: false
+    default: []
+  repo:
+    key: freckles_repos
+    type: freckles.FRECKLES_REPO
+    required: true
+    #is_argument: true
+tasks:
+  - freckles

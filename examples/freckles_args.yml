@@ -1,0 +1,7 @@
+url:
+  - "https://github.com/makkus/dotfiles.git"
+exclude: []
+include: []
+profiles: []
+stow: true
+target: "~freckles"

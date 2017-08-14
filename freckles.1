@@ -1,0 +1,420 @@
+#!/usr/bin/env bash
+
+# Exit codes:
+# 2: application configuration error
+# 3: execution error somewhere in the bootstrap pipeline
+# 6: platform or package manager not supported
+
+#set -o pipefail
+
+if [ ! -z "$FRECKLES_DEBUG" ]; then
+    DEBUG=true
+fi
+
+if [ "$DEBUG" = true ]; then
+    set -x
+fi
+
+# # convert exitcodes to events
+# # trap "throw EXIT"    EXIT
+# # trap "throw SIGINT"  SIGINT
+# # trap "throw SIGTERM" SIGTERM
+
+# addListener VIRTUALENV_ERROR error_message
+# addListener CONDA_ERROR error_message
+
+trap 'error_exit "Bootstrapping interrupted, exiting...; exit"' SIGHUP SIGINT SIGTERM
+
+PROGNAME="freckles bootstrap"
+function error_exit
+{
+
+    #	----------------------------------------------------------------
+    #	Function for exit due to fatal program error
+    #		Accepts 1 argument:
+    #			string containing descriptive error message
+    #	----------------------------------------------------------------
+
+
+	  echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2
+	  exit 1
+}
+
+# determine whether we run with sudo, or not
+if [ "$EUID" != 0 ]; then
+    using_sudo=false
+    FRECKLES_USER="$USER"
+else
+    using_sudo=true
+    FRECKLES_USER="$SUDO_USER"
+fi
+
+# General variables
+DEBUG=false
+
+PROFILE_NAME="frkl"
+
+FRECKLES_USER_HOME="`eval echo ~$FRECKLES_USER`"
+
+BASE_DIR="$FRECKLES_USER_HOME/.freckles"
+INSTALL_LOG_DIR="$BASE_DIR/.install_logs"
+SCRIPT_LOG_FILE="$INSTALL_LOG_DIR/install.log"
+FRECKLES_DATA_DIR="$BASE_DIR/opt"
+TEMP_DIR="/tmp/freckles_install"
+
+FRECKLES_PATH="$BASE_DIR/bin"
+
+# python/virtualenv related variables
+VIRTUALENV_DIR="$FRECKLES_DATA_DIR/venv_$PROFILE_NAME"
+VIRTUALENV_PATH="$VIRTUALENV_DIR/bin"
+
+# conda related variables
+CONDA_DOWNLOAD_URL_LINUX="https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh"
+#CONDA_DOWNLOAD_URL_LINUX="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda2-latest-Linux-x86_64.sh"
+CONDA_DOWNLOAD_URL_MAC="https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh"
+#CONDA_DOWNLOAD_URL_MAC="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda2-latest-MacOSX-x86_64.sh"
+CONDA_BASE_DIR="$BASE_DIR/opt/conda"
+CONDA_PATH="$CONDA_BASE_DIR/bin"
+CONDA_ROOT_EXE="$CONDA_BASE_DIR/bin/conda"
+CONDA_FRECKLES_ENV_PATH="$CONDA_BASE_DIR/envs/$PROFILE_NAME"
+CONDA_FRECKLES_ENV_EXE="$CONDA_FRECKLES_ENV_PATH/bin/conda"
+
+# profile dependent
+# conda
+CONDA_PYTHON_VERSION="2.7"
+CONDA_DEPENDENCIES="pip git"
+CONDA_PKGS_EXIST_CHECK_PATH="$CONDA_FRECKLES_ENV_PATH/bin/git"
+CONDA_EXECUTABLES_TO_LINK="$PROFILE_NAME"
+# deb
+DEB_DEPENDENCIES="build-essential git python-dev python-virtualenv libssl-dev libffi-dev"
+# rpm
+RPM_DEPENDENCIES="epel-release wget git python-virtualenv openssl-devel stow gcc libffi-devel python-devel openssl-devel"
+# pip requirements
+PIP_DEPENDENCIES="pyyaml frkl"
+
+mkdir -p "$INSTALL_LOG_DIR"
+touch "$SCRIPT_LOG_FILE"
+chmod 700 "$SCRIPT_LOG_FILE"
+chown "$FRECKLES_USER" "$SCRIPT_LOG_FILE"
+
+function log () {
+    echo "    .. $@" >> "$SCRIPT_LOG_FILE"
+}
+
+function output() {
+    log $@
+    echo "$@"
+}
+
+function error_output() {
+    log $1
+    echo "$@"
+}
+
+function command_exists {
+    PATH="$PATH:$FRECKLES_PATH" type "$1" > /dev/null 2>&1 ;
+}
+
+function execute_log {
+    eval "$1" >> "$SCRIPT_LOG_FILE" 2>&1 || error_exit "$2"
+}
+
+function download {
+    {
+    if command_exists wget; then
+        execute_log "wget -O $2 $1" "Could not download $1 using wget"
+    elif command_exists curl; then
+        execute_log "curl -o $2 $1" "Could not download $1 using curl"
+    else
+        error_output "Could not find 'wget' nor 'curl' to download files. Exiting..."
+        exit 1
+    fi
+    } >> "$SCRIPT_LOG_FILE"
+}
+
+function install_freckles {
+    if [ "$1" == true ]; then
+        install_freckles_root
+    else
+        install_freckles_non_root_conda
+    fi
+}
+
+#TODO: exception handline for this
+function create_virtualenv {
+    {
+    su "$FRECKLES_USER" <<EOF
+set +e
+mkdir -p "$FRECKLES_DATA_DIR"
+if [ ! -e "$VIRTUALENV_DIR" ]; then
+  virtualenv "$VIRTUALENV_DIR"
+fi
+source "$VIRTUALENV_DIR/bin/activate"
+pip install --upgrade pip
+pip install --upgrade setuptools wheel
+pip install --upgrade requests
+set -e
+EOF
+    } >> "$SCRIPT_LOG_FILE" 2>&1 || error_exit "Could not create '$PROFILE_NAME' virtual environment"
+}
+
+#TODO: exception handling for this
+#TODO: check whether package already installed? or overkill? -- yeah, probably
+function install_package_in_virtualenv {
+    output "  * installing '$1' into virtualenv"
+    {
+        su "$FRECKLES_USER" <<EOF
+set +e
+source "$VIRTUALENV_DIR/bin/activate"
+pip install --upgrade "$1" --upgrade-strategy only-if-needed
+set -e
+EOF
+    } >> "$SCRIPT_LOG_FILE" 2>&1 || error_exit "Could not create '$PROFILE_NAME' virtual environment"
+}
+
+
+function install_freckles_deb {
+    output "  * Debian-based system detected"
+    output "  * updating apt cache"
+    execute_log "apt-get update" "Could not update apt repository cache"
+    output "  * installing dependencies:\n\t$DEB_DEPENDENCIES"
+    execute_log "apt-get install -y $DEB_DEPENDENCIES" "Error installing dependencies via apt."
+    output "  * creating '$PROFILE_NAME' virtual environment"
+    create_virtualenv
+    for pkgName in $PIP_DEPENDENCIES
+    do
+        install_package_in_virtualenv $pkgName
+    done
+    link_required_executables "$VIRTUALENV_PATH"
+    export PATH="$PATH:$VIRTUALENV_PATH"
+}
+
+function install_freckles_rpm {
+    output "  * RedHat-based system detected."
+    output "  * installing dependencies:\n\t$RPM_DEPENDENCIES"
+    execute_log "yum install -y epel-release" "Error installing dependencies via yum."
+    execute_log "yum install -y $RPM_DEPENDENCIES" "Error installing dependencies via yum."
+    output "  * creating '$PROFILE_NAME' virtual environment"
+    create_virtualenv
+    for pkgName in $PIP_DEPENDENCIES
+    do
+        install_package_in_virtualenv $pkgName
+    done
+    link_required_executables "$VIRTUALENV_PATH"
+    export PATH="$PATH:$VIRTUALENV_PATH"
+}
+
+function install_xcode {
+    g++ --version > /dev/null 2&>1
+    if [ ! $? == 0 ]; then
+        output "  * installing xcode"
+        touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress;
+        log "Finding command-line-tools name"
+        PROD=$(softwareupdate -l |
+               grep "\*.*Command Line" |
+               head -n 1 | awk -F"*" '{print $2}' |
+               sed -e 's/^ *//' |
+               tr -d '\n')
+        log "Installing: $PROD"
+        execute_log "softwareupdate -i \"$PROD\" -v" "Could not install $PROD"
+    else
+        output "  - 'xcode' already installed, skipping"
+    fi
+
+}
+
+function install_freckles_mac_root {
+    output "  * MacOS X-based system detected."
+    install_xcode
+    install_stow_from_source
+    output "  * installing pip & virtualenv"
+    if ! command_exists pip; then
+        execute_log "easy_install pip" "Could not install pip"
+    fi
+    if ! command_exists virtualenv; then
+        execute_log "pip install virtualenv" "Could not install virtualenv via pip"
+    fi
+
+    output "  * creating '$PROFILE_NAME' virtual environment"
+    create_virtualenv
+    for pkgName in $PIP_DEPENDENCIES
+    do
+        install_package_in_virtualenv $pkgName
+    done
+    link_required_executables "$VIRTUALENV_PATH"
+    export PATH="$PATH:$VIRTUALENV_PATH"
+}
+
+function install_freckles_linux_root {
+    YUM_CMD=$(which yum 2> /dev/null)
+    APT_GET_CMD=$(which apt-get 2> /dev/null)
+    if [[ ! -z $YUM_CMD ]]; then
+        install_freckles_rpm
+    elif [[ ! -z $APT_GET_CMD ]]; then
+        install_freckles_deb
+    else
+        error_output "Could not find supported package manager. Exiting..."
+        exit 6
+    fi
+}
+
+function install_freckles_root {
+
+    output "  * elevated permissions detected, using sytem package manager to install dependencies"
+
+    # figure out which os we are running
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        install_freckles_linux_root
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        install_freckles_mac_root
+    elif [[ "$OSTYPE" == "cygwin" ]]; then
+        # POSIX compatibility layer and Linux environment emulation for Windows
+        error_output "Sorry, Cygwin platform is not supported (at the moment, anyway). Exiting..."
+        exit 6
+    elif [[ "$OSTYPE" == "msys" ]]; then
+        # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+        error_output "Sorry, msys/MinGW platform is not supported (at the moment, anyway). Exiting..."
+        exit 6
+    elif [[ "$OSTYPE" == "win32" ]]; then
+        error_output "Sorry, win32 platform is not supported (at the moment, anyway). Exiting..."
+        exit 6
+    elif [[ "$OSTYPE" == "freebsd"* ]]; then
+        error_output "Sorry, freebsd platform is not supported (at the moment, anyway). Exiting..."
+        exit 6
+    else
+        error_output "Could not figure out which platform I'm running on. Exiting..."
+        exit 6
+    fi
+}
+
+function link_path {
+    rm -f "$FRECKLES_PATH/$2"
+    ln -s "$1/$2" "$FRECKLES_PATH/$2"
+}
+
+function link_required_executables {
+    for pkgName in $CONDA_EXECUTABLES_TO_LINK
+    do
+      link_path "$1" "$pkgName"
+    done
+}
+
+function install_freckles_non_root_conda {
+
+    output "  * no elevated permissions detected, using conda package manager"
+
+    if [ ! -f "$CONDA_ROOT_EXE" ]; then
+        output "  * installing conda"
+        install_conda_non_root
+    else
+        output "  - 'conda' already installed, not installing again"
+        export PATH="$CONDA_PATH:$PATH"
+    fi
+
+    if [ ! -e "$CONDA_FRECKLES_ENV_EXE" ]; then
+        output "  * creating '$PROFILE_NAME' conda environment"
+        execute_log "conda create -y --name $PROFILE_NAME python=2" "Could not create conda environment."
+    else
+        output "  - '$PROFILE_NAME' conda environment already exists, not creating again"
+    fi
+
+    if [ ! -e "$CONDA_PKGS_EXIST_CHECK_PATH" ]; then
+        output "  * installing python (version $CONDA_PYTHON_VERSION) into conda environment"
+        execute_log "conda install --name $PROFILE_NAME -y python=$CONDA_PYTHON_VERSION" "Could not install python in conda environment."
+        for pkgName in $CONDA_DEPENDENCIES
+        do
+                output "  * installing $pkgName into conda environment"
+                execute_log "conda install --name $PROFILE_NAME -y $pkgName" "Could not install $pkgName in conda environment."
+        done
+    else
+        output "  - base requirements already installed, not installing again"
+    fi
+
+    execute_log "source activate $PROFILE_NAME" "Could not activate '$PROFILE_NAME' conda environment"
+
+    for pkgName in $PIP_DEPENDENCIES
+    do
+        modules=`pydoc modules`
+        if echo "$modules" | grep -q "$pkgName" ; then
+           output "  - python package '$pkgName' already installed in conda environment '$PROFILE_NAME'"
+        else
+           output "  * installing python package '$pkgName' into conda environment '$PROFILE_NAME'"
+           execute_log "pip install -U $pkgName --upgrade-strategy only-if-needed" "Could not install $pkgName in conda environment"
+        fi
+
+    done
+    execute_log "source deactivate $PROFILE_NAME" "Could not deactivate '$PROFILE_NAME' conda environment"
+    link_required_executables "$CONDA_BASE_DIR/envs/$PROFILE_NAME/bin"
+}
+
+function install_conda_non_root {
+    output "  * bootstrapping conda package manager"
+    {
+    cd "$TEMP_DIR"
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        download "$CONDA_DOWNLOAD_URL_LINUX" "$TEMP_DIR/miniconda.sh"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        download "$CONDA_DOWNLOAD_URL_MAC" "$TEMP_DIR/miniconda.sh"
+    fi
+    } >> "$SCRIPT_LOG_FILE" 2>&1
+    mkdir -p "$FRECKLES_DATA_DIR"
+    output "  * installing conda"
+    {
+    bash "$TEMP_DIR/miniconda.sh" -b -p "$CONDA_BASE_DIR"
+    export PATH="$CONDA_PATH:$PATH"
+    cd "$HOME"
+    rm -rf "$TEMP_DIR"
+    } >> "$SCRIPT_LOG_FILE" 2>&1
+}
+
+function add_freckles_path {
+
+    if [ -e "$FRECKLES_USER_HOME/.profile" ] && ! grep -q 'add freckles environment' "$FRECKLES_USER_HOME/.profile"; then
+       cat <<"EOF" >> "$FRECKLES_USER_HOME/.profile"
+
+# add freckles environment
+FRECKLES_PATH="$HOME/.freckles/bin"
+if [ -d "$FRECKLES_PATH" ]; then
+    PATH="$PATH:$FRECKLES_PATH"
+fi
+EOF
+
+       output "\nAdded path to freckles bin dir to .profile. You'll need to logout and login again to see the effect. Or you can just execute:\n\n  source $HOME/.profile"
+       output ""
+       output ""
+    fi
+}
+
+############# Start script ##################
+
+execute_log "echo Starting freckles bootstrap: `date`" "Error"
+
+# check if freckles is already in the path, if it is, assume everything is bootstrapped
+if ! command_exists $1; then
+    mkdir -p "$TEMP_DIR"
+    mkdir -p "$FRECKLES_PATH"
+    if [ $using_sudo == true ]; then
+        chown -R "$FRECKLES_USER" "$BASE_DIR"
+        chown -R "$FRECKLES_USER" "$TEMP_DIR"
+        chown -R "$FRECKLES_USER" "$FRECKLES_PATH"
+    fi
+
+    output ""
+    output "'$1' not found in path, bootstrapping..."
+    output ""
+    install_freckles "$using_sudo"
+    output ""
+    output "Bootstrapping finished, running '$1'..."
+    output ""
+    add_freckles_path
+    output "Starting '$1' with arguments: $@"
+    output ""
+fi
+
+execute_log "echo Finished '$PROFILE_NAME' bootstrap: `date`" "Error"
+
+if [ $using_sudo == true ]; then
+    exec sudo -u "$FRECKLES_USER" -i "PATH=$PATH:$FRECKLES_PATH" "$@"
+else
+    PATH="$PATH:$FRECKLES_PATH" "$@"
+fi

@@ -1,0 +1,18 @@
+defaults:
+  zip_dest: "/tmp/Ubooquity-2.1.0.zip"
+  target: "~/ubooquity"
+tasks:
+  - install-oracle-java
+  - install:
+     - unzip
+  - download:
+     dest: "{{ zip_dest }}"
+     url: http://vaemendis.net/ubooquity/downloads/Ubooquity-2.1.0.zip
+  - download:
+     dest: /tmp/ubooquity.sh
+     url: http://vaemendis.net/ubooquity/downloads/scripts/ubooquity.sh
+     mode: "0775"
+  - create-folder: "{{ target }}"
+  - unarchive:
+     src: "{{ zip_dest }}"
+     dest: "{{ target }}"

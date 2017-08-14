@@ -1,0 +1,8 @@
+tasks:
+  - docker_ubuntu:
+      meta:
+        become: yes
+        task-roles:
+            docker_ubuntu: angstwad.docker_ubuntu
+
+
