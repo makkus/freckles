@@ -10,5 +10,5 @@ PyYAML==3.11
 pytest==2.9.2
 nsbl
 sphinx-autobuild==0.7.1
-docutils<0.13.1
+docutils==0.14
 sphinxcontrib-napoleon
