@@ -4,6 +4,35 @@
 Installation
 ============
 
+----------------
+Bootstrap script
+----------------
+
+--------------
+Manual install
+--------------
+
+Requirements
+------------
+
+- Python 2.7
+
+
+
+Ubuntu / Debian
+---------------
+
+TBD
+
+Mac OS X
+--------
+
+xcode-select --install
+
+sudo easy_install pip
+
+sudo pip install --upgrade pip setuptools wheel requests freckles --ignore-installed six
+
 
 Stable release
 --------------
