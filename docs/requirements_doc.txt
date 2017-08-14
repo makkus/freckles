@@ -18,7 +18,7 @@ sphinx-autobuild==0.7.1
 docutils==0.14
 cryptography==2.0.3
 PyYAML==3.12
-pytest==2.9.2
+pytest==3.2.1
 ipython==5.1.0
 
 requests
