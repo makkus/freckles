@@ -20,8 +20,8 @@ freckles
 
 *freckles* is configuration management for your development environment (physical box, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
-- Documentation: https://freckles.readthedocs.io
-- Github: https://github.com/makkus/freckles
+- docs: https://freckles.readthedocs.io
+- github: https://github.com/makkus/freckles
 - pypi: https://pypi.python.org/pypi/freckles
 
 
@@ -31,6 +31,12 @@ Really quick-start
 .. code-block:: console
 
    curl https://frkl.io | bash -s -- freckles --help
+
+or
+
+.. code-block:: console
+
+   wget -O - https://frkl.io | bash -s -- freckles --help
 
 This bootstraps *freckles*, and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
