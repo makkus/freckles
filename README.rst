@@ -32,43 +32,52 @@ I realized it's too hard for me to explain in more detail what *freckles* is -- 
 
 So, that out of the way, here's what *freckles* does for a living:
 
-Example #1, manage your dotfiles and the setup of your development machine:
+Examples
+--------
 
-    .. code-block:: console
+Example #1, manage your dotfiles and the setup of your development machine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-       $ curl https://frkl.io | bash -s -- freckles gh:makkus/dotfiles
+.. code-block:: console
 
-    This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
+   $ curl https://frkl.io | bash -s -- freckles gh:makkus/dotfiles
 
-    - bootstraps *freckles* itself, then straight away executes it
-    - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (optional to have a short url, but I grew to like those short ones)
-    - checks out the repository to $HOME/freckles/dotfiles (this is configurable of course)
-    - reads all the metadata  it can find in that repository, describing mostly which packages to install
-    - installs all the packages it found in the metadata (btw, same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X)
-    - metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which it also installs if not present already)
+This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
 
-    My *dotfiles* are a bit more involved that
+- bootstraps *freckles* itself, then straight away executes it
+- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (optional to have a short url, but I grew to like those short ones)
+- checks out the repository to $HOME/freckles/dotfiles (this is configurable of course)
+- reads all the metadata  it can find in that repository, describing mostly which packages to install
+- installs all the packages it found in the metadata (btw, same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X)
+- metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which it also installs if not present already)
 
-    Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
+My *dotfiles* are a bit more involved that
 
-Example #2, setting up the environment for a development project:
+Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
-    Now, after setting up my machine with all the apps and configuration I use, I want to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which I have to start working on *freckles* again, see. Thus:
+Example #2, setting up the environment for a development project
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    .. code-block:: console
+Now, after setting up my machine with all the apps and configuration I use, I want to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which I have to start working on *freckles* again, see. Thus:
 
-        $ freckles gh:makkus/freckles
+.. code-block:: console
 
-    Here's what happens:
+   $ freckles gh:makkus/freckles
 
-    - freckles is already installed, so I can call it directly now (had to login again, or execute ``source $HOME/.profile`` to pick up the path *freckles* is installed in)
-    - as before, expands the url, from ``gh:makkkus/freckles`` to https://github.com/makkus/freckles
-    - checks out the repository to $HOME/freckles/freckles
-    - reads the metadata, installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
-    - also figures out this is a python dev project, so it:
-    - creates a virtualenv
-    - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
-    - executes ``python setup.py develop`` within that same virtualenv
+Here's what happens:
+
+- freckles is already installed, so I can call it directly now (had to login again, or execute ``source $HOME/.profile`` to pick up the path *freckles* is installed in)
+- as before, expands the url, from ``gh:makkkus/freckles`` to https://github.com/makkus/freckles
+- checks out the repository to $HOME/freckles/freckles
+- reads the metadata, installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
+- also figures out this is a python dev project, so it:
+- creates a virtualenv
+- installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
+- executes ``python setup.py develop`` within that same virtualenv
+
+
+Other
+-----
 
 If you are familiar with ansible_, puppet_, chef_, or saltstack_, you know about configuration management, and why it (mostly) is a good idea. If not: in short, configuration management gives you a way to describe a machine/server and the services and applications it runs. Either in code, or a configuration format like json or yaml. Then it takes that configuration and applies it to a machine, removing the need for you to setup the machine maunually, as well as guaranteeing that the machine is always setup the same way, even after a re-install.
 
