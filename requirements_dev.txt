@@ -7,7 +7,7 @@ tox==2.7.0
 coverage==4.4.1
 Sphinx==1.6.3
 PyYAML==3.12
-pytest==2.9.2
+pytest==3.2.1
 nsbl
 sphinx-autobuild==0.7.1
 docutils==0.14
