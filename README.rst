@@ -47,7 +47,7 @@ Features
 * minimal requirements: only ``curl`` or ``wget``
 * supports Linux & MacOS X (and probably the Ubuntu subsystem on Windows 10)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
-* support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations) -- or if you just link one or both of them
+* support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * direct support for all ansible_ modules and roles
 
 Examples
