@@ -18,22 +18,38 @@ freckles
      :alt: Updates
 
 
-*freckles* is configuration management for your local, or virtual, machine(s), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
+*freckles* is configuration management for your development environment (physical box, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
-I realized it's too hard for me to explain in more detail what *freckles* is -- and when it might be a good idea to use it -- without ending up with a wall of text on this here Readme. So, in the interest of keeping your attention I decided to hide the wall(s) of text in other places, like:
+As its a tad hard to explain --in sufficient detail and without loosing your interest -- what *freckles* is and when it might be a good idea to use it, here are some links:
 
-- freckle commands:
+- Documentation: https://freckles.readthedocs.io
+- Github: https://github.com/makkus/freckles
+- pypi: https://pypi.python.org/pypi/freckles
 
-   - freckles
-   - frecklecute
-   - dermatoscope
 
-- configuration management
+Really quick-start
+------------------
 
-So, that out of the way, here's what *freckles* does for a living:
+.. code-block:: console
+
+   curl https://frkl.io | bash -s -- freckles --help
+
+This bootstraps *freckles*, and displays it's help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``.
+
+Features
+--------
+
+* one-line setup of a new environment, including freckles bootstrap
+* minimal and (hopefully) intuitive config file format, using ``yaml`` syntax
+* supports Linux & MacOS X (and probably the Ubuntu subsystem on Windows 10)
+* share the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
+* support for systems where you don't have root/sudo access via the conda_ package manager or nix_ (or if you just think it's a good idea to use any of them)
+* direct support for all ansible_ modules and roles
 
 Examples
 --------
+
+Best to show what *freckles* is, and what it can do using Examples, right?
 
 Example #1, manage your dotfiles and the setup of your development machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
