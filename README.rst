@@ -20,15 +20,15 @@ freckles
 
 *freckles* is configuration management for your local, or virtual, machine(s), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
-I realized it's too hard for me to explain in more detail what *freckles* is without ending with a wall of text on this here Readme. So, in the interest of keeping your attention I decided to hide the wall of text in other places, like:
+I realized it's too hard for me to explain in more detail what *freckles* is -- and when it might be a good idea to use it -- without ending up with a wall of text on this here Readme. So, in the interest of keeping your attention I decided to hide the wall(s) of text in other places, like:
 
- - freckle commands:
+- freckle commands:
 
    - freckles
    - frecklecute
    - dermatoscope
 
- - configuration management
+- configuration management
 
 So, that out of the way, here's what *freckles* does for a living:
 
@@ -38,7 +38,7 @@ Example #1, manage your dotfiles and the setup of your development machine:
 
        $ curl https://frkl.io | bash -s -- freckles gh:makkus/dotfiles
 
-    This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. You figure out what happens more often. Anyway, what this does is:
+    This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
 
     - bootstraps *freckles* itself, then straight away executes it
     - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (optional to have a short url, but I grew to like those short ones)
