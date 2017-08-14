@@ -20,11 +20,16 @@ freckles
 
 *managing dotfiles! and more! cute!*
 
-*freckles* is configuration management for your local, or virtual, machine(s). If you are familiar with ansible_, puppet_, chef_, or saltstack_, you know about configuration management, and why it (mostly) is a good idea. If not: in short, configuration management gives you a way to describe a machine/server and the services and applications it runs. Either in code, or a configuration format like json or yaml. Then it takes that configuration and applies it to a machine, removing the need for you to setup the machine maunually, as well as guaranteeing that the machine is always setup the same way, even after a re-install.
+*freckles* is configuration management for your local, or virtual, machine(s), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
-Because of the overhead that come with configuration management systems, using them is usually restricted to situations where the infrastructure to be controlled is deemed to cross a certain threshold of... let's call it 'importance'. While for production services, or other business-relevant systems this threshold is often crossed even for single servers, this is not usually the case for the physical (or virtual) machines developers (or somesuch) use when going about whatever they go about. There are exceptions of course, but spending the time to learn about, and then setting up a system like that is not always worth it. *freckles* tries to change that equation by making it easier, and faster, to apply the principles of configuration management to local development environments. I do think there's a lot of developers time to be saved, to be used on actual development, rather than all the annoying stuff around it...
+I realized it's too hard for me to explain in more detail what *freckles* is without ending with a wall of text on this here Readme. So, in the interest of keeping your attention I decided to hide the wall of text in other places, like:
 
-Blahblah. Yes, sorry. Example, to keep you interested:
+ - link 1
+ - link 2
+
+So, that out of the way, here's what *freckles* does for a living:
+
+Example #1, manage your dotfiles and the setup of your development machine:
 
     .. code-block:: console
 
@@ -43,7 +48,7 @@ Blahblah. Yes, sorry. Example, to keep you interested:
 
     Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
-2nd example, executed directly after the above run:
+Example #2, setting up the environment for a development project:
 
     Now, after setting up my machine with all the apps and configuration I use, I want to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which I have to start working on *freckles* again, see. Thus:
 
@@ -61,6 +66,13 @@ Blahblah. Yes, sorry. Example, to keep you interested:
     - creates a virtualenv
     - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
     - executes ``python setup.py develop`` within that same virtualenv
+
+If you are familiar with ansible_, puppet_, chef_, or saltstack_, you know about configuration management, and why it (mostly) is a good idea. If not: in short, configuration management gives you a way to describe a machine/server and the services and applications it runs. Either in code, or a configuration format like json or yaml. Then it takes that configuration and applies it to a machine, removing the need for you to setup the machine maunually, as well as guaranteeing that the machine is always setup the same way, even after a re-install.
+
+Because of the overhead that come with configuration management systems, using them is usually restricted to situations where the infrastructure to be controlled is deemed to cross a certain threshold of... let's call it 'importance'. While for production services, or other business-relevant systems this threshold is often crossed even for single servers, this is not usually the case for the physical (or virtual) machines developers (or somesuch) use when going about whatever they go about. There are exceptions of course, but spending the time to learn about, and then setting up a system like that is not always worth it. *freckles* tries to change that equation by making it easier, and faster, to apply the principles of configuration management to local development environments. I do think there's a lot of developers time to be saved, to be used on actual development, rather than all the annoying stuff around it...
+
+Blahblah. Yes, sorry. Example, to keep you interested:
+
 
 Those two are the only so-called *profiles* I have implemented so far: ``dotfiles`` and ``python-dev``. *freckles* is written in a way to add more of those profiles fairly easily though, my reasoning being that its a good idea to have a set of 'commonly used', 'best-practices' profile of how code should be structured, and which metadata is necessary to describe certain 'expressions' of that code or data (e.g. a python project could need to be setup in a development environment, or installed from source for 'normal' use).
 
