@@ -12,3 +12,4 @@ nsbl==0.0.39
 sphinx-autobuild==0.7.1
 docutils==0.14
 sphinxcontrib-napoleon==0.6.1
+sphinx-nameko-theme
