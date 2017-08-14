@@ -18,14 +18,17 @@ freckles
      :alt: Updates
 
 
-*managing dotfiles! and more! cute!*
-
 *freckles* is configuration management for your local, or virtual, machine(s), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
 I realized it's too hard for me to explain in more detail what *freckles* is without ending with a wall of text on this here Readme. So, in the interest of keeping your attention I decided to hide the wall of text in other places, like:
 
- - link 1
- - link 2
+ - freckle commands:
+
+   - freckles
+   - frecklecute
+   - dermatoscope
+
+ - configuration management
 
 So, that out of the way, here's what *freckles* does for a living:
 
@@ -110,6 +113,7 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _ansible: https://ansible.com
 .. _puppet: https://puppet.com
 .. _chef: https://www.chef.io/chef
+.. _saltstack: https://saltstack.com
 .. _nix: https://nixos.org/nix/
 .. _conda: https://conda.io
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
