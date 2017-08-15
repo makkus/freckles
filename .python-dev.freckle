@@ -1,24 +1,11 @@
 vars:
-   conda_environment: freckles-dev
-   packages:
-      - base_dependencies:
-          pkg_mgr: auto
+   project_dependencies:
+      - pycrypto-related:
           pkgs:
             debian:
-              - build-essential
-            other: omit
-      - build-dependencies:
-          pkgs:
-            debian:
-              - python-dev
-              - python-virtualenv
               - libssl-dev
               - libffi-dev
               - libsqlite3-dev
-              - python-pip
             conda:
-              - python
-              - pip
               - cryptography
               - pycrypto
-            other: ignore
