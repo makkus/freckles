@@ -22,6 +22,33 @@
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
+Quick links
+-----------
+
+Note: none of this is available yet or working, I'm just playing with the documentation layout right now
+
+- *freckles*
+
+  - command usage
+  - configuration / folders
+  - available profiles
+
+- *frecklecute*
+
+  - command usage
+  - available frecklecutables
+
+- commands / roles
+
+  - supported commands
+  - supported roles
+  - community curated roles
+  - community frecklecutables
+  - list of ansible modules/tasks
+  - ansible galaxy
+
+
+
 Really quick-start
 ------------------
 
@@ -37,7 +64,7 @@ or
 
    wget -O - https://freckles.io | bash -s -- freckles --help
 
-This bootstraps *freckles*, and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* (using inaugurate_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features
 --------
@@ -55,8 +82,8 @@ Examples
 
 Best to show what *freckles* is, and what it can do using examples, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
-Example #1, manage your dotfiles and the setup of your development machine
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example #1, checkout your dotfiles and the setup of your development machine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
@@ -76,7 +103,7 @@ I've organized my *dotfiles* into subfolders (to be able to exclude applications
 Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
 Example #2, setting up the environment for a Python development project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which is why I have to start working on *freckles* again, see. Thus:
 
@@ -139,7 +166,7 @@ mac_pkg_
     ansible module written by Spencer Gibb for battleschool_, can install all sort of packages on a Mac. Can't tell you how glad I was not to have to write that.
 
 
-
+.. _inaugurate: https://github.com/makkus/inaugurate
 .. _nsbl: https://github.com/makkus/nsbl
 .. _frkl: https://github.com/makkus/frkl
 .. _ansible: https://ansible.com
