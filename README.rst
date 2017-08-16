@@ -27,13 +27,13 @@ Really quick-start
 
 .. code-block:: console
 
-   curl https://frkl.io | bash -s -- freckles --help
+   curl https://freckles.io | bash -s -- freckles --help
 
 or
 
 .. code-block:: console
 
-   wget -O - https://frkl.io | bash -s -- freckles --help
+   wget -O - https://freckles.io | bash -s -- freckles --help
 
 This bootstraps *freckles*, and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
@@ -58,7 +58,7 @@ Example #1, manage your dotfiles and the setup of your development machine
 
 .. code-block:: console
 
-   $ curl https://frkl.io | bash -s -- freckles gh:makkus/dotfiles
+   $ curl https://freckles.io | bash -s -- freckles gh:makkus/dotfiles
 
 This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
 
