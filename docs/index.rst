@@ -12,7 +12,6 @@ Contents:
    frecklecute
    bootstrap
    usage
-   trust
    contributing
    authors
    history
