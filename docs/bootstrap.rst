@@ -17,13 +17,13 @@ Here's the (base) command you'll have to execute to bootstrap & execute `freckle
 
 .. code-block:: console
 
-    curl https://frkl.io | bash -s -- freckles --help
+    curl https://freckles.io | bash -s -- freckles --help
 
 Or, if you don't have `curl`, but `wget` installed on your box:
 
 .. code-block:: console
 
-   wget -O - https://frkl.io | bash -s -- freckles --help
+   wget -O - https://freckles.io | bash -s -- freckles --help
 
 Once you executed either one of the above commands successfully, you'll have `freckles` installed on your system. It'll have put a line in either '~/.profile', or if that doesn't exist, '~/.bash_rc' to add its path to the session PATH, so the next time you login (or do a ``source ~/.profile``) it'll be available. So, from then on all you need to type is:
 
@@ -44,13 +44,13 @@ Using `curl`:
 
 .. code-block:: console
 
-   curl https://frkl.io | bash -s -- freckles <args>
+   curl https://freckles.io | bash -s -- freckles <args>
 
 Using `wget`:
 
 .. code-block:: console
 
-   wget -O - https://frkl.io | bash -s -- freckles <args>
+   wget -O - https://freckles.io | bash -s -- freckles <args>
 
 
 Supported
@@ -135,13 +135,13 @@ Using `curl`:
 
 .. code-block:: console
 
-   curl https://frkl.io | sudo bash
+   curl https://freckles.io | sudo bash
 
 Using `wget`:
 
 .. code-block:: console
 
-   wget -O - https://frkl.io | sudo bash
+   wget -O - https://freckles.io | sudo bash
 
 
 What does this do?

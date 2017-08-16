@@ -25,6 +25,8 @@
 Really quick-start
 ------------------
 
+(... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
+
 .. code-block:: console
 
    curl https://freckles.io | bash -s -- freckles --help

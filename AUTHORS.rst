@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Markus Binsteiner <makkus@posteo.net>
+* Markus Binsteiner <makkus@posteo.de>
 
 Contributors
 ------------

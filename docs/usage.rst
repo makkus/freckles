@@ -58,11 +58,11 @@ That doesn't sound like much, for sure. Just a script of some sort script, using
 
 Most of those differences stem from the fact that ``freckles`` is built as a layer on top of ansible_, and uses the rich ecosystem of ansible modules and roles. Ansible is a powerful and rich configuration management system, and if you haven't heard from it, look it up, it is pretty impressive piece of code, in my opinion. Ansibles main purpose is to help setup and maintain compute infrastructure. You write some configuration that describes the setup of your environment, and ansible will make sure that environment is setup that way. More details about configuration management: XXX other page
 
-============
+
 One great thing about ansible (same is true for other configuration management systems) is that it has a very rich ecosystem of modules(XXX), which can be viewed as mini-applications that take a defined set of configuration, and do one item of work (delete a file, make sure a file contains a certain line, install an application). The neat thing is that those modules can be assembled into bigger pieces of work, which again can take a defined set of configuration. In ansible terms this can either be playbooks, or roles. It is difficult to explain how this differs from the building blocks of a shell scripts (shell commands) without having used both a configuration management system and shell scripts.
 
 One such difference is that ``frecklecutables`` are (for the most part) idempotent. That means, if you run the same command a second time, you can be sure nothing changed on the machine you ran it on, and if it ran successfully the first time, it'll run successfully a second time. A shell script might run successfully one time, but might error out a second time, say, when it tries to create a folder it already created in an earlier run.
-============
+
 
 Anyway. Long story short, in some situations its good to use configuration management, sometimes its overkill, because of the overhead those systems introduce. This is the reason that configuration management is mainly used for managing infrastructure that crosses a certain threshold of, lets say... importance. Developer laptops or VMs don't often do that, except of course if the developer in question recognizes the importance of configuration management, and has the time and/or expertise to set it up.
 
@@ -71,8 +71,6 @@ So, now. While ansible itself is already quite user-friendly (for a configuratio
 Say, you want to install
 
 EXAMPLE XXX
-
-This will work on
 
 
 

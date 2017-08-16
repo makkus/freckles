@@ -9,10 +9,9 @@ Contents:
    :maxdepth: 2
 
    readme
+   frecklecute
    bootstrap
    usage
-   advanced_usage
-   examples
    trust
    contributing
    authors
