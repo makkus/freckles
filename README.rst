@@ -27,6 +27,8 @@ Quick links
 
 Note: none of this is available yet or working, I'm just playing with the documentation layout right now
 
+- *documentation index*
+
 - *freckles*
 
   - command usage
