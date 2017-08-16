@@ -34,11 +34,13 @@ Note: none of this is available yet or working, I'm just playing with the docume
   - command usage
   - configuration / folders
   - available profiles
+  - examples
 
 - *frecklecute*
 
   - command usage
   - available frecklecutables
+  - examples
 
 - commands / roles
 
@@ -48,8 +50,6 @@ Note: none of this is available yet or working, I'm just playing with the docume
   - community frecklecutables
   - list of ansible modules/tasks
   - ansible galaxy
-
-
 
 Really quick-start
 ------------------
