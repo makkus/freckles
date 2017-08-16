@@ -73,7 +73,7 @@ Features
 
 * one-line setup of a new environment, including freckles bootstrap
 * minimal requirements: only ``curl`` or ``wget``
-* supports Linux & MacOS X (and probably the Ubuntu subsystem on Windows 10)
+* supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * declarative scripting
