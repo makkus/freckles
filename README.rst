@@ -4,19 +4,22 @@ freckles
 
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
-        :target: https://pypi.python.org/pypi/freckles
+           :target: https://pypi.python.org/pypi/freckles
 
 .. image:: https://img.shields.io/travis/makkus/freckles.svg
-        :target: https://travis-ci.org/makkus/freckles
+           :target: https://travis-ci.org/makkus/freckles
 
 .. image:: https://readthedocs.org/projects/freckles/badge/?version=latest
-        :target: https://freckles.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
+           :target: https://freckles.readthedocs.io/en/latest/?badge=latest
+           :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/makkus/freckles/shield.svg
-     :target: https://pyup.io/repos/github/makkus/freckles/
-     :alt: Updates
+           :target: https://pyup.io/repos/github/makkus/freckles/
+           :alt: Updates
 
+.. image:: https://badges.gitter.im/freckles-io/Lobby.svg
+           :alt: Join the chat at https://gitter.im/freckles-io/Lobby
+           :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 *freckles* is configuration management for your development environment (physical box, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
@@ -151,6 +154,3 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _homebrew: https://brew.sh/
 
 
-.. image:: https://badges.gitter.im/freckles-io/Lobby.svg
-   :alt: Join the chat at https://gitter.im/freckles-io/Lobby
-   :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
