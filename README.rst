@@ -149,3 +149,8 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _ansible-nix: https://github.com/AdamFrey/nix-ansible
 .. _homebrew: https://brew.sh/
+
+
+.. image:: https://badges.gitter.im/freckles-io/Lobby.svg
+   :alt: Join the chat at https://gitter.im/freckles-io/Lobby
+   :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
