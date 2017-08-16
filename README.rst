@@ -1,7 +1,6 @@
-========
-freckles
-========
-
+============
+**freckles**
+============
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
@@ -21,12 +20,7 @@ freckles
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-*freckles* is configuration management for your development environment (physical box, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
-
-- docs: https://freckles.readthedocs.io
-- github: https://github.com/makkus/freckles
-- pypi: https://pypi.python.org/pypi/freckles
-
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
 Really quick-start
 ------------------
@@ -51,12 +45,13 @@ Features
 * supports Linux & MacOS X (and probably the Ubuntu subsystem on Windows 10)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
+* declarative scripting
 * direct support for all ansible_ modules and roles
 
 Examples
 --------
 
-Best to show what *freckles* is, and what it can do using examples, right?
+Best to show what *freckles* is, and what it can do using examples, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
 Example #1, manage your dotfiles and the setup of your development machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -100,57 +95,62 @@ Here's what happens:
   - executes ``python setup.py develop`` within that same virtualenv
 
 
-Other
------
-
-If you are familiar with ansible_, puppet_, chef_, or saltstack_, you know about configuration management, and why it (mostly) is a good idea. If not: in short, configuration management gives you a way to describe a machine/server and the services and applications it runs. Either in code, or a configuration format like json or yaml. Then it takes that configuration and applies it to a machine, removing the need for you to setup the machine maunually, as well as guaranteeing that the machine is always setup the same way, even after a re-install.
-
-Because of the overhead that come with configuration management systems, using them is usually restricted to situations where the infrastructure to be controlled is deemed to cross a certain threshold of... let's call it 'importance'. While for production services, or other business-relevant systems this threshold is often crossed even for single servers, this is not usually the case for the physical (or virtual) machines developers (or somesuch) use when going about whatever they go about. There are exceptions of course, but spending the time to learn about, and then setting up a system like that is not always worth it. *freckles* tries to change that equation by making it easier, and faster, to apply the principles of configuration management to local development environments. I do think there's a lot of developers time to be saved, to be used on actual development, rather than all the annoying stuff around it...
-
-Blahblah. Yes, sorry. Example, to keep you interested:
-
-
-Those two are the only so-called *profiles* I have implemented so far: ``dotfiles`` and ``python-dev``. *freckles* is written in a way to add more of those profiles fairly easily though, my reasoning being that its a good idea to have a set of 'commonly used', 'best-practices' profile of how code should be structured, and which metadata is necessary to describe certain 'expressions' of that code or data (e.g. a python project could need to be setup in a development environment, or installed from source for 'normal' use).
-
-I haven't finished thinking about all potential pros and cons yet, but so far I think that metadata should sit with the code itself (with a few minor exceptions like for example where on the target machine it should be checked out). Once that is done, we can have systems do things automatically to get the target system in the state that is determined by the code itself, the profile used, and some aspects of the host machine (e.g. which OS is running on it, which package managers are available).
-
-The nice thing about this is that this gives you all the advantages of an automated system to manage your working space, while still allowing flexibiliy in how to deal with certain types of code/data. For example, you don't like the ``stow`` way of symbolically linking dotfiles? Well, just create a profile that sets up your dotfiles using a detached git repostory (XXX link). As long as the repository contains the name of the profile in its metadata, all is good.
-
-Right. There's more, but I realize this is already too much text for a project Readme. So instead of writing more text here, I'll write more text elsewhere:
-
- - frecklecute
- - freckles profiles
- -
-
-
 * Free software: GNU General Public License v3
 * Documentation: https://freckles.readthedocs.io.
 
-
-Features
---------
-
-* TODO
-
 Credits
----------
+-------
 
-mac_pkg: Spencer Gibb ( https://github.com/spencergibb/battleschool )
+For *freckles* (and the libraries that developed because of it, nsbl_ and frkl_) I am relying on quite a few free libraries, frameworks, ansible-roles and more. Here's a list, I hope I did not forget anything. Let me know if I did.
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+ansible_
+    obviously the most important dependency, not much more to say apart from that without it *freckles* would not exist.
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+cookiecutter_
+    also a very important piece for *freckles* to use, most of the templating that is not done directly with jinja2_ is done using *cookiecutter. Also, *freckles* (as well as nsbl_ and frkl_) use the `audreyr/cookiecutter-pypackage`_ template.
+
+jinja2_
+    a main dependency of *ansible* and *cookiecutter*, but also used on its own by *freckles*
+
+click_
+    the library that powers the commandline interfaces of *freckles*, *nsbl*, and *frkl*
+
+nix_
+    a super-cool package manager I use for most of my non-system packages. Also check out NixOS_ while you're at it. Ideally *freckles* wouldn't be necessary (or at least would look quite different) because everybody would be using Nix!
+
+conda_
+    similarly cool package manager, and the reason *freckles* can be bootstrapped and run without sudo permissions. This is a bigger deal than you probably realize.
+
+homebrew_
+    I'm not using MacOS X myself, but I'm told *homebrew* is cool, which is why I support it. And, of course because MacOS X doesn't have a native system package manager.
+
+`geerlingguy.ansible-role-homebrew`_
+    the role that installs homebrew on MacOS X, one of the few external ansible roles that *freckles* ships with
+
+`elliotweiser.osx-command-line-tools`_
+    the role that installs the XCode commandline tools on Mac OS X. Also ships with *freckles*, and is a dependency of *geerlingguy.ansible-role-homebrew*
+
+ansible-nix_
+    ansible module written by Adam Frey, which I did some more work on. Probably wouldn't have thought to support *nix* if I hadn't found it.
+
+mac_pkg_
+    ansible module written by Spencer Gibb for battleschool_, can install all sort of packages on a Mac. Can't tell you how glad I was not to have to write that.
 
 
+
+.. _nsbl: https://github.com/makkus/nsbl
+.. _frkl: https://github.com/makkus/frkl
 .. _ansible: https://ansible.com
-.. _puppet: https://puppet.com
-.. _chef: https://www.chef.io/chef
-.. _saltstack: https://saltstack.com
+.. _jinja2: http://jinja.pocoo.org
+.. _click: http://click.pocoo.org
+.. _cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 .. _nix: https://nixos.org/nix/
+.. _NixOS: https://nixos.org
 .. _conda: https://conda.io
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _ansible-nix: https://github.com/AdamFrey/nix-ansible
 .. _homebrew: https://brew.sh/
-
-
+.. _`geerlingguy/ansible-role-homebrew`: https://github.com/geerlingguy/ansible-role-homebrew
+.. _`elliotweiser.osx-command-line-tools`: https://github.com/elliotweiser/ansible-osx-command-line-tools
+.. _mac_pkg: https://github.com/spencergibb/battleschool/blob/7f75c41077d73cceb19ea46a3185cb2419d7c3e9/share/library/mac_pkg
+.. _battleschool: https://github.com/spencergibb/battleschool
