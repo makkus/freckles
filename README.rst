@@ -84,14 +84,14 @@ Examples
 
 Best to show what *freckles* is, and what it can do using examples, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
-Example #1, checkout your dotfiles and the setup of your development machine
+Chapter #1, where we checkout our dotfiles and setup our development machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
    $ curl https://freckles.io | bash -s -- freckles gh:makkus/dotfiles
 
-This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use parts of my dotfiles on a VM or container, to have a decent editor and shell when working in them. Either way, what this does is:
+This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use all or parts of my dotfiles on a VM or container, to have a decent editor and shell while working in them. Either way, what this does is:
 
 - bootstraps *freckles* itself, then straight away executes it
 - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
@@ -104,10 +104,10 @@ I've organized my *dotfiles* into subfolders (to be able to exclude applications
 
 Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
-Example #2, setting up the environment for a Python development project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Chapter #2, where we setup a Python development project
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, which, I guess I should tell you, is not all that finished or stable just yet. Which is why I have to start working on *freckles* again, see. Thus:
+Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, because, as you can probably see, there's a lot to do still. Thus:
 
 .. code-block:: console
 
