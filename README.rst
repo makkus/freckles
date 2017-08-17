@@ -27,14 +27,14 @@ Quick links
 
 Note: none of this is available yet or working, I'm just playing with the documentation layout right now
 
-- *documentation index*
+- `documentation index <https://docs.freckles.io>`_
 
 - *freckles*
 
   - command usage
-  - configuration / folders
-  - available profiles
+  - :doc:`available profiles <docs/profiles.rst>`
   - examples
+  - configuration / folders
 
 - *frecklecute*
 
