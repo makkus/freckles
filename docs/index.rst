@@ -12,6 +12,7 @@ Contents:
    frecklecute
    bootstrap
    usage
+   profiles
    contributing
    authors
    history

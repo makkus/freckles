@@ -1,3 +1,7 @@
+.. _profile_overview:
+========
+Profiles
+========
 
 Those two are the only so-called *profiles* I have implemented so far: ``dotfiles`` and ``python-dev``. *freckles* is written in a way to add more of those profiles fairly easily though, my reasoning being that its a good idea to have a set of 'commonly used', 'best-practices' profile of how code should be structured, and which metadata is necessary to describe certain 'expressions' of that code or data (e.g. a python project could need to be setup in a development environment, or installed from source for 'normal' use).
 

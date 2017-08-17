@@ -32,7 +32,7 @@ Note: none of this is available yet or working, I'm just playing with the docume
 - *freckles*
 
   - command usage
-  - :doc:`available profiles <docs/profiles.rst>`
+  - available profiles
   - examples
   - configuration / folders
 
