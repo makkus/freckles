@@ -26,6 +26,7 @@ SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_
 @click.command()
 @click.version_option(version=VERSION, message="%(version)s")
 @click.option('--no-ask-pass', help='force not asking the user for a sudo password, if not specified freckles will try to do an educated guess (which could potentially fail)', is_flag=True, default=False, flag_value=True)
+@click.option('--force-ask-pass', help='force asking the user for a sudo password, if not specified freckles will try to do an educated guess (which could potentially fail)', is_flag=True, default=False, flag_value=True)
 @click.option('--profile', '-p', help='ignore remote freckle profile(s), force using this/those one(s)', multiple=True, metavar='PROFILE', default=[], type=click.Choice(find_supported_profiles()))
 @click.option('--format', '-f', help='format of the output', multiple=False, metavar='FORMAT', default="default", type=click.Choice(SUPPORTED_OUTPUT_FORMATS))
 @click.option('--target', '-t', help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home', type=str, metavar='PATH')
@@ -34,11 +35,15 @@ SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_
 @click.option('--exclude', '-e', help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt', type=str, metavar='FILTER_STRING', default=[], multiple=True)
 @click.option('--pkg-mgr', '-p', help="default package manager to use", type=click.Choice(SUPPORTED_PKG_MGRS), default="auto", multiple=False, required=False)
 @click.argument("freckle_urls", required=True, type=RepoType(), nargs=-1, metavar="URL_OR_PATH")
-def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pkg_mgr, no_ask_pass, format):
+def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pkg_mgr, no_ask_pass, force_ask_pass, format):
     """Freckles manages your dotfiles (and other aspects of your local machine).
 
     For information about how to use and configure Freckles, please visit: XXX
     """
+
+    if force_ask_pass and no_ask_pass:
+        click.echo("'--force-ask-pass' and '--no-ask-pass' can't be specified at the same time.")
+        sys.exit(1)
 
     target_is_parent = True
 
@@ -70,7 +75,14 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
 
     task_config = [{"vars": {"freckles": repos, "pkg_mgr": pkg_mgr}, "tasks": ["freckles"]}]
 
-    create_and_run_nsbl_runner(task_config, format, no_ask_pass)
+    if force_ask_pass:
+        n_ask_pass = False
+    elif no_ask_pass:
+        n_ask_pass = True
+    else:
+        n_ask_pass = False
+
+    create_and_run_nsbl_runner(task_config, format, no_ask_pass=n_ask_pass)
 
 if __name__ == "__main__":
     cli()
