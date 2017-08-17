@@ -66,7 +66,7 @@ or
 
    wget -O - https://freckles.io | bash -s -- freckles --help
 
-This bootstraps *freckles* (using inaugurate_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* (using inaugurate_, read more about the bootstrap process HERE_XXX), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features
 --------
