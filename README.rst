@@ -181,7 +181,7 @@ mac_pkg_
 .. _conda: https://conda.io
 .. _ansible-nix: https://github.com/AdamFrey/nix-ansible
 .. _homebrew: https://brew.sh/
-.. _`geerlingguy/ansible-role-homebrew`: https://github.com/geerlingguy/ansible-role-homebrew
+.. _`geerlingguy.ansible-role-homebrew`: https://github.com/geerlingguy/ansible-role-homebrew
 .. _`elliotweiser.osx-command-line-tools`: https://github.com/elliotweiser/ansible-osx-command-line-tools
 .. _mac_pkg: https://github.com/spencergibb/battleschool/blob/7f75c41077d73cceb19ea46a3185cb2419d7c3e9/share/library/mac_pkg
 .. _battleschool: https://github.com/spencergibb/battleschool
