@@ -1,5 +1,5 @@
-vars:
-   project_dependencies:
+python-dev:
+   packages:
       - pycrypto-related:
           pkgs:
             debian:
