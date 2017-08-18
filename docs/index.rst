@@ -12,7 +12,7 @@ Contents:
    frecklecute
    bootstrap
    usage
-   profiles
+   freckles_profiles
    contributing
    authors
    history
