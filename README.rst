@@ -132,7 +132,8 @@ Here's what happens:
 (Current) caveats
 -----------------
 
-- by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand
+- this whole thing is still very much work in progress, so things might break, or they might break your machine. Use at your own risk.
+- by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
 
 Credits
