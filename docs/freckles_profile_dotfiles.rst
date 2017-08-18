@@ -133,9 +133,9 @@ Internally, *freckles* uses frkl_ to parse this metadata. *frkl* tries to provid
 - the *.freckle* marker file in the root of a *freckle*
 - any file inside a freckle that starts with a ``.`` and ends with ``.freckle``
 
-If you want to provide additional metadata either way, the content of such a file needs to be `valid yaml`(TODO: link). Within *freckles* those two types are treated differently internally, and the second sort is used for more special cases, and might be different for each implementation of a *freckles* profile.
+If you want to provide additional metadata either way, the content of such a file needs to be `valid yaml`(TODO: link). Within *freckles* those two types are treated differently, and the second sort is used for more special cases, and might look different -- and have a different format -- for each implementation of a *freckles* profile.
 
-Let's only worry about the first type here, here's the most simple example of such a file:
+For now, let's only worry about the first type. Here's the most simple example of such a file:
 
 .. code-block:: yaml
 
@@ -145,7 +145,7 @@ Let's only worry about the first type here, here's the most simple example of su
          - pandoc
          - htop
 
-This describes some additional packages we want to install. None of those uses configuration files (or maybe we are just not interested in keeping the configuration of those, no matter). Let's edit one of the ``.freckle`` marker files from the above example and include those lines, then run:
+This describes some additional packages we want to install. None of those uses configuration files (or maybe we are just not interested in keeping the configuration of those, no matter). Let's edit one of the ``.freckle`` marker files from the above example and include the above lines, then run:
 
 .. code-block:: console
 

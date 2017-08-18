@@ -1,6 +1,8 @@
-============
-**freckles**
-============
+=======================
+*freckelize your life!*
+=======================
+
+... or at least your laptop...
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
@@ -20,7 +22,7 @@
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
+*freckles* is a configuration management for your working environment (workstation, remote server, virtual machine, container), a bit weird, and a bit elegant. And with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
 Quick links
 -----------
@@ -68,8 +70,8 @@ or
 
 This bootstraps *freckles* (using inaugurate_, read more about the bootstrap process HERE_XXX), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
-Features
---------
+Features & use-cases
+--------------------
 
 * one-line setup of a new environment, including freckles bootstrap
 * minimal requirements: only ``curl`` or ``wget``
@@ -77,12 +79,13 @@ Features
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * declarative scripting
+* 'self-loading' containers
 * direct support for all ansible_ modules and roles
 
 Examples
 --------
 
-Best to show what *freckles* is, and what it can do using examples, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
+Probably best to show what *freckles* is, and what it can do using examples. Who has time for anything else, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
 Chapter #1, where we checkout our dotfiles and setup our development machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

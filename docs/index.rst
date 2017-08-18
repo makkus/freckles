@@ -1,18 +1,17 @@
 freckles
 ========
 
-*freckelize* your life!
-
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
    readme
-   frecklecute
    bootstrap
    usage
+   freckles
    freckles_profiles
+   frecklecute
    contributing
    authors
    history
