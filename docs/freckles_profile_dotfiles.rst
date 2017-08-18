@@ -2,7 +2,7 @@
 dotfiles
 ========
 
-The dotfiles profile handles git repositories (or local folders) that contain information about packages to install as well as configuration files for those packages. Once checkout out, *freckles* will install the listed packages and link the configuration files to the appropriate location inside a users home directory.
+The dotfiles profile handles git repositories (or local folders) that contain information about packages to install as well as configuration files for those packages. Once checked out, *freckles* will install the listed packages and link the configuration files to the appropriate location inside a users home directory.
 
 Quick links
 -----------
