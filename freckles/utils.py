@@ -23,6 +23,8 @@ import yaml
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 DEFAULT_PROFILES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_profile_repo")
+DEFAULT_USER_PROFILES_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "profiles")
+DEFAULT_USER_ROLE_REPO_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "trusted_roles")
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
 
@@ -48,11 +50,15 @@ def find_supported_profiles():
     # task_folder = os.path.join(os.path.dirname(__file__), "external", "default_role_repo", "makkus.freckles", "tasks")
 
     files = os.listdir(DEFAULT_PROFILES_PATH)
-
     profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_PROFILES_PATH, f)) and not f.startswith(".")]
 
+    if os.path.exists(DEFAULT_USER_PROFILES_PATH):
+        user_profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_USER_PROFILES_PATH, f)) and not f.startswith(".")]
+    else:
+        user_profiles = []
+
     # profiles = [f[:-4] for f in files if os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
-    return profiles
+    return list(set(profiles + user_profiles))
 
 class RepoType(click.ParamType):
 
@@ -177,20 +183,35 @@ def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
-def create_file_copy_callback_from_profiles():
+def find_profile_files(filename):
 
     task_files_to_copy = {}
     for subfolder in os.listdir(DEFAULT_PROFILES_PATH):
 
         profiles_folder = os.path.join(DEFAULT_PROFILES_PATH, subfolder)
-        profile_tasks = os.path.join(profiles_folder, "task.yml")
-
+        profile_tasks = os.path.join(profiles_folder, filename)
 
         if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
-            print(profiles_folder)
             continue
 
         task_files_to_copy[subfolder] = profile_tasks
+
+    if os.path.exists(DEFAULT_USER_PROFILES_PATH) and os.path.isdir(DEFAULT_USER_PROFILES_PATH):
+        for subfolder in os.listdir(DEFAULT_USER_PROFILES_PATH):
+
+            profiles_folder = os.path.join(DEFAULT_USER_PROFILES_PATH, subfolder)
+            profile_tasks = os.path.join(profiles_folder, filename)
+
+            if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
+                continue
+
+            task_files_to_copy[subfolder] = profile_tasks
+
+    return task_files_to_copy
+
+def find_profile_files_callback(filename):
+
+    task_files_to_copy = find_profile_files
 
     def copy_callback():
 
@@ -203,9 +224,20 @@ def create_file_copy_callback_from_profiles():
     return copy_callback
 
 
-def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False):
+def get_profile_dependency_roles(profiles):
 
-    nsbl_obj = nsbl.Nsbl.create(task_config, [], [], wrap_into_localhost_env=True, pre_chain=[])
+    dep_files = find_profile_files("dependencies.yml")
+
+
+    print("XX")
+    print(dep_files)
+
+
+def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[]):
+
+    role_repos = defaults.calculate_role_repos(DEFAULT_USER_ROLE_REPO_PATH, use_default_roles=True)
+
+    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, [], wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
     runner = nsbl.NsblRunner(nsbl_obj)
     run_target = os.path.expanduser("~/.freckles/runs/archive/run")
     ansible_verbose = ""

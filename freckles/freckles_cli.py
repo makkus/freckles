@@ -14,9 +14,9 @@ import yaml
 
 from . import __version__ as VERSION
 from .commands import CommandRepo
-from .utils import (RepoType, create_and_run_nsbl_runner,
-                    create_file_copy_callback_from_profiles,
-                    create_freckle_desc, find_supported_profiles, url_is_local)
+from .utils import (RepoType, create_and_run_nsbl_runner, create_freckle_desc,
+                    find_profile_files_callback, find_supported_profiles,
+                    get_profile_dependency_roles, url_is_local)
 
 try:
     set
@@ -77,10 +77,10 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
         freckle_repo = create_freckle_desc(freckle_url, target, target_is_parent, profiles=profile, includes=include, excludes=exclude)
         repos.append(freckle_repo)
 
-    callback = create_file_copy_callback_from_profiles()
+    callback = find_profile_files_callback("tasks.yml")
+    additional_roles = get_profile_dependency_roles(profile)
 
-    # pprint.pprint(repos)
-    # sys.exit(0)
+    sys.exit(0)
 
     task_config = [{"vars": {"freckles": repos, "pkg_mgr": pkg_mgr}, "tasks": ["freckles"]}]
 
@@ -91,7 +91,7 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
     else:
         n_ask_pass = False
 
-    create_and_run_nsbl_runner(task_config, format, no_ask_pass=n_ask_pass, pre_run_callback=callback, no_run=no_run)
+    create_and_run_nsbl_runner(task_config, format, no_ask_pass=n_ask_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
 
 if __name__ == "__main__":
     cli()
