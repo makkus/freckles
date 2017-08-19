@@ -3,4 +3,4 @@
 
 - name: "starting profile execution"
   include_role:
-    name: "makkus.dotfiles2"
+    name: "makkus.dotfiles"
