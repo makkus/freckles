@@ -34,3 +34,6 @@
 [submodule "freckles/external/default_role_repo/makkus.install-packages"]
 	path = freckles/external/default_role_repo/makkus.install-packages
 	url = https://github.com/makkus/install-packages.git
+[submodule "freckles/external/default_role_repo/makkus.dotfiles"]
+	path = freckles/external/default_role_repo/makkus.dotfiles
+	url = git@github.com:makkus/dotfiles_ansible.git
