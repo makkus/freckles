@@ -1,0 +1,6 @@
+---
+# include makkus.dotfiles role
+
+- name: "Starting python-dev setup"
+  include_role:
+    name: "makkus.python-dev"

@@ -8,8 +8,6 @@ Contents:
 
    readme
    bootstrap
-   usage
-   freckles
    freckles_profiles
    frecklecute
    contributing

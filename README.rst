@@ -4,6 +4,7 @@
 
 ... or at least your laptop...
 
+
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
 
@@ -22,7 +23,9 @@
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+
 *freckles* is a configuration management for your working environment (workstation, remote server, virtual machine, container), a bit weird, and a bit elegant. And with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
+
 
 Quick links
 -----------
@@ -136,6 +139,7 @@ Here's what happens:
 -----------------
 
 - this whole thing is still very much work in progress, so things might break, or they might break your machine. Use at your own risk.
+- error messages are very raw, testing is, apart from a few bits and pieces, non-existent
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
 

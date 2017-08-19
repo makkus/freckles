@@ -1,3 +1,5 @@
+#! /usr/bin/env frecklecute
+
 tasks:
   - docker_ubuntu:
       meta:
