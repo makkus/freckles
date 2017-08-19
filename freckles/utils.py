@@ -211,7 +211,7 @@ def find_profile_files(filename):
 
 def find_profile_files_callback(filename):
 
-    task_files_to_copy = find_profile_files
+    task_files_to_copy = find_profile_files(filename)
 
     def copy_callback():
 
@@ -228,9 +228,14 @@ def get_profile_dependency_roles(profiles):
 
     dep_files = find_profile_files("dependencies.yml")
 
+    all_deps = set()
 
-    print("XX")
-    print(dep_files)
+    for profile_name, dep_file in dep_files.items():
+        with open(dep_file, 'r') as f:
+            deps = yaml.safe_load(f)
+            all_deps |= set(deps)
+
+    return list(all_deps)
 
 
 def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[]):

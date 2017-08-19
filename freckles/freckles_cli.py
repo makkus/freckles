@@ -80,8 +80,6 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
     callback = find_profile_files_callback("tasks.yml")
     additional_roles = get_profile_dependency_roles(profile)
 
-    sys.exit(0)
-
     task_config = [{"vars": {"freckles": repos, "pkg_mgr": pkg_mgr}, "tasks": ["freckles"]}]
 
     if force_ask_pass:
