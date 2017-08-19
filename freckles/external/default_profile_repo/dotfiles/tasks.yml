@@ -1,0 +1,6 @@
+---
+# include makkus.dotfiles role
+
+- name: "starting profile execution"
+  include_role:
+    name: "makkus.dotfiles2"
