@@ -123,6 +123,7 @@ tasks:
            - makkus.install-nix
            - makkus.install-conda
            - makkus.install-vagrant
+           - makkus.dotfiles
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - install:

@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 import logging
 import os
 import pprint
+import shutil
 import sys
 from pydoc import locate
 
@@ -21,8 +22,11 @@ import yaml
 
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
+DEFAULT_PROFILES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_profile_repo")
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
+
+DEFAULT_SYMLINK_LOCATION = os.path.expanduser("~/.freckles/runs/current")
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -41,11 +45,13 @@ freckles_jinja_utils = FrecklesUtilsExtension
 
 def find_supported_profiles():
 
-    task_folder = os.path.join(os.path.dirname(__file__), "external", "default_role_repo", "makkus.freckles", "tasks")
+    # task_folder = os.path.join(os.path.dirname(__file__), "external", "default_role_repo", "makkus.freckles", "tasks")
 
-    files = os.listdir(task_folder)
+    files = os.listdir(DEFAULT_PROFILES_PATH)
 
-    profiles = [f[:-4] for f in files if os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
+    profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_PROFILES_PATH, f)) and not f.startswith(".")]
+
+    # profiles = [f[:-4] for f in files if os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
     return profiles
 
 class RepoType(click.ParamType):
@@ -171,8 +177,33 @@ def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
+def create_file_copy_callback_from_profiles():
 
-def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False):
+    task_files_to_copy = {}
+    for subfolder in os.listdir(DEFAULT_PROFILES_PATH):
+
+        profiles_folder = os.path.join(DEFAULT_PROFILES_PATH, subfolder)
+        profile_tasks = os.path.join(profiles_folder, "task.yml")
+
+
+        if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
+            print(profiles_folder)
+            continue
+
+        task_files_to_copy[subfolder] = profile_tasks
+
+    def copy_callback():
+
+        for name, path in task_files_to_copy.items():
+
+            target_path = os.path.join(DEFAULT_SYMLINK_LOCATION, "roles", "internal", "makkus.freckles", "tasks", "{}.yml".format(name))
+
+            shutil.copyfile(path, target_path)
+
+    return copy_callback
+
+
+def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False):
 
     nsbl_obj = nsbl.Nsbl.create(task_config, [], [], wrap_into_localhost_env=True, pre_chain=[])
     runner = nsbl.NsblRunner(nsbl_obj)
@@ -199,8 +230,7 @@ def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False)
     else:
         raise Exception("Invalid output format: {}".format(format))
 
-    no_run = False
     force = True
     ask_become_pass = not no_ask_pass
 
-    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current", no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings)
+    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
