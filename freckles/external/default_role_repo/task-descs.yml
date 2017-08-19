@@ -124,6 +124,7 @@ tasks:
            - makkus.install-conda
            - makkus.install-vagrant
            - makkus.dotfiles
+           - makkus.python-dev
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - install:
