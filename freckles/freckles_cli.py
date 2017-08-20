@@ -78,6 +78,7 @@ def cli(freckle_urls, profile, include, exclude, target, local_target_folder, pk
         repos.append(freckle_repo)
 
     callback = find_profile_files_callback("tasks.yml")
+    # in case of no profile, we'll have to add all local profiles to the ansible environment, since we don't know what is requested remotely
     additional_roles = get_profile_dependency_roles(profile)
 
     task_config = [{"vars": {"freckles": repos, "pkg_mgr": pkg_mgr}, "tasks": ["freckles"]}]
