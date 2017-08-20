@@ -24,7 +24,7 @@
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
-*freckles* is a configuration management for your working environment (workstation, remote server, virtual machine, container), a bit weird, and a bit elegant. And with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), a bit weird, and a bit elegant. And with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
 
 
 Quick links
