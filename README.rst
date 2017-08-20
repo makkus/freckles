@@ -81,7 +81,7 @@ Features & use-cases
 * supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
-* declarative scripting
+* declarative scripting, sorta
 * 'self-loading' containers
 * direct support for all ansible_ modules and roles
 

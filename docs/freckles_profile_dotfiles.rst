@@ -7,9 +7,14 @@ The dotfiles profile handles git repositories (or local folders) that contain in
 Quick links
 -----------
 
-- full structure and metadata schema
+- full structure and metadata schema/conventions
 - examples
 - more examples
+
+Description
+-----------
+
+TBD
 
 Examples
 --------
