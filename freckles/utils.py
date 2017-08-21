@@ -47,20 +47,23 @@ class FrecklesUtilsExtension(Extension):
 freckles_jinja_utils = FrecklesUtilsExtension
 
 
-def find_supported_profiles():
+def get_profiles_from_folder(profile_folder):
 
-    # task_folder = os.path.join(os.path.dirname(__file__), "external", "default_role_repo", "makkus.freckles", "tasks")
-
-    files = os.listdir(DEFAULT_PROFILES_PATH)
+    files = os.listdir(profile_folder)
     profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_PROFILES_PATH, f)) and not f.startswith(".")]
 
-    if os.path.exists(DEFAULT_USER_PROFILES_PATH):
-        user_profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_USER_PROFILES_PATH, f)) and not f.startswith(".")]
-    else:
-        user_profiles = []
+    return profiles
 
-    # profiles = [f[:-4] for f in files if os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
-    return list(set(profiles + user_profiles))
+
+def find_supported_profiles(profile_folders=[DEFAULT_PROFILES_PATH, DEFAULT_USER_PROFILES_PATH]):
+
+    result = []
+    for pf in profile_folders:
+        profiles = get_profiles_from_folder(pf)
+        result.extend(profiles)
+
+    return list(set(result))
+
 
 class RepoType(click.ParamType):
 
