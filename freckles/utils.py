@@ -54,6 +54,7 @@ def find_supported_profiles():
     files = os.listdir(DEFAULT_PROFILES_PATH)
     profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_PROFILES_PATH, f)) and not f.startswith(".")]
 
+    files = os.listdir(DEFAULT_USER_PROFILES_PATH)
     if os.path.exists(DEFAULT_USER_PROFILES_PATH):
         user_profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_USER_PROFILES_PATH, f)) and not f.startswith(".")]
     else:
