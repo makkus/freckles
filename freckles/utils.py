@@ -28,7 +28,9 @@ DEFAULT_USER_ROLE_REPO_PATH = os.path.join(os.path.expanduser("~"), ".freckles",
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
 
-DEFAULT_SYMLINK_LOCATION = os.path.expanduser("~/.freckles/runs/current")
+DEFAULT_RUN_BASE_LOCATION = os.path.expanduser("~/.local/freckles/runs")
+DEFAULT_RUN_SYMLINK_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "current")
+DEFAULT_RUN_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "archive", "run")
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -213,11 +215,11 @@ def find_profile_files_callback(filename):
 
     task_files_to_copy = find_profile_files(filename)
 
-    def copy_callback():
+    def copy_callback(ansible_environment_root):
 
         for name, path in task_files_to_copy.items():
 
-            target_path = os.path.join(DEFAULT_SYMLINK_LOCATION, "roles", "internal", "makkus.freckles", "tasks", "{}.yml".format(name))
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "{}.yml".format(name))
 
             shutil.copyfile(path, target_path)
 
@@ -246,7 +248,7 @@ def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False,
 
     nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, [], wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
     runner = nsbl.NsblRunner(nsbl_obj)
-    run_target = os.path.expanduser("~/.freckles/runs/archive/run")
+    run_target = os.path.expanduser(DEFAULT_RUN_LOCATION)
     ansible_verbose = ""
     stdout_callback = "nsbl_internal"
     ignore_task_strings = []
@@ -272,4 +274,4 @@ def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False,
     force = True
     ask_become_pass = not no_ask_pass
 
-    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
+    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
