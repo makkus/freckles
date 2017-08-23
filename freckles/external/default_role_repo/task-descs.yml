@@ -44,6 +44,26 @@ tasks:
   - git:
       meta:
         task-desc: checking out git repository
+        var-keys:
+          - accept_hostkey
+          - bare
+          - clone
+          - depth
+          - dest
+          - executable
+          - force
+          - key_file
+          - recursive
+          - reference
+          - refspec
+          - remote
+          - repo
+          - ssh_opts
+          - track_submodules
+          - umask
+          - update
+          - verify_commit
+          - version
   - update-freckles:
       meta:
         task-type: ansible-role
