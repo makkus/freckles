@@ -22,7 +22,7 @@ nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "exte
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 
 FRECKLES_HELP_TEXT = "TO BE DONE"
-FRECKLES_EPILOG_TEXT = "For more information please visit: https://frkl.io"
+FRECKLES_EPILOG_TEXT = "For more information please visit: https://freckles.io"
 
 COMMAND_PROCESSOR_CHAIN = [
     frkl.UrlAbbrevProcessor()
