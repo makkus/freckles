@@ -190,42 +190,47 @@ def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
-def find_profile_files(filename):
+def find_profile_files(filename, valid_profiles=None, profile_repos=[DEFAULT_PROFILES_PATH, DEFAULT_USER_PROFILES_PATH]):
 
     task_files_to_copy = {}
-    for subfolder in os.listdir(DEFAULT_PROFILES_PATH):
+    for profile_repo in profile_repos:
+        if os.path.exists(profile_repo) and os.path.isdir(profile_repo):
+            for subfolder in os.listdir(profile_repo):
 
-        profiles_folder = os.path.join(DEFAULT_PROFILES_PATH, subfolder)
-        profile_tasks = os.path.join(profiles_folder, filename)
+                if valid_profiles and subfolder not in valid_profiles:
+                    continue
 
-        if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
-            continue
+                profiles_folder = os.path.join(profile_repo, subfolder)
+                profile_tasks = os.path.join(profiles_folder, filename)
 
-        task_files_to_copy[subfolder] = profile_tasks
+                if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
+                    continue
 
-    if os.path.exists(DEFAULT_USER_PROFILES_PATH) and os.path.isdir(DEFAULT_USER_PROFILES_PATH):
-        for subfolder in os.listdir(DEFAULT_USER_PROFILES_PATH):
-
-            profiles_folder = os.path.join(DEFAULT_USER_PROFILES_PATH, subfolder)
-            profile_tasks = os.path.join(profiles_folder, filename)
-
-            if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
-                continue
-
-            task_files_to_copy[subfolder] = profile_tasks
+                task_files_to_copy[subfolder] = profile_tasks
 
     return task_files_to_copy
 
-def find_profile_files_callback(filename):
+def find_profile_files_callback(filenames, valid_profiles=None):
 
-    task_files_to_copy = find_profile_files(filename)
+    if isinstance(filenames, string_types):
+        filenames = [filenames]
+
+    task_files_to_copy = {}
+    for filename in filenames:
+        files = find_profile_files(filename, valid_profiles)
+        for key, value in files.items():
+            task_files_to_copy.setdefault(filename, {})[key] = value
 
     def copy_callback(ansible_environment_root):
 
-        for name, path in task_files_to_copy.items():
+        for name, path in task_files_to_copy.get("init.yml", {}).items():
 
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "{}.yml".format(name))
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "init-{}.yml".format(name))
+            shutil.copyfile(path, target_path)
 
+        for name, path in task_files_to_copy.get("tasks.yml", {}).items():
+
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "items-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
     return copy_callback
@@ -233,12 +238,9 @@ def find_profile_files_callback(filename):
 
 def get_profile_dependency_roles(profiles):
 
-    dep_files = find_profile_files("dependencies.yml")
+    dep_files = find_profile_files("dependencies.yml", profiles)
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
-
-        if profiles and profile_name not in profiles:
-            continue
 
         with open(dep_file, 'r') as f:
             deps = yaml.safe_load(f)
