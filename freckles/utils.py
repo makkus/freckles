@@ -49,9 +49,9 @@ freckles_jinja_utils = FrecklesUtilsExtension
 
 def get_profiles_from_folder(profile_folder):
 
-    if os.path.exists(profile_folder) and os.path.isdir(profile_folder):
-        files = os.listdir(profile_folder)
-        profiles = [f for f in files if os.path.isdir(os.path.join(DEFAULT_PROFILES_PATH, f)) and not f.startswith(".")]
+    if os.path.exists(profile_folder) and os.path.isdir(os.path.realpath(profile_folder)):
+        files = os.listdir(os.path.realpath(profile_folder))
+        profiles = [f for f in files if os.path.isdir(os.path.realpath(os.path.join(profile_folder, f))) and not f.startswith(".")]
         return profiles
     else:
         return []
