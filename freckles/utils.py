@@ -238,13 +238,13 @@ def find_profile_files_callback(filenames, valid_profiles=None):
 
 def get_profile_dependency_roles(profiles):
 
-    dep_files = find_profile_files("dependencies.yml", profiles)
+    dep_files = find_profile_files("meta.yml", profiles)
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
 
         with open(dep_file, 'r') as f:
             deps = yaml.safe_load(f)
-            all_deps |= set(deps)
+            all_deps |= set(deps.get("role-dependencies", {}))
 
     return list(all_deps)
 
