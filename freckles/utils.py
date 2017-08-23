@@ -251,7 +251,7 @@ def get_profile_dependency_roles(profiles):
 
 def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[]):
 
-    role_repos = defaults.calculate_role_repos(DEFAULT_USER_ROLE_REPO_PATH, use_default_roles=True)
+    role_repos = defaults.calculate_role_repos([DEFAULT_USER_ROLE_REPO_PATH], use_default_roles=True)
 
     nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, [], wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
     runner = nsbl.NsblRunner(nsbl_obj)
