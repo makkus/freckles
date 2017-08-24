@@ -1,4 +1,0 @@
-tasks:
-  - makkus.freckles-config:
-     freckles_config_tasks:
-       - enable_community_repo

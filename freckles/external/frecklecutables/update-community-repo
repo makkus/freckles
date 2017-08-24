@@ -1,4 +1,0 @@
-tasks:
-  - makkus.freckles-config:
-     freckles_config_tasks:
-       - update_community_repo
