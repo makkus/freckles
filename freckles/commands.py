@@ -21,7 +21,7 @@ import yaml
 
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
-                    find_supported_profiles, render_dict, render_vars_template,
+                    render_dict, render_vars_template,
                     url_is_local)
 
 log = logging.getLogger("freckles")
