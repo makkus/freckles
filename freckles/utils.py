@@ -269,6 +269,8 @@ def get_profile_dependency_roles(profiles):
 
         with open(dep_file, 'r') as f:
             deps = yaml.safe_load(f)
+            if not deps:
+                deps = {}
             all_deps |= set(deps.get("role-dependencies", {}))
 
     return list(all_deps)
