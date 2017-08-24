@@ -1,0 +1,9 @@
+---
+# include makkus.dotfiles role
+- debug: var=freckles_profile_folders
+
+- name: "starting profile execution"
+  include_role:
+    name: "makkus.dotfiles"
+  vars:
+    dotfile_folders: "{{ freckles_profile_folders }}"
