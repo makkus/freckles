@@ -1,0 +1,4 @@
+tasks:
+  - makkus.freckles-config:
+     freckles_config_tasks:
+       - disable_community_repo
