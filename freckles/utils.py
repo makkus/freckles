@@ -1,12 +1,14 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import fnmatch
 import logging
 import os
 import pprint
 import shutil
 import sys
 from pydoc import locate
+from .config import FrecklesConfig
 
 import click
 from ansible.plugins.filter.core import FilterModule
@@ -18,19 +20,16 @@ from jinja2.ext import Extension
 from nsbl import defaults, nsbl
 from six import string_types
 
+try:
+    set
+except NameError:
+    from sets import Set as set
+
 import yaml
+from .freckles_defaults import *
 
-
-defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
-DEFAULT_PROFILES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_profile_repo")
-DEFAULT_USER_PROFILES_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "profiles")
-DEFAULT_USER_ROLE_REPO_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "trusted_roles")
-EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
-DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
-
-DEFAULT_RUN_BASE_LOCATION = os.path.expanduser("~/.local/freckles/runs")
-DEFAULT_RUN_SYMLINK_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "current")
-DEFAULT_RUN_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "archive", "run")
+DEFAULT_EXCLUDE_DIRS = [".git", ".tox", ".cache"]
+PROFILE_MARKER_FILENAME = "profile.yml"
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -46,26 +45,7 @@ class FrecklesUtilsExtension(Extension):
 
 freckles_jinja_utils = FrecklesUtilsExtension
 
-
-def get_profiles_from_folder(profile_folder):
-
-    if os.path.exists(profile_folder) and os.path.isdir(os.path.realpath(profile_folder)):
-        files = os.listdir(os.path.realpath(profile_folder))
-        profiles = [f for f in files if os.path.isdir(os.path.realpath(os.path.join(profile_folder, f))) and not f.startswith(".")]
-        return profiles
-    else:
-        return []
-
-
-def find_supported_profiles(profile_folders=[DEFAULT_PROFILES_PATH, DEFAULT_USER_PROFILES_PATH]):
-
-    result = []
-    for pf in profile_folders:
-        profiles = get_profiles_from_folder(pf)
-        result.extend(profiles)
-
-    return list(set(result))
-
+DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
 
 class RepoType(click.ParamType):
 
@@ -190,23 +170,68 @@ def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
-def find_profile_files(filename, valid_profiles=None, profile_repos=[DEFAULT_PROFILES_PATH, DEFAULT_USER_PROFILES_PATH]):
+PROFILE_CACHE = {}
+
+def find_supported_profiles(config=None):
+
+    if not config:
+        config = DEFAULT_FRECKLES_CONFIG
+
+    repos = config.get_profile_repos()
+
+    result = {}
+    for r in repos:
+        p = get_profiles_from_repo(r)
+        result.update(p)
+
+    return result
+
+
+def find_supported_profile_names(config=None):
+
+    return sorted(list(set(find_supported_profiles(config).keys())))
+
+def get_profiles_from_repo(profile_repo):
+
+    if not os.path.exists(profile_repo) or not os.path.isdir(os.path.realpath(profile_repo)):
+        return {}
+
+    if profile_repo in PROFILE_CACHE.keys():
+        return PROFILE_CACHE[profile_repo]
+
+    result = {}
+    for root, dirnames, filenames in os.walk(os.path.realpath(profile_repo), topdown=True, followlinks=True):
+
+        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+
+        for filename in fnmatch.filter(filenames, PROFILE_MARKER_FILENAME):
+
+            profile_file = os.path.realpath(os.path.join(root, PROFILE_MARKER_FILENAME))
+            profile_folder = os.path.abspath(os.path.dirname(profile_file))
+            profile_name = os.path.basename(profile_folder)
+
+            result[profile_name] = profile_folder
+
+    PROFILE_CACHE[profile_repo] = result
+    return result
+
+def find_profile_files(filename, valid_profiles=None, config=None):
+
+    profiles = find_supported_profiles(config)
 
     task_files_to_copy = {}
-    for profile_repo in profile_repos:
-        if os.path.exists(profile_repo) and os.path.isdir(profile_repo):
-            for subfolder in os.listdir(profile_repo):
 
-                if valid_profiles and subfolder not in valid_profiles:
-                    continue
+    for profile_name, profile_path in profiles.items():
 
-                profiles_folder = os.path.join(profile_repo, subfolder)
-                profile_tasks = os.path.join(profiles_folder, filename)
+        if valid_profiles and profile_name not in valid_profiles:
+            continue
 
-                if not os.path.isdir(profiles_folder) or not os.path.exists(profile_tasks) or not os.path.isfile(profile_tasks):
-                    continue
+        profile_child_file = os.path.join(profile_path, filename)
 
-                task_files_to_copy[subfolder] = profile_tasks
+        if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
+            continue
+
+        task_files_to_copy[profile_name] = profile_child_file
 
     return task_files_to_copy
 
@@ -238,7 +263,7 @@ def find_profile_files_callback(filenames, valid_profiles=None):
 
 def get_profile_dependency_roles(profiles):
 
-    dep_files = find_profile_files("meta.yml", profiles)
+    dep_files = find_profile_files("profile.yml", profiles)
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
 
@@ -249,11 +274,16 @@ def get_profile_dependency_roles(profiles):
     return list(all_deps)
 
 
-def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[]):
+def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[], config=None):
 
-    role_repos = defaults.calculate_role_repos([DEFAULT_USER_ROLE_REPO_PATH], use_default_roles=True)
+    if not config:
+        config = DEFAULT_FRECKLES_CONFIG
 
-    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, [], wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
+    role_repos = config.get_role_repos()
+    task_descs = config.get_task_descs()
+
+    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
+
     runner = nsbl.NsblRunner(nsbl_obj)
     run_target = os.path.expanduser(DEFAULT_RUN_LOCATION)
     ansible_verbose = ""

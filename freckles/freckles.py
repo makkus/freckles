@@ -14,9 +14,8 @@ import yaml
 
 from . import __version__ as VERSION
 from .commands import CommandRepo
-from .config import FrecklesConfig
 from .utils import (RepoType, create_and_run_nsbl_runner, create_freckle_desc,
-                    find_profile_files_callback, find_supported_profile_names,
+                    find_profile_files_callback, find_supported_profiles,
                     get_profile_dependency_roles, url_is_local)
 
 try:
@@ -35,7 +34,7 @@ SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_
 @click.option('--no-run', help='only creates the playbook environment, does not run it)', is_flag=True, default=False, flag_value=True)
 @click.option('--no-ask-pass', help='force not asking the user for a sudo password, if not specified freckles will try to do an educated guess (which could potentially fail)', is_flag=True, default=False, flag_value=True)
 @click.option('--force-ask-pass', help='force asking the user for a sudo password, if not specified freckles will try to do an educated guess (which could potentially fail)', is_flag=True, default=False, flag_value=True)
-@click.option('--profile', '-p', help='ignore remote freckle profile(s), force using this/those one(s)', multiple=True, metavar='PROFILE', default=[], type=click.Choice(find_supported_profile_names()))
+@click.option('--profile', '-p', help='ignore remote freckle profile(s), force using this/those one(s)', multiple=True, metavar='PROFILE', default=[], type=click.Choice(find_supported_profiles()))
 @click.option('--format', '-f', help='format of the output', multiple=False, metavar='FORMAT', default="default", type=click.Choice(SUPPORTED_OUTPUT_FORMATS))
 @click.option('--target', '-t', help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home', type=str, metavar='PATH')
 @click.option('--local-target-folder', help='in case only one freckle url is provided and the target folder should have a different basename, this option can be used to specify the full local path', required=False)
