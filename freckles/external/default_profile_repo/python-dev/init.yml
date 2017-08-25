@@ -1,0 +1,8 @@
+---
+# include makkus.dotfiles role
+
+- name: "Starting python-dev setup"
+  include_role:
+    name: "makkus.python-dev"
+  vars:
+    pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default(omit) }}"

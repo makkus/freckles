@@ -1,3 +1,5 @@
+doc:
+  help: enables the use of freckles community roles, profiles and frecklecutables
 tasks:
   - makkus.freckles-config:
      freckles_config_tasks:

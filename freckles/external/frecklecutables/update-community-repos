@@ -1,3 +1,5 @@
+doc:
+  help: updates the freckles community repos for roles, profiles and frecklecutables
 tasks:
   - makkus.freckles-config:
      freckles_config_tasks:
