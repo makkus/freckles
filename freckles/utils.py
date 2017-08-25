@@ -326,14 +326,14 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(freckle_repos, ask_become_pass="auto", no_run=False, output_format="default"):
+def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False, output_format="default"):
 
     profiles = extract_all_used_profiles(freckle_repos)
     callback = find_profile_files_callback(["tasks.yml", "init.yml"], profiles)
 
     additional_roles = get_profile_dependency_roles(profiles)
 
-    task_config = [{"vars": {"freckles": freckle_repos}, "tasks": ["freckles"]}]
+    task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 
     create_and_run_nsbl_runner(task_config, output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
 

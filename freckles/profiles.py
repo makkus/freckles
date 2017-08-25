@@ -9,7 +9,7 @@ import os
 import pprint
 import sys
 from pydoc import locate
-
+from frkl import frkl
 import click
 from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
                        EnsureUrlProcessor, Frkl, MergeDictResultCallback,
@@ -30,7 +30,14 @@ log = logging.getLogger("freckles")
 COMMAND_SEPERATOR = "-"
 DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecutables")
 
+
 def assemble_freckle_run(*args, **kwargs):
+
+
+    # print("ARGS")
+    # pprint.pprint(args)
+    # print("KWARGS")
+    # pprint.pprint(kwargs)
 
     target = kwargs.get("target", None)
     if not target:
@@ -45,17 +52,38 @@ def assemble_freckle_run(*args, **kwargs):
     ask_become_pass = kwargs["ask_become_pass"]
 
     profile_names = []
-    for p in args:
-        pn = p[0]["name"]
+    extra_profile_vars = {}
+    for p in args[0]:
+        pn = p["name"]
         if pn not in profile_names:
             profile_names.append(pn)
+        else:
+            raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
+        pvars = p["vars"]
+        if pvars:
+            extra_profile_vars[pn] = pvars
+
+    # profile_vars_new = []
+    # for profile, p_vars in profile_vars.items():
+    #     chain = [frkl.FrklProcessor(DEFAULT_PROFILE_VAR_FORMAT)]
+    #     try:
+    #         frkl_obj = frkl.Frkl(p_vars, chain)
+    #         frkl_callback = frkl.MergeResultCallback()
+    #         vars_new = frkl_obj.process(frkl_callback)
+    #         profile_vars_new[profile] = vars_new
+    #         # result.setdefault(freckle_folder, {})["vars"] = profile_vars_new
+    #         # result[freckle_folder]["extra_vars"] = extra_vars.get(freckle_folder, {})
+    #         # result[freckle_folder]["folder_metadata"] = folders_metadata[freckle_folder]
+    #     except (frkl.FrklConfigException) as e:
+    #         raise Exception(
+    #             "Can't read vars for profile '{}': {}".format(profile, e.message))
 
     repos = []
     for freckle_url in freckle_urls:
         freckle_repo = create_freckle_desc(freckle_url, target, True, profiles=profile_names, includes=include, excludes=exclude)
         repos.append(freckle_repo)
 
-    create_freckles_run(repos, ask_become_pass=ask_become_pass, no_run=False, output_format=output_format)
+    create_freckles_run(repos, extra_profile_vars, ask_become_pass=ask_become_pass, no_run=False, output_format=output_format)
 
 class ProfileRepo(object):
 
