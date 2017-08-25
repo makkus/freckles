@@ -41,11 +41,11 @@ I've prepared an example repository containing two applications (``fish``, and `
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles --profile dotfiles gh:makkus/dotfiles-test-simple
+   curl https://freckles.io | bash -s -- freckles -f gh:makkus/dotfiles-test-simple dotfiles
 
    # or, if you already have freckles installed and in your $PATH, just:
 
-   freckles --profile dotfiles gh:makkus/dotfiles-test-simple
+   freckles -f gh:makkus/dotfiles-test-simple dotfiles
 
 (from now on I'll assume you already have *freckles* installed, and either logged out and logged in again, or did a ``source ~/.profile`` to make sure it's in your path)
 
@@ -73,7 +73,7 @@ Now, on systems where we want to have both sets of dotfiles (and applications in
 
 .. code-block:: console
 
-    freckles --profile dotfiles gh:makkus/dotfiles-test-simple gh:makkus/dotfiles-test-simple-2
+    freckles -f gh:makkus/dotfiles-test-simple -f gh:makkus/dotfiles-test-simple-2 dotfiles
 
 One little thing we have to adjust so ``stow`` is happy with us *stowing* from two different source directories: we have to create (empty) marker files with the filename ``.stow`` in the root of each *freckle*.
 
@@ -117,9 +117,9 @@ If you only want the *minimal* sub-folder, you can do either:
 
 .. code-block:: console
 
-    freckles --profile dotfiles --include minimal gh:makkus/dotfiles-test-simple-combined
+    freckles --include minimal -f gh:makkus/dotfiles-test-simple-combined dotfiles
     # or
-    freckles --profile dotfiles --exclude gui-pkgs gh:makkus/dotfiles-test-simple-combined
+    freckles --exclude gui-pkgs -f gh:makkus/dotfiles-test-simple-combined dotfiles
 
 Both ``--include`` and ``--exclude`` options check whether the (full) path to the *freckle* ends with the provided string. If it does, the directive is applied to the *freckle*.
 
@@ -127,11 +127,11 @@ Both ``--include`` and ``--exclude`` options check whether the (full) path to th
 Include metadata to install additional packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the above examples we didn't add any *freckles* specific metadata to the *freckle* folders itself (except for the ``.freckle`` marker files in the last example). We just assured *freckles* that a git repository is of a certain type (``dotfiles``) and had a certain structure by providing the ``--profile dotfiles`` command-line option.
+In the above examples we didn't add any *freckles* specific metadata to the *freckle* folders itself (except for the ``.freckle`` marker files in the last example).
 
-This is useful for cases where we don't own the repository ourself, but we want to use the code therein and know it has a compatible structure. In most cases we'll have access to the repository though, which means we can augment the code or data itself with some metadata that helps *freckles* decide what to do with it. So, for the below examples we won't be needing he ``--profile`` option anymore, as that information is stored with the *freckle*. For sake of completeness: you can still use the ``--profile`` option as a filter, to only execute certain profiles.
+This is useful for cases where we don't own the repository ourself, but we want to use the code therein and know it has a compatible structure. In most cases we'll have access to the repository though, which means we can augment the code or data itself with some metadata that helps *freckles* decide how to deal with it.
 
-Internally, *freckles* uses frkl_ to parse this metadata. *frkl* tries to provide a way to keep configuration data as simple and readable as possible, as long as that is feasable. If the complexity of what the metadata is supposed to express increases, the *frkl* metadata schema can sorta 'expand' accordingly. *'elastic configuration'*, if you will. Anyway, for those examples I'll keep the configuration simple, if you want to learn more about *frkl* and what you can do if you need to do something out of the ordinary, check here_ (TODO: link)
+Internally, *freckles* uses frkl_ to parse this metadata. *frkl* tries to provide a way to keep configuration data as simple and readable as possible, as long as that is feasable. If the complexity of what the metadata is supposed to express increases, the *frkl* metadata schema can sorta 'expand' accordingly. *'elastic configuration'*, I think of it as. Anyway, for those examples I'll keep the configuration simple, if you want to learn more about *frkl* and what you can do if you need to do something out of the ordinary, check here_ (TODO: link)
 
 *freckles* expects additional metadata in two places:
 
@@ -154,7 +154,7 @@ This describes some additional packages we want to install. None of those uses c
 
 .. code-block:: console
 
-   freckles ~/freckles/dotfiles-test-simple-combined
+   freckles -f ~/freckles/dotfiles-test-simple-combined dotfiles
 
 This time we want to use the *freckle* directly, locally, without checking out from git. We didn't commit our changes (the edits to the ``.freckle`` file), so if we ran the same command as before we'd see an error message. If all goes ok, ``freckles`` output should tell you it has installed those additional 3 applications (if they weren't already installed).
 
