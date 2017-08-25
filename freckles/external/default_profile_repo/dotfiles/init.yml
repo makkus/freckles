@@ -8,3 +8,6 @@
   vars:
     dotfile_folders: "{{ freckles_profile_folders }}"
     pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default(omit) }}"
+    no_stow: "{{ freckles_user_vars.no_stow | default(omit) }}"
+    no_package_install: "{{ freckles_user_vars.no_package_install | default(omit) }}"
+    no_folder_install: "{{ freckles_user_vars.no_folder_install | default(omit) }}"
