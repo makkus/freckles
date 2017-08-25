@@ -14,6 +14,7 @@ import yaml
 
 from . import __version__ as VERSION
 from .commands import CommandRepo
+from .freckles_defaults import *
 
 log = logging.getLogger("freckles")
 
@@ -52,8 +53,10 @@ class FrecklesCommand(click.MultiCommand):
 
         click.MultiCommand.__init__(self, "freckles", **kwargs)
 
-        debug_option = click.Option(param_decls=["--debug", "-d"], required=False, default=False, is_flag=True)
-        self.params = [debug_option]
+        output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
+        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
+
+        self.params = [output_option, ask_become_pass_option]
 
         self.command_repo = CommandRepo(paths=command_repos, additional_commands=[current_command], no_run=False)
         self.current_command = current_command[0]

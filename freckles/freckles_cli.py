@@ -30,8 +30,6 @@ FRECKLES_EPILOG_TEXT = "n/a"
 
 # TODO: this is ugly, probably have refactor how role repos are used
 SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]
-SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
-
 
 class FrecklesProfiles(click.MultiCommand):
 

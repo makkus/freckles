@@ -1,6 +1,8 @@
 from nsbl import defaults
 import os
 
+SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
+
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 DEFAULT_PROFILES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_profile_repo")
 DEFAULT_FRECKLECUTABLES_PATH = os.path.join(os.path.dirname(__file__), "external", "frecklecutables")

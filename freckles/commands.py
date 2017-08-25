@@ -85,7 +85,6 @@ class CommandRepo(object):
 
         def command_callback(**kwargs):
             # exchange arg_name with var name
-
             new_args = {}
             for key, value in key_map.items():
                 temp = kwargs.pop(key)
@@ -130,7 +129,11 @@ class CommandRepo(object):
 
             log.debug("Final task config: {}".format(task_config))
 
-            create_and_run_nsbl_runner(task_config, "default", False)
+            output = ctx.params["output"]
+            ask_become_pass = ctx.params["ask_become_pass"]
+
+
+            create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
