@@ -11,7 +11,7 @@ import click
 from six import string_types
 
 import yaml
-
+from .freckles_defaults import *
 from . import __version__ as VERSION
 from .profiles import ProfileRepo, assemble_freckle_run
 from .utils import (RepoType, create_and_run_nsbl_runner, create_freckle_desc,

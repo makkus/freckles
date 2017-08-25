@@ -14,7 +14,7 @@ import click
 from ansible.plugins.filter.core import FilterModule
 from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
                        EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor)
+                       UrlAbbrevProcessor, YamlTextSplitProcessor, dict_merge)
 from jinja2 import Environment, PackageLoader, Template
 from jinja2.ext import Extension
 from nsbl import defaults, nsbl
@@ -227,6 +227,39 @@ def create_cli_command(config, command_path=None, no_run=False):
         options_list.append(o)
 
     return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
+
+
+def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars):
+
+    # exchange arg_name with var name
+    new_args = {}
+
+    for key, value in key_map.items():
+        temp = input_args.pop(key.replace('-', '_'))
+        if key not in args_that_are_vars:
+            if isinstance(temp, tuple):
+                temp = list(temp)
+            new_args[value] = temp
+        else:
+            task_vars[value] = temp
+
+    # now overimpose the new_args over template_vars
+    new_args = dict_merge(default_vars, new_args)
+
+    final_vars = {}
+
+    for key, template in task_vars.items():
+        if isinstance(template, string_types) and "{" in template:
+            template_var_string = render_vars_template(template, new_args)
+            try:
+                template_var_new = yaml.safe_load(template_var_string)
+                final_vars[key] = template_var_new
+            except (Exception) as e:
+                raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
+        else:
+            final_vars[key] = template
+
+    return new_args, final_vars
 
 def find_supported_profile_names(config=None):
 

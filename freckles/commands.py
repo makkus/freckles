@@ -22,7 +22,7 @@ import yaml
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     render_dict, render_vars_template,
-                    url_is_local, create_cli_command)
+                    url_is_local, create_cli_command, get_vars_from_cli_input)
 
 log = logging.getLogger("freckles")
 
@@ -84,33 +84,8 @@ class CommandRepo(object):
         no_run = self.commands[command_name]["no_run"]
 
         def command_callback(**kwargs):
-            # exchange arg_name with var name
-            new_args = {}
-            for key, value in key_map.items():
-                temp = kwargs.pop(key)
-                if key not in args_that_are_vars:
-                    if isinstance(temp, tuple):
-                        temp = list(temp)
-                    new_args[value] = temp
-                else:
-                    task_vars[value] = temp
 
-            # now overimpose the new_args over template_vars
-            new_args = dict_merge(default_vars, new_args)
-
-            final_vars = {}
-
-            for key, template in task_vars.items():
-                if isinstance(template, string_types) and "{" in template:
-                    template_var_string = render_vars_template(template, new_args)
-                    try:
-                        template_var_new = yaml.safe_load(template_var_string)
-                        final_vars[key] = template_var_new
-                    except (Exception) as e:
-                        raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
-                else:
-                    final_vars[key] = template
-
+            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars)
             rendered_tasks = render_dict(tasks, new_args)
 
             # log.debug("Args: {}".format(new_args))

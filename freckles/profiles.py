@@ -22,7 +22,7 @@ import yaml
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     render_dict, render_vars_template,
-                    url_is_local, find_supported_profiles, PROFILE_MARKER_FILENAME, create_cli_command, create_freckles_run)
+                    url_is_local, find_supported_profiles, PROFILE_MARKER_FILENAME, create_cli_command, create_freckles_run, get_vars_from_cli_input)
 
 log = logging.getLogger("freckles")
 
@@ -114,7 +114,8 @@ class ProfileRepo(object):
         no_run = self.commands[command_name]["no_run"]
 
         def command_callback(**kwargs):
-            return {"name": command_name, "vars": kwargs}
+            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars)
+            return {"name": command_name, "vars": final_vars}
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
