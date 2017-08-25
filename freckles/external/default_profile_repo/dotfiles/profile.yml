@@ -1,0 +1,12 @@
+doc:
+  help: "installs packages referenced in a dotfiles repository, then 'stows' the included dotfiles into the users' home"
+  short_help: installs packages, stows dotfiles
+args:
+  pkg-mgr:
+    help: the package manager to use, currently supported 'auto', 'conda', 'nix'
+    type: str
+    multiple: false
+    required: false
+    default: "auto"
+    metavar: "PKG_MGR"
+    is_var: true
