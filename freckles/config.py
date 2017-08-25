@@ -39,13 +39,15 @@ PROFILE_ABBREVS= {
     "community": DEFAULT_COMMUNITY_PROFILES_PATH
 }
 
-def get_real_repo_path(repo_name):
+FRECKLECUTABLES_ABBREV = {
+    "default": DEFAULT_FRECKLECUTABLES_PATH,
+    "user": DEFAULT_USER_FRECKLECUTABLES_PATH,
+    "community": DEFAULT_COMMUNITY_FRECKLECUTABLES_PATH
+}
 
-    return REPO_ABBREVS.get(repo_name, repo_name)
+def get_real_repo_path(abbrevs, repo_name):
 
-def get_real_profile_path(repo_name):
-
-    return PROFILE_ABBREVS.get(repo_name, repo_name)
+    return abbrevs.get(repo_name, repo_name)
 
 
 class FrecklesConfig(object):
@@ -61,13 +63,14 @@ class FrecklesConfig(object):
 
         self.trusted_repos = self.config.get("trusted-repos", ["default", "user"])
         self.trusted_profiles = self.config.get("trusted-profiles", ["default", "user"])
+        self.trusted_frecklecutables = self.config.get("trusted-frecklecutables", ["default", "user"])
         self.trusted_urls = self.config.get("trusted-urls", ["https://github.com/makkus"])
         self.task_descs = self.config.get("task-descs", [])
 
 
     def get_role_repos(self):
 
-        role_repos = defaults.calculate_role_repos([get_real_repo_path(r) for r in self.trusted_repos], use_default_roles=False)
+        role_repos = defaults.calculate_role_repos([get_real_repo_path(REPO_ABBREVS, r) for r in self.trusted_repos], use_default_roles=False)
         return role_repos
 
     def get_task_descs(self):
@@ -76,5 +79,9 @@ class FrecklesConfig(object):
 
     def get_profile_repos(self):
 
-        profile_repos = [get_real_profile_path(r) for r in self.trusted_profiles]
+        profile_repos = [get_real_repo_path(PROFILE_ABBREVS, r) for r in self.trusted_profiles]
         return profile_repos
+
+    def get_frecklecutables_repos(self):
+
+        f_repos = [get_real_repo_path(FRECKLECUTABLES_ABBREV, r) for r in self.trusted_frecklecutables]

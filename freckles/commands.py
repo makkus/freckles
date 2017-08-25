@@ -22,7 +22,7 @@ import yaml
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     render_dict, render_vars_template,
-                    url_is_local)
+                    url_is_local, create_cli_command)
 
 log = logging.getLogger("freckles")
 
@@ -157,46 +157,16 @@ class CommandRepo(object):
                 # log.info("Could not parse command file '{}', ignoring...".format(yaml_file))
                 # return None
 
-        doc = config_content.get("doc", {})
+        # doc = config_content.get("doc", {})
         # TODO: check format of config
-        options = config_content.get("args", {})
-        vars = config_content.get("vars", {})
+        # options = config_content.get("args", {})
+        # vars = config_content.get("vars", {})
         tasks = config_content.get("tasks", None)
-        default_vars = config_content.get("defaults", {})
+        # default_vars = config_content.get("defaults", {})
 
         if not tasks:
             click.echo("No tasks included in command, doing nothing.")
             sys.exit(1)
 
-        key_map = {}
-        argument_key = None
-
-        options_list = []
-        args_that_are_vars = []
-        for opt, opt_details in options.items():
-            opt_type = opt_details.get("type", None)
-            if opt_type:
-                opt_type_converted = locate(opt_type)
-                if not opt_type_converted:
-                    raise Exception("No type found for: {}".format(opt_type))
-                opt_details['type'] = opt_type_converted
-
-            key = opt_details.pop('arg_name', opt)
-            key_map[key] = opt
-
-            is_argument = opt_details.pop('is_argument', False)
-            is_var = opt_details.pop('is_var', True)
-            if is_var:
-                args_that_are_vars.append(key)
-            if is_argument:
-                if argument_key:
-                    raise Exception("Multiple arguments are not supported (yet): {}".format(config_content["vars"]))
-                argument_key = key
-                required = opt_details.pop("required", None)
-
-                o = click.Argument(param_decls=[key], required=required, **opt_details)
-            else:
-                o = click.Option(param_decls=["--{}".format(key)], **opt_details)
-            options_list.append(o)
-
-        return {"options": options_list, "key_map": key_map, "command_file": yaml_file, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
+        cli_command = create_cli_command(config_content, yaml_file, no_run)
+        return cli_command

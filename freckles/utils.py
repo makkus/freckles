@@ -186,6 +186,47 @@ def find_supported_profiles(config=None):
 
     return result
 
+def create_cli_command(config, command_path=None, no_run=False):
+
+    doc = config.get("doc", {})
+    # TODO: check format of config
+    options = config.get("args", {})
+    vars = config.get("vars", {})
+    tasks = config.get("tasks", None)
+    default_vars = config.get("defaults", {})
+
+    key_map = {}
+    argument_key = None
+
+    options_list = []
+    args_that_are_vars = []
+    for opt, opt_details in options.items():
+        opt_type = opt_details.get("type", None)
+        if opt_type:
+            opt_type_converted = locate(opt_type)
+            if not opt_type_converted:
+                raise Exception("No type found for: {}".format(opt_type))
+            opt_details['type'] = opt_type_converted
+
+        key = opt_details.pop('arg_name', opt)
+        key_map[key] = opt
+
+        is_argument = opt_details.pop('is_argument', False)
+        is_var = opt_details.pop('is_var', True)
+        if is_var:
+            args_that_are_vars.append(key)
+        if is_argument:
+            if argument_key:
+                raise Exception("Multiple arguments are not supported (yet): {}".format(config["vars"]))
+            argument_key = key
+            required = opt_details.pop("required", None)
+
+            o = click.Argument(param_decls=[key], required=required, **opt_details)
+        else:
+            o = click.Option(param_decls=["--{}".format(key)], **opt_details)
+        options_list.append(o)
+
+    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
 
 def find_supported_profile_names(config=None):
 
@@ -276,7 +317,29 @@ def get_profile_dependency_roles(profiles):
     return list(all_deps)
 
 
-def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False, pre_run_callback=None, no_run=False, additional_roles=[], config=None):
+def extract_all_used_profiles(freckle_repos):
+
+    all_profiles = []
+    for fr in freckle_repos:
+        all_profiles.extend(fr.get("profiles", []))
+
+    return list(set(all_profiles))
+
+
+def create_freckles_run(freckle_repos, ask_become_pass="auto", no_run=False, output_format="default"):
+
+    profiles = extract_all_used_profiles(freckle_repos)
+    callback = find_profile_files_callback(["tasks.yml", "init.yml"], profiles)
+
+    additional_roles = get_profile_dependency_roles(profiles)
+
+    task_config = [{"vars": {"freckles": freckle_repos}, "tasks": ["freckles"]}]
+
+    create_and_run_nsbl_runner(task_config, output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
+
+
+
+def create_and_run_nsbl_runner(task_config, output_format="default", ask_become_pass="auto", pre_run_callback=None, no_run=False, additional_roles=[], config=None):
 
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
@@ -294,23 +357,22 @@ def create_and_run_nsbl_runner(task_config, format="default", no_ask_pass=False,
     display_sub_tasks = True
     display_skipped_tasks = False
 
-    if format == "verbose":
+    if output_format == "verbose":
         stdout_callback = "default"
         ansible_verbose = "-vvvv"
-    elif format == "ansible":
+    elif output_format == "ansible":
         stdout_callback = "default"
-    elif format == "skippy":
+    elif output_format == "skippy":
         stdout_callback = "skippy"
-    elif format == "default_full":
+    elif output_format == "default_full":
         stdout_callback = "nsbl_internal"
         display_skipped_tasks = True
-    elif format == "default":
+    elif output_format == "default":
         ignore_task_strings = DEFAULT_IGNORE_STRINGS
         stdout_callback = "nsbl_internal"
     else:
-        raise Exception("Invalid output format: {}".format(format))
+        raise Exception("Invalid output format: {}".format(output_format))
 
     force = True
-    ask_become_pass = not no_ask_pass
 
     runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
