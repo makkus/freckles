@@ -7,3 +7,4 @@
     name: "makkus.dotfiles"
   vars:
     dotfile_folders: "{{ freckles_profile_folders }}"
+    pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default(omit) }}"
