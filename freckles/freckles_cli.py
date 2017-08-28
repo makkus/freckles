@@ -38,10 +38,10 @@ class FrecklesProfiles(click.MultiCommand):
         click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True, **kwargs)
 
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
-        freckle_option = click.Option(param_decls=["--freckle", "-f"], required=True, multiple=True, type=RepoType(), metavar="URL_OR_PATH", help="the url or path to the freckle(s) to use")
+        freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(), metavar="URL_OR_PATH", help="the url or path to the freckle(s) to use, if specified here, before any commands, all profiles will be applied to it")
         target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str, metavar="PATH", help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home')
         include_option = click.Option(param_decls=["--include", "-i"], help='if specified, only process folders that end with one of the specified strings, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        exclude_option = click.Option(param_decls=["--exclude", "-e"], help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, onlyapplicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
+        exclude_option = click.Option(param_decls=["--exclude", "-e"], help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
 
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
 

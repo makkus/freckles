@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import copy
 import fnmatch
 import logging
 import os
@@ -186,7 +187,7 @@ def find_supported_profiles(config=None):
 
     return result
 
-def create_cli_command(config, command_path=None, no_run=False):
+def create_cli_command(config, command_path=None, no_run=False, extra_options={}):
 
     doc = config.get("doc", {})
     # TODO: check format of config
@@ -200,15 +201,20 @@ def create_cli_command(config, command_path=None, no_run=False):
 
     options_list = []
     args_that_are_vars = []
-    for opt, opt_details in options.items():
+
+    options_all = copy.deepcopy(extra_options)
+    options_all.update(options)
+
+    for opt, opt_details in options_all.items():
         opt_type = opt_details.get("type", None)
-        if opt_type:
+        if isinstance(opt_type, string_types):
             opt_type_converted = locate(opt_type)
             if not opt_type_converted:
                 raise Exception("No type found for: {}".format(opt_type))
             opt_details['type'] = opt_type_converted
 
         key = opt_details.pop('arg_name', opt)
+        extra_arg_names = opt_details.pop('extra_arg_names', [])
         key_map[key] = opt
 
         is_argument = opt_details.pop('is_argument', False)
@@ -223,7 +229,8 @@ def create_cli_command(config, command_path=None, no_run=False):
 
             o = click.Argument(param_decls=[key], required=required, **opt_details)
         else:
-            o = click.Option(param_decls=["--{}".format(key)], **opt_details)
+            arg_names_for_option = ["--{}".format(key)] + extra_arg_names
+            o = click.Option(param_decls=arg_names_for_option, **opt_details)
         options_list.append(o)
 
     return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
