@@ -6,4 +6,4 @@ from .utils import FRECKLES_REPO, FRECKLES_URL
 
 __author__ = """Markus Binsteiner"""
 __email__ = 'makkus@posteo.net'
-__version__ = '0.1.105'
+__version__ = '0.1.106'
