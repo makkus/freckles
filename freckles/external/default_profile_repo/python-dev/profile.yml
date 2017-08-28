@@ -2,8 +2,9 @@ doc:
   help: "installs a conda or virtualenv environment with all the system- and python dependencies of a python project freckle"
   short_help: "prepares a python development environment"
 args:
-  pkg-mgr:
+  pkg_mgr:
     help: the package manager to use, currently supported 'auto', 'conda', 'nix'
+    arg_name: "pkg-mgr"
     type: str
     multiple: false
     required: false
