@@ -95,7 +95,7 @@ Chapter #1, where we checkout our dotfiles and setup our development machine
 
 .. code-block:: console
 
-   $ curl https://freckles.io | bash -s -- freckles -f gh:makkus/dotfiles dotfiles
+   $ curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
 
 This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use all or parts of my dotfiles on a VM or container, to have a decent editor and shell while working in them. Either way, what this does is:
 
@@ -117,7 +117,7 @@ Now, after setting up my machine with my applications and configuration files, I
 
 .. code-block:: console
 
-   $ freckles -f gh:makkus/freckles python-dev
+   $ freckles python-dev -f gh:makkus/freckles
 
 Here's what happens:
 

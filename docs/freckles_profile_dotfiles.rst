@@ -41,11 +41,11 @@ I've prepared an example repository containing two applications (``fish``, and `
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles -f gh:makkus/dotfiles-test-simple dotfiles
+   curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles-test-simple
 
    # or, if you already have freckles installed and in your $PATH, just:
 
-   freckles -f gh:makkus/dotfiles-test-simple dotfiles
+   freckles dotfiles -f gh:makkus/dotfiles-test-simple
 
 (from now on I'll assume you already have *freckles* installed, and either logged out and logged in again, or did a ``source ~/.profile`` to make sure it's in your path)
 
@@ -73,7 +73,7 @@ Now, on systems where we want to have both sets of dotfiles (and applications in
 
 .. code-block:: console
 
-    freckles -f gh:makkus/dotfiles-test-simple -f gh:makkus/dotfiles-test-simple-2 dotfiles
+    freckles dotfiles -f gh:makkus/dotfiles-test-simple -f gh:makkus/dotfiles-test-simple-2
 
 One little thing we have to adjust so ``stow`` is happy with us *stowing* from two different source directories: we have to create (empty) marker files with the filename ``.stow`` in the root of each *freckle*.
 
@@ -111,15 +111,15 @@ To use both (sub-) *freckles*, just issue:
 
 .. code-block:: console
 
-   freckles --profile dotfiles gh:makkus/dotfiles-test-simple-combined
+   freckles dotfiles -f gh:makkus/dotfiles-test-simple-combined
 
 If you only want the *minimal* sub-folder, you can do either:
 
 .. code-block:: console
 
-    freckles --include minimal -f gh:makkus/dotfiles-test-simple-combined dotfiles
+    freckles --include minimal dotfiles -f gh:makkus/dotfiles-test-simple-combined
     # or
-    freckles --exclude gui-pkgs -f gh:makkus/dotfiles-test-simple-combined dotfiles
+    freckles --exclude gui-pkgs dotfiles -f gh:makkus/dotfiles-test-simple-combined
 
 Both ``--include`` and ``--exclude`` options check whether the (full) path to the *freckle* ends with the provided string. If it does, the directive is applied to the *freckle*.
 
