@@ -24,7 +24,9 @@
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), a bit weird, and a bit elegant. And with a slight twist. Instead of describing your infrastructure, you describe the requirements of your software or data. *freckles* tries to figure out how to map that onto whatever you are working on.
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data. *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+
+*freckles* comes with a sister application, *frecklecute*, which supports a more 'traditional' way of managing the state of your machine by letting you describe the software, services and files you want to be available.
 
 
 Quick links
@@ -55,6 +57,7 @@ Note: none of this is available yet or working, I'm just playing with the docume
   - community frecklecutables
   - list of ansible modules/tasks
   - ansible galaxy
+
 
 Really quick-start
 ------------------
