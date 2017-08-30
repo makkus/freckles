@@ -92,8 +92,8 @@ Vagrant.configure("2") do |config|
      echo "[global]" > /home/vagrant/.pip/pip.conf
      echo "index-url = https://pypi.tuna.tsinghua.edu.cn/simple" >> /home/vagrant/.pip/pip.conf
 
-     sudo /inaugurate/inaugurate/bootstrap/inaugurate.sh freckles -i minimal dotfiles gh:makkus/dotfiles
-     sudo /inaugurate/inaugurate/bootstrap/inaugurate.sh freckles python-dev /freckles
+     sudo /inaugurate/inaugurate.sh freckles -i minimal dotfiles gh:makkus/dotfiles
+     sudo /inaugurate/inaugurate.sh freckles python-dev /freckles
 
      echo '. /home/vagrant/.local/virtualenvs/freckles-dev/bin/activate' >> /home/vagrant/.profile
      . /home/vagrant/.local/virtualenvs/freckles-dev/bin/activate
