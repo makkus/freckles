@@ -127,7 +127,7 @@ using: *frecklecute*
 Chapter #3, where we run an ansible task as well as an external ansible role
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-So, having setup all the data, associated applications, source code and working environment(s) I need there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use I specified that it should put all backups into ``~/.backups/zile``. that directory doesn't exist, and if it doesn't exists, ``zile`` doesn't create it automatically, and consequently not storing any backups of the files I'm working on.
+So -- having setup all the data, associated applications, source code and working environment(s) I need -- there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use I specified that it should put all backups into ``~/.backups/zile``. that directory doesn't exist, and if it doesn't exists, ``zile`` doesn't create it automatically, and consequently does not store any backups of the files I'm working on. So I have to make sure that folder gets created.
 
 Also, and I'm making this up now, I might want to have docker installed on that new machine. The install procedure of docker is a bit more complicated so it can't be easily added to my dotfiles configuration. Luckily though, there are tons of ansible roles on https://galaxy.ansible.com that can do the job for us. The only thing we need to check is that the role supports the platform we are running.
 
