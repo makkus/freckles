@@ -32,36 +32,7 @@ For now, *freckles* provides two interfaces, which tackle slightly different sce
     A bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
 
 *frecklecute*
-    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks')
-
-Quick links
------------
-
-Note: none of this is available yet or working, I'm just playing with the documentation layout right now
-
-- `documentation index <https://docs.freckles.io>`_
-
-- *freckles*
-
-  - command usage
-  - available profiles
-  - examples
-  - configuration / folders
-
-- *frecklecute*
-
-  - command usage
-  - available frecklecutables
-  - examples
-
-- commands / roles
-
-  - supported commands
-  - supported roles
-  - community curated roles
-  - community frecklecutables
-  - list of ansible modules/tasks
-  - ansible galaxy
+    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally
 
 
 Really quick-start
@@ -79,7 +50,7 @@ or, the same using ``curl``, and executing ``frecklecute`` (you can mix and matc
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features & use-cases
 --------------------
@@ -220,3 +191,33 @@ mac_pkg_
 .. _`elliotweiser.osx-command-line-tools`: https://github.com/elliotweiser/ansible-osx-command-line-tools
 .. _mac_pkg: https://github.com/spencergibb/battleschool/blob/7f75c41077d73cceb19ea46a3185cb2419d7c3e9/share/library/mac_pkg
 .. _battleschool: https://github.com/spencergibb/battleschool
+
+
+Quick links
+-----------
+
+Note: none of this is available yet or working, I'm just playing with the documentation layout right now
+
+- `documentation index <https://docs.freckles.io>`_
+
+- *freckles*
+
+  - command usage
+  - available profiles
+  - examples
+  - configuration / folders
+
+- *frecklecute*
+
+  - command usage
+  - available frecklecutables
+  - examples
+
+- commands / roles
+
+  - supported commands
+  - supported roles
+  - community curated roles
+  - community frecklecutables
+  - list of ansible modules/tasks
+  - ansible galaxy
