@@ -24,10 +24,9 @@
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data. *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
 
-*freckles* comes with a sister application, *frecklecute*, which supports a more 'traditional' way of managing the state of your machine by letting you describe the software, services and files you want to be available.
-
+For now, *freckles* provides two interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*. The latter is basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks'). The former is more of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
 
 Quick links
 -----------
@@ -62,28 +61,29 @@ Note: none of this is available yet or working, I'm just playing with the docume
 Really quick-start
 ------------------
 
-(... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
+(... or a quick reminder how to bootstrap ``freckles``, if that's why you're here)
 
 .. code-block:: console
 
    curl https://freckles.io | bash -s -- freckles --help
 
-or
+or, the same using ``curl``, and executing ``frecklecute`` (you can mix and match, of course):
 
 .. code-block:: console
 
-   wget -O - https://freckles.io | bash -s -- freckles --help
+   wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps *freckles* (using inaugurate_, read more about the bootstrap process HERE_XXX), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` or ``$HOME/.bashrc`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features & use-cases
 --------------------
 
-* one-line setup of a new environment, including freckles bootstrap
+* one-line setup of a new environment (including freckles itself)
 * minimal requirements: only ``curl`` or ``wget``
 * supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
+* extendable via *profiles*
 * declarative scripting, sorta
 * 'self-loading' containers
 * direct support for all ansible_ modules and roles
@@ -91,10 +91,13 @@ Features & use-cases
 Examples
 --------
 
+freckles
+^^^^^^^^
+
 Probably best to show what *freckles* is, and what it can do using examples. Who has time for anything else, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
 Chapter #1, where we checkout our dotfiles and setup our development machine
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. code-block:: console
 
@@ -114,7 +117,7 @@ I've organized my *dotfiles* into subfolders (to be able to exclude applications
 Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
 
 Chapter #2, where we setup a Python development project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, because, as you can probably see, there's a lot to do still. Thus:
 
@@ -134,9 +137,12 @@ Here's what happens:
   - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
   - executes ``python setup.py develop`` within that same virtualenv
 
+frecklecute
+^^^^^^^^^^^
 
-* Free software: GNU General Public License v3
-* Documentation: https://freckles.readthedocs.io.
+Chapter #3, where we run an external ansible role
++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 (Current) caveats
 -----------------
@@ -145,6 +151,12 @@ Here's what happens:
 - error messages are very raw, testing is, apart from a few bits and pieces, non-existent
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
+
+License
+-------
+
+* Free software: GNU General Public License v3
+
 
 Credits
 -------
