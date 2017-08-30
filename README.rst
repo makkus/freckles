@@ -29,7 +29,7 @@
 For now, *freckles* provides two interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*:
 
 *freckles*
-    A bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+    a bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally
@@ -86,6 +86,7 @@ This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I
 - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
 - checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
+- loads the instructions for the ``dotfiles`` profile, which:
 - installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
 - metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which *freckles* also installs if not present already)
 
@@ -107,12 +108,12 @@ Here's what happens:
 - freckles is already installed, so I can call it directly now (had to login again, or execute ``source $HOME/.profile`` to pick up the path *freckles* is installed in)
 - as before, expands the url, from ``gh:makkkus/freckles`` to https://github.com/makkus/freckles
 - checks out the repository to $HOME/freckles/freckles
-- reads the metadata, installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
-- also figures out this is a python dev project, so it:
-
-  - creates a virtualenv
-  - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
-  - executes ``python setup.py develop`` within that same virtualenv
+- reads (optional)  metadata in the folder
+- loads the instructions for the ``python_dev`` profile, which:
+- installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
+- creates a virtualenv
+- installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
+- executes ``python setup.py develop`` within that same virtualenv
 
 using: *frecklecute*
 ^^^^^^^^^^^^^^^^^^^^
