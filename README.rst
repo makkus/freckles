@@ -115,6 +115,12 @@ Here's what happens:
 - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
 - executes ``python setup.py develop`` within that same virtualenv
 
+By default, virtualenvs are put under ``$HOME/.local/virtualenvs`` and are names after the foldername, with an appended ``-dev``. Thus, ``freckles-dev`` in our exmple. If I want to work on *freckles* I can activate the python virtualenv I just created via:
+
+.. code-block:: console
+
+   source $HOME/.local/virtualenvs/freckles-dev/bin/activate
+
 using: *frecklecute*
 ^^^^^^^^^^^^^^^^^^^^
 
