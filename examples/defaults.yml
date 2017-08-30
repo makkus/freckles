@@ -1,0 +1,12 @@
+nginx_sites:
+ default:
+     - listen 80
+     - server_name _
+     - root "/usr/share/nginx/html"
+     - index index.html
+ foo:
+     - listen 8080
+     - server_name localhost
+     - root "/tmp/site1"
+     - location / { try_files $uri $uri/ /index.html; }
+     - location /images/ { try_files $uri $uri/ /index.html; }
