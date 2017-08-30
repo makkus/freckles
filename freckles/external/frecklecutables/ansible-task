@@ -17,6 +17,7 @@ args:
   vars_file:
     help: a file or json string containing vars for the specified task/role
     arg_name: vars
+    multiple: false
     required: false
     is_var: true
     use_value: true

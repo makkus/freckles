@@ -63,7 +63,7 @@ Features & use-cases
 * extendable via *profiles*
 * declarative scripting, sorta
 * 'self-loading' containers
-* supports for all *ansible* `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
+* supports for all ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
 
 Examples
 --------
@@ -71,7 +71,7 @@ Examples
 freckles
 ^^^^^^^^
 
-Probably best to show what *freckles* is, and what it can do using examples. Who has time for anything else, right? Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
+Probably best to show what *freckles* is, and what it can do using examples. Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
 Chapter #1, where we checkout our dotfiles and setup our development machine
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

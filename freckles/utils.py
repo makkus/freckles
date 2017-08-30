@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import inspect
 import json
 import copy
 import fnmatch
@@ -240,7 +241,10 @@ def create_cli_command(config, command_path=None, no_run=False, extra_options={}
             opt_type_converted = locate(opt_type)
             if not opt_type_converted:
                 raise Exception("No type found for: {}".format(opt_type))
-            opt_details['type'] = opt_type_converted()
+            if issubclass(opt_type_converted, click.ParamType):
+                opt_details['type'] = opt_type_converted()
+            else:
+                opt_details['type'] = opt_type_converted
 
         key = opt_details.pop('arg_name', opt)
         extra_arg_names = opt_details.pop('extra_arg_names', [])
