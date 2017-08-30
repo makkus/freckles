@@ -176,6 +176,7 @@ You'll see something like:
        ...
        ...
 
+Neat, eh?
 
 (Current) caveats
 -----------------
