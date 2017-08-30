@@ -9,7 +9,7 @@ import sys
 import click
 import nsbl
 from frkl import frkl
-
+from .utils import DEFAULT_FRECKLES_CONFIG
 import yaml
 
 from . import __version__ as VERSION
@@ -31,10 +31,19 @@ COMMAND_PROCESSOR_CHAIN = [
 
 # we need the current command to dynamically add it to the available ones
 current_command = None
+temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
+
+command_list = temp_repo.get_commands().keys()
+
 for arg in sys.argv[1:]:
 
     if arg.startswith("-"):
         continue
+
+    if arg in command_list:
+        current_command = None
+        current_command_path = None
+        break
 
     if os.path.exists(arg):
         current_command = arg

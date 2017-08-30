@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import json
 import copy
 import fnmatch
 import logging
@@ -47,6 +48,33 @@ class FrecklesUtilsExtension(Extension):
 freckles_jinja_utils = FrecklesUtilsExtension
 
 DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
+
+class VarsType(click.ParamType):
+
+    name = 'vars_type'
+
+    def convert(self, value, param, ctx):
+
+        if  os.path.exists(value):
+          if not os.path.isfile(value):
+            self.fail("Can't open file to read vars: {}".format(value))
+
+          with open(value, 'r') as f:
+            file_vars = yaml.safe_load(f)
+            if not file_vars:
+                file_vars = {}
+
+            return file_vars
+
+        else:
+            try:
+                string_vars = json.loads(value)
+                if not string_vars:
+                    string_vars = {}
+                return string_vars
+            except (ValueError) as e:
+                self.fail("Can't read vars: {}".format(value))
+
 
 class RepoType(click.ParamType):
 
@@ -201,6 +229,7 @@ def create_cli_command(config, command_path=None, no_run=False, extra_options={}
 
     options_list = []
     args_that_are_vars = []
+    value_vars = []  # vars where we add all values seperately to the 'vars' instead of as a single value
 
     options_all = copy.deepcopy(extra_options)
     options_all.update(options)
@@ -211,16 +240,22 @@ def create_cli_command(config, command_path=None, no_run=False, extra_options={}
             opt_type_converted = locate(opt_type)
             if not opt_type_converted:
                 raise Exception("No type found for: {}".format(opt_type))
-            opt_details['type'] = opt_type_converted
+            opt_details['type'] = opt_type_converted()
 
         key = opt_details.pop('arg_name', opt)
         extra_arg_names = opt_details.pop('extra_arg_names', [])
         key_map[key] = opt
 
-        is_argument = opt_details.pop('is_argument', False)
         is_var = opt_details.pop('is_var', True)
         if is_var:
             args_that_are_vars.append(key)
+
+        use_value = opt_details.pop('use_value', False)
+        if use_value:
+            value_vars.append(key)
+
+        # cli arguments
+        is_argument = opt_details.pop('is_argument', False)
         if is_argument:
             if argument_key:
                 raise Exception("Multiple arguments are not supported (yet): {}".format(config["vars"]))
@@ -233,10 +268,10 @@ def create_cli_command(config, command_path=None, no_run=False, extra_options={}
             o = click.Option(param_decls=arg_names_for_option, **opt_details)
         options_list.append(o)
 
-    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "no_run": no_run}
+    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "value_vars": value_vars, "no_run": no_run}
 
 
-def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars):
+def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
 
     # exchange arg_name with var name
     new_args = {}
@@ -249,6 +284,11 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
             new_args[value] = temp
         else:
             task_vars[value] = temp
+
+        # replace all matching strings in value_vars
+        for i,var_name in enumerate(value_vars):
+            if var_name == key:
+                value_vars[i] = value
 
     # now overimpose the new_args over template_vars
     new_args = dict_merge(default_vars, new_args)
@@ -266,7 +306,20 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
         else:
             final_vars[key] = template
 
-    return new_args, final_vars
+    new_vars = {}
+
+    for key in value_vars:
+
+        values = final_vars.pop(key, {})
+
+        if values and not isinstance(values, dict):
+            raise Exception("value for '{}' not a dict: {}".format(key, values))
+        if values:
+            dict_merge(new_vars, values, copy_dct=False)
+
+    dict_merge(new_vars, final_vars, copy_dct=False)
+
+    return new_args, new_vars
 
 def find_supported_profile_names(config=None):
 

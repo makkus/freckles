@@ -121,10 +121,11 @@ class ProfileRepo(object):
         default_vars = self.commands[command_name]["default_vars"]
         doc = self.commands[command_name]["doc"]
         args_that_are_vars = self.commands[command_name]["args_that_are_vars"]
+        value_vars = self.commands[command_name]["value_vars"]
         no_run = self.commands[command_name]["no_run"]
 
         def command_callback(**kwargs):
-            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars)
+            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars, value_vars)
             return {"name": command_name, "vars": final_vars}
 
         help = doc.get("help", "n/a")
