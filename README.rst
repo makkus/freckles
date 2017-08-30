@@ -50,12 +50,12 @@ or, the same using ``curl``, and executing ``frecklecute`` (you can mix and matc
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message. All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
 
 Features & use-cases
 --------------------
 
-* one-line setup of a new environment (including freckles itself)
+* one-line setup of a new working environment (including freckles itself)
 * minimal requirements: only ``curl`` or ``wget``
 * supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
@@ -63,7 +63,7 @@ Features & use-cases
 * extendable via *profiles*
 * declarative scripting, sorta
 * 'self-loading' containers
-* direct support for all ansible_ modules and roles
+* supports for all *ansible* `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
 
 Examples
 --------
@@ -165,6 +165,9 @@ You'll see something like:
        -  => ok (no change)
        - Download docker setup script for desired version => ok (no change)
        - Execute docker setup script =>
+       ...
+       ...
+       ...
 
 
 (Current) caveats
