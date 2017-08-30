@@ -117,8 +117,54 @@ Here's what happens:
 frecklecute
 ^^^^^^^^^^^
 
-Chapter #3, where we run an external ansible role
-+++++++++++++++++++++++++++++++++++++++++++++++++
+Chapter #3, where we run an ansible task as well as an external ansible role
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+So, having setup all the data, associated applications, source code and working environment(s) I need there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use I specified that it should put all backups into ``~/.backups/zile``. that directory doesn't exist, and if it doesn't exists, ``zile`` doesn't create it automatically, and consequently not storing any backups of the files I'm working on.
+
+Also, and I'm making this up now, I might want to have docker installed on that new machine. The install procedure of docker is a bit more complicated so it can't be easily added to my dotfiles configuration. Luckily though, there are tons of ansible roles on https://galaxy.ansible.com that can do the job for us. The only thing we need to check is that the role supports the platform we are running.
+
+For those more specialized tasks *freckles* is not a really good fit (although we could probably create a profile for this), it's easier to use *frecklecute*. *frecklecute* operates on (yaml) text files (I call them *frecklecutables* -- I know, I know...) that contain a list of ansible tasks and/or roles, along with configuration for those. Here's a quick *frecklecutable* to create the folder I need, and install docker using the a role that can be found here: https://galaxy.ansible.com/mongrelion/docker/ (I picked that role randomly, so not sure how well it actually works)
+
+.. code-block:: yaml
+
+   tasks:
+     - file:
+         path: ~/.backups/zile
+         state: directory
+     - mongrelion.docker:
+        meta:
+         become: yes
+
+I'll not explain how this works in detail here (instead, check out: XXX), but you can use all the ansible modules that are listed here: http://docs.ansible.com/ansible/latest/list_of_all_modules.html as well as all roles on `ansible galaxy <https://galaxy.ansible.com>`_.
+
+Right. Let's save the above yaml block into a file called ``housekeeping.yml``. And let *frecklecute* do its thing:
+
+.. code-block:: console
+
+   frecklecute housekeeping.yml
+
+You'll see something like:
+
+.. code-block:: console
+
+    Downloading external roles...
+      - downloading role 'docker', owned by mongrelion
+      - downloading role from https://github.com/mongrelion/ansible-role-docker/archive/master.tar.gz
+      - extracting mongrelion.docker to /home/vagrant/.cache/ansible-roles/mongrelion.docker
+      - mongrelion.docker (master) was installed successfully
+
+    * starting tasks (on 'localhost')...
+     * starting custom tasks:
+         * file... ok (changed)
+       => ok (changed)
+     * applying role 'mongrelion.docker'......
+       -  => ok (no change)
+       - ensure docker dependencies are installed =>
+           - [u'apt-transport-https', u'ca-certificates'] => ok (no change)
+       -  => ok (no change)
+       - Download docker setup script for desired version => ok (no change)
+       - Execute docker setup script =>
 
 
 (Current) caveats
@@ -126,6 +172,7 @@ Chapter #3, where we run an external ansible role
 
 - this whole thing is still very much work in progress, so things might break, or they might break your machine. Use at your own risk.
 - error messages are very raw, testing is, apart from a few bits and pieces, non-existent
+- almost no tests yet, this is basically just a working prototype
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
 
@@ -193,31 +240,3 @@ mac_pkg_
 .. _battleschool: https://github.com/spencergibb/battleschool
 
 
-Quick links
------------
-
-Note: none of this is available yet or working, I'm just playing with the documentation layout right now
-
-- `documentation index <https://docs.freckles.io>`_
-
-- *freckles*
-
-  - command usage
-  - available profiles
-  - examples
-  - configuration / folders
-
-- *frecklecute*
-
-  - command usage
-  - available frecklecutables
-  - examples
-
-- commands / roles
-
-  - supported commands
-  - supported roles
-  - community curated roles
-  - community frecklecutables
-  - list of ansible modules/tasks
-  - ansible galaxy
