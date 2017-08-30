@@ -50,7 +50,9 @@ or, the same using ``curl``, and executing ``frecklecute`` (you can mix and matc
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else. This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``).
+This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
+
+This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 
 Features & use-cases
 --------------------
