@@ -68,8 +68,8 @@ Features & use-cases
 Examples
 --------
 
-freckles
-^^^^^^^^
+using: *freckles*
+^^^^^^^^^^^^^^^^^
 
 Probably best to show what *freckles* is, and what it can do using examples. Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
 
@@ -114,8 +114,8 @@ Here's what happens:
   - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
   - executes ``python setup.py develop`` within that same virtualenv
 
-frecklecute
-^^^^^^^^^^^
+using: *frecklecute*
+^^^^^^^^^^^^^^^^^^^^
 
 Chapter #3, where we run an ansible task as well as an external ansible role
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
