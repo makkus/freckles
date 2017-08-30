@@ -85,3 +85,4 @@ class FrecklesConfig(object):
     def get_frecklecutables_repos(self):
 
         f_repos = [get_real_repo_path(FRECKLECUTABLES_ABBREV, r) for r in self.trusted_frecklecutables]
+        return f_repos
