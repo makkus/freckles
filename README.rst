@@ -26,7 +26,7 @@
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
 
-For now, *freckles* provides two interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*:
+For now, *freckles* provides two (command-line) interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*:
 
 *freckles*
     a bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
@@ -71,7 +71,7 @@ Examples
 using: *freckles*
 ^^^^^^^^^^^^^^^^^
 
-Probably best to show what *freckles* is, and what it can do using examples. Do not try those below examples at home, as they'll install loads of packages you most likely don't need.
+Probably best to show what *freckles* is, and what it can do using examples. Do not try those below examples at home, as they'll install loads of packages you most likely don't need. I'll show you how I use *freckles* and *frecklecute* to install a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use all or parts of my dotfiles on a VM or container, to have a decent editor and shell while working in them.
 
 Chapter #1, where we checkout our dotfiles and setup our development machine
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -80,7 +80,7 @@ Chapter #1, where we checkout our dotfiles and setup our development machine
 
    $ curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
 
-This is what I use to setup a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use all or parts of my dotfiles on a VM or container, to have a decent editor and shell while working in them. Either way, what this does is:
+This is what happens:
 
 - bootstraps *freckles* itself, then straight away executes it
 - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
