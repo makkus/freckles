@@ -88,11 +88,11 @@ This is what happens:
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
 - loads the instructions for the ``dotfiles`` profile, which:
 - installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
-- metadata also says that this repository is of type  ``dotfiles``, so *freckles* goes ahead and symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which *freckles* also installs if not present already)
+- symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called `stow` -- which *freckles* also installs if not present already)
 
 I've organized my *dotfiles* into subfolders (to be able to exclude applications I don't need for certain scenarios -- e.g. X-applications in a VM), but that is more complicated than necessary. You can certainly just have a flatter folder-structure, with on subfolder per application.
 
-Here's how the (common part) of the metadata looks like: XXX link. And here is how the ``dotfiles`` profile works: XXX link
+Most of the above steps can be switched off, if necessary.
 
 Chapter #2, where we setup a Python development project
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
