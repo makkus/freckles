@@ -26,7 +26,13 @@
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
 
-For now, *freckles* provides two interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*. The latter is basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks'). The former is more of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+For now, *freckles* provides two interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*:
+
+*freckles*
+    A bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+
+*frecklecute*
+    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks')
 
 Quick links
 -----------
