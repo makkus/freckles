@@ -139,13 +139,13 @@ For those more specialized tasks *freckles* is not a really good fit (although w
 
    tasks:
      - file:
-         path: ~/.backups/zile
-         state: directory
+        path: ~/.backups/zile
+        state: directory
      - mongrelion.docker:
         meta:
          become: yes
 
-I'll not explain how this works in detail here (instead, check out: XXX), but you can use all the ansible modules that are listed here: http://docs.ansible.com/ansible/latest/list_of_all_modules.html as well as all roles on `ansible galaxy <https://galaxy.ansible.com>`_.
+I'll not explain how this works in detail here (instead, check out: XXX), but basically *frecklecute* allows you to use all the ansible modules that are listed here: http://docs.ansible.com/ansible/latest/list_of_all_modules.html as well as all roles on `ansible galaxy <https://galaxy.ansible.com>`_.
 
 Right. Let's save the above yaml block into a file called ``housekeeping.yml``. And let *frecklecute* do its thing:
 
