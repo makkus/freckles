@@ -24,18 +24,20 @@
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer for the sake of simplicity and a quick turnaround.
 
-For now, *freckles* provides two (command-line) interfaces, which tackle slightly different scenarios and workflows: *freckles* itself, and *frecklecute*:
+For now, the *freckles* project provides two (command-line) interfaces, which tackle slightly different scenarios and workflows:
 
 *freckles*
-    a bit of an experiment, configuration management with a slight twist. Instead of describing your infrastructure, you describe the shape of your software or data, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+    configuration management for the desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of all the software or data packages you work with, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+
+    One example would be pointing it to a repository of your dot-/config-files. *freckles* will install download them, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* downloads your source files, sets up a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
-    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally
+    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets that can be command-line applications themselves.
 
 
-Really quick-start
+Really quick start
 ------------------
 
 (... or a quick reminder how to bootstrap ``freckles``, if that's why you're here)
@@ -54,8 +56,9 @@ This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about 
 
 This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 
-Features & use-cases
---------------------
+
+Features
+--------
 
 * one-line setup of a new working environment (including freckles itself)
 * minimal requirements: only ``curl`` or ``wget``
@@ -64,8 +67,16 @@ Features & use-cases
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * extendable via *profiles*
 * declarative scripting, sorta
-* 'self-loading' containers
 * supports for all ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
+
+
+Actual/potential usecases
+-------------------------
+
+* replicate configuration across machines
+* quickly re-install your workstation after a potential security incident
+* 'self-loading' containers
+
 
 Examples
 --------
