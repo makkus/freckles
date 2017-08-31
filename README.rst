@@ -34,7 +34,31 @@ For now, the *freckles* project provides two (command-line) interfaces, which ta
     One example would be pointing it to a repository of your dot-/config-files. *freckles* will install download them, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* downloads your source files, sets up a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
-    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets that can be command-line applications themselves.
+    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
+
+    Here's a quick example *frecklecutable*, let's store it in a file called example.yml:
+
+    .. code-block:: yaml
+
+       tasks:
+         - file:
+             path: ~/.backups
+             create: yes
+             state: directory
+         - lineinfile:
+             path: /tmp/testfile
+             line: '192.168.1.99 foo.lab.net foo'
+         - mongrelion.docker:
+             meta:
+               become: yes
+
+    It can be '`inaugurated <https://github.com/makkus/inaugurate>`_' (neither ``freckles`` nor ``ansible`` nor anything else apart from ``curl`` needs to be installed yet) simply via:
+
+    .. code-block:: console
+
+       curl https://freckles.io | bash -s -- frecklecute example.yml
+
+    This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that it contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense.
 
 
 Really quick start
