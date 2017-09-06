@@ -37,7 +37,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
        curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
 
-    *freckles* will install download them, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+    *freckles* will '`inaugurate <https://github.com/makkus/inaugurate>`_' itself, then download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
