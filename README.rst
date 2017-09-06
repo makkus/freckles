@@ -26,12 +26,18 @@
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer for the sake of simplicity and a quick turnaround.
 
-For now, the *freckles* project provides two (command-line) interfaces, which tackle slightly different scenarios and workflows:
+For now, the *freckles* project provides two (command-line) interfaces, which deal with slightly different scenarios and workflows:
 
 *freckles*
     configuration management for the desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of all the software or data packages you work with, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
 
-    One example would be pointing it to a repository of your dot-/config-files. *freckles* will install download them, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* downloads your source files, sets up a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+    One example would be pointing it to a repository of your (well, my in this example) dot-/config-files:
+
+    .. code-block:: console
+
+       curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
+
+    *freckles* will install download them, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
