@@ -37,7 +37,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
        curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
 
-    *freckles* will '`inaugurate <https://github.com/makkus/inaugurate>`_' itself, then download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place. Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+    *freckles* will '`inaugurate <https://github.com/makkus/inaugurate>`_' itself, then download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
@@ -58,13 +58,14 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
              meta:
                become: yes
 
+    This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that that file contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense.
+
     It can be '`inaugurated <https://github.com/makkus/inaugurate>`_' (neither ``freckles`` nor ``ansible`` nor anything else apart from ``curl`` needs to be installed yet) simply via:
 
     .. code-block:: console
 
        curl https://freckles.io | bash -s -- frecklecute example.yml
 
-    This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that it contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense.
 
 
 Really quick start

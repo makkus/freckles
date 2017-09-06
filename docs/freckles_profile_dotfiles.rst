@@ -61,8 +61,6 @@ This will:
 Mixing and matching two ``dotfile`` freckles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-THIS DOES NOT WORK CURRENTLY, DUE TO A BUG IN ANSIBLE (PROBABLY). USE THE METHOD RIGHT BELOW.
-
 Now, lets assume you are an avid user of both ``fish`` and ``zile``, so you install them everywhere you do work on (your laptop, every Vagrant_ dev box, every Docker_ container (while you are still developing your Dockerfile) remote ssh servers, etc...).
 
 *freckles* lets you do that fairly easily in all of those cases, doing what we did above. Now, in some cases you want some additional applications which are unnecessary in others. For example, say, on systems where you have a graphical frontend you want to have the the terminator_ X terminal available.
