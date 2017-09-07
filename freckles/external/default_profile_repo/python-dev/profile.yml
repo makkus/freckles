@@ -11,3 +11,11 @@ args:
     default: "auto"
     metavar: "PKG_MGR"
     is_var: true
+  python_version:
+    arg_name: python-version
+    help: the version of python to use to create the environment
+    type: str
+    multiple: false
+    required: false
+    metavar: "VERSION"
+    is_var: true
