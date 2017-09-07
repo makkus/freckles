@@ -78,7 +78,7 @@ Really quick start
 
 (... or a quick reminder how to bootstrap ``freckles``, if that's why you're here)
 
-The two examples above assume you have *freckles* already installed. If that's not the case yet, *freckles* can be bootstrapped using 'inaugurate_' (read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_). To install *freckles* and then run it instantly, issue:
+The two examples above assume you have *freckles* already installed. If that's not the case yet, *freckles* can be bootstrapped using 'inaugurate_' (read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_). To install *freckles* and run it straight away to display it's help, issue:
 
 .. code-block:: console
 
@@ -99,7 +99,7 @@ Features
 --------
 
 * one-line setup of a new working environment (including freckles itself)
-* minimal requirements: only ``curl`` or ``wget``
+* minimal initial requirements: only ``curl`` or ``wget``
 * supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
 * uses the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
@@ -236,6 +236,7 @@ Neat, eh?
 - error messages are very raw, testing is, apart from a few bits and pieces, non-existent
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
+- mostly developed on Debian & Ubuntu, so RedHat-based platforms and Mac OS X might not work as well just yet (although I spent a shitload of time to support Mac OS X, so it shouldn't be far off)
 
 License
 -------
