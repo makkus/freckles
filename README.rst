@@ -37,7 +37,15 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
        freckles dotfiles -f gh:makkus/dotfiles
 
-    *freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+    *freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or you can use *freckles* to start contributing to *freckles* itself:
+
+    .. code-block:: console
+
+       freckles python-dev -f gh:makkus/freckles
+
+    This will download the *freckles* source code, install all the system dependencies *freckles* needs, creates a virtual environment called ``freckles-dev`` and installs *freckles* and its python dependencies into it.
+
+    Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
