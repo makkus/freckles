@@ -35,9 +35,9 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
     .. code-block:: console
 
-       curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
+       freckles dotfiles -f gh:makkus/dotfiles
 
-    *freckles* will '`inaugurate <https://github.com/makkus/inaugurate>`_' itself, then download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+    *freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
     basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
@@ -60,12 +60,9 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
     This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that that file contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense.
 
-    It can be '`inaugurated <https://github.com/makkus/inaugurate>`_' (neither ``freckles`` nor ``ansible`` nor anything else apart from ``curl`` needs to be installed yet) simply via:
-
     .. code-block:: console
 
-       curl https://freckles.io | bash -s -- frecklecute example.yml
-
+       frecklecute example.yml
 
 
 Really quick start
@@ -73,17 +70,19 @@ Really quick start
 
 (... or a quick reminder how to bootstrap ``freckles``, if that's why you're here)
 
+The two examples above assume you have *freckles* already installed. If that's not the case yet, *freckles* can be bootstrapped using 'inaugurate_' (read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_). To install *freckles* and then run it instantly, issue:
+
 .. code-block:: console
 
    curl https://freckles.io | bash -s -- freckles --help
 
-or, the same using ``curl``, and executing ``frecklecute`` (you can mix and match, of course):
+or, using ``wget`` instead of ``curl``, and executing ``frecklecute`` instead of ``freckles`` (you can mix and match, of course):
 
 .. code-block:: console
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps *freckles* or *frecklecute* (using inaugurate_, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_), and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
+This bootstraps ('inaugurates') *freckles* or *frecklecute* and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
 
 This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 
