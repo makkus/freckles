@@ -48,7 +48,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
     Or, maybe you are working on a webpage. *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 *frecklecute*
-    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
+    basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*') that can be command-line applications themselves. As *freckles* is built ontop of *ansible*, the building blocks of those *frecklecutables* are: `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, and `all roles on ansible galaxy <https://galaxy.ansible.com>`_.
 
     Here's a quick example *frecklecutable*, let's store it in a file called example.yml:
 
@@ -66,7 +66,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
              meta:
                become: yes
 
-    This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that that file contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense.
+    This ensures that a folder called ``.backups`` exists in your home directory, that a file ``/tmp/testfile`` exists, and that that file contains a line with a certain content, and also installs docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role). And yes, I know, I have to think of an example that makes a bit more sense. Here's how you'd run the *frecklecutable*:
 
     .. code-block:: console
 
