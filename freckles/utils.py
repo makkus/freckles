@@ -386,12 +386,12 @@ def find_profile_files_callback(filenames, valid_profiles=None):
 
     def copy_callback(ansible_environment_root):
 
-        for name, path in task_files_to_copy.get("init.yml", {}).items():
+        for name, path in task_files_to_copy.get("init-tasks.yml", {}).items():
 
             target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "init-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
-        for name, path in task_files_to_copy.get("tasks.yml", {}).items():
+        for name, path in task_files_to_copy.get("freckle-tasks.yml", {}).items():
 
             target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "items-{}.yml".format(name))
             shutil.copyfile(path, target_path)
@@ -426,7 +426,7 @@ def extract_all_used_profiles(freckle_repos):
 def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False, output_format="default"):
 
     profiles = extract_all_used_profiles(freckle_repos)
-    callback = find_profile_files_callback(["tasks.yml", "init.yml"], profiles)
+    callback = find_profile_files_callback(["freckle-tasks.yml", "init-tasks.yml"], profiles)
 
     additional_roles = get_profile_dependency_roles(profiles)
 
