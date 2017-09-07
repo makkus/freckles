@@ -3,6 +3,7 @@ doc:
   short_help: installs packages, stows dotfiles
 args:
   pkg_mgr:
+    arg_name: pkg-mgr
     help: the package manager to use, currently supported 'auto', 'conda', 'nix'
     type: str
     multiple: false
