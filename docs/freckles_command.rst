@@ -10,7 +10,7 @@ Description
 Usage
 -----
 
-.. click:: freckles.frecklecute_cli:cli',
+.. click:: freckles.freckles_cli:cli
   :prog: freckles
 
 
