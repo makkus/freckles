@@ -1,6 +1,16 @@
 doc:
   help: enables the use of freckles community roles, profiles and frecklecutables
+args:
+  pkg_mgr:
+    arg_name: pkg-mgr
+    help: the package manager to install git if not already installed
+    required: false
+    default: auto
+    is_var: false
 tasks:
+  - install:
+     - git:
+         pkg_mgr: "{{ pkg_mgr }}"
   - makkus.freckles-config:
      freckles_config_tasks:
        - enable_community_repo
