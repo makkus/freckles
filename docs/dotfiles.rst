@@ -56,20 +56,24 @@ vars
 .. code-block:: console
 
      <freckle-root>
+           ├── .freckle (optional)
            ├── <pkg_name_1>
            │      └── <pkg1_config>
-           │              └── [.package.freckle] (optional)
-           │              └── [.no_install.freckle] (optional)
-           │              └── [.no_stow.freckle] (optional)
-           │              └── <pkg1_config_file_2>
+           │              ├── [.package.freckle] (optional)
+           │              ├── [.no_install.freckle] (optional)
+           │              ├── [.no_stow.freckle] (optional)
+           │              ├── <pkg1_config_file_2>
            │              └── <pkg1_config_file_2>
            ├── <pkg_name_2>
            │      └── <pkg2_config>
            │              └── [.package.freckle] (optional)
-           │              └── [.no_install.freckle] (optional)
-           │              └── [.no_stow.freckle] (optional)
+           │              ├── [.no_install.freckle] (optional)
+           │              ├── [.no_stow.freckle] (optional)
            │              └── <pkg2_config_file_1>
-           │
+           .
+           .
+           .
+
 
 Additional files and markers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

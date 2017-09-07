@@ -11,6 +11,7 @@
   vars:
     pkg_mgr: "{{ freckles_user_vars.get('pkg_mgr', 'auto') }}"
     python_dev_setup_command: "{{ freckle_vars.get('setup_command', 'install') }}"
+    python_dev_setuptools_command: "{{ freckle_vars.get('setuptools_command', 'install') }}"
     python_dev_requirements_files: "{{ freckle_vars.get('requirements_files', all_requirements_files) }}"
     python_dev_project_path: "{{ freckle_path }}"
     python_dev_dependency_packages: "{{ freckle_vars_raw.get('vars', []) | create_package_list_from_var_filter('packages') }}"
