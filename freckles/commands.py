@@ -61,7 +61,10 @@ class CommandRepo(object):
                     command = self.create_command(command_name, os.path.join(root, f), no_run)
                     commands[command_name] = command
 
+
+
         for command in self.additional_commands:
+
             command_name = command[0]
             command_file = command[1]
             if not command_name or not command_file:

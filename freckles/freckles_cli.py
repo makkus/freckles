@@ -61,9 +61,11 @@ class FrecklesProfiles(click.MultiCommand):
         else:
             return None
 
+click.core.SUBCOMMAND_METAVAR = 'ADAPTER [ARGS]...'
+click.core.SUBCOMMANDS_METAVAR = 'ADAPTER1 [ARGS]... [ADAPTER2 [ARGS]...]...'
+
 cli = FrecklesProfiles(DEFAULT_FRECKLES_CONFIG, chain=True,  help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
 
-print
-
 if __name__ == "__main__":
+
     cli()
