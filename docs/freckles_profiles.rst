@@ -1,7 +1,7 @@
 .. _freckles_profile_overview:
-==============================
-freckles profiles and adapters
-==============================
+
+Supported profiles/adapters
+---------------------------
 
 *freckles* uses adapters to deal with data or code of a certain profile/type (a *freckle*).
 
@@ -12,11 +12,11 @@ Ideally, the metadata that describes the characteristics of a *freckle* will sit
 Following is a list of currently available *profiles*, and links to more in-detail descriptions of those:
 
 :doc:`dotfiles`
----------------
+^^^^^^^^^^^^^^^
 
 Used with a repository of dotfiles (configuration files), and metadata describing which applications to install alongside. Basically a way to configure your working environment and make it easy to (re-)install it when and where-ever you need.
 
 :doc:`python-dev`
------------------
+^^^^^^^^^^^^^^^^^
 
 Used for Python projects that are layed out similar to what you get when you use (XXX link to cookiecutter)

@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Markus Binsteiner <makkus@posteo.de>
+* Markus Binsteiner <makkus@frkl.io>
 
 Contributors
 ------------

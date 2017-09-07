@@ -1,5 +1,11 @@
 ===========
-frecklecute
+``frecklecute``
 ===========
 
-TBD
+Description
+-----------
+
+Usage
+-----
+
+.. include:: frecklecutables.rst

@@ -1,7 +1,12 @@
-========
-freckles
-========
+============
+``freckles``
+============
 
-.. toctree::
+Description
+-----------
 
-  freckles_profiles
+Usage
+-----
+
+.. include:: freckles_profiles.rst
+

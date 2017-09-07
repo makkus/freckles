@@ -4,15 +4,13 @@ freckles
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    readme
    bootstrap
    freckles_command
    frecklecute_command
-   contributing
-   authors
-   history
+   code
 
 Indices and tables
 ==================
