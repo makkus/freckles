@@ -13,4 +13,5 @@ sphinx-autobuild==0.7.1
 docutils==0.14
 sphinxcontrib-napoleon==0.6.1
 sphinx-nameko-theme==0.0.3
-sphinx-click==1.0.3
+sphinx-click-freckles==1.0.4.dev1
+

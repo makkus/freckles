@@ -50,6 +50,10 @@ class FrecklesProfiles(click.MultiCommand):
         self.command_names = self.profile_repo.profiles.keys()
         self.command_names.sort()
 
+        self.commands = {}
+        for name in self.command_names:
+            self.commands[name] = self.get_command(None, name)
+
     def list_commands(self, ctx):
 
         return self.command_names

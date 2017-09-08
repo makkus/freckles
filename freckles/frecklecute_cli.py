@@ -78,6 +78,9 @@ class FrecklesCommand(click.MultiCommand):
         if self.current_command:
             self.command_names.insert(0, self.current_command)
 
+        self.commands = {}
+        for name in self.command_names:
+            self.commands[name] = self.get_command(None, name)
 
     def list_commands(self, ctx):
 
