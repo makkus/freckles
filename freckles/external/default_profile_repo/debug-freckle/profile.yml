@@ -2,12 +2,3 @@ doc:
   help: a profile to help develop other profiles, it prints out variables at the point just before profile execution starts.
   short_help: helper profile, for developing other profiles
 
-args:
-  test:
-   help: help text
-   type: str
-   multiple: false
-   required: false
-   default: "n/a"
-   is_var: false
-
