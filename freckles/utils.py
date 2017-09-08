@@ -12,7 +12,6 @@ import shutil
 import sys
 from pydoc import locate
 from .config import FrecklesConfig
-
 import click
 from ansible.plugins.filter.core import FilterModule
 from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
