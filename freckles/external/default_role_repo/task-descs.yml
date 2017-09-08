@@ -1,6 +1,7 @@
 tasks:
   - apt:
       meta:
+        default-key: name
         task-name: apt
         become: yes
         var-keys:
@@ -174,6 +175,8 @@ tasks:
          task-desc: creating folder(s)
          task-name: file
          var-keys:
+           - state
+           - path
            - attributes
            - group
            - mode
