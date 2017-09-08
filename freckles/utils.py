@@ -31,7 +31,7 @@ import yaml
 from .freckles_defaults import *
 
 DEFAULT_EXCLUDE_DIRS = [".git", ".tox", ".cache"]
-PROFILE_MARKER_FILENAME = "profile.yml"
+PROFILE_MARKER_FILENAME = "freckles-profile.yml"
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -400,7 +400,7 @@ def find_profile_files_callback(filenames, valid_profiles=None):
 
 def get_profile_dependency_roles(profiles):
 
-    dep_files = find_profile_files("profile.yml", profiles)
+    dep_files = find_profile_files(PROFILE_MARKER_FILENAME, profiles)
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
 
