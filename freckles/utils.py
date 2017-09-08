@@ -31,7 +31,7 @@ import yaml
 from .freckles_defaults import *
 
 DEFAULT_EXCLUDE_DIRS = [".git", ".tox", ".cache"]
-PROFILE_MARKER_FILENAME = "freckles-profile.yml"
+PROFILE_MARKER_FILENAME = "freckles-adapter.yml"
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)

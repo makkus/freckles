@@ -1,4 +1,0 @@
-doc:
-  help: a profile to help develop other profiles, it prints out variables at the point just before profile execution starts.
-  short_help: helper profile, for developing other profiles
-
