@@ -25,8 +25,12 @@ except NameError:
 
 log = logging.getLogger("freckles")
 
-FRECKLES_HELP_TEXT = "n/a"
-FRECKLES_EPILOG_TEXT = "n/a"
+FRECKLES_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') and sets up your local environment to be able to handle the data, according to its profile.
+
+Locally available adapters for supported profiles are listed below, each having their own configuration. You can specify a 'global' url that is then used by each of specified adapters by adding it's '--freckle' option before any adapter. Or you can assign one (or multiple) freckle to an adapter by providing it after the adapter name.
+"""
+
+FRECKLES_EPILOG_TEXT = "freckles is free and open source software, for more information visit: https://docs.freckles.io"
 
 # TODO: this is ugly, probably have refactor how role repos are used
 SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]

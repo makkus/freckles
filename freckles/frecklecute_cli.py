@@ -23,8 +23,9 @@ log = logging.getLogger("freckles")
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 
-FRECKLES_HELP_TEXT = "TO BE DONE"
-FRECKLES_EPILOG_TEXT = "For more information please visit: https://freckles.io"
+FRECKLES_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formated) text file (called a 'frecklecutable').
+"""
+FRECKLES_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
 COMMAND_PROCESSOR_CHAIN = [
     frkl.UrlAbbrevProcessor()
