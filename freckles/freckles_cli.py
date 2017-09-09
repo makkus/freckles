@@ -25,7 +25,7 @@ except NameError:
 
 log = logging.getLogger("freckles")
 
-FRECKLES_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') and sets up your local environment to be able to handle the data, according to its profile.
+FRECKLES_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') and sets up your local environment to be able to handle the data, according to the data's profile.
 
 Ideally the remote dataset includes all the metadata that is needed to setup the environment, but it's possible to provide some directives using commandline options globally (--target, --include, --exclude), or per adapter (use the --help function on each adapter to view those).
 
@@ -51,7 +51,7 @@ class FrecklesProfiles(click.MultiCommand):
         exclude_option = click.Option(param_decls=["--exclude", "-e"], help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
 
 
-        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
+        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-a"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
 
         version_option = click.Option(param_decls=["--version", "-v"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
         self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, version_option]
