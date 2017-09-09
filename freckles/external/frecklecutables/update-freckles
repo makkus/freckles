@@ -1,5 +1,0 @@
-doc:
-  help: updates freckles itself
-tasks:
-  - update-freckles:
-      install_method: auto
