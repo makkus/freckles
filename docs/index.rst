@@ -3,9 +3,9 @@ freckles documentation
 ######################
 `'configuration management for the rest of us'`
 
-Welcome to the *freckles* documentation! *freckles* is a project to do configuration management on your local working environment.
+Welcome to the *freckles* documentation!
 
-Find out more about it using any of the sections below:
+*freckles* is a project to do configuration management on your local working environment. Find out more about how it works here:
 
 .. toctree::
    :maxdepth: 2

@@ -59,7 +59,7 @@ Or, maybe you are working on a webpage. If somebody writes an adapter for this u
 ``freckecute``
 ==============
 
-Basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*'), which, by the way, can be command-line applications themselves. As *freckles* is built ontop of *ansible*, `all ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for a *frecklecutable*.
+Basically a wrapper around ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*'), which, by the way, can be command-line applications themselves. As *freckles* is built ontop of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for a *frecklecutable*.
 
 *frecklecute* comes with a few default *frecklecutables*, for example one that lets you execute any arbitrary Ansible module or role directly (called ``ansible-task``). This is what it looks like to ensure a folder exists, using *frecklecute* (including '`inaugurating <inaugurate_>`_'/bootstrapping *frecklecute* itself):
 
@@ -67,7 +67,7 @@ Basically a wrapper around ansible_, making it easier to get started writing and
 
    curl https://freckles.io | bash -s -- frecklecute --ask-become-pass false ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
 
-This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, this example doesn't make any sense, I hope it is plain to see how use- and powerful this can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume *frecklecute*/*freckles* is already installed this time):
+This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, that particular example doesn't make any sense, I hope it is plain to see how use- and powerful a scripting tool like this, with access to all Ansible modules and roles, can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume *frecklecute*/*freckles* is already installed this time):
 
 .. code-block:: console
 
@@ -129,7 +129,7 @@ Features
 * can use the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * extensible via *adapters*
-* declarative scripting, sorta
+* declarative, idempotent scripting, sorta
 * allows the use of all ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
 
 
@@ -172,7 +172,7 @@ This is what happens:
 - expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
 - checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
-- loads the instructions for the ``dotfiles`` profile, which:
+- loads the instructions for the ``dotfiles`` adapter, which:
 - installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
 - symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called stow_ -- which *freckles* also installs if not present already)
 
@@ -195,7 +195,7 @@ Here's what happens:
 - as before, expands the url, from ``gh:makkkus/freckles`` to https://github.com/makkus/freckles
 - checks out the repository to ``$HOME/freckles/freckles``
 - reads (optional)  metadata in the folder
-- loads the instructions for the ``python_dev`` profile, which:
+- loads the instructions for the ``python_dev`` adapter, which:
 - installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
 - creates a virtualenv
 - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
@@ -273,6 +273,7 @@ Neat, eh?
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
 - mostly developed on Debian & Ubuntu, so RedHat-based platforms and Mac OS X might not work as well just yet (although I spent a shitload of time to support Mac OS X, so it shouldn't be far off)
 - as *freckles* and it's adapters use conventions to minimize the need for configuration, it is fairly opinionated on how to do things, necessarily. You might, for example, not like the way ``dotfiles`` are 'stowed' (preferring maybe using an external git work-tree, or whatnot), or how the ``python-dev`` adapter handles python code. That being said, it is certainly possible to just write another adapter, or add different options to existing ones.
+
 
 License
 *******
