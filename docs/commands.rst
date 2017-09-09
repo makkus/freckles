@@ -1,6 +1,6 @@
-========
+########
 Commands
-========
+########
 
 The *freckles* project currently provides two command-line applications: ``freckles`` and ``frecklecute``. Both use the same underlying code, but they differ slightly in what they can do:
 
@@ -16,10 +16,10 @@ The former is designed to require little to no configuration to achive its goal,
 ``freckles`` consists of a few different commands, which all use the same underlying codebase and configuration format.
 
 Notes
------
+*****
 
 Abbreviations
-^^^^^^^^^^^^^
+=============
 
 ``freckles`` applications mostly operate on urls. To make those urls more memorable, and also shorter, a few (optional -- you can still just provide the full url) abbreviation schemes are supported.
 
@@ -27,17 +27,6 @@ Abbreviations
 - *github repo file*: ``gh:<github_user>/<repo_name>/path/to/file``
 - *bitbucket_repo*: ``bb:<bitbucket_user>/<repo_name>``
 - *bitbucket_repo_file*: ``bb:<bitbucket_user/<repo_name>/path/to/file``
-
-
-========
-
-- freckles usage page
-- (currently) supported freckle profiles
-- examples
-
-
-
-
 
 
 
