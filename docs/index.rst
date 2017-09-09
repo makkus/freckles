@@ -1,19 +1,22 @@
-freckles
-========
+######################
+freckles documentation
+######################
+`'configuration management for the rest of us'`
 
-Contents:
+Welcome to the *freckles* documentation!
+
+*freckles* is a project to do configuration management on your local working environment. Find out more about how it works here:
 
 .. toctree::
    :maxdepth: 2
 
    readme
    bootstrap
-   freckles_command
-   frecklecute_command
-   code
+   commands
+   code_overview
 
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

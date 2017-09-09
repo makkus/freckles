@@ -1,14 +1,14 @@
 .. highlight:: shell
 
-===================
+###################
 Bootstrap / install
-===================
+###################
 
 
 There are a few different ways to bootstrap *freckles*. Depending on the state of your box, your proficiency and your general trust in random people on the internet, you can choose one of the methods below. The main way of bootstrapping *freckles* is by utilizing `inaugurate <https://github.com/makkus/inaugurate>`_, a thing I wrote for *freckles* but decided to factor out, because I figured it might be worth a shot making it into a sort of 'generic bootstrap script'. For how it exactly works, and why you should or should not trust it, head over `there <https://github.com/makkus/inaugurate/>`_.
 
 Bootstrap & execution in one go ("inaugurate")
-----------------------------------------------
+**********************************************
 
 This method of bootstrapping is the easiest, and fricktionlessest. One of the main reasons for creating *freckles* was that I wanted a way to setup a new box (physical or virtual) by executing only one (easy to remember) line on a commandline terminal.
 
@@ -35,12 +35,12 @@ Once you executed either one of the above commands successfully, you'll have *fr
 Below a few more details on the two ways of bootstrapping *freckles* using *inaugurate*:
 
 inaugurate (without elevated permissions)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================================
 
 This is the default way of bootstrapping *freckles*. It will create a self-contained installation (under ``$HOME/.local/inaugurate/``), using conda_ to install requirements and create its working environment.
 
 Commands
-++++++++
+--------
 
 Using `curl`:
 
@@ -56,7 +56,7 @@ Using `wget`:
 
 
 Supported
-+++++++++
+---------
 
 Those are the platforms I have tested so far, others might very well work too. I did my development mainly on Debian-based systems, so other Linux distributions might not (yet) be up to scratch:
 
@@ -88,7 +88,7 @@ Those are the platforms I have tested so far, others might very well work too. I
 
 
 What does this do?
-++++++++++++++++++
+------------------
 
 This installs the conda_ package manager (miniconda_ actually). Then it creates a `conda environment`_ called 'inaugurate', into which *freckles* along with its dependencies is installed.
 
@@ -98,13 +98,13 @@ A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the us
 
 
 Inaugurate (with elevated permissions)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+======================================
 
 This is a quicker way to bootstrap *freckles*, as 'normal' distribution packages are used to install dependencies. Also, the size of the ``$HOME/.local/inaugurate`` folder will be smaller, ~70mb -- systems packages are adding to that in other parts of the system though). The *freckles* install itself is done in a virtualenv using `pip`. Root permissions are required.
 
 
 Supported
-+++++++++
+---------
 
 Those are the platforms I have tested so far, others might very well work too. I did my development mainly on Debian-based systems, so other Linux distributions might not (yet) be up to scratch:
 
@@ -147,7 +147,7 @@ Using `wget`:
 
 
 What does this do?
-++++++++++++++++++
+------------------
 
 This installs all the requirements that are needed to create a Python virtualenv for *freckles*. What exactly those requirements are differs depending on the OS/Distribution that is used (check the :ref:`Install manually via pip` section for details). Then a Python virtual environment is created in ``$HOME/.local/inaugurate/virtualenvs/inaugurate`` into which *freckles* and all its requirements are installed (~70mb).
 
@@ -155,29 +155,29 @@ A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the us
 
 
 Install manually via ``pip``
-----------------------------
+****************************
 
 If you prefer to install *freckles* from pypi_ yourself, you'll have to install a few system packages, mostly to be able to install the ``pycrypto`` and ``cryptography`` packages when doing the ``pip install``.
 
 Requirements
-++++++++++++
+============
 
 Ubuntu/Debian
-.............
+-------------
 
 .. code-block:: console
 
    apt install build-essential git python-dev python-virtualenv libssl-dev libffi-dev stow
 
 RedHat/CentOS
-.............
+-------------
 
 .. code-block:: console
 
    yum install epel-release wget git python-virtualenv stow openssl-devel stow gcc libffi-devel python-devel openssl-devel
 
 MacOS X
-.......
+-------
 
 We need Xcode. Either install it from the app store, or do something like:
 
@@ -200,7 +200,7 @@ We also need to manually install pip:
 
 
 Install *freckles*
-++++++++++++++++++
+==================
 
 Ideally, you'll install *freckles* into its own virtualenv. But if you read this you'll (hopefully) know how to do that. Here's how to install it system-wide (which I haven't tested, to be honest, so let me know if that doesn't work)
 
@@ -217,17 +217,11 @@ Optionally, if necessary (if you didn't do a systemwide install) add *freckles* 
 
 
 Install using an Ansible installation
--------------------------------------
+*************************************
 
 Another option is to install Ansible following their instructions: http://docs.ansible.com/ansible/intro_installation.html
 
 Then, after that is done, install the ``freckles`` python package via pip in either a virtualenv, or system-wide.
-
-Bootstrapped files/layout
--------------------------
-
-The bootstrap process will install *freckles* as well as its requirements. *freckles* (and depending on the bootstrap process choosen, also its dependencies) is installed into ``$HOME/.local/inaugurate``. Symbolic links  `*freckles*` executable as well as some helper applications (``conda``, etc.) are created in ``$HOME/.local/bin`` and a line is added to ``$HOME/.profile`` which adds this folder to the ``PATH`` variable, which means that after the next login (or after issuing ``source ~/.profile``) *freckles* can be run directly from then on.
-
 
 .. _conda: https://conda.io
 .. _inaugurate: https://github.com/makkus/inaugurate

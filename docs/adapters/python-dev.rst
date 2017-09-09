@@ -1,11 +1,11 @@
-==========
+##########
 python-dev
-==========
+##########
 
 The `python-dev` adapter downloads folders that contain python code that can be installed via either ``pip`` or ``setuptools``. It'll install potential system dependencies, creates a python virtualenv and installs python development dependencies into that virtual environment. Alternatively the adapter can use *conda*.
 
 Usage
------
+*****
 
 .. code-block:: console
 
@@ -14,7 +14,8 @@ Usage
 At least one path or url to a freckle needs to be provided (multiple paths can be supplied by simply providing multiple ``--freckle`` options)
 
 Options
-^^^^^^^
+=======
+
 ``--freckle``
     the path or url that points to a 'dotfiles' freckle
 
@@ -25,14 +26,14 @@ Options
     the version of python to use for the virtual (or conda) environment, defaults to '3'
 
 Metadata
----------
+========
 
 Metadata that can be provided within the *freckle* itself, either via the ``.freckle`` file in the root of the *freckle* directory, or via marker files.
 
 TODO: link to package list format
 
 vars
-^^^^
+----
 
 ``packages``
     a list of non-python dependency packages
@@ -49,8 +50,9 @@ vars
 ``setuptools_command``
     if ``setuptools`` is used as ``setup_command``, this can be used to determine which command to use for the ``python setup.py <command>`` command. Defaults to ``develop``.
 
+
 *freckle* folder structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 .. code-block:: console
 
@@ -70,16 +72,16 @@ vars
            .                        ...
 
 Additional files and markers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
-None
+If the ``requirements_files`` variable is not set, all files that match the regex ``.*requirements.*txt$`` are used and their content installed into the virtual environment as python dependencies.
 
 
-Example ``.freckle`` file
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Example ``.freckle`` files
+--------------------------
 
 simple python 2 project, using ``pip``
-++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As the ``setup_command`` var is not specified, it'll fall back to ``pip``, meaning ``pip install -e .`` will be used to install the source code into the development virtual env.
 
@@ -89,7 +91,7 @@ As the ``setup_command`` var is not specified, it'll fall back to ``pip``, meani
        python_version: 2.7
 
 simple python 3 project, using ``setuptools``
-+++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As the ``setup_command`` var is specified, ``setuptools`` will be used, meaning ``python setup.py develop`` will be used to install the source code into the development virtual env.
 
@@ -101,12 +103,12 @@ As the ``setup_command`` var is specified, ``setuptools`` will be used, meaning 
 
 
 Examples
---------
+********
 
 Below are some more exmaples with a detailed explanations to illustrate how to use the *python-dev* adapter.
 
 ``.freckle`` file for *freckles* itself
-+++++++++++++++++++++++++++++++++++++++
+=======================================
 
 This is the configuration *freckles* itself uses. Because of Ansible still not being fully supported on Python 3, *freckles* also uses Python 2. Ansible also has a few non-python dependencies that are required to build the ``cryptography`` python library, which can be installed either via the system package manager, or we use conda to get the compiled ``cryptography`` and ``pycrypto`` dependencies directly. Mac OS X (homebrew) does not need any extra system dependencies installed.
 

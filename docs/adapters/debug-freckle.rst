@@ -1,6 +1,6 @@
-==========
+=============
 debug-freckle
-==========
+=============
 
 This is a helper adapter to display metadata when developing or debugging a *freckles* adapter.
 
