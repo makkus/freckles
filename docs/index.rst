@@ -8,8 +8,7 @@ Contents:
 
    readme
    bootstrap
-   freckles_command
-   frecklecute_command
+   usage
    code
 
 Indices and tables

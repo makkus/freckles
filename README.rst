@@ -29,7 +29,7 @@
 For now, the *freckles* project provides two (command-line) interfaces, which deal with slightly different scenarios and workflows:
 
 *freckles*
-    configuration management for the desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of all the software or data packages you work with, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
+    configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the software or data packages you work with, then *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on.
 
     One example would be pointing it to a repository of your (well, my in this example) dot-/config-files:
 
@@ -37,7 +37,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 
        freckles dotfiles -f gh:makkus/dotfiles
 
-    *freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Chapter #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or you can use *freckles* to start contributing to *freckles* itself:
+    *freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (check `below <Example #1, where we checkout our dotfiles and setup our development machine_>`_ for more details). Or you can use *freckles* to start contributing to *freckles* itself:
 
     .. code-block:: console
 
@@ -124,7 +124,7 @@ using: *freckles*
 
 Probably best to show what *freckles* is, and what it can do using examples. Do not try those below examples at home, as they'll install loads of packages you most likely don't need. I'll show you how I use *freckles* and *frecklecute* to install a new machine, after a) I buy a new Thinkpad or b) I did something silly that requires a re-install. Or, more often c) want to use all or parts of my dotfiles on a VM or container, to have a decent editor and shell while working in them.
 
-Chapter #1, where we checkout our dotfiles and setup our development machine
+Example #1, where we checkout our dotfiles and setup our development machine
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. code-block:: console
@@ -145,7 +145,7 @@ I've organized my *dotfiles* into subfolders (to be able to exclude applications
 
 Most of the above steps can be switched off, if necessary.
 
-Chapter #2, where we setup a Python development project
+Example #2, where we setup a Python development project
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Now, after setting up my machine with my applications and configuration files, I really need to start working on *freckles* again, because, as you can probably see, there's a lot to do still. Thus:
@@ -175,7 +175,7 @@ By default, virtualenvs are put under ``$HOME/.local/virtualenvs`` and are names
 using: *frecklecute*
 ^^^^^^^^^^^^^^^^^^^^
 
-Chapter #3, where we run an ansible task as well as an external ansible role
+Example #3, where we run an ansible task as well as an external ansible role
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 So -- having setup all the data, associated applications, source code and working environment(s) I need -- there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use I specified that it should put all backups into ``~/.backups/zile``. That directory doesn't exist yet, and if it doesn't exists, ``zile`` doesn't create it automatically, and consequently does not store any backups of the files I'm working on. So I have to make sure that folder gets created.
