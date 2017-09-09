@@ -56,7 +56,7 @@ The central role for the ``freckles`` command-line application. Used to download
 - homepage: https://github.com/makkus/freckles_ansible
 
 makkus.install-freckles
-----------------------
+-----------------------
 
 An Ansible role that can install *freckles* (although that functionality is not used by ``freckles`` itself, obviously), and, more importantly, update it.
 
