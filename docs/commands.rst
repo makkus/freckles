@@ -1,6 +1,6 @@
-==============
-Usage overview
-==============
+========
+Commands
+========
 
 The *freckles* project currently provides two command-line applications: ``freckles`` and ``frecklecute``. Both use the same underlying code, but they differ slightly in what they can do:
 

@@ -8,7 +8,7 @@ Contents:
 
    readme
    bootstrap
-   usage
+   commands
    code
 
 Indices and tables
