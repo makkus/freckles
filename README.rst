@@ -142,6 +142,7 @@ Some actual/potential usecases
 * 'self-loading' containers
 * provide an (easy-to-read, understand and re-use) *frecklecutable* or *freckle adapter* alongside a blog post you wrote about some useful workstation setup (e.g. 'how to secure your workstation', or 'how to setup a python dev environment', ...)
 * share the same project setup with your team-mates
+* quickly create install/update scripts for your scripts/applications where it's not worth or easy to create 'traditional' packages
 
 
 Examples
