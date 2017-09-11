@@ -70,7 +70,7 @@ class FrecklesCommand(click.MultiCommand):
 
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-a"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
-        version_option = click.Option(param_decls=["--version", "-v"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+        version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
 
         self.params = [output_option, ask_become_pass_option, version_option]
 

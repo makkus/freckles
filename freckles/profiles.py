@@ -27,7 +27,7 @@ except NameError:
 from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     render_dict, render_vars_template,
-                    url_is_local, find_supported_profiles, PROFILE_MARKER_FILENAME, create_cli_command, create_freckles_run, get_vars_from_cli_input)
+                    url_is_local, find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run, get_vars_from_cli_input)
 
 log = logging.getLogger("freckles")
 
@@ -139,7 +139,7 @@ class ProfileRepo(object):
     def create_command(self, command_name, command_path, no_run=False):
 
         log.debug("Creating command for profile: '{}...'".format(command_name))
-        profile_metadata_file = os.path.join(command_path, PROFILE_MARKER_FILENAME)
+        profile_metadata_file = os.path.join(command_path, "{}.{}".format(command_name, ADAPTER_MARKER_EXTENSION))
         with open(profile_metadata_file, 'r') as f:
             md = yaml.safe_load(f)
 

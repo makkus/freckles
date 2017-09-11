@@ -12,7 +12,10 @@ from frkl import frkl
 import click_log
 import yaml
 
+from nsbl import defaults, tasks
+from .freckles_defaults import *
 from . import __version__ as VERSION
+from .utils import get_all_roles_in_repos, get_all_adapters_in_repos, find_adapter_files, get_adapter_dependency_roles
 from .commands import CommandRepo
 
 
@@ -37,9 +40,7 @@ def output(python_object, format="raw", pager=False):
 
 @click.group(invoke_without_command=True)
 @click.option('--version', help='the version of frkl you are using', is_flag=True)
-@click_log.simple_verbosity_option()
 @click.pass_context
-@click_log.init("freckles")
 def cli(ctx, version):
     """Console script for nsbl"""
 
@@ -65,6 +66,24 @@ def debug_last(ctx, pager):
 
     for line in iter(proc.stdout.readline, ''):
         click.echo(line, nl=False)
+
+@cli.command('list-roles')
+@click.pass_context
+def list_roles(ctx):
+
+    repos = ["default"]
+    # role_repos = defaults.calculate_role_repos([get_real_repo_path(REPO_ABBREVS, r) for r in repos], use_default_roles=False)
+
+    roles = get_all_roles_in_repos(repos)
+
+    print("Roles:")
+    pprint.pprint(roles)
+
+    print("")
+    adapters = get_all_adapters_in_repos(repos)
+    print("Adapters")
+    pprint.pprint(adapters)
+
 
 @cli.command('frecklecute-command')
 @click.option('--command', '-c', help="the command to debug", required=True)

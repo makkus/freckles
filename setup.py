@@ -35,7 +35,7 @@ setup(
         'console_scripts': [
             'freckles=freckles.freckles_cli:cli',
             'frecklecute=freckles.frecklecute_cli:cli',
-            'dermatoscope=freckles.freckles_dev_cli:cli'
+            '_freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
     include_package_data=True,
