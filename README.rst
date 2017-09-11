@@ -102,7 +102,7 @@ Really quick start
 
 (... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
 
-Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_). To install *freckles* and run it straight away to display it's help, issue:
+Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' ( so before --mostly rightfully-- complaining about executing random scripts from the internet, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, then come back and complain :-) ). To install *freckles* and run it straight away to display it's help, issue:
 
 .. code-block:: console
 
