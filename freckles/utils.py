@@ -20,6 +20,7 @@ from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
 from jinja2 import Environment, PackageLoader, Template
 from jinja2.ext import Extension
 from nsbl import defaults, nsbl
+from nsbl import tasks as nsbl_tasks
 from six import string_types
 
 try:
@@ -30,8 +31,6 @@ except NameError:
 import yaml
 from .freckles_defaults import *
 
-DEFAULT_EXCLUDE_DIRS = [".git", ".tox", ".cache"]
-PROFILE_MARKER_FILENAME = "freckles-adapter.yml"
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -199,18 +198,16 @@ def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
-PROFILE_CACHE = {}
-
 def find_supported_profiles(config=None):
 
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
-    repos = config.get_profile_repos()
+    repos = config.get_adapter_repos()
 
     result = {}
     for r in repos:
-        p = get_profiles_from_repo(r)
+        p = get_adapters_from_repo(r)
         result.update(p)
 
     return result
@@ -328,31 +325,33 @@ def find_supported_profile_names(config=None):
 
     return sorted(list(set(find_supported_profiles(config).keys())))
 
-def get_profiles_from_repo(profile_repo):
+ADAPTER_CACHE = {}
+def get_adapters_from_repo(adapter_repo):
 
-    if not os.path.exists(profile_repo) or not os.path.isdir(os.path.realpath(profile_repo)):
+    if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
         return {}
 
-    if profile_repo in PROFILE_CACHE.keys():
-        return PROFILE_CACHE[profile_repo]
+    if adapter_repo in ADAPTER_CACHE.keys():
+        return ADAPTER_CACHE[adapter_repo]
 
     result = {}
-    for root, dirnames, filenames in os.walk(os.path.realpath(profile_repo), topdown=True, followlinks=True):
+    for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
 
         dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
 
-        for filename in fnmatch.filter(filenames, PROFILE_MARKER_FILENAME):
+        for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
 
-            profile_file = os.path.realpath(os.path.join(root, PROFILE_MARKER_FILENAME))
-            profile_folder = os.path.abspath(os.path.dirname(profile_file))
-            profile_name = os.path.basename(profile_folder)
+            adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
+            adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
-            result[profile_name] = profile_folder
+            profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[0:-1])
 
-    PROFILE_CACHE[profile_repo] = result
+            result[profile_name] = adapter_folder
+
+    ADAPTER_CACHE[adapter_repo] = result
     return result
 
-def find_profile_files(filename, valid_profiles=None, config=None):
+def find_adapter_files(extension, valid_profiles=None, config=None):
 
     profiles = find_supported_profiles(config)
 
@@ -363,7 +362,7 @@ def find_profile_files(filename, valid_profiles=None, config=None):
         if valid_profiles and profile_name not in valid_profiles:
             continue
 
-        profile_child_file = os.path.join(profile_path, filename)
+        profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
 
         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
             continue
@@ -372,25 +371,45 @@ def find_profile_files(filename, valid_profiles=None, config=None):
 
     return task_files_to_copy
 
-def find_profile_files_callback(filenames, valid_profiles=None):
+def get_all_roles_in_repos(repos):
 
-    if isinstance(filenames, string_types):
-        filenames = [filenames]
+    result = []
+    repos = get_local_repos(repos, "roles")
+    for repo in repos:
+        roles = nsbl_tasks.find_roles_in_repo(repo)
+        result.extend(roles)
+
+    return result
+
+def get_all_adapters_in_repos(repos):
+
+    result = []
+    repos = get_local_repos(repos, "adapters")
+    for repo in repos:
+        adapters = get_adapters_from_repo(repo)
+        result.extend(adapters)
+
+    return result
+
+def find_adapter_files_callback(extensions, valid_profiles=None):
+
+    if isinstance(extensions, string_types):
+        extensions = [extensions]
 
     task_files_to_copy = {}
-    for filename in filenames:
-        files = find_profile_files(filename, valid_profiles)
+    for extension in extensions:
+        files = find_adapter_files(extension, valid_profiles)
         for key, value in files.items():
-            task_files_to_copy.setdefault(filename, {})[key] = value
+            task_files_to_copy.setdefault(extension, {})[key] = value
 
     def copy_callback(ansible_environment_root):
 
-        for name, path in task_files_to_copy.get("init-tasks.yml", {}).items():
+        for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
 
             target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "init-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
-        for name, path in task_files_to_copy.get("freckle-tasks.yml", {}).items():
+        for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
 
             target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "items-{}.yml".format(name))
             shutil.copyfile(path, target_path)
@@ -398,9 +417,10 @@ def find_profile_files_callback(filenames, valid_profiles=None):
     return copy_callback
 
 
-def get_profile_dependency_roles(profiles):
+def get_adapter_dependency_roles(profiles):
 
-    dep_files = find_profile_files(PROFILE_MARKER_FILENAME, profiles)
+    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
+
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
 
@@ -425,9 +445,9 @@ def extract_all_used_profiles(freckle_repos):
 def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False, output_format="default"):
 
     profiles = extract_all_used_profiles(freckle_repos)
-    callback = find_profile_files_callback(["freckle-tasks.yml", "init-tasks.yml"], profiles)
+    callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
 
-    additional_roles = get_profile_dependency_roles(profiles)
+    additional_roles = get_adapter_dependency_roles(profiles)
 
     task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 

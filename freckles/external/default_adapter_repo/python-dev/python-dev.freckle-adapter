@@ -1,6 +1,8 @@
 doc:
   help: "installs a conda or virtualenv environment with all the system- and python dependencies of a python project freckle"
   short_help: "prepares a python development environment"
+role-dependencies:
+  - makkus.python-dev
 args:
   pkg_mgr:
     help: the package manager to use, currently supported 'auto', 'conda', 'nix'

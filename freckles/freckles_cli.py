@@ -15,8 +15,8 @@ from .freckles_defaults import *
 from . import __version__ as VERSION, print_version
 from .profiles import ProfileRepo, assemble_freckle_run
 from .utils import (RepoType, create_and_run_nsbl_runner, create_freckle_desc,
-                    find_profile_files_callback, find_supported_profiles,
-                    get_profile_dependency_roles, url_is_local, DEFAULT_FRECKLES_CONFIG)
+                    find_supported_profiles,
+                    get_adapter_dependency_roles, url_is_local, DEFAULT_FRECKLES_CONFIG)
 
 try:
     set
@@ -53,7 +53,7 @@ class FrecklesProfiles(click.MultiCommand):
 
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-a"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
 
-        version_option = click.Option(param_decls=["--version", "-v"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+        version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
         self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, version_option]
         self.profile_repo = ProfileRepo(config, no_run=False)
         self.command_names = self.profile_repo.profiles.keys()
