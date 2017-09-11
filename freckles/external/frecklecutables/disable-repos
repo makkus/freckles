@@ -1,0 +1,32 @@
+doc:
+  help: ensures the specified repositories are present locally, and used by default
+args:
+  pkg_mgr:
+    arg_name: pkg-mgr
+    help: the package manager to install git if not already installed
+    required: false
+    default: auto
+    is_var: false
+  repos:
+    arg_name: repo
+    required: true
+    nargs: -1
+    is_var: true
+    is_argument: true
+  update_repos:
+    help: whether to update the non-disabled existing repos
+    arg_name: update
+    required: false
+    default: false
+    is_flag: true
+tasks:
+  - install:
+     - git:
+         pkg_mgr: "{{ pkg_mgr }}"
+  - makkus.freckles-config:
+     freckles_config_tasks:
+       disable_repos:
+           - community
+           # - ark
+           # - adapters
+           # - gh:makkus/curated-roles
