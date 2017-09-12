@@ -191,4 +191,4 @@ Let's run the whole thing again:
 Voilà! Now we can prepare hosts for all *freckle* folders that contain code that needs *Vagrant* and potentially some *Vagrant plugins*!
 
 
-_vagrant: https://www.vagrantup.com
+.. _vagrant: https://www.vagrantup.com
