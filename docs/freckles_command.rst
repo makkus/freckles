@@ -7,7 +7,7 @@ Description
 
 ``freckles`` is an application that downloads a remote code or data repository (I call such a thing a 'freckle') that is structured according to one or some conventions. After download, ``freckles`` will execute pre-defined tasks appropriate for the type of `freckle` in question.
 
-In order to handle those different data profiles, ``freckles`` can be extended with so called *adapters*. For example, if the `freckle` is a python project, ``freckles`` will use the ``python-dev`` adapter which will create a virtualenv named like the repository (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
+In order to handle those different data profiles, ``freckles`` can be extended with so called *adapters*. For example, if the `freckle` is a python project, ``freckles`` will use the ``python-dev`` adapter which will create a virtualenv (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
 
 Or, the `freckle` is a folder containing subfolders which in turn contain `dotfiles` (that's what configuration files are called in Unix-land). ``freckles`` will download this repo, install potentially configured applications that relate to the configuration files, and symbolically link those configuration files to the appropriate places.
 
@@ -141,6 +141,8 @@ First order of business is to make sure *Vagrant* is installed. Since *freckles*
      include_role:
        name: makkus.install-vagrant
 
+This uses an already existing Ansible role that is (conveniently) shipped with *freckles*.
+
 Now we can run *freckles* again, and see whether it does in fact install *Vagrant*:
 
 .. code-block:: console
@@ -173,6 +175,8 @@ Looks good! Those last 3 debug statements are the ones still present in the ``va
      with_items:
        - "{{ freckle_vars.vagrant_plugins | default([]) }}"
 
+(You might not recognize the ``install`` Ansible module, as it's custom written to be used with *freckles*. Check out :doc:`this page </install_module>` for more information.
+
 Let's run the whole thing again:
 
 .. code-block:: yaml
@@ -189,6 +193,8 @@ Let's run the whole thing again:
       => ok (changed)
 
 Voilà! Now we can prepare hosts for all *freckle* folders that contain code that needs *Vagrant* and potentially some *Vagrant plugins*!
+
+As mentioned above, more documentation on the topic of writing *freckle adapters*  can be found :doc:`here </writing_freckles_adapters>`.
 
 
 .. _vagrant: https://www.vagrantup.com
