@@ -7,7 +7,7 @@ import click
 
 __author__ = """Markus Binsteiner"""
 __email__ = 'makkus@posteo.net'
-__version__ = '0.1.116'
+__version__ = '0.1.117'
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
