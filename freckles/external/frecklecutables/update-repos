@@ -1,5 +1,5 @@
 doc:
-  help: updates the freckles community repos for roles, profiles and frecklecutables
+  help: updates the trusted repos configured in ~/.freckles/config.yml
 tasks:
   - makkus.freckles-config:
       freckles_config_update_repos: true

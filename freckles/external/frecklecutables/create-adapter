@@ -1,5 +1,5 @@
 doc:
-  help: create a freckle adapter from a template
+  help: create a freckle adapter stub from a template
 args:
   adapter_name:
     arg_name: adapter-name
