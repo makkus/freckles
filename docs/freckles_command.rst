@@ -39,7 +39,7 @@ By default, *freckles* checks one folder for available adapters: ``$HOME/.freckl
 
    frecklecute enable-repos gh:makkus/freckles_roles_and_adapters
 
-This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a calculated path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where *freckles* will find it in subsequent runs.
+This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where *freckles* will find it in subsequent runs.
 
 *freckles* will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (before the ``.freckle-adapter`` part). Then it'll look for 2 other files in the same folder, starting with the adapter name and ending with either ``freckle-init`` or ``freckle-tasks``. Only one of those two needs to exist (which one doesn't matter), but it's also possible for both of those to exist. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*, using the *freckle*s specific metadata.
 
