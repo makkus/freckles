@@ -7,7 +7,7 @@ Description
 
 ``freckles`` is an application that downloads a remote code or data repository (I call such a thing a 'freckle') that is structured according to one or some conventions. After download, ``freckles`` will execute pre-defined tasks appropriate for the type of `freckle` in question.
 
-For example, if the `freckle` is a python project, ``freckles`` will create a virtualenv named like the repository (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
+In order to handle those different data profiles, ``freckles`` can be extended with so called *adapters*. For example, if the `freckle` is a python project, ``freckles`` will use the ``python-dev`` adapter which will create a virtualenv named like the repository (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
 
 Or, the `freckle` is a folder containing subfolders which in turn contain `dotfiles` (that's what configuration files are called in Unix-land). ``freckles`` will download this repo, install potentially configured applications that relate to the configuration files, and symbolically link those configuration files to the appropriate places.
 
@@ -28,7 +28,7 @@ Details
 Adapters & profiles
 ===================
 
-Currently, only 2 types of data are supported by *freckles*: ``dotfiles`` and ``python`` development projects. To encourage the creation of lots of adapters, in order to support lots of different data-types, *freckles* tries to make it as easy as possible to create new adapters.
+Currently, only 2 types of data are supported by *freckles*: :doc:`dotfiles </adapters/dotfiles>` and :doc:`python dev projects </adapters/python-dev>`. To encourage the creation of lots of adapters, in order to support lots of different data-types, *freckles* tries to make it as easy as possible to create new adapters.
 
 
 Writing adapters

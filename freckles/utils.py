@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import re
 import inspect
 import json
 import copy
@@ -74,12 +75,7 @@ class VarsType(click.ParamType):
             except (ValueError) as e:
                 self.fail("Can't read vars: {}".format(value))
 
-
-class RepoType(click.ParamType):
-
-    name = 'repo'
-
-    def convert(self, value, param, ctx):
+def expand_string_to_git_repo(value):
 
         if isinstance(value, string_types):
             is_string = True
@@ -87,6 +83,7 @@ class RepoType(click.ParamType):
             is_string = False
         else:
             raise Exception("Not a supported type (only string or list are accepted): {}".format(value))
+
         try:
             frkl_obj = Frkl(value, [UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
             result = frkl_obj.process()
@@ -94,6 +91,19 @@ class RepoType(click.ParamType):
                 return result[0]
             else:
                 return result
+        except:
+            raise Exception('%s is not a valid repo url' % value, param, ctx)
+
+
+class RepoType(click.ParamType):
+
+    name = 'repo'
+
+    def convert(self, value, param, ctx):
+
+        try:
+            result = expand_string_to_git_repo(value)
+            return result
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
 
@@ -203,7 +213,8 @@ def find_supported_profiles(config=None):
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
-    repos = config.get_adapter_repos()
+    trusted_repos = config.trusted_repos
+    repos = get_local_repos(trusted_repos, "adapters")
 
     result = {}
     for r in repos:
@@ -320,6 +331,63 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     dict_merge(new_vars, final_vars, copy_dct=False)
 
     return new_args, new_vars
+
+
+def calculate_local_repo_path(repo_url):
+
+    clean_string = re.sub('[^A-Za-z0-9]+', os.sep, repo_url)
+    return clean_string
+
+def get_local_repos(repo_names, repo_type):
+
+    result = []
+    for repo_name in repo_names:
+        repo = get_default_repo(repo_name)
+        if not repo:
+            repo_url = expand_string_to_git_repo(repo_name)
+            relative_repo_path = calculate_local_repo_path(repo_url)
+            repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
+            result.append(repo_path)
+        else:
+            repos = repo.get(repo_type, [])
+            for r in repos:
+                result.append(r[1])
+
+    return result
+
+def expand_repos(repos):
+    """Expands a list of stings to a list of tuples (repo_url, repo_path).
+    """
+
+    result = []
+    for repo in repos:
+        fields = ["url", "path"]
+        r = get_default_repo(repo)
+
+        if not r:
+            repo_url = expand_string_to_git_repo(repo)
+            relative_repo_path = calculate_local_repo_path(repo_url)
+            repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
+            temp = {"url": repo_url, "path": repo_path}
+            result.append(temp)
+        else:
+            role_tuples = r.get("roles", [])
+
+            if role_tuples:
+                temp = [dict(zip(fields, t)) for t in role_tuples]
+                result.extend(temp)
+
+            adapter_tuples = r.get("adapters", [])
+            if adapter_tuples:
+                temp = [dict(zip(fields, t)) for t in adapter_tuples]
+                result.extend(temp)
+            frecklecutable_tuples = r.get("frecklecutables", [])
+            if frecklecutable_tuples:
+                temp = [dict(zip(fields, t)) for t in frecklecutable_tuples]
+                result.extend(temp)
+
+    return result
+
 
 def find_supported_profile_names(config=None):
 
@@ -460,8 +528,11 @@ def create_and_run_nsbl_runner(task_config, output_format="default", ask_become_
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
-    role_repos = config.get_role_repos()
-    task_descs = config.get_task_descs()
+    config_trusted_repos = config.trusted_repos
+    local_role_repos = get_local_repos(config_trusted_repos, "roles")
+    role_repos = defaults.calculate_role_repos(local_role_repos, use_default_roles=False)
+
+    task_descs = config.task_descs
 
     nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
 

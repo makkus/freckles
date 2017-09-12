@@ -29,6 +29,7 @@ log = logging.getLogger("freckles")
 
 COMMAND_SEPERATOR = "-"
 DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "external", "frecklecutables")
+DEFAULT_COMMAND_EPILOG = "For more information about frecklecute and the freckles project, please visit: https://github.com/makkus/freckles"
 
 class CommandRepo(object):
 
@@ -116,7 +117,7 @@ class CommandRepo(object):
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
-        epilog = doc.get("epilog", None)
+        epilog = doc.get("epilog", DEFAULT_COMMAND_EPILOG)
 
         command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog, callback=command_callback)
         return command

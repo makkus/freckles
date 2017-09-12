@@ -44,24 +44,4 @@ class FrecklesConfig(object):
         self.trusted_urls = self.config.get("trusted-urls", ["https://github.com/makkus", "https:/github.com/freckles-io"])
         self.task_descs = self.config.get("task-descs", [])
 
-    def get_role_repos(self):
 
-        local_repos = get_local_repos(self.trusted_repos, "roles")
-
-        role_repos = defaults.calculate_role_repos(local_repos, use_default_roles=False)
-        return role_repos
-
-    def get_task_descs(self):
-
-        return self.task_descs
-
-    def get_adapter_repos(self):
-
-        profile_repos = get_local_repos(self.trusted_repos, "adapters")
-
-        return profile_repos
-
-    def get_frecklecutables_repos(self):
-
-        f_repos = get_local_repos(self.trusted_repos, "frecklecutables")
-        return f_repos

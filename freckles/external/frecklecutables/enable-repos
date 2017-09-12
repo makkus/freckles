@@ -4,6 +4,7 @@ args:
   pkg_mgr:
     arg_name: pkg-mgr
     help: the package manager to install git if not already installed
+    metavar: PKG_MGR
     required: false
     default: auto
     is_var: false
@@ -13,13 +14,13 @@ args:
     nargs: -1
     is_var: false
     is_argument: true
-  update_repos:
-    help: whether to update repos that are aleady enabled
+  freckles_config_update_repos:
+    help: "whether to update repos that are aleady enabled (default: false)"
     arg_name: update
     required: false
     default: false
     is_flag: true
-
+    is_var: true
 vars:
   freckles_config_tasks: >
     enable_repos:
