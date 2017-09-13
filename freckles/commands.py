@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # python 3 compatibility
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import logging
 import os
@@ -19,7 +18,8 @@ from six import string_types
 
 import yaml
 
-from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
+from .freckles_defaults import *
+from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType, print_task_list_details,
                     create_and_run_nsbl_runner, create_freckle_desc,
                     render_dict, render_vars_template,
                     url_is_local, create_cli_command, get_vars_from_cli_input)
@@ -31,38 +31,72 @@ COMMAND_SEPERATOR = "-"
 DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "external", "frecklecutables")
 DEFAULT_COMMAND_EPILOG = "For more information about frecklecute and the freckles project, please visit: https://github.com/makkus/freckles"
 
+
+def find_frecklecutable_dirs(path):
+
+    result = []
+    for root, dirnames, filenames in os.walk(os.path.realpath(path), topdown=True, followlinks=True):
+
+        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+
+        for dirname in dirnames:
+            if dirname == "frecklecutables":
+                result.append(os.path.join(root, dirname))
+
+    return result
+
 class CommandRepo(object):
 
-    def __init__(self, paths=[DEFAULT_COMMAND_REPO], no_run=False, additional_commands=[]):
+    def __init__(self, paths=[], additional_commands=[]):
         if not isinstance(paths, (list, tuple)):
             paths = [paths]
 
         self.paths = [os.path.expanduser(p) for p in paths]
 
-        if DEFAULT_COMMAND_REPO not in self.paths:
-            self.paths.insert(0, DEFAULT_COMMAND_REPO)
+        # if DEFAULT_COMMAND_REPO not in self.paths:
+            # self.paths.insert(0, DEFAULT_COMMAND_REPO)
 
         self.additional_commands = additional_commands
 
-        self.commands = self.get_commands(no_run)
+        self.commands = self.get_commands()
 
-    def get_commands(self, no_run=False):
+    def get_commands(self):
 
-        commands = {}
+        command_folders = []
         for path in self.paths:
 
+            if not os.path.exists(path):
+                log.debug("Not using folder '{}' as it doesn't exist.".format(path))
+                continue
+
+            command_folders.append(path)
+
+            root_dirs = find_frecklecutable_dirs(path)
+            command_folders.extend(root_dirs)
+
+
+        commands = {}
+
+        for path in command_folders:
+
             path_tokens = len(path.split(os.sep))
-            for root, dirs, files in os.walk(path):
-                if not files:
+            for child in os.listdir(path):
+
+                file_path = os.path.realpath(os.path.join(path, child))
+
+                if "." in child:
+                    log.debug("Not using '{}' as frecklecutable: filename contains '.'".format(file_path))
                     continue
 
-                path = root.split(os.sep)
-                for f in files:
-                    command_name = COMMAND_SEPERATOR.join(path[path_tokens:] + [f])
-                    command = self.create_command(command_name, os.path.join(root, f), no_run)
+                if not os.path.isfile(file_path):
+                    continue
+
+                command_name = child
+                command = self.create_command(command_name, file_path)
+                if not command:
+                    log.debug("Not using '{}' as frecklecutable: file couldn't be parsed".format(file_path))
+                else:
                     commands[command_name] = command
-
-
 
         for command in self.additional_commands:
 
@@ -71,7 +105,7 @@ class CommandRepo(object):
             if not command_name or not command_file:
                 continue
             path = command_file.split(os.sep)
-            command = self.create_command(command_file, command_file, no_run)
+            command = self.create_command(command_file, command_file)
             commands[command_name] = command
 
         return commands
@@ -86,7 +120,7 @@ class CommandRepo(object):
         doc = self.commands[command_name]["doc"]
         args_that_are_vars = self.commands[command_name]["args_that_are_vars"]
         value_vars = self.commands[command_name]["value_vars"]
-        no_run = self.commands[command_name]["no_run"]
+        metadata = self.commands[command_name]["metadata"]
 
         def command_callback(**kwargs):
 
@@ -99,21 +133,18 @@ class CommandRepo(object):
 
             task_config = [{"vars": final_vars, "tasks": rendered_tasks}]
 
-            if no_run:
-                click.echo("")
-                click.echo("Task config:")
-                click.echo("")
-                pprint.pprint(task_config)
-                click.echo("")
-                return
-
             log.debug("Final task config: {}".format(task_config))
 
             output = ctx.params["output"]
             ask_become_pass = ctx.params["ask_become_pass"]
+            no_run = ctx.params["no_run"]
 
-
-            create_and_run_nsbl_runner(task_config, output, ask_become_pass)
+            if no_run:
+                parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass, no_run=True)
+                print_task_list_details(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass, run_parameters=parameters)
+            else:
+                create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass)
+            # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
@@ -122,34 +153,24 @@ class CommandRepo(object):
         command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog, callback=command_callback)
         return command
 
-    def create_command(self, command_name, yaml_file, no_run=False):
+    def create_command(self, command_name, yaml_file):
 
         log.debug("Loading command file '{}'...".format(yaml_file))
 
-        #split_config = {"keywords": ["args", "doc", "tasks"]}
-        #chain = [UrlAbbrevProcessor(), EnsureUrlProcessor(), YamlTextSplitProcessor(init_params=split_config), EnsurePythonObjectProcessor()]
         chain = [UrlAbbrevProcessor(), EnsureUrlProcessor(), EnsurePythonObjectProcessor()]
-        frkl_obj = Frkl(yaml_file, chain)
 
-        config_content = frkl_obj.process(MergeDictResultCallback())
-        # with open(yaml_file, 'r') as stream:
-            # try:
-                # config_content = yaml.safe_load(stream)
-            # except yaml.YAMLError as exc:
-                # raise exc
-                # log.info("Could not parse command file '{}', ignoring...".format(yaml_file))
-                # return None
+        try:
+            frkl_obj = Frkl(yaml_file, chain)
+            config_content = frkl_obj.process(MergeDictResultCallback())
+        except:
+            log.debug("Can't parse command file '{}'.".format(yaml_file))
+            return None
 
-        # doc = config_content.get("doc", {})
-        # TODO: check format of config
-        # options = config_content.get("args", {})
-        # vars = config_content.get("vars", {})
         tasks = config_content.get("tasks", None)
-        # default_vars = config_content.get("defaults", {})
 
         if not tasks:
-            click.echo("No tasks included in command, doing nothing.")
-            sys.exit(1)
+            return None
 
-        cli_command = create_cli_command(config_content, yaml_file, no_run)
+        cli_command = create_cli_command(config_content, command_name=command_name, command_path=yaml_file)
         return cli_command
+

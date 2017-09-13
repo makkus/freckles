@@ -15,8 +15,6 @@ from nsbl.nsbl import Nsbl, NsblRunner, ensure_git_repo_format
 
 import yaml
 
-from .commands import CommandRepo, RepoType
-
 log = logging.getLogger("freckles")
 
 # TODO: this is ugly, probably have refactor how role repos are used

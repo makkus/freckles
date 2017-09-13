@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # python 3 compatibility
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import collections
 import logging
@@ -38,10 +37,7 @@ DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecutables"
 
 def assemble_freckle_run(*args, **kwargs):
 
-    # print("ARGS")
-    # pprint.pprint(args)
-    # print("KWARGS")
-    # pprint.pprint(kwargs)
+    no_run = kwargs.get("no_run")
 
     default_target = kwargs.get("target", None)
     if not default_target:
@@ -58,8 +54,12 @@ def assemble_freckle_run(*args, **kwargs):
     extra_profile_vars = {}
     repos = collections.OrderedDict()
     profiles = []
+
+    metadata = {}
     for p in args[0]:
         pn = p["name"]
+        metadata[pn] = p["metadata"]
+
         if pn in profiles:
             raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
         else:
@@ -87,27 +87,38 @@ def assemble_freckle_run(*args, **kwargs):
 
             # freckle_repo = create_freckle_desc(freckle_url, target, True, profiles=profile_names, includes=include_all, excludes=exclude_all)
 
-
     all_freckle_repos = []
     for freckle_url, freckle_details in repos.items():
         freckle_repo = create_freckle_desc(freckle_url, freckle_details["target"], True, profiles=freckle_details["profiles"], includes=freckle_details["includes"], excludes=freckle_details["excludes"])
         all_freckle_repos.append(freckle_repo)
 
-    create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass, no_run=False, output_format=output_format)
+    if no_run:
+        run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, no_run=True)
+
+        click.echo("")
+        click.echo("Used adapters:")
+        for p in profiles:
+            click.echo("\tadapter: {}".format(p))
+            click.echo("\tpath: {}".format(metadata[p]["command_path"]))
+        click.echo("")
+        click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
+        click.echo("")
+    else:
+        create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format)
 
 class ProfileRepo(object):
 
-    def __init__(self, config, no_run=False):
+    def __init__(self, config):
 
         self.profiles = find_supported_profiles(config)
-        self.commands = self.get_commands(no_run)
+        self.commands = self.get_commands()
 
-    def get_commands(self, no_run=False):
+    def get_commands(self):
 
         commands = {}
 
         for profile_name, profile_path in self.profiles.items():
-            command = self.create_command(profile_name, profile_path, no_run)
+            command = self.create_command(profile_name, profile_path)
             commands[profile_name] = command
 
         return commands
@@ -122,11 +133,11 @@ class ProfileRepo(object):
         doc = self.commands[command_name]["doc"]
         args_that_are_vars = self.commands[command_name]["args_that_are_vars"]
         value_vars = self.commands[command_name]["value_vars"]
-        no_run = self.commands[command_name]["no_run"]
+        metadata = self.commands[command_name]["metadata"]
 
         def command_callback(**kwargs):
             new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars, value_vars)
-            return {"name": command_name, "vars": final_vars}
+            return {"name": command_name, "vars": final_vars, "metadata": metadata}
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
@@ -136,7 +147,7 @@ class ProfileRepo(object):
         return command
 
 
-    def create_command(self, command_name, command_path, no_run=False):
+    def create_command(self, command_name, command_path):
 
         log.debug("Creating command for profile: '{}...'".format(command_name))
         profile_metadata_file = os.path.join(command_path, "{}.{}".format(command_name, ADAPTER_MARKER_EXTENSION))
@@ -183,5 +194,5 @@ class ProfileRepo(object):
         #     "is_var": True
         # }
 
-        cli_command = create_cli_command(md, command_path, no_run, extra_options=extra_options)
+        cli_command = create_cli_command(md, command_name=command_name, command_path=command_path, extra_options=extra_options)
         return cli_command

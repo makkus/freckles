@@ -1,5 +1,4 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import re
 import inspect
@@ -223,7 +222,17 @@ def find_supported_profiles(config=None):
 
     return result
 
-def create_cli_command(config, command_path=None, no_run=False, extra_options={}):
+def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto", run_parameters={}):
+
+    click.echo("")
+    click.echo("frecklecutable: {}".format(task_metadata.get("command_name", "n/a")))
+    click.echo("path: {}".format(task_metadata.get("command_path", "n/a")))
+    click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
+    click.echo("config:")
+    click.echo(pprint.pformat(task_config))
+    click.echo("")
+
+def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
 
     doc = config.get("doc", {})
     # TODO: check format of config
@@ -279,7 +288,7 @@ def create_cli_command(config, command_path=None, no_run=False, extra_options={}
             o = click.Option(param_decls=arg_names_for_option, **opt_details)
         options_list.append(o)
 
-    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "value_vars": value_vars, "no_run": no_run}
+    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "value_vars": value_vars, "metadata": {"extra_options": extra_options, "command_path": command_path, "command_name": command_name, "config": config}}
 
 
 def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
@@ -519,11 +528,10 @@ def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto
 
     task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 
-    create_and_run_nsbl_runner(task_config, output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
+    return create_and_run_nsbl_runner(task_config, output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
 
 
-
-def create_and_run_nsbl_runner(task_config, output_format="default", ask_become_pass="auto", pre_run_callback=None, no_run=False, additional_roles=[], config=None):
+def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="auto", pre_run_callback=None, no_run=False, additional_roles=[], config=None):
 
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
@@ -562,4 +570,4 @@ def create_and_run_nsbl_runner(task_config, output_format="default", ask_become_
 
     force = True
 
-    runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
+    return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)

@@ -52,10 +52,10 @@ class FrecklesProfiles(click.MultiCommand):
 
 
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-a"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
-
+        no_run_option = click.Option(param_decls=["--no-run"], help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
         version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
-        self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, version_option]
-        self.profile_repo = ProfileRepo(config, no_run=False)
+        self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, no_run_option, version_option]
+        self.profile_repo = ProfileRepo(config)
         self.command_names = self.profile_repo.profiles.keys()
         self.command_names.sort()
 

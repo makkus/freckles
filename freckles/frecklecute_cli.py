@@ -9,7 +9,7 @@ import sys
 import click
 import nsbl
 from frkl import frkl
-from .utils import DEFAULT_FRECKLES_CONFIG
+from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos, create_and_run_nsbl_runner
 import yaml
 
 from . import __version__ as VERSION, print_version
@@ -19,7 +19,7 @@ from .freckles_defaults import *
 log = logging.getLogger("freckles")
 
 
-# TODO: this is ugly, probably have refactor how role repos are used
+# TODO: this is a bit ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 
@@ -35,9 +35,9 @@ COMMAND_PROCESSOR_CHAIN = [
 
 # we need the current command to dynamically add it to the available ones
 current_command = None
-temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
 
-command_list = temp_repo.get_commands().keys()
+# temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
+# command_list = temp_repo.get_commands().keys()
 
 if sys.argv[0].endswith("frecklecute"):
     for arg in sys.argv[1:]:
@@ -45,10 +45,10 @@ if sys.argv[0].endswith("frecklecute"):
         if arg.startswith("-"):
             continue
 
-        if arg in command_list:
-            current_command = None
-            current_command_path = None
-            break
+        # if arg in command_list:
+            # current_command = None
+            # current_command_path = None
+            # break
 
         if os.path.exists(arg):
             current_command = arg
@@ -71,10 +71,11 @@ class FrecklesCommand(click.MultiCommand):
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-a"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
         version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+        no_run_option = click.Option(param_decls=["--no-run"], help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
 
-        self.params = [output_option, ask_become_pass_option, version_option]
+        self.params = [output_option, ask_become_pass_option, no_run_option, version_option]
 
-        self.command_repo = CommandRepo(paths=command_repos, additional_commands=[current_command], no_run=False)
+        self.command_repo = CommandRepo(paths=command_repos, additional_commands=[current_command])
         self.current_command = current_command[0]
         self.command_names = self.command_repo.commands.keys()
         self.command_names.sort()
@@ -100,7 +101,11 @@ class FrecklesCommand(click.MultiCommand):
 click.core.SUBCOMMAND_METAVAR = 'FRECKLECUTABLE [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'FRECKLECUTABLE1 [ARGS]... [FRECKLECUTABLE2 [ARGS]...]...'
 
-cli = FrecklesCommand((current_command, current_command_path), help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
+trusted_repos = DEFAULT_FRECKLES_CONFIG.trusted_repos
+
+local_paths = get_local_repos(trusted_repos, "frecklecutables")
+
+cli = FrecklesCommand((current_command, current_command_path), command_repos=local_paths, help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
 
 if __name__ == "__main__":
 
