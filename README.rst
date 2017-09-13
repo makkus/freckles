@@ -61,7 +61,7 @@ Or, maybe you are working on a webpage. If somebody writes an adapter for this u
 
 Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks') locally. It also allows you to write short scriptlets ('*frecklecutables*'), which can be command-line applications themselves. As *freckles* is built ontop of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for a *frecklecutable*.
 
-*frecklecute* comes with a few default *frecklecutables*, for example one that lets you execute any arbitrary Ansible module or role directly (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_). This is what it looks like to ensure a folder exists, using *frecklecute* (including '`inaugurating <inaugurate_>`_'/bootstrapping *frecklecute* itself):
+*frecklecute* comes with a few default *frecklecutables*, for example one (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_) that lets you execute any arbitrary Ansible module or role directly. This is what it looks like to ensure a folder exists, using *frecklecute* (including '`inaugurating <inaugurate_>`_'/bootstrapping *frecklecute* itself):
 
 .. code-block:: console
 
@@ -143,7 +143,7 @@ Some actual/potential usecases
 * provide an (easy-to-read, understand and re-use) *frecklecutable* or *freckle adapter* alongside a blog post you wrote about some useful workstation setup (e.g. 'how to secure your workstation', or 'how to setup a python dev environment', ...)
 * share the same project setup with your team-mates
 * quickly create install/update scripts for your scripts/applications where it's not worth or easy to create 'traditional' packages
-
+* minimal bootstrap/config management for your Ansible/Chef/saltstack controllers -- I mean, you need to set those up too, right?
 
 Examples
 ********
