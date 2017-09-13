@@ -29,7 +29,9 @@ vars:
     {% endfor %}
 
 tasks:
-  - install:
-     - git:
-         pkg_mgr: "{{ pkg_mgr }}"
+  - install-pkg-mgrs:
+      pkg_mgrs:
+        - homebrew
+        - git
+      pkg_mgr: "{{ pkg_mgr }}"
   - makkus.freckles-config
