@@ -2,9 +2,9 @@
 Commands
 ########
 
-The *freckles* project currently provides two command-line applications: ``freckles`` and ``frecklecute``. Both use the same underlying code, but they differ slightly in what they can do:
+The *freckles* project currently provides two command-line applications: ``freckles`` and ``frecklecute``. Both use mostly the same underlying code, but they differ slightly in what they can do:
 
-- ``freckles`` helps getting a set of data or code, and preparing the host environment to handle it meaningfully
+- ``freckles`` helps retrieving a set of data or code, and preparing the host environment to handle it meaningfully
 - ``frecklecute`` can execute a list of tasks (ansible modules and/or roles) defined in a yaml-formatted text file, to get the local machine into a certain state
 
 The former is designed to require little to no configuration to achive its goal, the latter is more flexible, but needs a tad more effort in preparing the list of tasks:

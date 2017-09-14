@@ -73,7 +73,7 @@ This has to be, by the way, the most bloated and roundabout way to create a fold
 
    frecklecute ansible-task --become --task-name mongrelion.docker
 
-This will install docker with everything that is required on your local machine (check the `source code of the role <https://github.com/mongrelion/ansible-role-docker>`_ to see what exactly it is doing, and how, and which target environment it supports).
+This will install docker with everything that is required on your local machine (check the `source code of the role <https://github.com/mongrelion/ansible-role-docker>`_ to see what exactly it is doing, and how, and which target environments it supports).
 
 In addition to using the pre-existing *frecklecutables*, it's easy to `write your own <https://docs.freckles.io/en/latest/writing_frecklecutables.html>`_. Using the two tasks above, we could write one like the following (note how it's possible to make a cli option for the ``path`` var), and store it in a file called ``example.yml``:
 
@@ -102,7 +102,7 @@ Really quick start
 
 (... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
 
-Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' ( so before --mostly rightfully-- complaining about executing random scripts from the internet, read more about the bootstrap process itself `here <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, then come back and complain :-) ). To install *freckles* and run it straight away to display it's help, issue:
+Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is quite often a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run it straight away to display it's help, issue:
 
 .. code-block:: console
 
@@ -125,32 +125,32 @@ Features
 
 * one-line setup of a new working environment (including *freckles* itself)
 * minimal initial requirements: only ``curl`` or ``wget``
-* supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested)
+* supports Linux & MacOS X (and maybe the Ubuntu subsystem on Windows 10, not tested yet)
 * can use the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * extensible via *adapters*
 * declarative, idempotent scripting, sorta
 * allows the use of all ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
 
-
 Some actual/potential usecases
 ******************************
 
 * easily replicate configuration across machines
 * use configuration to document the setup of your working environment
-* quickly re-install your workstation after a potential security incident, or a border crossing, or after you did something to your filesystem you now regret
+* quickly re-install your workstation after a potential security incident (or a border crossing?), or after you did something to your filesystem you now realize you shouldn't have done
 * 'self-loading' containers
-* provide an (easy-to-read, understand and re-use) *frecklecutable* or *freckle adapter* alongside a blog post you wrote about some useful workstation setup (e.g. 'how to secure your workstation', or 'how to setup a python dev environment', ...)
 * share the same project setup with your team-mates
-* quickly create install/update scripts for your scripts/applications where it's not worth or easy to create 'traditional' packages
-* minimal bootstrap/config management for your Ansible/Chef/saltstack controllers -- I mean, you need to set those up too, right?
+* provide an (easy-to-read, understand and re-use) *frecklecutable* or *freckle adapter* alongside a blog post you wrote about some useful workstation setup (e.g. 'how to secure your workstation', or 'how to setup a python dev environment', ...)
+* quickly create install/update scripts for your scripts/applications where it's not worthwhile to create 'traditional' packages
+* minimal, initial bootstrap/config management for your Ansible/Chef/saltstack controllers -- I mean, you need to set those up too, right?
+* anything else where you need to make sure your environment needs to be in a certain state but for some reason or other you don't want to use a 'full-blown' configuration management system
 
 Examples
 ********
 
 Probably best to show what *freckles* is, and what it can do using examples. Do not try those at home, as they'll install loads of packages you most likely don't need.
 
-I'll show you how I use *freckles* and *frecklecute* to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use *freckles* on the *freckles* source code itself. And finally I'll quickly outline how to use *frecklecute* to do some other housekeeping tasks.
+I'll show you how I use *freckles* and *frecklecute* to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use *freckles* on the *freckles* source code itself. And finally I'll quickly outline how to use *frecklecute* to do some other, more specialized, housekeeping tasks.
 
 
 using: *freckles*
@@ -176,9 +176,9 @@ This is what happens:
 - installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
 - symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called stow_ -- which *freckles* also installs if not present already)
 
-In case you had a look at `my dotfiles repo <https://github.com/makkus/dotfiles>`_: I've organized my configuration into subfolders (to be able to exclude applications I don't need for certain scenarios -- e.g. X-applications on a remote server), but that is more complicated than necessary. You can certainly just have a flatter folder-structure, with one subfolder per application.
+In case you had a look at `my dotfiles repo <https://github.com/makkus/dotfiles>`_: I've organized my configuration into subfolders (to be able to exclude applications I don't need for certain scenarios -- e.g. X-applications on a remote server), but that is more complicated than necessary. You can certainly just have a flat folder-structure, with one subfolder per application.
 
-Most of the above steps can be switched off, if necessary. More information about the ``dotfiles`` adapter used in this example: `dotfiles <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_.
+Most of the above steps can be switched off, if necessary. More information about the adapter used in this example: `dotfiles <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_.
 
 Example #2, where we setup a Python development project
 -------------------------------------------------------
@@ -207,7 +207,7 @@ By default, virtualenvs are put under ``$HOME/.local/virtualenvs`` and are named
 
    source $HOME/.local/virtualenvs/freckles-dev/bin/activate
 
-More information about the ``python-doc`` adapter: `python-doc <https://docs.freckles.io/en/latest/adapters/python-doc.html>`_.
+More information about the ``python-doc`` adapter: `python-doc <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_.
 
 using: *frecklecute*
 ====================
@@ -215,11 +215,11 @@ using: *frecklecute*
 Example #3, where we run an ansible task as well as an external ansible role
 ----------------------------------------------------------------------------
 
-So -- having setup all the data, associated applications, source code and working environment(s) I need -- there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use, I specified ``zile`` should put all backups into ``~/.backups/zile``. That directory doesn't exist yet, and if it doesn't exists, ``zile`` doesn't create it automatically, and consequently does not store any backups of the files I'm working on. So I have to make sure that folder gets created.
+So -- having setup all the data, associated applications, source code and working environment(s) I need -- there are a few other housekeeping tasks to do. For example, in the configuration of the minimal emacs-like editor ``zile`` I sometimes use, I specified ``zile`` should put all backups into ``~/.backups/zile``. That directory doesn't exist yet, and if it doesn't exist, ``zile`` doesn't create it automatically, and consequently does not store any backups of the files I'm working on. So I have to make sure that folder gets created.
 
 Also I want to have Docker installed on that new machine. The install procedure of Docker is a bit more complicated than an simple ``apt-get install docker``, and because of that I can't easily add it to my dotfiles configuration. Luckily though, there are tons of ansible roles on https://galaxy.ansible.com that can do the job of installing Docker for me. The only thing I need to check is that the role supports the platform I am running.
 
-For those more specialized tasks *freckles* is not a really good fit (although we could probably create an adapter for this, or expand the existing ``dotfiles`` one), so it's easier to use *frecklecute*. *frecklecute* operates on (yaml) text files (I call them *frecklecutables*) that contain a list of Ansible tasks and/or roles to execute, along with configuration for those tasks and roles. Here's a short *frecklecutable* to create the folder I need, and install docker using the a role i found on ansible galaxy: https://galaxy.ansible.com/mongrelion/docker/
+For those more specialized tasks *freckles* is not a really good fit (although we could probably create an adapter for this, or expand the existing ``dotfiles`` one), so it's easier to use *frecklecute*. *frecklecute* operates on (yaml) text files (I call them *frecklecutables*) that contain a list of Ansible tasks and/or roles to execute, along with configuration for those tasks and roles. Here's a short *frecklecutable* to create the folder I need, and install *docker* using a role I found on Ansible galaxy: https://galaxy.ansible.com/mongrelion/docker/
 
 .. code-block:: yaml
 

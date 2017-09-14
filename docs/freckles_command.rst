@@ -5,9 +5,9 @@
 Description
 ***********
 
-``freckles`` is an application that downloads a remote code or data repository (I call such a thing a 'freckle') that is structured according to one or some conventions. After download, ``freckles`` will execute pre-defined tasks appropriate for the type of `freckle` in question.
+``freckles`` is an application that downloads a remote code or data repository (a '*freckle*') that is structured according to one or some conventions. After download, ``freckles`` will execute pre-defined tasks appropriate for the type of *freckle* in question.
 
-In order to handle those different data profiles, ``freckles`` can be extended with so called *adapters*. For example, if the `freckle` is a python project, ``freckles`` will use the ``python-dev`` adapter which will create a virtualenv (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
+In order to handle those different data/code profiles, ``freckles`` can be extended with so called *adapters*. For example, if the `freckle` is a python project, ``freckles`` will use the ``python-dev`` adapter which will create a virtualenv (after, if necessary, downloading everything that is needed to create virtualenvs in the first place), download and install all dependencies it can find in any potential ``requirement_*.txt`` files, and then execute either ``pip install -e .`` or  ``python setup.py develop`` inside the created virtualenv.
 
 Or, the `freckle` is a folder containing subfolders which in turn contain `dotfiles` (that's what configuration files are called in Unix-land). ``freckles`` will download this repo, install potentially configured applications that relate to the configuration files, and symbolically link those configuration files to the appropriate places.
 
@@ -28,38 +28,58 @@ Details
 Adapters & profiles
 ===================
 
-Currently, only 2 types of data are supported by *freckles*: :doc:`dotfiles </adapters/dotfiles>` and :doc:`python dev projects </adapters/python-dev>`. To encourage the creation of lots of adapters, in order to support lots of different data-types, *freckles* tries to make it as easy as possible to create new adapters.
+Currently, only 2 types/profiles of data are supported by *freckles*: :doc:`dotfiles </adapters/dotfiles>` and :doc:`python dev projects </adapters/python-dev>`. To encourage the creation of lots of adapters, in order to support lots of different data-types, *freckles* tries to make it as easy as possible to create new adapters, and add those adapters to your environment.
 
 Adapter locations/naming
 ------------------------
 
-By default, *freckles* checks one folder for available adapters: ``$HOME/.freckles/adapters``. More locations can be specified by adding either git repositories urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To add an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*:
+By default *freckles* comes with a (small) set of 'officially supported' adapters. In addition, by default it checks one other folder for more available adapters: ``$HOME/.freckles/adapters``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*:
 
 .. code-block:: console
 
-   frecklecute enable-repos gh:makkus/freckles_roles_and_adapters
+   frecklecute enable-repo gh:makkus/freckles_roles_and_adapters
 
 This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where *freckles* will find it in subsequent runs.
 
-*freckles* will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (before the ``.freckle-adapter`` part). Then it'll look for 2 other files in the same folder, starting with the adapter name and ending with either ``freckle-init`` or ``freckle-tasks``. Only one of those two needs to exist (which one doesn't matter), but it's also possible for both of those to exist. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*, using the *freckle*s specific metadata.
+*freckles* will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.freckle-adapter``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``freckle-init`` or ``freckle-tasks``. Only one of those two needs to exist (which one doesn't matter), but it's also possible for both of those to be there. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way -- and only once -- for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*), using the *freckle* specific metadata.
 
 Available profiles
 ------------------
 
-TODO
+Find all locally available adapters by executing ``freckles`` with the ``--help`` option:
+
+.. code-block:: console
+
+   $ freckles --help
+   Usage: freckles [OPTIONS] ADAPTER1 [ARGS]... [ADAPTER2 [ARGS]...]...
+
+     Downloads a remote dataset or code (called a 'freckle') and sets up
+     ...
+     ...
+
+                            * more output *
+
+     ...
+     ...
+   Commands:
+     debug-freckle  helper adapter, for developing other adapter
+     dotfiles       installs packages, stows dotfiles
+     python-dev     prepares a python development environment
+
+
 
 Quick-start
 -----------
 
-Following a quick overview on how to create a *freckles* adapter, more in-detail information can be found :doc:`here </writing_freckles_adapters>`. *freckles adapters* use *Ansible's* configuration format (facilitating *yaml*), similar to how to create Ansible playbooks and tasks for roles. I'll assume you'll have some experience with *Ansible* here. If that is not the case, maybe check out the `Ansible documentation <http://docs.ansible.com/ansible/latest/playbooks_intro.html>`_ before continuing here.
+This is a quick overview on how to create a *freckles* adapter, more in-detail information can be found :doc:`here </writing_freckles_adapters>`. *freckles adapters* use *Ansible's* configuration format (facilitating *yaml*), similar to how to create Ansible playbooks and tasks for roles. I'll assume you have some experience with *Ansible* here. If that is not the case, maybe check out the `Ansible documentation <http://docs.ansible.com/ansible/latest/playbooks_intro.html>`_ before continuing here.
 
-*freckles* comes with a *frecklecute* (called ``create-adapter`` that creates a *freckles adapter* stub in ``$HOME/.freckles/adapters/<adapter_name>``:
+*freckles* comes with a *frecklecute* (called `'create_adapter' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/create-adapter>`_ that can help you creating a *freckles adapter* stub in ``$HOME/.freckles/adapters/<adapter_name>``:
 
 .. code-block:: console
 
    frecklecute create-adapter <adapter_name>
 
-For example, let's create an adapter that can handle projects that use Vagrant_. The adapter will, after checking out of the *freckle*, install *Vagrant* (if it is not already installed), then read the *freckle* metadata to determine whether any *Vagrant plugins* need to be installed, and install those.
+For example, let's create an adapter that can handle projects that use Vagrant_. The adapter will, after checking out of the *freckle*, install *Vagrant* (if it is not already installed), then read the *freckle* metadata to determine whether any *Vagrant plugins* need to be installed, then installs those.
 
 .. code-block:: console
 
@@ -95,9 +115,9 @@ To see that our adapter-stub was created, we can run the *freckles* help:
      freckles is free and open source software, for more information
      visit: https://docs.freckles.io
 
-As you can see, the ``vagrant-dev-example`` profile is created and ready to be used by *freckles*. By default it only contains a few debug statements, which is helpful to see which metadata variables are present to be used by our adapter.
+As you can see, the ``vagrant-dev-example`` profile is created and ready to be used by *freckles*. By default it only contains a few debug tasks, which is helpful to see which metadata variables are present to be used by our adapter.
 
-Let's clean up the help output first, before we continue. To do that, edit the file ``$HOME/.freckles/adapters/vagrant-dev-example/vagrant-dev-example.freckle-adapter``, and change the ``doc`` key like like so:
+Let's clean up the help output first before we continue. To do that, edit the file ``$HOME/.freckles/adapters/vagrant-dev-example/vagrant-dev-example.freckle-adapter``, and change the ``doc`` key like like so:
 
 .. code-block:: shell
 
@@ -133,7 +153,7 @@ I've create an example *freckle* repository with some example metadata to help d
 
 We use the ``skippy`` output format as the default one wouldn't display any debug variables.
 
-First order of business is to make sure *Vagrant* is installed. Since *freckles* supports the processing of multiple *freckle* folders in the same run, but it is not necessary to ensure *Vagrant* is installed for every one of those processing items, we put the required directives in the file called ``vagrant-dev-example.freckle-init`` (in ``$HOME/.freckles/adapters/vagrant-dev-example``). We replace the existing content of the ``vagrant-dev-example.freckle-init`` file with:
+First order of business is to make sure *Vagrant* is installed. Since *freckles* supports the processing of multiple *freckle* folders in the same run, but it is not necessary to ensure *Vagrant* is installed for every one of those processing iterations, we put the required directives in the file called ``vagrant-dev-example.freckle-init`` (in ``$HOME/.freckles/adapters/vagrant-dev-example``). We replace the existing content of the ``vagrant-dev-example.freckle-init`` file with:
 
 .. code-block:: yaml
 

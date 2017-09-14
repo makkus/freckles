@@ -22,7 +22,7 @@ FRECKLES_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') 
 
 Ideally the remote dataset includes all the metadata that is needed to setup the environment, but it's possible to provide some directives using commandline options globally (--target, --include, --exclude), or per adapter (use the --help function on each adapter to view those).
 
-Locally available adapters for supported profiles are listed below, each having their own configuration. You can specify a 'global' url that is then used by each of specified adapters by adding it's '--freckle' option before any adapter. Or you can assign one (or multiple) freckle to an adapter by providing it after the adapter name.
+Locally available adapters for supported profiles are listed below, each having their own configuration. You can specify a 'global' url by adding it's '--freckle' option before any of the subsequently specified adapters, prompting any of those adapters to apply their tasks to it. Or you can assign one (or multiple) freckle to an adapter by providing it after the adapter name.
 
 For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckles_command.html
 """
