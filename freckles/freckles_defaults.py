@@ -1,7 +1,6 @@
-from nsbl import defaults
 import os
-import pprint
-import sys
+from nsbl import defaults
+
 SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")

@@ -1,24 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-
-import logging
-import os
-import pprint
-import shutil
-import sys
-from pydoc import locate
-
 import click
-from ansible.plugins.filter.core import FilterModule
-from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
-                       EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor)
-from jinja2 import Environment, PackageLoader, Template
-from jinja2.ext import Extension
-from nsbl import defaults, nsbl
-from six import string_types
+
 from .freckles_defaults import *
-from nsbl import defaults
 
 try:
     set

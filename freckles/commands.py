@@ -4,25 +4,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 import logging
-import os
-import pprint
-import sys
-from pydoc import locate
 
 import click
-from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
+from frkl.frkl import (EnsurePythonObjectProcessor,
                        EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor, dict_merge)
-from jinja2 import Environment, PackageLoader, Template
-from six import string_types
-
-import yaml
+                       UrlAbbrevProcessor)
 
 from .freckles_defaults import *
-from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType, print_task_list_details,
-                    create_and_run_nsbl_runner, create_freckle_desc,
-                    render_dict, render_vars_template,
-                    url_is_local, create_cli_command, get_vars_from_cli_input)
+from .utils import create_and_run_nsbl_runner, create_cli_command, get_vars_from_cli_input, print_task_list_details, \
+    render_dict
 
 log = logging.getLogger("freckles")
 

@@ -1,27 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 
-import re
-import inspect
-import json
 import copy
 import fnmatch
-import logging
-import os
-import pprint
+import json
+import re
 import shutil
-import sys
 from pydoc import locate
-from .config import FrecklesConfig
+
 import click
 from ansible.plugins.filter.core import FilterModule
-from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
-                       EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor, dict_merge)
-from jinja2 import Environment, PackageLoader, Template
+from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge
+from jinja2 import Environment
 from jinja2.ext import Extension
-from nsbl import defaults, nsbl
-from nsbl import tasks as nsbl_tasks
+from nsbl import nsbl, tasks as nsbl_tasks
 from six import string_types
+
+from .config import FrecklesConfig
 
 try:
     set
@@ -528,7 +522,7 @@ def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto
 
     task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 
-    return create_and_run_nsbl_runner(task_config, output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
+    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="auto", pre_run_callback=None, no_run=False, additional_roles=[], config=None):

@@ -3,20 +3,13 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-import os
-import pprint
-import sys
 
 import click
-from six import string_types
 
-import yaml
+from . import print_version
 from .freckles_defaults import *
-from . import __version__ as VERSION, print_version
 from .profiles import ProfileRepo, assemble_freckle_run
-from .utils import (RepoType, create_and_run_nsbl_runner, create_freckle_desc,
-                    find_supported_profiles,
-                    get_adapter_dependency_roles, url_is_local, DEFAULT_FRECKLES_CONFIG)
+from .utils import DEFAULT_FRECKLES_CONFIG, RepoType
 
 try:
     set
@@ -49,7 +42,7 @@ class FrecklesProfiles(click.MultiCommand):
         target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str, metavar="PATH", help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home')
         include_option = click.Option(param_decls=["--include", "-i"], help='if specified, only process folders that end with one of the specified strings, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
         exclude_option = click.Option(param_decls=["--exclude", "-e"], help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]))
+        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="auto")
         no_run_option = click.Option(param_decls=["--no-run"], help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
         version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
         self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, no_run_option, version_option]

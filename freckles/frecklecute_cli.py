@@ -3,18 +3,16 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-import os
-import sys
 
 import click
 import nsbl
+import sys
 from frkl import frkl
-from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos, create_and_run_nsbl_runner
-import yaml
 
-from . import __version__ as VERSION, print_version
+from . import print_version
 from .commands import CommandRepo
 from .freckles_defaults import *
+from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos
 
 log = logging.getLogger("freckles")
 
@@ -69,7 +67,7 @@ class FrecklesCommand(click.MultiCommand):
         click.MultiCommand.__init__(self, "freckles", **kwargs)
 
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
-        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="true")
+        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="auto")
         version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
         no_run_option = click.Option(param_decls=["--no-run"], help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
 

@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import json
-import os
-import pprint
 import subprocess
-import sys
 
 import click
-from frkl import frkl
-
-import click_log
 import yaml
 
-from nsbl import defaults, tasks
-from .freckles_defaults import *
 from . import __version__ as VERSION
-from .utils import get_all_roles_in_repos, get_all_adapters_in_repos, find_adapter_files, get_adapter_dependency_roles
 from .commands import CommandRepo
+from .freckles_defaults import *
+from .utils import get_all_adapters_in_repos, get_all_roles_in_repos
 
 
 def output(python_object, format="raw", pager=False):

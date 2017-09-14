@@ -2,18 +2,11 @@
 
 from __future__ import absolute_import, division, print_function
 
-import cProfile
 import logging
-import os
-import pprint
-import profile
-import sys
 
-import click
 import nsbl
+import os
 from nsbl.nsbl import Nsbl, NsblRunner, ensure_git_repo_format
-
-import yaml
 
 log = logging.getLogger("freckles")
 

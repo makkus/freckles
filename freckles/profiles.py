@@ -5,28 +5,19 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 import logging
-import os
-import pprint
-import sys
-from pydoc import locate
-from frkl import frkl
-import click
-from frkl.frkl import (PLACEHOLDER, EnsurePythonObjectProcessor,
-                       EnsureUrlProcessor, Frkl, MergeDictResultCallback,
-                       UrlAbbrevProcessor, YamlTextSplitProcessor, dict_merge)
-from jinja2 import Environment, PackageLoader, Template
-from six import string_types
 
+import click
+import os
 import yaml
+
 try:
     set
 except NameError:
     from sets import Set as set
 
-from .utils import (FRECKLES_REPO, FRECKLES_URL, RepoType,
-                    create_and_run_nsbl_runner, create_freckle_desc,
-                    render_dict, render_vars_template,
-                    url_is_local, find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run, get_vars_from_cli_input)
+from .utils import (RepoType,
+                    create_freckle_desc,
+                    find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run, get_vars_from_cli_input)
 
 log = logging.getLogger("freckles")
 
