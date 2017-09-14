@@ -17,17 +17,16 @@ except NameError:
 
 from .utils import (RepoType,
                     create_freckle_desc,
-                    find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run, get_vars_from_cli_input)
+                    find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
+                    get_vars_from_cli_input)
 
 log = logging.getLogger("freckles")
-
 
 COMMAND_SEPERATOR = "-"
 DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecutables")
 
 
 def assemble_freckle_run(*args, **kwargs):
-
     no_run = kwargs.get("no_run")
 
     default_target = kwargs.get("target", None)
@@ -67,7 +66,6 @@ def assemble_freckle_run(*args, **kwargs):
 
         all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
         for freckle_url in all_freckles_for_this_profile:
-
             fr = {
                 "target": default_target,
                 "includes": default_include,
@@ -80,11 +78,14 @@ def assemble_freckle_run(*args, **kwargs):
 
     all_freckle_repos = []
     for freckle_url, freckle_details in repos.items():
-        freckle_repo = create_freckle_desc(freckle_url, freckle_details["target"], True, profiles=freckle_details["profiles"], includes=freckle_details["includes"], excludes=freckle_details["excludes"])
+        freckle_repo = create_freckle_desc(freckle_url, freckle_details["target"], True,
+                                           profiles=freckle_details["profiles"], includes=freckle_details["includes"],
+                                           excludes=freckle_details["excludes"])
         all_freckle_repos.append(freckle_repo)
 
     if no_run:
-        run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, no_run=True)
+        run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
+                                             output_format=output_format, no_run=True)
 
         click.echo("")
         click.echo("Used adapters:")
@@ -95,10 +96,11 @@ def assemble_freckle_run(*args, **kwargs):
         click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
         click.echo("")
     else:
-        create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format)
+        create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
+                            output_format=output_format)
+
 
 class ProfileRepo(object):
-
     def __init__(self, config):
 
         self.profiles = find_supported_profiles(config)
@@ -127,16 +129,17 @@ class ProfileRepo(object):
         metadata = self.commands[command_name]["metadata"]
 
         def command_callback(**kwargs):
-            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars, value_vars)
+            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars,
+                                                           value_vars)
             return {"name": command_name, "vars": final_vars, "metadata": metadata}
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
         epilog = doc.get("epilog", None)
 
-        command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog, callback=command_callback)
+        command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog,
+                                callback=command_callback)
         return command
-
 
     def create_command(self, command_name, command_path):
 
@@ -185,5 +188,6 @@ class ProfileRepo(object):
         #     "is_var": True
         # }
 
-        cli_command = create_cli_command(md, command_name=command_name, command_path=command_path, extra_options=extra_options)
+        cli_command = create_cli_command(md, command_name=command_name, command_path=command_path,
+                                         extra_options=extra_options)
         return cli_command

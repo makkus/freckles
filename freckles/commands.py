@@ -16,14 +16,12 @@ from .utils import create_and_run_nsbl_runner, create_cli_command, get_vars_from
 
 log = logging.getLogger("freckles")
 
-
 COMMAND_SEPERATOR = "-"
 DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "external", "frecklecutables")
 DEFAULT_COMMAND_EPILOG = "For more information about frecklecute and the freckles project, please visit: https://github.com/makkus/freckles"
 
 
 def find_frecklecutable_dirs(path):
-
     result = []
     for root, dirnames, filenames in os.walk(os.path.realpath(path), topdown=True, followlinks=True):
 
@@ -35,8 +33,8 @@ def find_frecklecutable_dirs(path):
 
     return result
 
-class CommandRepo(object):
 
+class CommandRepo(object):
     def __init__(self, paths=[], additional_commands=[]):
         if not isinstance(paths, (list, tuple)):
             paths = [paths]
@@ -44,7 +42,7 @@ class CommandRepo(object):
         self.paths = [os.path.expanduser(p) for p in paths]
 
         # if DEFAULT_COMMAND_REPO not in self.paths:
-            # self.paths.insert(0, DEFAULT_COMMAND_REPO)
+        # self.paths.insert(0, DEFAULT_COMMAND_REPO)
 
         self.additional_commands = additional_commands
 
@@ -63,7 +61,6 @@ class CommandRepo(object):
 
             root_dirs = find_frecklecutable_dirs(path)
             command_folders.extend(root_dirs)
-
 
         commands = {}
 
@@ -114,7 +111,8 @@ class CommandRepo(object):
 
         def command_callback(**kwargs):
 
-            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars, value_vars)
+            new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars,
+                                                           value_vars)
             rendered_tasks = render_dict(tasks, new_args)
 
             # log.debug("Args: {}".format(new_args))
@@ -130,17 +128,21 @@ class CommandRepo(object):
             no_run = ctx.params["no_run"]
 
             if no_run:
-                parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass, no_run=True)
-                print_task_list_details(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass, run_parameters=parameters)
+                parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
+                                                        ask_become_pass=ask_become_pass, no_run=True)
+                print_task_list_details(task_config, task_metadata=metadata, output_format=output,
+                                        ask_become_pass=ask_become_pass, run_parameters=parameters)
             else:
-                create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output, ask_become_pass=ask_become_pass)
-            # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
+                create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
+                                           ask_become_pass=ask_become_pass)
+                # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)
         epilog = doc.get("epilog", DEFAULT_COMMAND_EPILOG)
 
-        command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog, callback=command_callback)
+        command = click.Command(command_name, params=options_list, help=help, short_help=short_help, epilog=epilog,
+                                callback=command_callback)
         return command
 
     def create_command(self, command_name, yaml_file):
@@ -163,4 +165,3 @@ class CommandRepo(object):
 
         cli_command = create_cli_command(config_content, command_name=command_name, command_path=yaml_file)
         return cli_command
-

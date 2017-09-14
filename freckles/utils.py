@@ -29,8 +29,8 @@ from .freckles_defaults import *
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
 
-class FrecklesUtilsExtension(Extension):
 
+class FrecklesUtilsExtension(Extension):
     def __init__(self, environment):
         super(Extension, self).__init__()
         fm = FilterModule()
@@ -38,26 +38,27 @@ class FrecklesUtilsExtension(Extension):
         filters["to_freckle_desc"] = to_freckle_desc_filter
         environment.filters.update(filters)
 
+
 freckles_jinja_utils = FrecklesUtilsExtension
 
 DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
 
-class VarsType(click.ParamType):
 
+class VarsType(click.ParamType):
     name = 'vars_type'
 
     def convert(self, value, param, ctx):
 
-        if  os.path.exists(value):
-          if not os.path.isfile(value):
-            self.fail("Can't open file to read vars: {}".format(value))
+        if os.path.exists(value):
+            if not os.path.isfile(value):
+                self.fail("Can't open file to read vars: {}".format(value))
 
-          with open(value, 'r') as f:
-            file_vars = yaml.safe_load(f)
-            if not file_vars:
-                file_vars = {}
+            with open(value, 'r') as f:
+                file_vars = yaml.safe_load(f)
+                if not file_vars:
+                    file_vars = {}
 
-            return file_vars
+                return file_vars
 
         else:
             try:
@@ -68,28 +69,28 @@ class VarsType(click.ParamType):
             except (ValueError) as e:
                 self.fail("Can't read vars: {}".format(value))
 
+
 def expand_string_to_git_repo(value):
+    if isinstance(value, string_types):
+        is_string = True
+    elif isinstance(value, (list, tuple)):
+        is_string = False
+    else:
+        raise Exception("Not a supported type (only string or list are accepted): {}".format(value))
 
-        if isinstance(value, string_types):
-            is_string = True
-        elif isinstance(value, (list, tuple)):
-            is_string = False
+    try:
+        frkl_obj = Frkl(value, [
+            UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
+        result = frkl_obj.process()
+        if is_string:
+            return result[0]
         else:
-            raise Exception("Not a supported type (only string or list are accepted): {}".format(value))
-
-        try:
-            frkl_obj = Frkl(value, [UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
-            result = frkl_obj.process()
-            if is_string:
-                return result[0]
-            else:
-                return result
-        except:
-            raise Exception('%s is not a valid repo url' % value, param, ctx)
+            return result
+    except:
+        raise Exception('%s is not a valid repo url' % value, param, ctx)
 
 
 class RepoType(click.ParamType):
-
     name = 'repo'
 
     def convert(self, value, param, ctx):
@@ -100,8 +101,8 @@ class RepoType(click.ParamType):
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
 
-class FreckleUrlType(click.ParamType):
 
+class FreckleUrlType(click.ParamType):
     name = 'repo'
 
     def convert(self, value, param, ctx):
@@ -109,15 +110,16 @@ class FreckleUrlType(click.ParamType):
         if not isinstance(value, string_types):
             raise Exception("freckle url needs to a string: {}".format(value))
         try:
-            frkl_obj = Frkl(value, [UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
+            frkl_obj = Frkl(value, [
+                UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
             result = frkl_obj.process()
             return result[0]
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
 
+
 FRECKLES_REPO = RepoType()
 FRECKLES_URL = FreckleUrlType()
-
 
 DEFAULT_ABBREVIATIONS = {
     'gh':
@@ -125,14 +127,14 @@ DEFAULT_ABBREVIATIONS = {
     'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"]
 }
 
-def url_is_local(url):
 
+def url_is_local(url):
     if url.startswith("~") or url.startswith(os.sep):
         return True
     return os.path.exists(os.path.expanduser(url))
 
-def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[], includes=[], excludes=[]):
 
+def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[], includes=[], excludes=[]):
     freckle_repo = {}
 
     if isinstance(profiles, string_types):
@@ -164,13 +166,13 @@ def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[],
 
     return freckle_repo
 
-def replace_string(template_string, replacement_dict):
 
+def replace_string(template_string, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(template_string).render(replacement_dict)
     return result
 
-def render_dict(obj, replacement_dict):
 
+def render_dict(obj, replacement_dict):
     # print("OBJ")
     # pprint.pprint(obj)
     # print("REPLACEMNT")
@@ -196,13 +198,13 @@ def render_dict(obj, replacement_dict):
         # anything else
         return obj
 
-def render_vars_template(vars_template, replacement_dict):
 
+def render_vars_template(vars_template, replacement_dict):
     result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
     return result
 
-def find_supported_profiles(config=None):
 
+def find_supported_profiles(config=None):
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
@@ -216,8 +218,9 @@ def find_supported_profiles(config=None):
 
     return result
 
-def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto", run_parameters={}):
 
+def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
+                            run_parameters={}):
     click.echo("")
     click.echo("frecklecutable: {}".format(task_metadata.get("command_name", "n/a")))
     click.echo("path: {}".format(task_metadata.get("command_path", "n/a")))
@@ -226,8 +229,8 @@ def print_task_list_details(task_config, task_metadata={}, output_format="defaul
     click.echo(pprint.pformat(task_config))
     click.echo("")
 
-def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
 
+def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
     doc = config.get("doc", {})
     # TODO: check format of config
     options = config.get("args", {})
@@ -282,11 +285,14 @@ def create_cli_command(config, command_name=None, command_path=None, extra_optio
             o = click.Option(param_decls=arg_names_for_option, **opt_details)
         options_list.append(o)
 
-    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars, "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars, "value_vars": value_vars, "metadata": {"extra_options": extra_options, "command_path": command_path, "command_name": command_name, "config": config}}
+    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars,
+            "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars,
+            "value_vars": value_vars,
+            "metadata": {"extra_options": extra_options, "command_path": command_path, "command_name": command_name,
+                         "config": config}}
 
 
 def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
-
     # exchange arg_name with var name
     new_args = {}
 
@@ -300,7 +306,7 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
             task_vars[value] = temp
 
         # replace all matching strings in value_vars
-        for i,var_name in enumerate(value_vars):
+        for i, var_name in enumerate(value_vars):
             if var_name == key:
                 value_vars[i] = value
 
@@ -337,12 +343,11 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
 
 
 def calculate_local_repo_path(repo_url):
-
     clean_string = re.sub('[^A-Za-z0-9]+', os.sep, repo_url)
     return clean_string
 
-def get_local_repos(repo_names, repo_type):
 
+def get_local_repos(repo_names, repo_type):
     result = []
     for repo_name in repo_names:
         repo = get_default_repo(repo_name)
@@ -357,6 +362,7 @@ def get_local_repos(repo_names, repo_type):
                 result.append(r[1])
 
     return result
+
 
 def expand_repos(repos):
     """Expands a list of stings to a list of tuples (repo_url, repo_path).
@@ -393,12 +399,13 @@ def expand_repos(repos):
 
 
 def find_supported_profile_names(config=None):
-
     return sorted(list(set(find_supported_profiles(config).keys())))
 
-ADAPTER_CACHE = {}
-def get_adapters_from_repo(adapter_repo):
 
+ADAPTER_CACHE = {}
+
+
+def get_adapters_from_repo(adapter_repo):
     if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
         return {}
 
@@ -411,7 +418,6 @@ def get_adapters_from_repo(adapter_repo):
         dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
 
         for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
-
             adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
             adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
@@ -422,8 +428,8 @@ def get_adapters_from_repo(adapter_repo):
     ADAPTER_CACHE[adapter_repo] = result
     return result
 
-def find_adapter_files(extension, valid_profiles=None, config=None):
 
+def find_adapter_files(extension, valid_profiles=None, config=None):
     profiles = find_supported_profiles(config)
 
     task_files_to_copy = {}
@@ -442,8 +448,8 @@ def find_adapter_files(extension, valid_profiles=None, config=None):
 
     return task_files_to_copy
 
-def get_all_roles_in_repos(repos):
 
+def get_all_roles_in_repos(repos):
     result = []
     repos = get_local_repos(repos, "roles")
     for repo in repos:
@@ -452,8 +458,8 @@ def get_all_roles_in_repos(repos):
 
     return result
 
-def get_all_adapters_in_repos(repos):
 
+def get_all_adapters_in_repos(repos):
     result = []
     repos = get_local_repos(repos, "adapters")
     for repo in repos:
@@ -462,8 +468,8 @@ def get_all_adapters_in_repos(repos):
 
     return result
 
-def find_adapter_files_callback(extensions, valid_profiles=None):
 
+def find_adapter_files_callback(extensions, valid_profiles=None):
     if isinstance(extensions, string_types):
         extensions = [extensions]
 
@@ -476,20 +482,19 @@ def find_adapter_files_callback(extensions, valid_profiles=None):
     def copy_callback(ansible_environment_root):
 
         for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
-
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "init-{}.yml".format(name))
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks",
+                                       "init-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
         for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
-
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks", "items-{}.yml".format(name))
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks",
+                                       "items-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
     return copy_callback
 
 
 def get_adapter_dependency_roles(profiles):
-
     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
 
     all_deps = set()
@@ -505,7 +510,6 @@ def get_adapter_dependency_roles(profiles):
 
 
 def extract_all_used_profiles(freckle_repos):
-
     all_profiles = []
     for fr in freckle_repos:
         all_profiles.extend(fr.get("profiles", []))
@@ -513,8 +517,8 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False, output_format="default"):
-
+def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False,
+                        output_format="default"):
     profiles = extract_all_used_profiles(freckle_repos)
     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
 
@@ -522,11 +526,12 @@ def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto
 
     task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 
-    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass, pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
+    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
 
 
-def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="auto", pre_run_callback=None, no_run=False, additional_roles=[], config=None):
-
+def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
+                               pre_run_callback=None, no_run=False, additional_roles=[], config=None):
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
@@ -536,7 +541,8 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     task_descs = config.task_descs
 
-    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[], additional_roles=additional_roles)
+    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[],
+                                additional_roles=additional_roles)
 
     runner = nsbl.NsblRunner(nsbl_obj)
     run_target = os.path.expanduser(DEFAULT_RUN_LOCATION)
@@ -564,4 +570,8 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     force = True
 
-    return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks, display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
+    return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
+                      extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True,
+                      add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run,
+                      display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks,
+                      display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)

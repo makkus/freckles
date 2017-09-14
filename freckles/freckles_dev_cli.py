@@ -13,7 +13,6 @@ from .utils import get_all_adapters_in_repos, get_all_roles_in_repos
 
 
 def output(python_object, format="raw", pager=False):
-
     if format == 'yaml':
         output_string = yaml.safe_dump(python_object, default_flow_style=False, encoding='utf-8', allow_unicode=True)
     elif format == 'json':
@@ -55,15 +54,16 @@ def debug_last(ctx, pager):
 
     run_env = os.environ.copy()
 
-    proc = subprocess.Popen(last_run_debug_script, stdout=subprocess.PIPE, stderr=sys.stdout.fileno(), stdin=subprocess.PIPE, shell=True, env=run_env)
+    proc = subprocess.Popen(last_run_debug_script, stdout=subprocess.PIPE, stderr=sys.stdout.fileno(),
+                            stdin=subprocess.PIPE, shell=True, env=run_env)
 
     for line in iter(proc.stdout.readline, ''):
         click.echo(line, nl=False)
 
+
 @cli.command('list-roles')
 @click.pass_context
 def list_roles(ctx):
-
     repos = ["default"]
     # role_repos = defaults.calculate_role_repos([get_real_repo_path(REPO_ABBREVS, r) for r in repos], use_default_roles=False)
 
@@ -80,10 +80,10 @@ def list_roles(ctx):
 
 @cli.command('frecklecute-command')
 @click.option('--command', '-c', help="the command to debug", required=True)
-@click.option('--args-file', '-f', help="the file containing example args", type=click.File(), required=False, default=None)
+@click.option('--args-file', '-f', help="the file containing example args", type=click.File(), required=False,
+              default=None)
 @click.pass_context
 def debug_frecklecute_command(ctx, command, args_file):
-
     if args_file:
         args = yaml.safe_load(args_file)
         print(args)

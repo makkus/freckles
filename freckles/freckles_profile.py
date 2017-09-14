@@ -13,20 +13,22 @@ log = logging.getLogger("freckles")
 # TODO: this is ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 
-def url_is_local(url):
 
+def url_is_local(url):
     if url.startswith("~") or url.startswith(os.sep):
         return True
     return os.path.exists(os.path.expanduser(url))
 
-def find_supported_profiles():
 
+def find_supported_profiles():
     task_folder = os.path.join(os.path.dirname(__file__), "external", "default_role_repo", "makkus.freckles", "tasks")
 
     files = os.listdir(task_folder)
 
-    profiles = [f[:-4] for f in files if os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
+    profiles = [f[:-4] for f in files if
+                os.path.isfile(os.path.join(task_folder, f)) and f.endswith("yml") and f != "main.yml"]
     return profiles
+
 
 def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
     """Freckles manages your dotfiles (and other aspects of your local machine).
@@ -78,7 +80,10 @@ def cli(freckle_urls, profile, folder_filter, target, no_ask_pass, debug):
     display_sub_tasks = True
     display_skipped_tasks = False
     ask_become_pass = not no_ask_pass
-    runner.run(target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current", no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks)
+    runner.run(target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
+               callback=stdout_callback, add_timestamp_to_env=True, add_symlink_to_env="~/.freckles/runs/current",
+               no_run=no_run, display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks)
+
 
 if __name__ == "__main__":
     cli(["https://github.com/makkus/dotfiles-test-full.git"], [], [], "~/temp/tttt", False, False), 'profile.tmp'

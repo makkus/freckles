@@ -32,20 +32,37 @@ FRECKLES_EPILOG_TEXT = "freckles is free and open source software, for more info
 # TODO: this is ugly, probably have refactor how role repos are used
 SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]
 
+
 class FrecklesProfiles(click.MultiCommand):
-
     def __init__(self, config, **kwargs):
-        click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True, **kwargs)
+        click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True,
+                                    **kwargs)
 
-        output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
-        freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(), metavar="URL_OR_PATH", help="the url or path to the freckle(s) to use, if specified here, before any commands, all profiles will be applied to it")
-        target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str, metavar="PATH", help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home')
-        include_option = click.Option(param_decls=["--include", "-i"], help='if specified, only process folders that end with one of the specified strings, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        exclude_option = click.Option(param_decls=["--exclude", "-e"], help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders', type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="auto")
-        no_run_option = click.Option(param_decls=["--no-run"], help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
-        version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
-        self.params = [freckle_option, target_option, include_option, exclude_option, output_option, ask_become_pass_option, no_run_option, version_option]
+        output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
+                                     metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
+                                     help="format of the output")
+        freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(),
+                                      metavar="URL_OR_PATH",
+                                      help="the url or path to the freckle(s) to use, if specified here, before any commands, all profiles will be applied to it")
+        target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str,
+                                     metavar="PATH",
+                                     help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home')
+        include_option = click.Option(param_decls=["--include", "-i"],
+                                      help='if specified, only process folders that end with one of the specified strings, only applicable for multi-freckle folders',
+                                      type=str, metavar='FILTER_STRING', default=[], multiple=True)
+        exclude_option = click.Option(param_decls=["--exclude", "-e"],
+                                      help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders',
+                                      type=str, metavar='FILTER_STRING', default=[], multiple=True)
+        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"],
+                                              help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)',
+                                              type=click.Choice(["auto", "true", "false"]), default="auto")
+        no_run_option = click.Option(param_decls=["--no-run"],
+                                     help='don\'t execute frecklecute, only prepare environment and print task list',
+                                     type=bool, is_flag=True, default=False, required=False)
+        version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool,
+                                      is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+        self.params = [freckle_option, target_option, include_option, exclude_option, output_option,
+                       ask_become_pass_option, no_run_option, version_option]
         self.profile_repo = ProfileRepo(config)
         self.command_names = self.profile_repo.profiles.keys()
         self.command_names.sort()
@@ -65,11 +82,11 @@ class FrecklesProfiles(click.MultiCommand):
         else:
             return None
 
+
 click.core.SUBCOMMAND_METAVAR = 'ADAPTER [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'ADAPTER1 [ARGS]... [ADAPTER2 [ARGS]...]...'
 
-cli = FrecklesProfiles(DEFAULT_FRECKLES_CONFIG, chain=True,  help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
+cli = FrecklesProfiles(DEFAULT_FRECKLES_CONFIG, chain=True, help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
 
 if __name__ == "__main__":
-
     cli()
