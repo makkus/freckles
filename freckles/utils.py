@@ -351,6 +351,7 @@ def get_local_repos(repo_names, repo_type):
     result = []
     for repo_name in repo_names:
         repo = get_default_repo(repo_name)
+
         if not repo:
             repo_url = expand_string_to_git_repo(repo_name)
             relative_repo_path = calculate_local_repo_path(repo_url)
