@@ -13,8 +13,8 @@ The main way of bootstrapping *freckles* is by utilizing *inaugurate*, a thing I
 For how it exactly works, and why you should or should not trust it, head over `to it's homepage <https://github.com/makkus/inaugurate/>`_. This method of bootstrapping is the easiest, and fricktionlessest. One of the main reasons for creating *freckles* was that I wanted a way to setup a new box (physical or virtual) by executing only one (easy to remember) line on a commandline terminal. *inaugurate* provides that functionality.
 
 
-Supported
-=========
+Supported platforms
+===================
 
 Those are the platforms I have tested so far, others might very well work too. I did my development mainly on Debian-based systems, so other Linux distributions might not (yet) be up to scratch:
 

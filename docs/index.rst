@@ -10,7 +10,7 @@ Welcome to the *freckles* documentation! *freckles* is a project to help you do 
 
    readme
    bootstrap
-   commands
+   usage
    code_overview
 
 Indices and tables
