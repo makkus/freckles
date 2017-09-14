@@ -2,6 +2,13 @@
 ``freckles``
 ############
 
+- Description_
+- `Application Interface`_
+- `Adapters`_
+    - `Adapters & profiles`_
+    - `Adapter locations/naming`_
+    - `Available adapters`_
+
 Description
 ***********
 
@@ -22,18 +29,33 @@ Application interface
        :link-command-prefix: adapters
 
 
-Details
-*******
+Adapters
+********
 
 Adapters & profiles
 ===================
 
-Currently, only 2 types/profiles of data are supported by *freckles*: :doc:`dotfiles </adapters/dotfiles>` and :doc:`python dev projects </adapters/python-dev>`. To encourage the creation of lots of adapters, in order to support lots of different data-types, *freckles* tries to make it as easy as possible to create new adapters, and add those adapters to your environment.
+As *freckles* is designed to handle folders of data/code of different types, each using a different structure, it relies on plugins (called 'adapters') to process those different types of data (a data 'profile').
 
-Adapter locations/naming
-------------------------
+Currently, only very few types/profiles of data are 'officially' supported by *freckles*: :doc:`dotfiles </adapters/dotfiles>` and :doc:`python dev projects </adapters/python-dev>` (although, at the time you are reading this this might have changed). To encourage the creation of lots of *adapters* -- in order to support lots of different data *profiles* -- *freckles* tries to make it as easy as possible to create new adapters, and to add those adapters to your environment.
 
-By default *freckles* comes with a (small) set of 'officially supported' adapters. In addition, by default it checks one other folder for more available adapters: ``$HOME/.freckles/adapters``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*:
+A *freckles* adapter consists of two to three files, which need to located in the same folder:
+
+``adapter-name.freckle-adapter`` (required)
+    contains metadata about the adapter. The file is yaml-formated and contains 3 main sections: ``doc`` (help text), ``role-dependencies`` (Ansible roles that this adapter needs as dependencies), and ``args`` (optional, arguments to enable additional user input client-side)
+``adapter-name.freckle-init``    (optional)
+    a list of tasks (in the format of an Ansible tasks file, or playbook) to execute once per run, per adapter.
+``adapter-name.freckle-tasks``   (optional)
+    a list of tasks (in the format of an Ansible tasks file, or playbook) to execute once for every single *freckle* in a run.
+
+Only one of those latter two needs to exist (which one doesn't matter), but it's also possible for both of those to be there. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way -- and only once -- for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*), using the *freckle* specific metadata.
+
+As an example for a reasonably complex *adapter*, check out the source-code of the ``python-dev`` one on github: https://github.com/makkus/freckles/tree/master/freckles/external/default_adapter_repo/python-dev
+
+Adapter locations
+=================
+
+By default *freckles* comes with a (small) set of 'officially supported' adapters which are always available (see below). In addition, by default it checks one other folder for more available adapters: ``$HOME/.freckles/adapters``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
 
 .. code-block:: console
 
@@ -41,12 +63,37 @@ By default *freckles* comes with a (small) set of 'officially supported' adapter
 
 This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where *freckles* will find it in subsequent runs.
 
-*freckles* will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.freckle-adapter``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``freckle-init`` or ``freckle-tasks``. Only one of those two needs to exist (which one doesn't matter), but it's also possible for both of those to be there. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way -- and only once -- for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*), using the *freckle* specific metadata.
+*freckles* will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.freckle-adapter``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``freckle-init`` or ``freckle-tasks`` (see above).
 
-Available profiles
-------------------
+Available adapters
+==================
 
-Find all locally available adapters by executing ``freckles`` with the ``--help`` option:
+'Officially' supported adapters
+-------------------------------
+
+Those are adapters that ship with the *freckles* python package.
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   adapters/*
+
+*freckles* adapter repository
+----------------------------
+
+There is a repository of community created and maintained *freckle adapters*, which can easily enabled using the ``enable-repo`` *frecklecutable*:
+
+.. code-block:: console
+
+   frecklecutable enable-repo freckles-io
+
+This will check out the `freckles adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
+
+Locally available adapters
+--------------------------
+
+Which adapters are available to you locally depends on which additional repositories you specify as 'trusted' in the *freckles* config, and whether you have any custom adapters in ``~/.freckles/adapters``. To quickly list all available adapters by executing ``freckles`` with the ``--help`` option:
 
 .. code-block:: console
 
@@ -68,153 +115,3 @@ Find all locally available adapters by executing ``freckles`` with the ``--help`
 
 
 
-Quick-start
------------
-
-This is a quick overview on how to create a *freckles* adapter, more in-detail information can be found :doc:`here </writing_freckles_adapters>`. *freckles adapters* use *Ansible's* configuration format (facilitating *yaml*), similar to how to create Ansible playbooks and tasks for roles. I'll assume you have some experience with *Ansible* here. If that is not the case, maybe check out the `Ansible documentation <http://docs.ansible.com/ansible/latest/playbooks_intro.html>`_ before continuing here.
-
-*freckles* comes with a *frecklecute* (called `'create_adapter' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/create-adapter>`_ that can help you creating a *freckles adapter* stub in ``$HOME/.freckles/adapters/<adapter_name>``:
-
-.. code-block:: console
-
-   frecklecute create-adapter <adapter_name>
-
-For example, let's create an adapter that can handle projects that use Vagrant_. The adapter will, after checking out of the *freckle*, install *Vagrant* (if it is not already installed), then read the *freckle* metadata to determine whether any *Vagrant plugins* need to be installed, then installs those.
-
-.. code-block:: console
-
-   frecklecute create-adapter vagrant-dev-example
-
-To see that our adapter-stub was created, we can run the *freckles* help:
-
-.. code-block:: console
-
-   $ freckles --help
-
-   Usage: freckles [OPTIONS] ADAPTER1 [ARGS]... [ADAPTER2 [ARGS]...]...
-
-   Downloads a remote dataset or code (called a 'freckle') and sets up
-   your local environment to be able to handle the data, according to
-   ...
-   ...
-
-                        * more help output *
-
-   ...
-   ...
-   --version                       prints the version of freckles
-   --help                          Show this message and exit.
-
-   Commands:
-     debug-freckle        helper adapter, for developing other adapter
-     dotfiles             installs packages, stows dotfiles
-     python-dev           prepares a python development environment
-     vagrant-dev-example  adapter-stub, please fill in the fields as
-                          approriate
-
-     freckles is free and open source software, for more information
-     visit: https://docs.freckles.io
-
-As you can see, the ``vagrant-dev-example`` profile is created and ready to be used by *freckles*. By default it only contains a few debug tasks, which is helpful to see which metadata variables are present to be used by our adapter.
-
-Let's clean up the help output first before we continue. To do that, edit the file ``$HOME/.freckles/adapters/vagrant-dev-example/vagrant-dev-example.freckle-adapter``, and change the ``doc`` key like like so:
-
-.. code-block:: shell
-
-   doc:
-     help: freckle adapter to prepare a host machine for a Vagrant (https://w$
-     short_help: installs Vagrant and, (optional) required plugins
-
-To see the effect, just run ``freckles --help`` again.
-
-I've create an example *freckle* repository with some example metadata to help developing this adapter, https://github.com/makkus/vagrant-dev-example-freckle. To see what metadata the adapter has available at runtime, we can run the adapter in it's initial state:
-
-.. code-block:: shell
-
-   freckles -o skippy vagrant-dev-example -f gh:makkus/vagrant-dev-example-freckle
-
-   PLAY [name] ********************************************************************
-
-   TASK [Gathering Facts] *********************************************************
-   ok: [localhost]
-   ...
-
-                * more output *
-
-   ...
-   TASK [makkus.freckles : debug freckle vars] ************************************
-   ok: [localhost] => {
-       "freckle_vars": {
-           "vagrant_plugins": [
-               "vagrant-bindfs"
-           ]
-       }
-   }
-
-We use the ``skippy`` output format as the default one wouldn't display any debug variables.
-
-First order of business is to make sure *Vagrant* is installed. Since *freckles* supports the processing of multiple *freckle* folders in the same run, but it is not necessary to ensure *Vagrant* is installed for every one of those processing iterations, we put the required directives in the file called ``vagrant-dev-example.freckle-init`` (in ``$HOME/.freckles/adapters/vagrant-dev-example``). We replace the existing content of the ``vagrant-dev-example.freckle-init`` file with:
-
-.. code-block:: yaml
-
-   - name: checking whether to install Vagrant
-     include_role:
-       name: makkus.install-vagrant
-
-This uses an already existing Ansible role that is (conveniently) shipped with *freckles*.
-
-Now we can run *freckles* again, and see whether it does in fact install *Vagrant*:
-
-.. code-block:: console
-
-   $ freckles vagrant-dev-example -f gh:makkus/vagrant-dev-example-freckle
-
-     * starting tasks (on 'localhost')...
-      * applying profile(s) to freckle(s)...
-        - checking out freckle(s) =>
-            - https://github.com/makkus/vagrant-dev-example-freckle.git => ok (no change)
-        - checking whether to install Vagrant => ok (no change)
-        - creating cache download dir => ok (changed)
-        - downloading Vagrant => ok (changed)
-        - installing Vagrant Debian package => ok (changed)
-        - deleting downloaded Vagrant install package => ok (changed)
-        - debug freckle path => ok (no change)
-        - debug freckle vars (raw) => ok (no change)
-        - debug freckle vars => ok (no change)
-        => ok (changed)
-
-Looks good! Those last 3 debug statements are the ones still present in the ``vagrant-dev-example.freckle-tasks`` file. Let's edit that next, and make the adapter install all the *Vagrant* plugins that are specified in the ``.freckle`` metadata file. For our example repository we know this is one plugin, 'vagrant-bindfs'.
-
-.. code-block:: yaml
-
-   - name: install vagrant plugins
-     install:
-       pkg_mgr: vagrant_plugin
-       packages:
-         - "{{ item }}"
-     with_items:
-       - "{{ freckle_vars.vagrant_plugins | default([]) }}"
-
-(You might not recognize the ``install`` Ansible module, as it's custom written to be used with *freckles*. Check out :doc:`this page </install_module>` for more information.
-
-Let's run the whole thing again:
-
-.. code-block:: yaml
-
-   freckles vagrant-dev-example -f gh:makkus/vagrant-dev-example-freckle
-
-   * starting tasks (on 'localhost')...
-    * applying profile(s) to freckle(s)...
-      - checking out freckle(s) =>
-          - https://github.com/makkus/vagrant-dev-example-freckle.git => ok (no change)
-      - checking whether to install Vagrant => ok (no change)
-      - install vagrant plugins =>
-          - vagrant-bindfs (using: vagrant_plugin) => ok (changed)
-      => ok (changed)
-
-Voilà! Now we can prepare hosts for all *freckle* folders that contain code that needs *Vagrant* and potentially some *Vagrant plugins*!
-
-As mentioned above, more documentation on the topic of writing *freckle adapters*  can be found :doc:`here </writing_freckles_adapters>`.
-
-
-.. _vagrant: https://www.vagrantup.com

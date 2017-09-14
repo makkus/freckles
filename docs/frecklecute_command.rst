@@ -7,6 +7,10 @@ Description
 
 Where ``freckles`` automatically applies pre-configured tasks according to a profile, ``frecklecute`` is more flexible. It takes a ``yaml``-formatted text file (let's call those ``frecklecutables``) as input, and executes the list of tasks contained in them.
 
+Overview
+********
+
+
 Application interface
 *********************
 
