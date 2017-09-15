@@ -8,6 +8,7 @@
     - `Overview`_
     - `frecklecutable folders`_
     - `Available frecklecutables`_
+    - `frecklecutables in your $PATH`_
     - `Development`_
 
 Description
@@ -123,6 +124,27 @@ Which *frecklecutables* are available to you locally depends on which additional
      update-repos    updates the trusted repos configured in
                      ~/.freckles/config.yml
 
+frecklecutables in your $PATH
+=============================
+
+As a *frecklecutable* is really just a text file with a list of tasks, it can also be used as a 'proper' exectuable script. In order to use a *frecklecutable* like that, it needs to have a shebang like such:
+
+.. code-block:: yaml
+
+   #! /usr/bin/env frecklecute
+   doc:
+     help: updates the trusted repos configured in ~/.freckles/config.yml
+   tasks:
+     - makkus.freckles-config:
+         freckles_config_update_repos: true
+
+And, of course, it needs to be executable:
+
+.. code-block:: console
+
+   chmod +x <frecklecutable>
+
+After this, you can either add the folder where the *frecklecutable* lives to your $PATH, or you copy it into a folder that already is included in it. Now you can use your *frecklecutable* like any other commandline script :-)
 
 Development
 ===========

@@ -46,7 +46,9 @@ One example would be pointing it to a repository of your (well, my, in this case
 
    freckles dotfiles -f gh:makkus/dotfiles
 
-*freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (for more details, check `the example below <Example #1, where we checkout our dotfiles and setup our development machine_>`_, or the ``dotfile`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_). Or you can use *freckles* to get you started working on *freckles* itself by letting it download it's own source code and set up a development environment for it:
+*freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (for more details, check `the example below <Example #1, where we checkout our dotfiles and setup our development machine_>`_, or the ``dotfile`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_).
+
+Or you can use *freckles* to get you started working on *freckles* itself by letting it download it's own source code and set up a development environment for it:
 
 .. code-block:: console
 
@@ -54,7 +56,7 @@ One example would be pointing it to a repository of your (well, my, in this case
 
 This will check out the *freckles* source code from `it's github repo <https://github.com/makkus/freckles>`_, install all the system dependencies *freckles* needs, creates a virtual environment called ``freckles-dev`` and installs *freckles* and its python dependencies into it (more details can be found `in the example below <Example #2, where we setup a Python development project_>`_ and the ``python-dev`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_).
 
-Or, maybe you are working on a webpage. If somebody writes an adapter for this usecase, *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+Or, maybe you are working on a webpage. If somebody writes an adapter for this usecase, *freckles* could download your source files, setup a webserver and potential dependencies (nodejs? php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 ``frecklecute``
 ===============
