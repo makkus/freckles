@@ -2,6 +2,14 @@
 ``frecklecute``
 ###############
 
+- Description_
+- `Application Interface`_
+- `frecklecutables`_
+    - `Overview`_
+    - `frecklecutable folders`_
+    - `Available frecklecutables`_
+    - `Development`_
+
 Description
 ***********
 
@@ -45,20 +53,20 @@ Those are the top-level ``yaml`` keys a valid *frecklecutable* can contain:
 
 Some of the values in a *frecklecutable* can also be `Jinja2 <http://jinja.pocoo.org/>`_ templates in case the ``args`` key is used. More details about all this: :doc:`writing_frecklecutables`
 
-*frecklecutable* locations
-==========================
+*frecklecutable* folders
+========================
 
-By default, *freckles*/*frecklecute* comes with a (small) set of 'officially supported' adapters which are always available (see below). Those are mostly for *freckles* housekeeping tasks (like updating *freckles* itself, or adding new trusted repos, etc.) or generic enough to be of common interest.
+By default, *frecklecute* comes with a (small) set of 'officially supported' adapters which are always available (see below). Those are mostly for *freckles* housekeeping tasks (like updating the *freckles* package itself, or adding new trusted repos, etc.) or generic enough to be of common interest.
 
-In addition, by default *frecklecute) checks one other folder for more available adapters: ``$HOME/.freckles/frecklecutables``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
+In addition, by default *frecklecute* checks one other folder for more available adapters: ``$HOME/.freckles/frecklecutables``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
 
 .. code-block:: console
 
-   frecklecute enable-repo gh:makkus/curated-frecklecutables
+   frecklecute enable-repo gh:makkus/my-frecklecutables
 
-This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/curated/frecklecutables/git in this case``) where *freckles* will find it in subsequent runs.
+This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/my/frecklecutables/git in this case``) where *freckles* will find it in subsequent runs.
 
-*frecklecute* will look at all files in the roots of the configured folders and check if it can find any (usable -- which means their content is yaml and contains a ``tasks`` key) files. Those files are not allowed to have a '.' (dot) in their name. In addition, *frecklecute* will look for any child-folders of all of the configured folders, and look into the roots of all of those child-folders that are named (exactly) ``frecklecutables``. It'll also check the roots of those for useable text files that don't contain a '.' in their name.
+*frecklecute* will look at all files in the roots of the configured folders and check if it can find any (usable -- which means their content is yaml and contains a ``tasks`` key) files. Also, those files are not allowed to have a '.' (dot) in their name. In addition, *frecklecute* will look for any child-folders of all of the configured folders, and look into the roots of all of those child-folders that are named (exactly) ``frecklecutables``. It'll also check the roots of those for useable text files that don't contain a '.' in their name.
 
 Available *frecklecutables*
 ===========================
@@ -116,8 +124,8 @@ Which *frecklecutables* are available to you locally depends on which additional
                      ~/.freckles/config.yml
 
 
-Writing *frecklecutables*
-=========================
+Development
+===========
 
 Even though it is fairly easy to write a basic *frecklecutable*, there are still a few things you need to know before getting started:
 

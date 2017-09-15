@@ -6,9 +6,9 @@
 - `Application Interface`_
 - `Adapters (& profiles)`_
     - `Overview`_
-    - `Adapter locations`_
+    - `Adapter folders`_
     - `Available adapters`_
-    - `Creating adapters`_
+    - `Development`_
 
 Description
 ***********
@@ -53,8 +53,8 @@ Only one of those latter two needs to exist (which one doesn't matter), but it's
 
 As an example for a reasonably complex *adapter*, check out the source-code of the ``python-dev`` one on github: https://github.com/makkus/freckles/tree/master/freckles/external/default_adapter_repo/python-dev
 
-Adapter locations
-=================
+Adapter folders
+===============
 
 By default *freckles* comes with a (small) set of 'officially supported' adapters which are always available (see below). In addition, by default it checks one other folder for more available adapters: ``$HOME/.freckles/adapters``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
 
@@ -114,8 +114,9 @@ Which adapters are available to you locally depends on which additional reposito
      dotfiles       installs packages, stows dotfiles
      python-dev     prepares a python development environment
 
-Creating adapters
-=================
+
+Development
+===========
 
 *freckles* goal is not to manage e.g. *dotfiles* or *python development project*, but to facilitate handling a multitude of different data profiles. That's why *freckles* is designed in a way to make it easy to create new *adapters* and add them to a *freckles* execution context.
 
