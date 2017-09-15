@@ -30,11 +30,3 @@ Abbreviations
 - *bitbucket_repo*: ``bb:<bitbucket_user>/<repo_name>``
 - *bitbucket_repo_file*: ``bb:<bitbucket_user/<repo_name>/path/to/file``
 
-
-
-frecklecute
-===========
-
-    - frecklecute usage page
-    - (currently) officially supported *frecklecutables*
-    - examples

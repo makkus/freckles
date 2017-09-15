@@ -58,7 +58,7 @@ Some of the values in a *frecklecutable* can also be `Jinja2 <http://jinja.pocoo
 
 By default, *frecklecute* comes with a (small) set of 'officially supported' adapters which are always available (see below). Those are mostly for *freckles* housekeeping tasks (like updating the *freckles* package itself, or adding new trusted repos, etc.) or generic enough to be of common interest.
 
-In addition, by default *frecklecute* checks one other folder for more available adapters: ``$HOME/.freckles/frecklecutables``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
+In addition, by default *frecklecute* checks one other folder for more available adapters: ``$HOME/.freckles/frecklecutables``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains frecklecutables, you can use the ``enable-repo`` *frecklecutable*, e.g.:
 
 .. code-block:: console
 
