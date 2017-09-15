@@ -13,8 +13,8 @@ Writing frecklecutables
 Overview
 ********
 
-What's a *frecklecutable*
-=========================
+What is a *frecklecutable*
+==========================
 
 A *frecklecutable* is a yaml file, with at least the ``tasks`` key in the yaml root (and a list of tasks as value of that key), that does not have a '.' (dot) in it's file name. The building blocks of a *frecklecutable* are:
 
@@ -159,7 +159,7 @@ Conventions
 The format of a *frecklecutable* is designed to be as minimal and readable (meaning, it's plain to see what it does) as possible. To achieve this, *frecklecute* relies on a few conventions that somebody looking into writing a *frecklecutable* needs to be aware of.
 
 Specifying the type via the task name
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------
 
 For configuration purposes *frecklecute* does not require the user to explicitly state the type of a task, but tries to figure it out by looking at the name itself:
 
@@ -167,12 +167,11 @@ For configuration purposes *frecklecute* does not require the user to explicitly
 - if the task contains a '.', it is assumed to be an Ansible role
 - if the task contains no '.', it is assumed to either be an Ansible task module
 
-Specifying the type explicitly
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-TODO
 
 Examples
 ********
 
 TODO
+
+For now, check out the default executables that ship with *freckles* to get an idea what is possible: https://github.com/makkus/freckles/tree/master/freckles/external/frecklecutables
