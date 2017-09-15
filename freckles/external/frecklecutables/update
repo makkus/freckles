@@ -1,3 +1,4 @@
+#! /usr/bin/env frecklecute
 doc:
   help: updates freckles itself
 tasks:

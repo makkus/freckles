@@ -1,3 +1,4 @@
+#! /usr/bin/env frecklecute
 doc:
   help: executes an ansible task or role
 args:
