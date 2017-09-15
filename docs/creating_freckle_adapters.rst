@@ -1,5 +1,5 @@
 =========================
-Writing freckles adapters
+Creating freckle adapters
 =========================
 
 Quick-start
@@ -148,8 +148,7 @@ Let's run the whole thing again:
 
 Voilà! Now we can prepare hosts for all *freckle* folders that contain code that needs *Vagrant* and potentially some *Vagrant plugins*!
 
-As mentioned above, more documentation on the topic of writing *freckle adapters*  can be found :doc:`here </writing_freckle_adapters>`.
-
+More documentation to be written. Stay tuned!
 
 .. _vagrant: https://www.vagrantup.com
 

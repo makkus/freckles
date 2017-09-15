@@ -56,8 +56,8 @@ This will check out the *freckles* source code from `it's github repo <https://g
 
 Or, maybe you are working on a webpage. If somebody writes an adapter for this usecase, *freckles* could download your source files, setup a webserver and potential dependencies (php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
-``freckecute``
-==============
+``frecklecute``
+===============
 
 Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As *freckles* is built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
 

@@ -5,10 +5,13 @@
 Description
 ***********
 
-Where ``freckles`` automatically applies pre-configured tasks according to a profile, ``frecklecute`` is more flexible. It takes a ``yaml``-formatted text file (let's call those ``frecklecutables``) as input, and executes the list of tasks contained in them.
+Where ``freckles`` automatically applies pre-configured tasks according to a profile, ``frecklecute`` is more flexible. It takes a ``yaml``-formatted text file (let's call those *'frecklecutables'*) as input, and executes the list of tasks contained in them.
 
-Overview
-********
+If you've ever used Ansible then you know about their so-called `'playbooks' <http://docs.ansible.com/ansible/playbooks.html>`_. If not, *Ansible playbooks* are basically list of instructions to get a (physical or virtual) machine from one state another. Usually, from a useless state to a useful one. Your definition of 'usefulness' of course is what's important here.
+
+Ansible is very powerful, and mainly designed to manage infrastructure, not single machines. Although, of course, Ansible can do that too. The issue is that -- for single machines -- often setting up Ansible and a playbook, and the environment and configuration that playbook needs is more effort than just doing whatever needs doing manually. Esp. if those are things that don't need to be done very often, relatively.
+
+So, If you find yourself in a situation where you'd like to have some 'managed state change', but can't really be bothered (or afford) to setup Ansible and write a playbook, maybe *frecklecute* is for you. It is (deliberately) not as powerful and flexible as a full-blown *playbook*, but it can be used to execute `Ansible roles <http://docs.ansible.com/ansible/latest/playbooks_reuse.html>`_, which means you can, if need be, get all of Ansible's power, but the ease of execution that *frecklecute* provides.
 
 
 Application interface
@@ -21,10 +24,106 @@ Application interface
       :link-command-prefix: frecklecutables
 
 
-Details
-*******
+frecklecutables
+***************
 
-TBD
+Overview
+========
 
+A *frecklecutable* is a (yaml) text file that does not contain a '.' (dot) in its file name, and is found in any of the 'trusted_repo' folders configured in ``$HOME/.freckles/config.yml`` (if not shipped with *freckles*, or located in ``$HOME/.freckles/frecklecutables``).
+
+Those are the top-level ``yaml`` keys a valid *frecklecutable* can contain:
+
+``tasks`` (required)
+    the list of tasks the *frecklecutable* executes if called
+``doc`` (optional)
+    contains help text to display in the command line (if called with the ``--help`` option
+``args`` (optional)
+    configuration for command-line arguments for a *frecklecutable*
+``vars`` (optional)
+    variables to be forwarded to the Ansible tasks and roles that get executed by the *frecklecutable*
+
+Some of the values in a *frecklecutable* can also be `Jinja2 <http://jinja.pocoo.org/>`_ templates in case the ``args`` key is used. More details about all this: :doc:`writing_frecklecutables`
+
+*frecklecutable* locations
+==========================
+
+By default, *freckles*/*frecklecute* comes with a (small) set of 'officially supported' adapters which are always available (see below). Those are mostly for *freckles* housekeeping tasks (like updating *freckles* itself, or adding new trusted repos, etc.) or generic enough to be of common interest.
+
+In addition, by default *frecklecute) checks one other folder for more available adapters: ``$HOME/.freckles/frecklecutables``. Additional locations can be specified by adding either git repository urls or local paths to the ``trusted-repos`` config option of the *freckles* config file (``$HOME/.freckles/config.yml``). To easily add and retrieve an existing git repo that contains adapters (or roles, for that matter), you can use the ``enable-repo`` *frecklecutable*, e.g.:
+
+.. code-block:: console
+
+   frecklecute enable-repo gh:makkus/curated-frecklecutables
+
+This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/curated/frecklecutables/git in this case``) where *freckles* will find it in subsequent runs.
+
+*frecklecute* will look at all files in the roots of the configured folders and check if it can find any (usable -- which means their content is yaml and contains a ``tasks`` key) files. Those files are not allowed to have a '.' (dot) in their name. In addition, *frecklecute* will look for any child-folders of all of the configured folders, and look into the roots of all of those child-folders that are named (exactly) ``frecklecutables``. It'll also check the roots of those for useable text files that don't contain a '.' in their name.
+
+Available *frecklecutables*
+===========================
+
+Supported *frecklecutables*
+---------------------------
+
+Those are the *frecklecutables* that ship with the *freckles* python package.
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   frecklecutables/*
+
+
+*freckles.io* frecklecutable repository
+---------------------------------------
+
+There is a repository of community created and maintained *freckle adapters*, which can easily enabled using the ``enable-repo`` *frecklecutable*:
+
+.. code-block:: console
+
+   frecklecutable enable-repo freckles-io
+
+This will check out the `freckles adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
+
+Locally available *frecklecutables*
+-----------------------------------
+
+Which *frecklecutables* are available to you locally depends on which additional repositories you specify as 'trusted' in the *freckles* config, and whether you have any custom *frecklecutables* in ``~/.freckles/frecklecutables``. To quickly list all available *frecklecutables*, execute ``frecklecute`` with the ``--help`` option:
+
+.. code-block:: console
+
+   $ frecklecute --help
+   Usage: frecklecute [OPTIONS] FRECKLECUTABLE [ARGS]...
+
+     Executes a list of tasks specified in a (yaml-formated) text file (called
+     ...
+     ...
+
+                            * more output *
+
+     ...
+     ...
+   Commands:
+     ansible-task    executes an ansible task or role
+     create-adapter  create a freckle adapter stub from a template
+     disable-repo    ensures the specified repositories are not used by default,
+                     no previously enabled repos will be deleted
+     enable-repo     ensures the specified repositories are present locally, and
+                     used by default
+     update          updates freckles itself
+     update-repos    updates the trusted repos configured in
+                     ~/.freckles/config.yml
+
+
+Writing *frecklecutables*
+=========================
+
+Even though it is fairly easy to write a basic *frecklecutable*, there are still a few things you need to know before getting started:
+
+.. toctree::
+   :maxdepth: 2
+
+   writing_frecklecutables
 
 .. _ansible: https://ansible.com

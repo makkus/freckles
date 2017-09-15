@@ -10,6 +10,8 @@ The *freckles* project currently provides two command-line applications: ``freck
 The former is designed to require little to no configuration to achive its goal, the latter is more flexible, but needs a tad more effort in preparing the list of tasks:
 
 .. toctree::
+   :maxdepth: 5
+
    freckles_command
    frecklecute_command
 

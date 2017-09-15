@@ -4,10 +4,11 @@
 
 - Description_
 - `Application Interface`_
-- `Adapters`_
-    - `Adapters & profiles`_
-    - `Adapter locations/naming`_
+- `Adapters (& profiles)`_
+    - `Overview`_
+    - `Adapter locations`_
     - `Available adapters`_
+    - `Creating adapters`_
 
 Description
 ***********
@@ -29,11 +30,11 @@ Application interface
        :link-command-prefix: adapters
 
 
-Adapters
-********
+Adapters (& profiles)
+*********************
 
-Adapters & profiles
-===================
+Overview
+========
 
 As *freckles* is designed to handle folders of data/code of different types, each using a different structure, it relies on plugins (called 'adapters') to process those different types of data (a data 'profile').
 
@@ -68,8 +69,8 @@ This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckle
 Available adapters
 ==================
 
-'Officially' supported adapters
--------------------------------
+Supported adapters
+------------------
 
 Those are adapters that ship with the *freckles* python package.
 
@@ -79,8 +80,8 @@ Those are adapters that ship with the *freckles* python package.
 
    adapters/*
 
-*freckles* adapter repository
-----------------------------
+*freckles.io* adapter repository
+--------------------------------
 
 There is a repository of community created and maintained *freckle adapters*, which can easily enabled using the ``enable-repo`` *frecklecutable*:
 
@@ -93,7 +94,7 @@ This will check out the `freckles adapters <https://github.com/freckles-io/adapt
 Locally available adapters
 --------------------------
 
-Which adapters are available to you locally depends on which additional repositories you specify as 'trusted' in the *freckles* config, and whether you have any custom adapters in ``~/.freckles/adapters``. To quickly list all available adapters by executing ``freckles`` with the ``--help`` option:
+Which adapters are available to you locally depends on which additional repositories you specify as 'trusted' in the *freckles* config, and whether you have any custom adapters in ``~/.freckles/adapters``. To quickly list all available adapters, execute ``freckles`` with the ``--help`` option:
 
 .. code-block:: console
 
@@ -113,5 +114,16 @@ Which adapters are available to you locally depends on which additional reposito
      dotfiles       installs packages, stows dotfiles
      python-dev     prepares a python development environment
 
+Creating adapters
+=================
 
+*freckles* goal is not to manage e.g. *dotfiles* or *python development project*, but to facilitate handling a multitude of different data profiles. That's why *freckles* is designed in a way to make it easy to create new *adapters* and add them to a *freckles* execution context.
 
+While creating *adapters* is not as easy as using them, it should still be manageable for people with a rudimentary amount of programming skills. This is mostly due to the fact that Ansible itself, on top of which *freckles* is built, has a fairly flat learning curve, esp. for a configuration management system. If you already have some experience with Ansible, writing a *freckles adapter* should be easy.
+
+If you are keen to get started, check out the relevant documentation:
+
+.. toctree::
+   :maxdepth: 2
+
+   creating_freckle_adapters
