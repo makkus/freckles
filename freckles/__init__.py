@@ -6,7 +6,7 @@ import click
 
 __author__ = """Markus Binsteiner"""
 __email__ = 'makkus@posteo.net'
-__version__ = '0.1.123'
+__version__ = '0.1.124'
 
 
 def print_version(ctx, param, value):
