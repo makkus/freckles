@@ -16,11 +16,11 @@ Description
 
 Where ``freckles`` automatically applies pre-configured tasks according to a profile, ``frecklecute`` is more flexible. It takes a ``yaml``-formatted text file (let's call those *'frecklecutables'*) as input, and executes the list of tasks contained in them.
 
-If you've ever used Ansible then you know about their so-called `'playbooks' <http://docs.ansible.com/ansible/playbooks.html>`_. If not, *Ansible playbooks* are basically list of instructions to get a (physical or virtual) machine from one state another. Usually, from a useless state to a useful one. Your definition of 'usefulness' of course is what's important here.
+If you've ever used Ansible then you know about their so-called `'playbooks' <http://docs.ansible.com/ansible/playbooks.html>`_. If not, *Ansible playbooks* are basically list of instructions to get a (physical or virtual) machine from one state to another. Usually, from a useless state to a useful one. Your definition of 'usefulness' of course is what's important here.
 
-Ansible is very powerful, and mainly designed to manage infrastructure, not single machines. Although, of course, Ansible can do that too. The issue is that -- for single machines -- often setting up Ansible and a playbook, and the environment and configuration that playbook needs is more effort than just doing whatever needs doing manually. Esp. if those are things that don't need to be done very often, relatively.
+Ansible is very powerful, and mainly designed to manage infrastructure, not single machines. Although, of course, Ansible can do that too. The issue is that -- for single machines -- setting up Ansible and a playbook, and the environment and configuration that playbook needs, is often more effort than just doing whatever needs doing manually. Esp. if those are things that don't need to be done very often, relatively.
 
-So, If you find yourself in a situation where you'd like to have some 'managed state change', but can't really be bothered (or afford) to setup Ansible and write a playbook, maybe *frecklecute* is for you. It is (deliberately) not as powerful and flexible as a full-blown *playbook*, but it can be used to execute `Ansible roles <http://docs.ansible.com/ansible/latest/playbooks_reuse.html>`_, which means you can, if need be, get all of Ansible's power, but the ease of execution that *frecklecute* provides.
+So, If you find yourself in a situation where you'd like to have some 'managed state change', but can't really be bothered (or afford) to setup Ansible and write a playbook, maybe *frecklecute* is for you. It is (deliberately) not as powerful and as a full-blown *playbook*, but it can be used to execute `Ansible roles <http://docs.ansible.com/ansible/latest/playbooks_reuse.html>`_, which means you can, if need be, get all of Ansible's power by just writing a 'normal' Asible role, but the ease of execution that *frecklecute* provides.
 
 
 Application interface
@@ -84,8 +84,8 @@ Those are the *frecklecutables* that ship with the *freckles* python package.
    frecklecutables/*
 
 
-*freckles.io* frecklecutable repository
----------------------------------------
+*freckles.io* frecklecutables repository
+----------------------------------------
 
 There is a repository of community created and maintained *freckle adapters*, which can easily enabled using the ``enable-repo`` *frecklecutable*:
 
