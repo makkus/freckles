@@ -30,8 +30,9 @@ Introduction
 Quick links
 ===========
 
-- homepage: https://github.com/makkus/freckles
+- homepage: https://freckles.io
 - documentation: https://docs.freckles.io
+- code: https://github.com/makkus/freckles
 
 For now, the *freckles* project provides two (command-line) interfaces, which deal with slightly different scenarios and workflows:
 
