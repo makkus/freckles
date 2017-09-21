@@ -83,6 +83,11 @@ def assemble_freckle_run(*args, **kwargs):
                                            excludes=freckle_details["excludes"])
         all_freckle_repos.append(freckle_repo)
 
+
+    if not all_freckle_repos:
+        click.echo("No adapters specified, doing nothing. Use '--help' to display this tools help as well as available adapters.")
+        sys.exit(0)
+
     if no_run:
         run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
                                              output_format=output_format, no_run=True)
