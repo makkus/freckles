@@ -4,6 +4,23 @@ TODO
 
 A list of things, still to be done (or planned).
 
+documentation
+-------------
+
+- freckles code
+- nsbl
+- elastic configuration (frkl, frecklecutables)
+- grav adapter
+
+testing
+-------
+
+- freckles code tests
+- role testing templates/requirements
+- freckles roles tests
+- frecklecutable test framework
+- adapter test framework
+
 common
 ------
 
@@ -14,9 +31,12 @@ freckles
 --------
 
 - vagrant-dev adapter
+- freckles-context adapter
 
 frecklecute
 -----------
+
+n/a
 
 roles
 -----
