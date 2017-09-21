@@ -11,6 +11,7 @@ documentation
 - nsbl
 - elastic configuration (frkl, frecklecutables)
 - grav adapter
+- trust
 
 testing
 -------
