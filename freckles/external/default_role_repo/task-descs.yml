@@ -135,7 +135,7 @@ tasks:
            - elliotweiser.osx-command-line-tools
   - freckles:
       meta:
-        task-desc: applying profile(s) to freckle(s)
+        task-desc: starting freckle(s) processing
         task-name: makkus.freckles
         task-roles:
            - makkus.box-basics

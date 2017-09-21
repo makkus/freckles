@@ -4,7 +4,7 @@
   set_fact:
     all_requirements_files: "{{ freckle_vars_raw.files | file_list_filter('.*requirements.*txt$') | relative_path_filter(freckle_path) }}"
 
-- name: "Starting python-dev setup for {{ freckle_path }}"
+- name: "starting python-dev setup for {{ freckle_path }}"
   include_role:
     name: "makkus.python-dev"
     tasks_from: python-dev-item.yml
