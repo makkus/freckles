@@ -1,6 +1,7 @@
 import os
 from nsbl import defaults
 
+FRECKLE_MARKER_FILE_NAME = ".freckle"
 SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
