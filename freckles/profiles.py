@@ -8,6 +8,7 @@ import logging
 
 import click
 import os
+import sys
 import yaml
 
 try:
@@ -27,6 +28,7 @@ DEFAULT_COMMAND_REPO = os.path.join(os.path.dirname(__file__), "frecklecutables"
 
 
 def assemble_freckle_run(*args, **kwargs):
+
     no_run = kwargs.get("no_run")
 
     default_target = kwargs.get("target", None)
@@ -62,7 +64,10 @@ def assemble_freckle_run(*args, **kwargs):
         # target = pvars.pop("target", None)
 
         if pvars:
-            extra_profile_vars[pn] = pvars
+            extra_profile_vars[pn] = {}
+            for pk, pv in pvars.items():
+                if pv != None:
+                    extra_profile_vars[pn][pk] = pv
 
         all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
         for freckle_url in all_freckles_for_this_profile:

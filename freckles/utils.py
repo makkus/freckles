@@ -249,6 +249,7 @@ def create_cli_command(config, command_name=None, command_path=None, extra_optio
     options_all.update(options)
 
     for opt, opt_details in options_all.items():
+
         opt_type = opt_details.get("type", None)
         if isinstance(opt_type, string_types):
             opt_type_converted = locate(opt_type)
