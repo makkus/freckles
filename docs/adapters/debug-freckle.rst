@@ -4,7 +4,9 @@ debug-freckle
 
 This is a helper adapter to display metadata when developing or debugging a *freckles* adapter.
 
-Within the *freckles* ansible role this profile is treated as a special case, which means it can't be used in runs with multiple adapters. In contrast to 'normal' adapters who only see metadata that is either under the general ``freckle`` key, or the key that is the name of the profile itself, this adapter can see all vars under all (primary) keys in a ``.freckle`` metadata file. So, if you have a freckle that uses multiple of those keys you might get misleading results using this adapter. As this is mainly used for developing new adapters I think that's an acceptable tradeoff, but one has to be aware of this pitfall.
+.. note::
+
+   Within the *freckles* ansible role this profile is treated as a special case, which means it can't be used in runs with multiple adapters. In contrast to 'normal' adapters who only see metadata that is either under the general ``freckle`` key, or the key that is the name of the profile itself, this adapter can see all vars under all (primary) keys in a ``.freckle`` metadata file. So, if you have a freckle that uses multiple of those keys you might get misleading results using this adapter. As this is mainly used for developing new adapters I think that's an acceptable tradeoff, but one has to be aware of this pitfall.
 
 
 Usage
