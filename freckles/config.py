@@ -25,4 +25,4 @@ class FrecklesConfig(object):
         self.trusted_repos = self.config.get("trusted-repos", ["default", "user"])
         self.trusted_urls = self.config.get("trusted-urls",
                                             ["https://github.com/makkus", "https:/github.com/freckles-io"])
-        self.task_descs = self.config.get("task-descs", [])
+        self.task_descs = self.config.get("task-aliases", [])
