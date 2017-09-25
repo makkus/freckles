@@ -8,7 +8,7 @@ import click
 
 from . import print_version
 from .freckles_defaults import *
-from .profiles import ProfileRepo, assemble_freckle_run
+from .profiles import ProfileRepo, assemble_freckle_run, get_freckles_option_set, BREAK_COMMAND_NAME
 from .utils import DEFAULT_FRECKLES_CONFIG, RepoType
 
 try:
@@ -41,28 +41,15 @@ class FrecklesProfiles(click.MultiCommand):
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
                                      metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
                                      help="format of the output")
-        freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(),
-                                      metavar="URL_OR_PATH",
-                                      help="the url or path to the freckle(s) to use, if specified here, before any commands, all profiles will be applied to it")
-        target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str,
-                                     metavar="PATH",
-                                     help='target folder for freckle checkouts (if remote url provided), defaults to folder \'freckles\' in users home')
-        include_option = click.Option(param_decls=["--include", "-i"],
-                                      help='if specified, only process folders that end with one of the specified strings, only applicable for multi-freckle folders',
-                                      type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        exclude_option = click.Option(param_decls=["--exclude", "-e"],
-                                      help='if specified, omit process folders that end with one of the specified strings, takes precedence over the include option if in doubt, only applicable for multi-freckle folders',
-                                      type=str, metavar='FILTER_STRING', default=[], multiple=True)
-        ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"],
-                                              help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)',
-                                              type=click.Choice(["auto", "true", "false"]), default="auto")
         no_run_option = click.Option(param_decls=["--no-run"],
                                      help='don\'t execute frecklecute, only prepare environment and print task list',
                                      type=bool, is_flag=True, default=False, required=False)
         version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool,
                                       is_flag=True, is_eager=True, expose_value=False, callback=print_version)
-        self.params = [freckle_option, target_option, include_option, exclude_option, output_option,
-                       ask_become_pass_option, no_run_option, version_option]
+
+
+        self.params = get_freckles_option_set()
+        self.params.extend([ output_option,  no_run_option, version_option])
         self.profile_repo = ProfileRepo(config)
         self.command_names = self.profile_repo.profiles.keys()
         self.command_names.sort()
@@ -71,11 +58,19 @@ class FrecklesProfiles(click.MultiCommand):
         for name in self.command_names:
             self.commands[name] = self.get_command(None, name)
 
+        self.command_names.append(BREAK_COMMAND_NAME)
+
+
     def list_commands(self, ctx):
 
         return self.command_names
 
     def get_command(self, ctx, name):
+
+        if name == BREAK_COMMAND_NAME:
+            def break_callback(**kwargs):
+                return {"name": BREAK_COMMAND_NAME}
+            return click.Command(BREAK_COMMAND_NAME, help="marker to start a new run", callback=break_callback)
 
         if name in self.profile_repo.profiles.keys():
             return self.profile_repo.get_command(ctx, name)

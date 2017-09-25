@@ -60,7 +60,7 @@ Ansible distributes those roles via a website called `Ansible galaxy <https://ga
 Task alias
 ^^^^^^^^^^
 
-A *task alias* can either point to a module or role, and contains additional metadata. Task *aliases* are defined in files called ``task-descs.yml``. Here's a part of the one that ships with *freckles*:
+A *task alias* can either point to a module or role, and contains additional metadata. Task *aliases* are defined in files called ``task-aliases.yml``. Here's a part of the one that ships with *freckles*:
 
 .. code-block:: yaml
 
