@@ -1,0 +1,19 @@
+- name: debug freckle path
+  debug: var=freckle_path
+
+- name: debug freckle vars (raw)
+  debug: var=freckle_vars_raw
+
+- name: debug freckle vars
+  debug: var=freckle_vars
+
+- name: debug user vars
+  debug: var=freckles_user_vars
+
+- name: load freckles-config role
+  include_role:
+    name: "makkus.freckles-config"
+  vars:
+    freckles_config_folder: "{{ freckle_path }}"
+    freckles_config_link_to_home: yes
+    freckles_config_force_link: "{{ freckles_user_vars.get('delete_existing', False) }}"

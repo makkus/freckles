@@ -1,0 +1,22 @@
+doc:
+  help: adapter to check out a freckles configuration folder, and link it to $HOME/.freckles
+  short_help: check out and link $HOME/.freckles config folder
+args:
+  delete_existing:
+    arg_name: delete-existing
+    type: bool
+    is_flag: true
+    default: false
+    required: false
+    help: "deletes an existing '$HOME/.freckles' folder (or removes a symlink), you better know what you are doing"
+# test_arg:
+#     arg_name: test-arg
+#     help: example help text for arg
+#     type: str  # (optional)
+#     multiple: false  # (optional)
+#     required: false  # (optional)
+#     default: default-string  # (optional)
+#     metavar: TEST_ARG  # (optional)
+#     is_flag: false  # (optional)
+#     is_var: true  # (optional)
+#     is_argument: false  # (optional)

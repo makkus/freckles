@@ -56,6 +56,24 @@ DEFAULT_REPOS = {
 }
 
 
+# .freckle (raw) format
+DEFAULT_PROFILE_VAR_FORMAT = {"child_marker": "profiles",
+                              "default_leaf": "profile",
+                              "default_leaf_key": "name",
+                              "key_move_map": {'*': "vars"}}
+
+# .freckle format
+DEFAULT_VAR_FORMAT = {"child_marker": "childs",
+                      "default_leaf": "vars",
+                      "default_leaf_key": "name",
+                      "key_move_map": {'*': "vars"}}
+
+# .freckle package format
+DEFAULT_PACKAGE_FORMAT = {"child_marker": "packages",
+                          "default_leaf": "vars",
+                          "default_leaf_key": "name",
+                           "key_move_map": {'*': "vars"}}
+
 def get_default_repo(repo_name):
     repo = DEFAULT_REPOS.get(repo_name, None)
     return repo

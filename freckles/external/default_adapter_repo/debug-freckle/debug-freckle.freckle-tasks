@@ -6,3 +6,6 @@
 
 - name: debug freckle vars
   debug: var=freckle_vars
+
+- name: debug user vars
+  debug: var=freckles_user_vars

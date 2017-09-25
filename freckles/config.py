@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import click
 
 from .freckles_defaults import *
+from frkl import frkl
+
 
 try:
     set
@@ -11,18 +13,51 @@ except NameError:
 
 import yaml
 
+DEFAULT_ROLE_REPOS = ['default', 'user']
+DEFAULT_TRUSTED_URLS = ['https://github.com/makkus', 'https://github.com/freckles-io']
+
+def parse_config_file(path):
+
+    chain = [frkl.EnsureUrlProcessor(), frkl.EnsurePythonObjectProcessor(), frkl.FrklProcessor(DEFAULT_PROFILE_VAR_FORMAT)]
+
+    frkl_obj = frkl.Frkl(path, chain)
+    # mdrc_init = {"append_keys": "vars/packages"}
+    # frkl_callback = frkl.MergeDictResultCallback(mdrc_init)
+    frkl_callback = frkl.MergeResultCallback()
+    configs = frkl_obj.process(frkl_callback)
+    repos = DEFAULT_ROLE_REPOS
+    urls = DEFAULT_TRUSTED_URLS
+    aliases = []
+
+    for c in configs:
+
+        if c.get("profile", {}).get("name", None) == "config":
+            temp = c.get("vars", {}).get("trusted-repos", [])
+            for r in temp:
+                if r not in repos:
+                    repos.append(r)
+
+            temp = c.get("vars", {}).get("trusted-urls", [])
+            for u in temp:
+                if u not in urls:
+                    urls.append(u)
+            temp = c.get("vars", {}).get("task-aliases", [])
+            for a in temp:
+                if a not in aliases:
+                    aliases.append(a)
+
+    return {'trusted-repos': repos, "trusted-urls": urls, "task-aliases": aliases}
+
 
 class FrecklesConfig(object):
     def __init__(self):
 
         self.config_file = os.path.join(click.get_app_dir('freckles', force_posix=True), FRECKLE_MARKER_FILE_NAME)
         if os.path.exists(self.config_file):
-            with open(self.config_file) as f:
-                self.config = yaml.safe_load(f)
+            self.config = parse_config_file(self.config_file)
         else:
             self.config = {}
 
-        self.trusted_repos = self.config.get("trusted-repos", ["default", "user"])
-        self.trusted_urls = self.config.get("trusted-urls",
-                                            ["https://github.com/makkus", "https:/github.com/freckles-io"])
+        self.trusted_repos = self.config.get("trusted-repos", DEFAULT_ROLE_REPOS)
+        self.trusted_urls = self.config.get("trusted-urls", DEFAULT_TRUSTED_URLS)
         self.task_descs = self.config.get("task-aliases", [])

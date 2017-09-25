@@ -139,6 +139,7 @@ tasks:
         task-name: makkus.freckles
         task-roles:
            - makkus.box-basics
+           - makkus.freckles-config
            - makkus.install-pkg-mgrs
            - makkus.install-packages
            - makkus.install-nix

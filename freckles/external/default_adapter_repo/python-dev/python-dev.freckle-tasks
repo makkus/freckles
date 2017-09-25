@@ -15,4 +15,4 @@
     python_dev_requirements_files: "{{ freckle_vars.get('requirements_files', all_requirements_files) }}"
     python_dev_project_path: "{{ freckle_path }}"
     python_dev_dependency_packages: "{{ freckle_vars_raw.get('vars', []) | create_package_list_from_var_filter('packages') }}"
-    python_version: "{{ freckles_user_vars.python_version | first_valid_default_list_filter(freckle_vars.get('python_version'), '3') }}"
+    python_version: "{{ freckles_user_vars.get('python_version', None) | first_valid_default_list_filter(freckle_vars.get('python_version', None), '3') }}"

@@ -112,7 +112,7 @@ def parse_commands(args):
             repos.setdefault(freckle_url, fr)
             repos[freckle_url].setdefault("profiles", []).append(pn)
 
-def execute_freckle_run(repos, extra_profile_vars={}, no_run=False, output_format="default"):
+def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default"):
 
     all_freckle_repos = []
     ask_become_pass = "auto"
@@ -140,6 +140,7 @@ def execute_freckle_run(repos, extra_profile_vars={}, no_run=False, output_forma
         run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
                                              output_format=output_format, no_run=True)
 
+
         click.echo("")
         click.echo("Used adapters:")
         for p in profiles:
@@ -149,6 +150,7 @@ def execute_freckle_run(repos, extra_profile_vars={}, no_run=False, output_forma
         click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
         click.echo("")
     else:
+
         create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
                             output_format=output_format)
 
@@ -173,7 +175,7 @@ def assemble_freckle_run(*args, **kwargs):
     repos = collections.OrderedDict()
     profiles = []
 
-    # metadata = {}
+    metadata = {}
     click.echo("\n# starting ansible run...")
 
     for p in args[0]:
@@ -182,14 +184,16 @@ def assemble_freckle_run(*args, **kwargs):
 
         if pn == BREAK_COMMAND_NAME:
 
-            execute_freckle_run(repos, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+            execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
 
             repos = collections.OrderedDict()
             extra_profile_vars = {}
+            profiles = []
+            metadata = {}
             click.echo("\n# starting new ansible run...")
             continue
 
-        # metadata[pn] = p["metadata"]
+        metadata[pn] = p["metadata"]
 
         if pn in profiles:
             raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
@@ -236,7 +240,8 @@ def assemble_freckle_run(*args, **kwargs):
 
             # freckle_repo = create_freckle_desc(freckle_url, target, True, profiles=profile_names, includes=include_all, excludes=exclude_all)
 
-    execute_freckle_run(repos, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+    if (repos):
+        execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
 
     # all_freckle_repos = []
     # for freckle_url, freckle_details in repos.items():
