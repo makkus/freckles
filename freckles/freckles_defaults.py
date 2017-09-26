@@ -1,8 +1,12 @@
 import os
+import click
 from nsbl import defaults
 
 FRECKLE_MARKER_FILE_NAME = ".freckle"
 SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
+
+FRECKLES_DEFAULT_CONFIG_FOLDER = click.get_app_dir('freckles', force_posix=True)
+FRECKLES_DEFAULT_CONFIG_FILE = os.path.join(FRECKLES_DEFAULT_CONFIG_FOLDER, FRECKLE_MARKER_FILE_NAME)
 
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 DEFAULT_ADAPTERS_PATH = os.path.join(os.path.dirname(__file__), "external", "default_adapter_repo")

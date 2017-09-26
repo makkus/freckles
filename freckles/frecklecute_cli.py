@@ -12,7 +12,7 @@ from frkl import frkl
 from . import print_version
 from .commands import CommandRepo
 from .freckles_defaults import *
-from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos, download_extra_repos
 
 log = logging.getLogger("freckles")
 
@@ -60,7 +60,7 @@ if not current_command:
 
 
 class FrecklesCommand(click.MultiCommand):
-    def __init__(self, current_command, command_repos=[], **kwargs):
+    def __init__(self, current_command, config, **kwargs):
 
         click.MultiCommand.__init__(self, "freckles", **kwargs)
 
@@ -75,12 +75,20 @@ class FrecklesCommand(click.MultiCommand):
         no_run_option = click.Option(param_decls=["--no-run"],
                                      help='don\'t execute frecklecute, only prepare environment and print task list',
                                      type=bool, is_flag=True, default=False, required=False)
+        use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos)
 
-        self.params = [output_option, ask_become_pass_option, no_run_option, version_option]
+        self.params = [use_repo_option, output_option, ask_become_pass_option, no_run_option, version_option]
 
-        self.command_repo = CommandRepo(paths=command_repos, additional_commands=[current_command])
+        self.config = config
+        # .trusted_repos = DEFAULT_FRECKLES_CONFIG.trusted_repos
+        # local_paths = get_local_repos(trusted_repos, "frecklecutables")
+
+        self.command_repo = CommandRepo(config=self.config, additional_commands=[current_command])
         self.current_command = current_command[0]
-        self.command_names = self.command_repo.commands.keys()
+
+    def list_commands(self, ctx):
+
+        self.command_names = self.command_repo.get_commands().keys()
         self.command_names.sort()
         if self.current_command:
             self.command_names.insert(0, self.current_command)
@@ -89,13 +97,11 @@ class FrecklesCommand(click.MultiCommand):
         for name in self.command_names:
             self.commands[name] = self.get_command(None, name)
 
-    def list_commands(self, ctx):
-
         return self.command_names
 
     def get_command(self, ctx, name):
 
-        if name in self.command_repo.commands.keys():
+        if name in self.command_repo.get_commands().keys():
             return self.command_repo.get_command(ctx, name)
 
         else:
@@ -105,11 +111,8 @@ class FrecklesCommand(click.MultiCommand):
 click.core.SUBCOMMAND_METAVAR = 'FRECKLECUTABLE [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'FRECKLECUTABLE1 [ARGS]... [FRECKLECUTABLE2 [ARGS]...]...'
 
-trusted_repos = DEFAULT_FRECKLES_CONFIG.trusted_repos
 
-local_paths = get_local_repos(trusted_repos, "frecklecutables")
-
-cli = FrecklesCommand((current_command, current_command_path), command_repos=local_paths, help=FRECKLES_HELP_TEXT,
+cli = FrecklesCommand((current_command, current_command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLES_HELP_TEXT,
                       epilog=FRECKLES_EPILOG_TEXT)
 
 if __name__ == "__main__":

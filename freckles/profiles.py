@@ -176,7 +176,6 @@ def assemble_freckle_run(*args, **kwargs):
     profiles = []
 
     metadata = {}
-    click.echo("\n# starting ansible run...")
 
     for p in args[0]:
 
@@ -241,6 +240,7 @@ def assemble_freckle_run(*args, **kwargs):
             # freckle_repo = create_freckle_desc(freckle_url, target, True, profiles=profile_names, includes=include_all, excludes=exclude_all)
 
     if (repos):
+        click.echo("\n# starting ansible run...")
         execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
 
     # all_freckle_repos = []
@@ -278,25 +278,36 @@ def assemble_freckle_run(*args, **kwargs):
 class ProfileRepo(object):
     def __init__(self, config):
 
-        self.profiles = find_supported_profiles(config)
-        self.commands = self.get_commands()
+        self.config = config
+        self.profiles = None
+        self.commands = None
+
+    def get_profiles(self):
+
+        if not self.profiles:
+            self.profiles = find_supported_profiles(self.config)
+
+        return self.profiles
 
     def get_commands(self):
 
-        commands = {"BREAK": None}
+        if not self.commands:
 
-        for profile_name, profile_path in self.profiles.items():
-            command = self.create_command(profile_name, profile_path)
-            commands[profile_name] = command
+            # commands = {"BREAK": None}
+            self.commands = {}
 
-        return commands
+            for profile_name, profile_path in self.get_profiles().items():
+                command = self.create_command(profile_name, profile_path)
+                self.commands[profile_name] = command
+
+        return self.commands
 
     def get_command(self, ctx, command_name):
 
-        if command_name == "BREAK":
-            return click.Command("BREAK", help="marker")
+        # if command_name == "BREAK":
+            # return click.Command("BREAK", help="marker")
 
-        options_list = self.commands[command_name]["options"]
+        options_list = self.get_commands()[command_name]["options"]
         key_map = self.commands[command_name]["key_map"]
         tasks = self.commands[command_name]["tasks"]
         task_vars = self.commands[command_name]["vars"]

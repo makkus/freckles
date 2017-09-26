@@ -12,7 +12,7 @@ from frkl.frkl import (EnsurePythonObjectProcessor,
 
 from .freckles_defaults import *
 from .utils import create_and_run_nsbl_runner, create_cli_command, get_vars_from_cli_input, print_task_list_details, \
-    render_dict
+    render_dict, expand_repos
 
 log = logging.getLogger("freckles")
 
@@ -35,67 +35,68 @@ def find_frecklecutable_dirs(path):
 
 
 class CommandRepo(object):
-    def __init__(self, paths=[], additional_commands=[]):
-        if not isinstance(paths, (list, tuple)):
-            paths = [paths]
 
-        self.paths = [os.path.expanduser(p) for p in paths]
+    def __init__(self, config, additional_commands=[]):
 
-        # if DEFAULT_COMMAND_REPO not in self.paths:
-        # self.paths.insert(0, DEFAULT_COMMAND_REPO)
-
+        self.config = config
+        self.commands = None
         self.additional_commands = additional_commands
-
-        self.commands = self.get_commands()
+        self.paths = None
 
     def get_commands(self):
 
-        command_folders = []
-        for path in self.paths:
+        repos = self.config.trusted_repos
 
-            if not os.path.exists(path):
-                log.debug("Not using folder '{}' as it doesn't exist.".format(path))
-                continue
+        self.paths = [p['path'] for p in expand_repos(repos)]
 
-            command_folders.append(path)
+        if not self.commands:
 
-            root_dirs = find_frecklecutable_dirs(path)
-            command_folders.extend(root_dirs)
+            command_folders = []
+            for path in self.paths:
 
-        commands = {}
-
-        for path in command_folders:
-
-            path_tokens = len(path.split(os.sep))
-            for child in os.listdir(path):
-
-                file_path = os.path.realpath(os.path.join(path, child))
-
-                if "." in child:
-                    log.debug("Not using '{}' as frecklecutable: filename contains '.'".format(file_path))
+                if not os.path.exists(path):
+                    log.debug("Not using folder '{}' as it doesn't exist.".format(path))
                     continue
 
-                if not os.path.isfile(file_path):
+                command_folders.append(path)
+
+                root_dirs = find_frecklecutable_dirs(path)
+                command_folders.extend(root_dirs)
+
+            self.commands = {}
+
+            for path in command_folders:
+
+                path_tokens = len(path.split(os.sep))
+                for child in os.listdir(path):
+
+                    file_path = os.path.realpath(os.path.join(path, child))
+
+                    if "." in child:
+                        log.debug("Not using '{}' as frecklecutable: filename contains '.'".format(file_path))
+                        continue
+
+                    if not os.path.isfile(file_path):
+                        continue
+
+                    command_name = child
+                    command = self.create_command(command_name, file_path)
+                    if not command:
+                        log.debug("Not using '{}' as frecklecutable: file couldn't be parsed".format(file_path))
+                    else:
+                        self.commands[command_name] = command
+
+            for command in self.additional_commands:
+
+                command_name = command[0]
+                command_file = command[1]
+                if not command_name or not command_file:
                     continue
+                path = command_file.split(os.sep)
+                command = self.create_command(command_file, command_file)
+                self.commands[command_name] = command
 
-                command_name = child
-                command = self.create_command(command_name, file_path)
-                if not command:
-                    log.debug("Not using '{}' as frecklecutable: file couldn't be parsed".format(file_path))
-                else:
-                    commands[command_name] = command
-
-        for command in self.additional_commands:
-
-            command_name = command[0]
-            command_file = command[1]
-            if not command_name or not command_file:
-                continue
-            path = command_file.split(os.sep)
-            command = self.create_command(command_file, command_file)
-            commands[command_name] = command
-
-        return commands
+        return self.commands
 
     def get_command(self, ctx, command_name):
 

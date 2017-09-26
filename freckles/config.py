@@ -49,10 +49,11 @@ def parse_config_file(path):
     return {'trusted-repos': repos, "trusted-urls": urls, "task-aliases": aliases}
 
 
+
 class FrecklesConfig(object):
     def __init__(self):
 
-        self.config_file = os.path.join(click.get_app_dir('freckles', force_posix=True), FRECKLE_MARKER_FILE_NAME)
+        self.config_file = FRECKLES_DEFAULT_CONFIG_FILE
         if os.path.exists(self.config_file):
             self.config = parse_config_file(self.config_file)
         else:
@@ -61,3 +62,7 @@ class FrecklesConfig(object):
         self.trusted_repos = self.config.get("trusted-repos", DEFAULT_ROLE_REPOS)
         self.trusted_urls = self.config.get("trusted-urls", DEFAULT_TRUSTED_URLS)
         self.task_descs = self.config.get("task-aliases", [])
+
+    def add_repos(self, repos):
+
+        self.trusted_repos.extend(repos)

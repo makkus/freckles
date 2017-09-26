@@ -9,7 +9,7 @@ import click
 from . import print_version
 from .freckles_defaults import *
 from .profiles import ProfileRepo, assemble_freckle_run, get_freckles_option_set, BREAK_COMMAND_NAME
-from .utils import DEFAULT_FRECKLES_CONFIG, RepoType
+from .utils import DEFAULT_FRECKLES_CONFIG, RepoType, download_extra_repos
 
 try:
     set
@@ -38,8 +38,10 @@ class FrecklesProfiles(click.MultiCommand):
         click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True,
                                     **kwargs)
 
+
+        use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos)
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
-                                     metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
+                                     metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), is_eager=True,
                                      help="format of the output")
         no_run_option = click.Option(param_decls=["--no-run"],
                                      help='don\'t execute frecklecute, only prepare environment and print task list',
@@ -49,30 +51,32 @@ class FrecklesProfiles(click.MultiCommand):
 
 
         self.params = get_freckles_option_set()
-        self.params.extend([ output_option,  no_run_option, version_option])
-        self.profile_repo = ProfileRepo(config)
-        self.command_names = self.profile_repo.profiles.keys()
+        self.params.extend([ use_repo_option, output_option,  no_run_option, version_option])
+        self.config = config
+        self.profile_repo = ProfileRepo(self.config)
+
+        # self.command_names.append(BREAK_COMMAND_NAME)
+
+
+    def list_commands(self, ctx):
+
+        self.command_names = self.profile_repo.get_profiles().keys()
         self.command_names.sort()
 
         self.commands = {}
         for name in self.command_names:
             self.commands[name] = self.get_command(None, name)
 
-        self.command_names.append(BREAK_COMMAND_NAME)
-
-
-    def list_commands(self, ctx):
-
         return self.command_names
 
     def get_command(self, ctx, name):
 
-        if name == BREAK_COMMAND_NAME:
-            def break_callback(**kwargs):
-                return {"name": BREAK_COMMAND_NAME}
-            return click.Command(BREAK_COMMAND_NAME, help="marker to start a new run", callback=break_callback)
+        # if name == BREAK_COMMAND_NAME:
+        #     def break_callback(**kwargs):
+        #         return {"name": BREAK_COMMAND_NAME}
+        #     return click.Command(BREAK_COMMAND_NAME, help="marker to start a new run", callback=break_callback)
 
-        if name in self.profile_repo.profiles.keys():
+        if name in self.profile_repo.get_profiles().keys():
             return self.profile_repo.get_command(ctx, name)
         else:
             return None

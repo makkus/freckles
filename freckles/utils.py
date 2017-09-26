@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import fnmatch
 import json
+import pprint
 import re
 import shutil
 from pydoc import locate
@@ -364,6 +365,32 @@ def get_local_repos(repo_names, repo_type):
                 result.append(r[1])
 
     return result
+
+def download_extra_repos(ctx, param, value):
+
+
+    output = ctx.find_root().params.get("output", "default")
+
+    if not value:
+        return
+    repos = list(value)
+
+    click.echo("\n# processing extra repos...")
+
+    task_config = [{'tasks':
+                    [ {'install-pkg-mgrs': {
+                        'pkg_mgr': 'auto',
+                        'pkg_mgrs': ['homebrew', 'git']}},
+                      {'makkus.freckles-config': {
+                         'freckles_extra_repos': repos }
+                     }]
+    }]
+
+
+    create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=True)
+
+    ctx.find_root().command.config.add_repos(repos)
+
 
 
 def expand_repos(repos):
