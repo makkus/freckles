@@ -378,9 +378,10 @@ def download_extra_repos(ctx, param, value):
     click.echo("\n# processing extra repos...")
 
     task_config = [{'tasks':
-                    [ {'install-pkg-mgrs': {
-                        'pkg_mgr': 'auto',
-                        'pkg_mgrs': ['homebrew', 'git']}},
+                    [
+                        # {'install-pkg-mgrs': {   #
+                        # 'pkg_mgr': 'auto',
+                        # 'pkg_mgrs': ['homebrew']}},
                       {'makkus.freckles-config': {
                          'freckles_extra_repos': repos }
                      }]
