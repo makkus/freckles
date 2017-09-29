@@ -1,7 +1,7 @@
 #######################
 *freckelize your life!*
 #######################
-... or at least your laptop.
+... or maybe your laptop.
 
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
@@ -26,6 +26,8 @@ Introduction
 ************
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
+
+*freckles* helps you bring your machine from a useless -- for your intent and purpose --state, into a useful one. With one line in a terminal.
 
 Quick links
 ===========
@@ -144,9 +146,12 @@ Some actual/potential usecases
 * 'self-loading' containers
 * share the same project setup with your team-mates
 * provide an (easy-to-read, understand and re-use) *frecklecutable* or *freckle adapter* alongside a blog post you wrote about some useful workstation setup (e.g. 'how to secure your workstation', or 'how to setup a python dev environment', ...)
+* create base environments for tutorials etc.
+* quick and easy config management for small networks, which can grow into a 'proper' Ansible-managed infrastructure if necessary
 * quickly create install/update scripts for your scripts/applications where it's not worthwhile to create 'traditional' packages
 * minimal, initial bootstrap/config management for your Ansible/Chef/saltstack controllers -- I mean, you need to set those up too, right?
 * anything else where you need to make sure your environment needs to be in a certain state but for some reason or other you don't want to use a 'full-blown' configuration management system
+
 
 Examples
 ********
