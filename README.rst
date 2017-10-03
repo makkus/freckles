@@ -1,7 +1,7 @@
 #######################
 *freckelize your life!*
 #######################
-... or maybe your laptop.
+... or maybe your laptop?
 
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
@@ -25,7 +25,7 @@
 Introduction
 ************
 
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container), removing or hiding some more advanced features configuration management frameworks usually offer, for the sake of simplicity and a quick turnaround.
+*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container, ...), it removes (or hides) advanced features often offered by other configuration management frameworks, for the sake of simplicity and a quick turnaround.
 
 *freckles* helps you bring your machine from a useless -- for your intent and purpose --state, into a useful one. With one line in a terminal.
 
@@ -41,7 +41,7 @@ For now, the *freckles* project provides two (command-line) interfaces, which de
 ``freckles``
 ============
 
-Configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the code or data packages you work with, and *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on by using an appropriate *adapter* for the type of data.
+Configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the code or data packages you work with, and *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on by using an appropriate *adapter* for that type of data.
 
 One example would be pointing it to a repository of your (well, my, in this case) dotfiles:
 
@@ -59,18 +59,18 @@ Or you can use *freckles* to get you started working on *freckles* itself by let
 
 This will check out the *freckles* source code from `it's github repo <https://github.com/makkus/freckles>`_, install all the system dependencies *freckles* needs, creates a virtual environment called ``freckles-dev`` and installs *freckles* and its python dependencies into it (more details can be found `in the example below <Example #2, where we setup a Python development project_>`_ and the ``python-dev`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_).
 
-Or, maybe you are working on a webpage. If somebody writes an adapter for this usecase, *freckles* could download your source files, setup a webserver and potential dependencies (nodejs? php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+Or, maybe you are working on a webpage. If somebody writes an adapter for your usecase and the framework(s) you use, *freckles* could download your source files, setup a webserver and potential dependencies (nodejs? php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 ``frecklecute``
 ===============
 
-Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As *freckles* is built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
+Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As *freckles* and *frecklecute* are built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
 
 *frecklecute* comes with a few default *frecklecutables*, for example one (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_) that lets you execute any arbitrary Ansible module or role directly. This is what it looks like to ensure a folder exists, using *frecklecute* (including '`inaugurating <inaugurate_>`_'/bootstrapping *frecklecute* itself):
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- frecklecute --ask-become-pass false ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
+   curl https://freckles.io | bash -s -- frecklecute -pw false ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
 
 This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, that particular example doesn't make any sense, I hope it is plain to see how use- and powerful a scripting tool like this, with access to all Ansible modules and roles, can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume *frecklecute*/*freckles* is already installed this time):
 
@@ -107,7 +107,7 @@ Really quick start
 
 (... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
 
-Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is quite often a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run it straight away to display it's help, issue:
+Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run it straight away to display it's help, issue:
 
 .. code-block:: console
 
