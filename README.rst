@@ -27,7 +27,7 @@ Introduction
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container, ...), it removes (or hides) advanced features often offered by other configuration management frameworks, for the sake of simplicity and a quick turnaround.
 
-*freckles* helps you bring your machine from a useless -- for your intent and purpose --state, into a useful one. With one line in a terminal.
+*freckles* helps you bring your system from a useless -- for your intent and purpose --state, into a useful one. With one line in a terminal.
 
 Quick links
 ===========
