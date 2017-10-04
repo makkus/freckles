@@ -40,6 +40,7 @@ ASK_PW_HELP = 'whether to force ask for a password, force ask not to, or let try
 ASK_PW_CHOICES = click.Choice(["auto", "true", "false"])
 
 def get_freckles_option_set():
+    """Helper method to create some common cli options."""
 
     freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(),
                                   metavar=FRECKLE_ARG_METAVAR, help=FRECKLE_ARG_HELP)
@@ -62,57 +63,66 @@ def get_freckles_option_set():
     return params
 
 
-def parse_commands(args):
+# def parse_commands(args):
+#     """Parse the provided arguments/commands."""
 
-    for p in args[0]:
-        pn = p["name"]
+#     for p in args[0]:
+#         pn = p["name"]
 
-        if pn == BREAK_COMMAND_NAME:
-            continue
+#         if pn == BREAK_COMMAND_NAME:
+#             continue
 
-        metadata[pn] = p["metadata"]
+#         metadata[pn] = p["metadata"]
 
-        if pn in profiles:
-            raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
-        else:
-            profiles.append(pn)
+#         if pn in profiles:
+#             raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
+#         else:
+#             profiles.append(pn)
 
-        pvars = p["vars"]
-        freckles = pvars.pop("freckle", [])
-        include = pvars.pop("include", [])
-        exclude = pvars.pop("exclude", [])
-        target = pvars.pop("target", None)
-        ask_become_pass = pvars.pop("ask_become_pass", None)
+#         pvars = p["vars"]
+#         freckles = pvars.pop("freckle", [])
+#         include = pvars.pop("include", [])
+#         exclude = pvars.pop("exclude", [])
+#         target = pvars.pop("target", None)
+#         ask_become_pass = pvars.pop("ask_become_pass", None)
 
-        if pvars:
-            extra_profile_vars[pn] = {}
-            for pk, pv in pvars.items():
-                if pv != None:
-                    extra_profile_vars[pn][pk] = pv
+#         if pvars:
+#             extra_profile_vars[pn] = {}
+#             for pk, pv in pvars.items():
+#                 if pv != None:
+#                     extra_profile_vars[pn][pk] = pv
 
-        all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
-        for freckle_url in all_freckles_for_this_profile:
-            if target:
-                t = target
-            else:
-                t = default_target
+#         all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
+#         for freckle_url in all_freckles_for_this_profile:
+#             if target:
+#                 t = target
+#             else:
+#                 t = default_target
 
-            for i in default_include:
-                if i not in include:
-                    include.add(i)
-            for e in default_exclude:
-                if e not in exclude:
-                    exclude.add(e)
-            fr = {
-                "target": t,
-                "includes": include,
-                "excludes": exclude,
-                "password": ask_become_pass
-            }
-            repos.setdefault(freckle_url, fr)
-            repos[freckle_url].setdefault("profiles", []).append(pn)
+#             for i in default_include:
+#                 if i not in include:
+#                     include.add(i)
+#             for e in default_exclude:
+#                 if e not in exclude:
+#                     exclude.add(e)
+#             fr = {
+#                 "target": t,
+#                 "includes": include,
+#                 "excludes": exclude,
+#                 "password": ask_become_pass
+#             }
+#             repos.setdefault(freckle_url, fr)
+#             repos[freckle_url].setdefault("profiles", []).append(pn)
+
 
 def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default"):
+    """Executes a freckles run using the provided run details.
+
+    Args:
+      repos (dict): dict with freckle urls as key, and details about (optional) include/excludes and target directory.
+      profiles (list): list of adapters to use with these freckle repos
+
+    """
 
     all_freckle_repos = []
     ask_become_pass = "auto"

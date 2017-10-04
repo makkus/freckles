@@ -60,7 +60,18 @@ if not current_command:
 
 
 class FrecklesCommand(click.MultiCommand):
+
     def __init__(self, current_command, config, **kwargs):
+        """Base class to provide a command-based (similar to e.g. git) cli for frecklecute.
+
+        This class parses the folders in the paths provided by the config
+        element for so-called 'frecklecutables', (yaml) text files that contain a list of tasks and optionally command-line argument descriptions. More information: XXX
+
+        Args:
+          current_command (tuple): a tuple in the format (command_name, command_path), which is used for commands that are paths, instead of filenames in one of the known frecklecutable paths. Can be (None, None) if not a path.
+          config (FrecklesConfig): the config wrapper object
+          kwargs (dict): additional arguments that are forwarded to the partent click.MultiCommand constructor
+        """
 
         click.MultiCommand.__init__(self, "freckles", **kwargs)
 
@@ -87,6 +98,8 @@ class FrecklesCommand(click.MultiCommand):
         self.current_command = current_command[0]
 
     def list_commands(self, ctx):
+        """Lists all commands (frecklecutables) that are available
+        """
 
         self.command_names = self.command_repo.get_commands().keys()
         self.command_names.sort()
@@ -100,6 +113,7 @@ class FrecklesCommand(click.MultiCommand):
         return self.command_names
 
     def get_command(self, ctx, name):
+        """Return details about the provided command."""
 
         if name in self.command_repo.get_commands().keys():
             return self.command_repo.get_command(ctx, name)

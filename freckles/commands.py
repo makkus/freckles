@@ -22,6 +22,16 @@ DEFAULT_COMMAND_EPILOG = "For more information about frecklecute and the freckle
 
 
 def find_frecklecutable_dirs(path):
+    """Helper method to find 'child' frecklecutable dirs.
+
+    Frecklecutables can either be in the root of a provided 'trusted-repo', or
+    in any subfolder within, as long as the subfolder is called 'frecklecutables'.
+
+    Args:
+      path (str): the root path (usually the path to a 'trusted repo').
+    Returns:
+      list: a list of valid 'frecklecutable' paths
+    """
     result = []
     for root, dirnames, filenames in os.walk(os.path.realpath(path), topdown=True, followlinks=True):
 
@@ -37,6 +47,12 @@ def find_frecklecutable_dirs(path):
 class CommandRepo(object):
 
     def __init__(self, config, additional_commands=[]):
+        """Wrapper class to find all frecklecutables that are specified/allowed by the current configuration, and create and parse command-line options from them.
+
+        Args:
+          config (FrecklesConfig): the configuration to use
+          additional_commands (list): list of tuples in the format (command_name, command_path) for extra frecklecutables that are not located within any of the valid frecklecutable paths
+        """
 
         self.config = config
         self.commands = None
@@ -44,6 +60,7 @@ class CommandRepo(object):
         self.paths = None
 
     def get_commands(self):
+        """Returns all valid frecklecutables."""
 
         repos = self.config.trusted_repos
 
@@ -99,6 +116,10 @@ class CommandRepo(object):
         return self.commands
 
     def get_command(self, ctx, command_name):
+        """Returns details about the specified command.
+
+        Details include the callback to use when executing it, as well as other metadata.
+        """
 
         options_list = self.commands[command_name]["options"]
         key_map = self.commands[command_name]["key_map"]
@@ -147,6 +168,7 @@ class CommandRepo(object):
         return command
 
     def create_command(self, command_name, yaml_file):
+        """Created the commandline options and arguments out of a frecklecutable."""
 
         log.debug("Loading command file '{}'...".format(yaml_file))
 

@@ -34,7 +34,22 @@ SUPPORTED_PKG_MGRS = ["auto", "conda", "nix"]
 
 
 class FrecklesProfiles(click.MultiCommand):
+
+
     def __init__(self, config, **kwargs):
+        """Base class to provide a command-based (similar to e.g. git) cli for freckles.
+
+        This class parses the folders in the paths provided by the config
+        element for so-called 'freckle adapters'. A freckle adapter is a
+        collection of files that describe commandline-arguments and tasks lists
+        to execute on a folder (more information: XXX)
+
+        Args:
+          config (FrecklesConfig): the config wrapper object
+          kwargs (dict): additional arguments that are forwarded to the partent click.MultiCommand constructor
+
+        """
+
         click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True,
                                     **kwargs)
 
