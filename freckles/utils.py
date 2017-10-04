@@ -383,7 +383,9 @@ def download_extra_repos(ctx, param, value):
                         # 'pkg_mgr': 'auto',
                         # 'pkg_mgrs': ['homebrew']}},
                       {'makkus.freckles-config': {
-                         'freckles_extra_repos': repos }
+                          'freckles_extra_repos': repos,
+                          'freckles_config_update_repos': True
+                      }
                      }]
     }]
 

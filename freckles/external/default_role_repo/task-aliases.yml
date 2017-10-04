@@ -107,6 +107,7 @@ tasks:
         task-name: ansiblebit.oracle-java
         task-roles:
           - ansiblebit.oracle-java
+        become: yes
   - yum:
       meta:
         become: yes
