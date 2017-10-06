@@ -75,6 +75,16 @@ tasks:
       vars:
         update: true
         install_method: auto
+  - use-freckles-version:
+      meta:
+        task-type: ansible-role
+        task_desc: updating freckles
+        task-name: makkus.install-freckles
+        task-roles:
+          - makkus.install-conda
+      vars:
+        update: false
+        install_method: auto
   - install-nix:
         meta:
           task-type: ansible-role

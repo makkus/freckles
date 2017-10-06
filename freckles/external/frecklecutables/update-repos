@@ -1,6 +1,6 @@
 #! /usr/bin/env frecklecute
 doc:
-  help: updates the trusted repos configured in ~/.freckles/config.yml
+  help: updates the trusted repos configured in ~/.freckles/.freckle
 tasks:
   - makkus.freckles-config:
       freckles_config_update_repos: true

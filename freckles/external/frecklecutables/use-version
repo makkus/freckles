@@ -1,0 +1,16 @@
+#! /usr/bin/env frecklecute
+doc:
+  help: install a specific version of freckles
+
+args:
+  freckles_version:
+    arg_name: version
+    required: true
+    metavar: "VERSION"
+    is_var: true
+    is_argument: true
+    nargs: 1
+tasks:
+  - update-freckles:
+      install_method: auto
+      update: false
