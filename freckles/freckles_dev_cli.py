@@ -9,7 +9,8 @@ import yaml
 from . import __version__ as VERSION
 from .commands import CommandRepo
 from .freckles_defaults import *
-from .utils import get_all_adapters_in_repos, get_all_roles_in_repos
+from .utils import get_all_adapters_in_repos
+from nsbl.tasks import get_all_roles_in_repos
 
 
 def output(python_object, format="raw", pager=False):

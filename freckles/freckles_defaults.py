@@ -78,8 +78,8 @@ DEFAULT_PACKAGE_FORMAT = {"child_marker": "packages",
                           "default_leaf_key": "name",
                            "key_move_map": {'*': "vars"}}
 
-def get_default_repo(repo_name):
-    repo = DEFAULT_REPOS.get(repo_name, None)
-    return repo
+# def get_default_repo(repo_name):
+    # repo = DEFAULT_REPOS.get(repo_name, None)
+    # return repo
 
     # default = {"roles": (repo_name, repo_name), "adapters": (repo_name, repo_name), "frecklecutables": (repo_name_repo_name)}

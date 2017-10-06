@@ -12,7 +12,7 @@ from frkl import frkl
 from . import print_version
 from .commands import CommandRepo
 from .freckles_defaults import *
-from .utils import DEFAULT_FRECKLES_CONFIG, get_local_repos, download_extra_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos
 
 log = logging.getLogger("freckles")
 
@@ -77,7 +77,7 @@ class FrecklesCommand(click.MultiCommand):
 
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
                                      metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
-                                     help="format of the output")
+                                     help="format of the output", is_eager=True)
         ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"],
                                               help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)',
                                               type=click.Choice(["auto", "true", "false"]), default="auto")
@@ -86,7 +86,7 @@ class FrecklesCommand(click.MultiCommand):
         no_run_option = click.Option(param_decls=["--no-run"],
                                      help='don\'t execute frecklecute, only prepare environment and print task list',
                                      type=bool, is_flag=True, default=False, required=False)
-        use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos)
+        use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos, expose_value=True)
 
         self.params = [use_repo_option, output_option, ask_become_pass_option, no_run_option, version_option]
 

@@ -71,33 +71,13 @@ class VarsType(click.ParamType):
                 self.fail("Can't read vars: {}".format(value))
 
 
-def expand_string_to_git_repo(value):
-    if isinstance(value, string_types):
-        is_string = True
-    elif isinstance(value, (list, tuple)):
-        is_string = False
-    else:
-        raise Exception("Not a supported type (only string or list are accepted): {}".format(value))
-
-    try:
-        frkl_obj = Frkl(value, [
-            UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
-        result = frkl_obj.process()
-        if is_string:
-            return result[0]
-        else:
-            return result
-    except:
-        raise Exception('%s is not a valid repo url' % value, param, ctx)
-
-
 class RepoType(click.ParamType):
     name = 'repo'
 
     def convert(self, value, param, ctx):
 
         try:
-            result = expand_string_to_git_repo(value)
+            result = nsbl_tasks.expand_string_to_git_repo(value, DEFAULT_ABBREVIATIONS)
             return result
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
@@ -210,7 +190,7 @@ def find_supported_profiles(config=None):
         config = DEFAULT_FRECKLES_CONFIG
 
     trusted_repos = config.trusted_repos
-    repos = get_local_repos(trusted_repos, "adapters")
+    repos = nsbl_tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
     result = {}
     for r in repos:
@@ -298,6 +278,7 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     # exchange arg_name with var name
     new_args = {}
 
+
     for key, value in key_map.items():
         temp = input_args.pop(key.replace('-', '_'))
         if key not in args_that_are_vars:
@@ -344,27 +325,7 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     return new_args, new_vars
 
 
-def calculate_local_repo_path(repo_url):
-    clean_string = re.sub('[^A-Za-z0-9]+', os.sep, repo_url)
-    return clean_string
 
-
-def get_local_repos(repo_names, repo_type):
-    result = []
-    for repo_name in repo_names:
-        repo = get_default_repo(repo_name)
-
-        if not repo:
-            repo_url = expand_string_to_git_repo(repo_name)
-            relative_repo_path = calculate_local_repo_path(repo_url)
-            repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
-            result.append(repo_path)
-        else:
-            repos = repo.get(repo_type, [])
-            for r in repos:
-                result.append(r[1])
-
-    return result
 
 def download_extra_repos(ctx, param, value):
 
@@ -395,7 +356,6 @@ def download_extra_repos(ctx, param, value):
     ctx.find_root().command.config.add_repos(repos)
 
 
-
 def expand_repos(repos):
     """Expands a list of stings to a list of tuples (repo_url, repo_path).
     """
@@ -403,13 +363,17 @@ def expand_repos(repos):
     result = []
     for repo in repos:
         fields = ["url", "path"]
-        r = get_default_repo(repo)
+        r = nsbl_tasks.get_default_repo(repo, DEFAULT_REPOS)
 
         if not r:
-            repo_url = expand_string_to_git_repo(repo)
-            relative_repo_path = calculate_local_repo_path(repo_url)
-            repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
-            temp = {"url": repo_url, "path": repo_path}
+
+            if os.path.exists(repo):
+                temp = {"url": None, "path": repo}
+            else:
+                repo_url = nsbl_tasks.expand_string_to_git_repo(repo, DEFAULT_ABBREVIATIONS)
+                relative_repo_path = nsbl_tasks.calculate_local_repo_path(repo_url)
+                repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
+                temp = {"url": repo_url, "path": repo_path}
             result.append(temp)
         else:
             role_tuples = r.get("roles", [])
@@ -481,19 +445,9 @@ def find_adapter_files(extension, valid_profiles=None, config=None):
     return task_files_to_copy
 
 
-def get_all_roles_in_repos(repos):
-    result = []
-    repos = get_local_repos(repos, "roles")
-    for repo in repos:
-        roles = nsbl_tasks.find_roles_in_repo(repo)
-        result.extend(roles)
-
-    return result
-
-
 def get_all_adapters_in_repos(repos):
     result = []
-    repos = get_local_repos(repos, "adapters")
+    repos = nsbl_tasks.get_local_repos(repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
     for repo in repos:
         adapters = get_adapters_from_repo(repo)
         result.extend(adapters)
@@ -568,7 +522,8 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
         config = DEFAULT_FRECKLES_CONFIG
 
     config_trusted_repos = config.trusted_repos
-    local_role_repos = get_local_repos(config_trusted_repos, "roles")
+    local_role_repos = nsbl_tasks.get_local_repos(config_trusted_repos, "roles", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
     role_repos = defaults.calculate_role_repos(local_role_repos, use_default_roles=False)
 
     task_descs = config.task_descs

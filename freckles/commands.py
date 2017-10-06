@@ -121,6 +121,9 @@ class CommandRepo(object):
         Details include the callback to use when executing it, as well as other metadata.
         """
 
+        if command_name not in self.commands.keys() or not self.commands[command_name]:
+            return None
+
         options_list = self.commands[command_name]["options"]
         key_map = self.commands[command_name]["key_map"]
         tasks = self.commands[command_name]["tasks"]
@@ -132,6 +135,7 @@ class CommandRepo(object):
         metadata = self.commands[command_name]["metadata"]
 
         def command_callback(**kwargs):
+
 
             new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars,
                                                            value_vars)
@@ -151,12 +155,12 @@ class CommandRepo(object):
 
             if no_run:
                 parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                                        ask_become_pass=ask_become_pass, no_run=True)
+                                                        ask_become_pass=ask_become_pass, no_run=True, config=self.config)
                 print_task_list_details(task_config, task_metadata=metadata, output_format=output,
                                         ask_become_pass=ask_become_pass, run_parameters=parameters)
             else:
                 create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                           ask_become_pass=ask_become_pass)
+                                           ask_become_pass=ask_become_pass, config=self.config)
                 # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
         help = doc.get("help", "n/a")
