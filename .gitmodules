@@ -43,3 +43,6 @@
 [submodule "freckles/external/default_role_repo/makkus.freckles-config"]
 	path = freckles/external/default_role_repo/makkus.freckles-config
 	url = https://github.com/makkus/freckles-config_ansible.git
+[submodule "freckles/external/default_role_repo/makkus.basic-security"]
+	path = freckles/external/default_role_repo/makkus.basic-security
+	url = https://github.com/makkus/basic-security.git
