@@ -243,6 +243,8 @@ def create_cli_command(config, command_name=None, command_path=None, extra_optio
 
         key = opt_details.pop('arg_name', opt)
         extra_arg_names = opt_details.pop('extra_arg_names', [])
+        if isinstance(extra_arg_names, string_types):
+            extra_arg_names = [extra_arg_names]
         key_map[key] = opt
 
         is_var = opt_details.pop('is_var', True)
@@ -263,6 +265,7 @@ def create_cli_command(config, command_name=None, command_path=None, extra_optio
 
             o = click.Argument(param_decls=[key], required=required, **opt_details)
         else:
+
             arg_names_for_option = ["--{}".format(key)] + extra_arg_names
             o = click.Option(param_decls=arg_names_for_option, **opt_details)
         options_list.append(o)
