@@ -354,7 +354,7 @@ def download_extra_repos(ctx, param, value):
     }]
 
 
-    create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=True)
+    create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=False)
 
     ctx.find_root().command.config.add_repos(repos)
 
