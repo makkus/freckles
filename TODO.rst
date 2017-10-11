@@ -44,6 +44,14 @@ roles
 
 - freckles-context: a role to manage freckles contexts (collection of roles, adapters and frecklecutables)
 
+package managers:
+-----------------
+
+- pip
+- nodejs
+- gems
+- haskell
+
 ark
 ---
 

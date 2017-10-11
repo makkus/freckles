@@ -23,7 +23,10 @@ Notes
 Abbreviations
 =============
 
-``freckles`` applications mostly operate on urls. To make those urls more memorable, and also shorter, a few (optional -- you can still just provide the full url) abbreviation schemes are supported.
+``freckles`` applications mostly operate on urls. To make those urls more memorable, and also shorter, a few abbreviation schemes are supported (see below).
+
+.. warning::
+    This abbreviation scheme and/or the used format might change, don't depend on it for anything remotely approaching 'production'. I strongly recommend using 'full' urls for anything more than playing around.
 
 - *github repo*: ``gh:<github_user>/<repo_name>``
 - *github repo file*: ``gh:<github_user>/<repo_name>/path/to/file``

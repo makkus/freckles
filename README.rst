@@ -177,7 +177,7 @@ On a newly installed machine, I run:
 This is what happens:
 
 - bootstraps *freckles* itself, then straight away executes it
-- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (it's optional to have a short url, but I grew to like those)
+- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (those short urls are optional, and their format might change later, read about the topic [here](http://localhost:8000/usage.html#notes)
 - checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
 - loads the instructions for the ``dotfiles`` adapter, which:
