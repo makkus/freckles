@@ -12,7 +12,7 @@ from frkl.frkl import (EnsurePythonObjectProcessor,
 
 from .freckles_defaults import *
 from .utils import create_and_run_nsbl_runner, create_cli_command, get_vars_from_cli_input, print_task_list_details, \
-    render_dict, expand_repos
+    render_dict, expand_repos, print_repos_expand
 
 log = logging.getLogger("freckles")
 
@@ -55,6 +55,9 @@ class CommandRepo(object):
         """
 
         self.config = config
+        repo_source = "using repo(s) from '{}'".format(config.config_file)
+        print_repos_expand(self.config.trusted_repos, repo_source=repo_source, warn=True)
+
         self.commands = None
         self.additional_commands = additional_commands
         self.paths = None
@@ -63,7 +66,6 @@ class CommandRepo(object):
         """Returns all valid frecklecutables."""
 
         repos = self.config.trusted_repos
-
         self.paths = [p['path'] for p in expand_repos(repos)]
 
         if not self.commands:

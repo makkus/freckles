@@ -92,7 +92,7 @@ class FreckleUrlType(click.ParamType):
             raise Exception("freckle url needs to a string: {}".format(value))
         try:
             frkl_obj = Frkl(value, [
-                UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False})])
+                UrlAbbrevProcessor(init_params={"abbrevs": DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False, "verbose": True})])
             result = frkl_obj.process()
             return result[0]
         except:
@@ -332,12 +332,13 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
 
 def download_extra_repos(ctx, param, value):
 
-
     output = ctx.find_root().params.get("output", "default")
 
     if not value:
         return
     repos = list(value)
+
+    print_repos_expand(repos, repo_source="using extra repo(s)", warn=True)
 
     click.echo("\n# processing extra repos...")
 
@@ -359,9 +360,59 @@ def download_extra_repos(ctx, param, value):
     ctx.find_root().command.config.add_repos(repos)
 
 
+def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
+
+    expanded = expanded_repos_dict(repos)
+
+    exp = False
+
+    if not expanded:
+        return
+
+    click.echo("")
+
+    if repo_source:
+        click.echo("# {}:".format(repo_source))
+    else:
+        click.echo("# using repo(s):")
+
+    click.echo("")
+
+    for r, value in expanded.items():
+        click.echo(" - {}".format(r))
+        for v in value:
+
+            if v["url"]:
+                if r != v["url"]:
+                    exp = True
+                    click.echo("     -> remote: '{}'".format(v["url"]))
+            if v["path"]:
+                if r != v["path"]:
+                    exp = True
+                    click.echo("     -> local: '{}'".format(v["path"]))
+
+    if warn and exp:
+        click.echo(" * NOTE: don't rely on abbreviated urls for anything important as that feature might change in a future release, use full urls if in doubt")
+
+def expanded_repos_dict(repos):
+
+    if isinstance(repos, string_types):
+        repos = [repos]
+
+    result = {}
+    for p in repos:
+        expanded = expand_repos(p)
+        if p not in DEFAULT_REPOS.keys() and p != expanded[0]:
+            result[p] = expanded
+
+    return result
+
 def expand_repos(repos):
     """Expands a list of stings to a list of tuples (repo_url, repo_path).
     """
+
+    if isinstance(repos, string_types):
+        repos = [repos]
 
     result = []
     for repo in repos:

@@ -289,6 +289,7 @@ class ProfileRepo(object):
     def __init__(self, config):
 
         self.config = config
+        print_repos_expand(self.config.trusted_repos, repo_source=config.config_file, warn=True)
         self.profiles = None
         self.commands = None
 
