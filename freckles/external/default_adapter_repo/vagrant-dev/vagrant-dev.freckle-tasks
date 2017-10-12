@@ -1,22 +1,9 @@
 # TODO: check for VirtualBox executable, omit calling the install role if found (to speed up execution)
-- name: "install virtualbox"
-  install:
-  vars:
-    homebrew_taps: []
-    homebrew_installed_packages: []
-    homebrew_cask_apps:
-      - virtualbox
-  when: "ansible_os_family == 'Darwin' and virtualbox in freckle_vars.get('providers', {})"
 
-- name: "[install virtualbox on Mac OS X]"
+- name: "[install virtualbox]"
   include_role:
-    name: geerlingguy.homebrew
-  vars:
-    homebrew_taps: []
-    homebrew_installed_packages: []
-    homebrew_cask_apps:
-      - virtualbox
-  when: "ansible_os_family == 'Darwin' and virtualbox in freckle_vars.get('providers', {})"
+    name: makkus.virtualbox
+  when: "'virtualbox' in freckle_vars.get('providers', {})"
 
 - name: install vagrant plugins
   install:

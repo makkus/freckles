@@ -1,3 +1,3 @@
-- name: checking whether to install Vagrant
+- name: "[checking whether to install Vagrant]"
   include_role:
     name: makkus.install-vagrant

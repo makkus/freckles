@@ -46,3 +46,6 @@
 [submodule "freckles/external/default_role_repo/makkus.basic-security"]
 	path = freckles/external/default_role_repo/makkus.basic-security
 	url = https://github.com/makkus/basic-security.git
+[submodule "freckles/external/default_role_repo/makkus.virtualbox"]
+	path = freckles/external/default_role_repo/makkus.virtualbox
+	url = https://github.com/makkus/virtualbox_ansible.git

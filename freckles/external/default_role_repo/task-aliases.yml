@@ -118,6 +118,22 @@ tasks:
         task-roles:
           - ansiblebit.oracle-java
         become: yes
+  - install-vagrant:
+      meta:
+        task-type: ansible-role
+        task-desc: installing vagrant
+        task-name: makkus.install-vagrant
+        task-roles:
+          - makkus.install-vagrant
+        become: yes
+  - install-virtualbox:
+      meta:
+        task-type: ansible-role
+        task-desc: installing virtualbox
+        task-name: makkus.virtualbox
+        task-roles:
+          - makkus.virtualbox
+        become: yes
   - yum:
       meta:
         become: yes
@@ -159,6 +175,7 @@ tasks:
            - makkus.dotfiles
            - makkus.python-dev
            - geerlingguy.homebrew
+           - makkus.virtualbox
            - elliotweiser.osx-command-line-tools
   - install:
       meta:
