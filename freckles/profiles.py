@@ -19,7 +19,7 @@ except NameError:
 from .utils import (RepoType,
                     create_freckle_desc,
                     find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
-                    get_vars_from_cli_input)
+                    get_vars_from_cli_input, print_repos_expand)
 
 log = logging.getLogger("freckles")
 
