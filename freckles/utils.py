@@ -77,7 +77,10 @@ class RepoType(click.ParamType):
     def convert(self, value, param, ctx):
 
         try:
+
+            print_repos_expand(value, warn=True)
             result = nsbl_tasks.expand_string_to_git_repo(value, DEFAULT_ABBREVIATIONS)
+
             return result
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
