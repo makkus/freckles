@@ -1,8 +1,8 @@
 ---
 # include makkus.dotfiles role
-# - debug: var=freckles_profile_folders
+- debug: var=freckles_profile_folders
 
-- name: "starting profile execution"
+- name: "starting dotfile adapter execution"
   include_role:
     name: "makkus.dotfiles"
   vars:
