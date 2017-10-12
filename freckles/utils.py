@@ -395,7 +395,7 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
                     click.echo("     -> local: '{}'".format(v["path"]))
 
     if warn and exp:
-        click.echo(" * NOTE: don't rely on abbreviated urls for anything important as that feature might change in a future release, use full urls if in doubt")
+        click.echo(" * NOTE: don't rely on abbreviated urls for anything important as that feature might change in a future release, use full urls if in doubt\n")
 
 def expanded_repos_dict(repos):
 
