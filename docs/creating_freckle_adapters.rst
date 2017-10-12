@@ -56,7 +56,7 @@ Let's clean up the help output first before we continue. To do that, edit the fi
 .. code-block:: shell
 
    doc:
-     help: freckle adapter to prepare a host machine for a Vagrant (https://w$
+     help: freckle adapter to prepare a host machine for a Vagrant (https://www.vagrantup.com)
      short_help: installs Vagrant and, (optional) required plugins
 
 To see the effect, just run ``freckles --help`` again.
