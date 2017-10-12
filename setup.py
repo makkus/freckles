@@ -10,8 +10,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
-    'nsbl==0.1.4'
+    'Click>=6.7',
+    'nsbl==0.1.5'
 ]
 
 test_requirements = [
