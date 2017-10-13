@@ -18,7 +18,7 @@ except NameError:
 
 log = logging.getLogger("freckles")
 
-FRECKLES_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') and sets up your local environment to be able to handle the data, according to the data's profile.
+FRECKELIZE_HELP_TEXT = """Downloads a remote dataset or code (called a 'freckle') and sets up your local environment to be able to handle the data, according to the data's profile.
 
 Ideally the remote dataset includes all the metadata that is needed to setup the environment, but it's possible to provide some directives using commandline options globally (--target, --include, --exclude), or per adapter (use the --help function on each adapter to view those).
 
@@ -27,10 +27,10 @@ Locally available adapters for supported profiles are listed below, each having 
 For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckles_command.html
 """
 
-FRECKLES_EPILOG_TEXT = "freckelize is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
+FRECKELIZE_EPILOG_TEXT = "freckelize is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
 
-class FrecklesProfiles(click.MultiCommand):
+class FreckelizeCommand(click.MultiCommand):
 
 
     def __init__(self, config, **kwargs):
@@ -65,6 +65,7 @@ class FrecklesProfiles(click.MultiCommand):
         self.params = get_freckles_option_set()
         self.params.extend([ use_repo_option, output_option,  no_run_option, version_option])
         self.config = config
+
         self.profile_repo = ProfileRepo(self.config)
 
         # self.command_names.append(BREAK_COMMAND_NAME)
@@ -97,7 +98,7 @@ class FrecklesProfiles(click.MultiCommand):
 click.core.SUBCOMMAND_METAVAR = 'ADAPTER [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'ADAPTER1 [ARGS]... [ADAPTER2 [ARGS]...]...'
 
-cli = FrecklesProfiles(DEFAULT_FRECKLES_CONFIG, chain=True, help=FRECKLES_HELP_TEXT, epilog=FRECKLES_EPILOG_TEXT)
+cli = FreckelizeCommand(DEFAULT_FRECKLES_CONFIG, chain=True, help=FRECKELIZE_HELP_TEXT, epilog=FRECKELIZE_EPILOG_TEXT)
 
 if __name__ == "__main__":
     cli()

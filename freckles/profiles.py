@@ -159,27 +159,29 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
         click.echo("")
         click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
         click.echo("")
+        return None
     else:
 
-        create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
+        return create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
                             output_format=output_format)
 
 
 def assemble_freckle_run(*args, **kwargs):
 
+    result = []
     no_run = kwargs.get("no_run")
 
     default_target = kwargs.get("target", None)
     if not default_target:
         default_target = "~/freckles"
 
-    default_freckle_urls = list(kwargs["freckle"])
-    default_output_format = kwargs["output"]
+    default_freckle_urls = list(kwargs.get("freckle", []))
+    default_output_format = kwargs.get("output", "default")
 
-    default_include = list(kwargs["include"])
-    default_exclude = list(kwargs["exclude"])
+    default_include = list(kwargs.get("include", []))
+    default_exclude = list(kwargs.get("exclude", []))
 
-    default_ask_become_pass = kwargs["ask_become_pass"]
+    default_ask_become_pass = kwargs.get("ask_become_pass", True)
 
     extra_profile_vars = {}
     repos = collections.OrderedDict()
@@ -193,8 +195,9 @@ def assemble_freckle_run(*args, **kwargs):
 
         if pn == BREAK_COMMAND_NAME:
 
-            execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+            temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
 
+            result.append(temp)
             repos = collections.OrderedDict()
             extra_profile_vars = {}
             profiles = []
@@ -251,7 +254,10 @@ def assemble_freckle_run(*args, **kwargs):
 
     if (repos):
         click.echo("\n# starting ansible run...")
-        execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+        temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+        result.append(temp)
+
+    return result
 
     # all_freckle_repos = []
     # for freckle_url, freckle_details in repos.items():

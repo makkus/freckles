@@ -18,13 +18,13 @@ log = logging.getLogger("freckles")
 
 # TODO: this is a bit ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
-EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
+# EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 
-FRECKLES_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formated) text file (called a 'frecklecutable').
+FRECKLECUTE_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formated) text file (called a 'frecklecutable').
 
 *frecklecute* comes with a few default frecklecutables that are used to manage itself (as well as its sister application *freckles*) as well as a few useful generic ones. Visit the online documentation for more details: https://docs.freckles.io/en/latest/frecklecute_command.html
 """
-FRECKLES_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
+FRECKLECUTE_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
 COMMAND_PROCESSOR_CHAIN = [
     frkl.UrlAbbrevProcessor()
@@ -59,7 +59,7 @@ if not current_command:
     current_command_path = None
 
 
-class FrecklesCommand(click.MultiCommand):
+class FrecklecuteCommand(click.MultiCommand):
 
     def __init__(self, current_command, config, **kwargs):
         """Base class to provide a command-based (similar to e.g. git) cli for frecklecute.
@@ -126,8 +126,8 @@ click.core.SUBCOMMAND_METAVAR = 'FRECKLECUTABLE [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'FRECKLECUTABLE1 [ARGS]... [FRECKLECUTABLE2 [ARGS]...]...'
 
 
-cli = FrecklesCommand((current_command, current_command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLES_HELP_TEXT,
-                      epilog=FRECKLES_EPILOG_TEXT)
+cli = FrecklecuteCommand((current_command, current_command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLECUTE_HELP_TEXT,
+                      epilog=FRECKLECUTE_EPILOG_TEXT)
 
 if __name__ == "__main__":
     cli()

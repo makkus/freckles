@@ -138,7 +138,6 @@ class CommandRepo(object):
 
         def command_callback(**kwargs):
 
-
             new_args, final_vars = get_vars_from_cli_input(kwargs, key_map, task_vars, default_vars, args_that_are_vars,
                                                            value_vars)
             rendered_tasks = render_dict(tasks, new_args)
@@ -151,19 +150,27 @@ class CommandRepo(object):
 
             log.debug("Final task config: {}".format(task_config))
 
-            output = ctx.params["output"]
-            ask_become_pass = ctx.params["ask_become_pass"]
-            no_run = ctx.params["no_run"]
+            if ctx:
+                output = ctx.params.get("output", "default")
+                ask_become_pass = ctx.params.get("ask_become_pass", True)
+                no_run = ctx.params.get("no_run", False)
+            else:
+                output = "default"
+                ask_become_pass = True
+                no_run = False
 
             if no_run:
                 parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
                                                         ask_become_pass=ask_become_pass, no_run=True, config=self.config)
                 print_task_list_details(task_config, task_metadata=metadata, output_format=output,
                                         ask_become_pass=ask_become_pass, run_parameters=parameters)
+                result = None
             else:
-                create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
+                result = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
                                            ask_become_pass=ask_become_pass, config=self.config)
                 # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
+
+            return result
 
         help = doc.get("help", "n/a")
         short_help = doc.get("short_help", help)

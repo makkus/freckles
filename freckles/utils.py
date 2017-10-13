@@ -360,7 +360,10 @@ def download_extra_repos(ctx, param, value):
 
     create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=False)
 
-    ctx.find_root().command.config.add_repos(repos)
+    if hasattr(ctx.find_root().command, "config"):
+        ctx.find_root().command.config.add_repos(repos)
+    elif hasattr(ctx.find_root(), "obj"):
+        ctx.find_root().obj["config"].add_repos(repos)
 
 
 def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
