@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import click
-import frkl
+from  frkl import frkl
 import nsbl
 import pprint
 import textwrap
@@ -78,41 +78,27 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
     current_command = "create-adapter"
     current_command_path = None
 
-    script = [
-        {"command": {
-            "name": "grav",
-            "type": "freckelize"
-        },
-         "vars": [
-             {"freckle": "gh:makkus/grav-test",
-             "port": 80}
-         ]},
-        {"command": {
-            "name": "dotfiles",
-            "type": "freckelize"
-        },
-        "vars": [
-            {"freckle": "gh:makkus/dotfiles"},
-            {"include": "minimal"}
-        ]},
-        {"command": {
-            "name": "create-adapter",
-            "type": "frecklecute"
-        },
-        "vars": {
-            "args": "test-adapter2"
-        }}
-    ]
+    chain = [frkl.UrlAbbrevProcessor(), frkl.EnsureUrlProcessor(), frkl.EnsurePythonObjectProcessor(), frkl.FrklProcessor(DEFAULT_FRECKLES_COMMAND_FORMAT)]
 
-    for item in script:
+    frkl_obj = frkl.Frkl(script, chain)
+    commands = frkl_obj.process()
+
+    pprint.pprint(commands)
+
+    for item in commands:
 
         command = item["command"]
         command_name = command["name"]
-        command_type = command["type"]
+        command_type = command.get("type", None)
+
+        if not command_type:
+            if "freckle" in item.get("vars", {}).keys():
+                command_type = 'freckelize'
+            else:
+                command_type = 'frecklecute'
 
         arguments = []
         create_cli_list(item.get("vars", {}), arguments)
-        print(arguments)
 
         if command_type == 'frecklecute':
 
@@ -122,6 +108,9 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
 
             click.echo("\n# Executing {}...".format(command_title))
             c = cli_command.get_command(ctx, command_name)
+            if not c:
+                click.echo("Could not find frecklecutable '{}'. Exiting...".format(command_name))
+                sys.exit(1)
             r = c.main(args=arguments, prog_name=command_title, standalone_mode=False)
             exit_code = r["return_code"]
 
@@ -131,6 +120,9 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
             cli_command = FreckelizeCommand(DEFAULT_FRECKLES_CONFIG, chain=True, help=FRECKELIZE_HELP_TEXT, epilog=FRECKELIZE_EPILOG_TEXT)
 
             c = cli_command.get_command(ctx, command_name)
+            if not c:
+                click.echo("Could not find adapter '{}'. Exiting...".format(command_name))
+                sys.exit(1)
             parse_cli_result = c.main(args=arguments, prog_name=command_title, standalone_mode=False)
 
             if not parse_cli_result.get("vars", {}).get("freckle", False):
