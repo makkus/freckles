@@ -1,5 +1,7 @@
+- grav:
+    freckle: gh:makkus/grav-test
 - dotfiles:
    freckle: gh:makkus/dotfiles
    include: minimal
 - create-adapter:
-   args: testadatperscripct
+   args: testadatperscripct2
