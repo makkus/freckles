@@ -83,8 +83,6 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
     frkl_obj = frkl.Frkl(script, chain)
     commands = frkl_obj.process()
 
-    pprint.pprint(commands)
-
     for item in commands:
 
         command = item["command"]
