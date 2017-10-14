@@ -3,4 +3,4 @@
     include: minimal
 - python-dev:
    freckle: gh:makkus/freckles
-- ~/freckles/freckles/examples/housekeeping.yml
+- /home/vagrant/freckles/freckles/examples/housekeeping.yml
