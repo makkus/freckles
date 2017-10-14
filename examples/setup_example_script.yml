@@ -1,0 +1,5 @@
+- dotfiles:
+    freckle: gh:makkus/dotfiles
+- python-dev:
+   freckle: gh:makkus/freckles
+- gh:makkus/freckles/examples/housekeeping.yml

@@ -1,0 +1,7 @@
+tasks:
+  - file:
+     path: ~/.backups/zile
+     state: directory
+  - mongrelion.docker:
+     meta:
+      become: yes
