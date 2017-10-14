@@ -27,7 +27,7 @@ Introduction
 
 *freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container, ...), it removes (or hides) advanced features often offered by other configuration management frameworks, for the sake of simplicity and a quick turnaround.
 
-*freckles* helps you bring your system from a useless -- for your intent and purpose --state, into a useful one. With one line in a terminal.
+*freckles* helps you bring your system from a useless -- for your intent and purpose -- state, into a useful one. With one line in a terminal (and a bit of preparation).
 
 Quick links
 ===========
@@ -36,43 +36,43 @@ Quick links
 - documentation: https://docs.freckles.io
 - code: https://github.com/makkus/freckles
 
-For now, the *freckles* project provides two (command-line) interfaces, which deal with slightly different scenarios and workflows:
+For now, the *freckles* project provides three (command-line) interfaces, which deal with slightly different scenarios and workflows:
 
-``freckles``
-============
+``freckelize``
+==============
 
-Configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the code or data packages you work with, and *freckles* tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on by using an appropriate *adapter* for that type of data.
+Configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the code or data packages you work with, and ``freckelize`` tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on by using an appropriate *adapter* for that type of data.
 
 One example would be pointing it to a repository of your (well, my, in this case) dotfiles:
 
 .. code-block:: console
 
-   freckles dotfiles -f gh:makkus/dotfiles
+   freckelize dotfiles -f gh:makkus/dotfiles
 
-*freckles* will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (for more details, check `the example below <Example #1, where we checkout our dotfiles and setup our development machine_>`_, or the ``dotfile`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_).
+``freckelize`` will download the dotfiles repo, install all the applications that are referenced, then link the dotfiles themselves into the right place (for more details, check `the example below <Example #1, where we checkout our dotfiles and setup our development machine_>`_, or the ``dotfile`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/dotfiles.html>`_).
 
-Or you can use *freckles* to get you started working on *freckles* itself by letting it download it's own source code and set up a development environment for it:
+Or you can use ``freckelize`` to get you started working on *freckles* itself by letting it download it's own source code and set up a development environment for it:
 
 .. code-block:: console
 
-   freckles python-dev -f gh:makkus/freckles
+   freckelize python-dev -f gh:makkus/freckles
 
 This will check out the *freckles* source code from `it's github repo <https://github.com/makkus/freckles>`_, install all the system dependencies *freckles* needs, creates a virtual environment called ``freckles-dev`` and installs *freckles* and its python dependencies into it (more details can be found `in the example below <Example #2, where we setup a Python development project_>`_ and the ``python-dev`` adapter documentation `here <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_).
 
-Or, maybe you are working on a webpage. If somebody writes an adapter for your usecase and the framework(s) you use, *freckles* could download your source files, setup a webserver and potential dependencies (nodejs? php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
+Or, maybe you are working on a webpage. If somebody writes an adapter for your usecase and the framework(s) you use, ``freckelize`` could download your source files, setup a webserver and potential dependencies (nodejs? php? ruby?, ...) on your dev machine, then puts configuration in place so you can start working straight away.
 
 ``frecklecute``
 ===============
 
-Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As *freckles* and *frecklecute* are built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
+Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As all of *freckles* is built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
 
-*frecklecute* comes with a few default *frecklecutables*, for example one (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_) that lets you execute any arbitrary Ansible module or role directly. This is what it looks like to ensure a folder exists, using *frecklecute* (including '`inaugurating <inaugurate_>`_'/bootstrapping *frecklecute* itself):
+``frecklecute`` comes with a few default *frecklecutables*, for example one (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_) that lets you execute any arbitrary Ansible module or role directly. This is what it looks like to ensure a folder exists, using ``frecklecute`` (including '`inaugurating <inaugurate_>`_'/bootstrapping ``frecklecute`` itself):
 
 .. code-block:: console
 
    curl https://freckles.io | bash -s -- frecklecute -pw false ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
 
-This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, that particular example doesn't make any sense, I hope it is plain to see how use- and powerful a scripting tool like this, with access to all Ansible modules and roles, can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume *frecklecute*/*freckles* is already installed this time):
+This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, that particular example doesn't make any sense, I hope it is plain to see how use- and powerful a scripting tool like this, with access to all Ansible modules and roles, can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume ``frecklecute``/*freckles* is already installed this time):
 
 .. code-block:: console
 
@@ -101,25 +101,39 @@ Then run it like so:
 
     frecklecute example.yml --path ~/another_cool_folder
 
+``freckles``
+============
+
+The interface that brings ``freckelize`` and ``frecklecute`` together. It allows you to describe several runs of ``freckelize`` and/or ``frecklecute`` in a yaml file, which it will execute (after optionally downloading that file from a remote host).
+
+.. code-block:: console
+
+   curl https://freckles.io | bash -s -- freckles -pw false XXX-TO_DO
+
+This is what a *freckles* script looks like:
+
+.. code-block:: yaml
+
+   TODO
 
 Really quick start
 ******************
 
 (... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
 
-Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run it straight away to display it's help, issue:
+Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run ``freckelize`` straight away to display it's help, issue:
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles --help
+   curl https://freckles.io | bash -s -- freckelize --help
 
-or, using ``wget`` instead of ``curl``, and executing ``frecklecute`` instead of ``freckles`` (you can mix and match, of course):
+or, using ``wget`` instead of ``curl``, and executing ``frecklecute`` instead of ``freckles`` (you can mix and match, of course, and also use the ``freckles`` command if that is what you need):
 
 .. code-block:: console
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps ('inaugurates') *freckles* or *frecklecute* and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
+This bootstraps ('inaugurates') ``freckelize``, ``frecklecute`` or *freckles* and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
 
 This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 
@@ -158,11 +172,11 @@ Examples
 
 Probably best to show what *freckles* is, and what it can do using examples. Do not try those at home, as they'll install loads of packages you most likely don't need.
 
-I'll show you how I use *freckles* and *frecklecute* to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use *freckles* on the *freckles* source code itself. And finally I'll quickly outline how to use *frecklecute* to do some other, more specialized, housekeeping tasks.
+I'll show you how I use ``freckelize``, ``frecklecute`` and *freckles* to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use ``freckelize`` on the *freckles* source code itself. I'll quickly outline how to use ``frecklecute`` to do some other, more specialized, housekeeping tasks. And finally I'll show how to tie everything together using the *freckles* command.
 
 
-using: *freckles*
-=================
+using: ``freckelize``
+=====================
 
 
 Example #1, where we checkout our dotfiles and setup our development machine
@@ -172,17 +186,17 @@ On a newly installed machine, I run:
 
 .. code-block:: console
 
-   $ curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles
+   $ curl https://freckles.io | bash -s -- freckelize dotfiles -f gh:makkus/dotfiles
 
 This is what happens:
 
-- bootstraps *freckles* itself, then straight away executes it
-- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (those short urls are optional, and their format might change later, read about the topic [here](http://localhost:8000/usage.html#notes)
+- bootstraps *freckles* itself, then straight away executes ``freckelize``
+- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (those short urls are optional, and their format might change later, read about the topic [here](https://docs.freckles.io/en/latest/usage.html#notes)
 - checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
 - loads the instructions for the ``dotfiles`` adapter, which:
 - installs all the packages listed in the metadata (same metadata can be used to describe the setup on several flavors of Linux as well as on Mac OS X, you only have to provide the correct package names per package manager)
-- symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called stow_ -- which *freckles* also installs if not present already)
+- symbolically links all the configuration files it finds in the repository into their appropriate place in my home directory (using an application called stow_ -- which *freckelize* also installs if not present already)
 
 In case you had a look at `my dotfiles repo <https://github.com/makkus/dotfiles>`_: I've organized my configuration into subfolders (to be able to exclude applications I don't need for certain scenarios -- e.g. X-applications on a remote server), but that is more complicated than necessary. You can certainly just have a flat folder-structure, with one subfolder per application.
 
@@ -195,7 +209,7 @@ Now, after setting up my machine with my applications and configuration files, I
 
 .. code-block:: console
 
-   $ freckles python-dev -f gh:makkus/freckles
+   $ freckelize python-dev -f gh:makkus/freckles
 
 Here's what happens:
 
@@ -217,8 +231,8 @@ By default, virtualenvs are put under ``$HOME/.local/virtualenvs`` and are named
 
 More information about the ``python-doc`` adapter: `python-doc <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_.
 
-using: *frecklecute*
-====================
+using: ``frecklecute``
+======================
 
 Example #3, where we run an ansible task as well as an external ansible role
 ----------------------------------------------------------------------------
@@ -227,7 +241,7 @@ So -- having setup all the data, associated applications, source code and workin
 
 Also I want to have Docker installed on that new machine. The install procedure of Docker is a bit more complicated than an simple ``apt-get install docker``, and because of that I can't easily add it to my dotfiles configuration. Luckily though, there are tons of ansible roles on https://galaxy.ansible.com that can do the job of installing Docker for me. The only thing I need to check is that the role supports the platform I am running.
 
-For those more specialized tasks *freckles* is not a really good fit (although we could probably create an adapter for this, or expand the existing ``dotfiles`` one), so it's easier to use *frecklecute*. *frecklecute* operates on (yaml) text files (I call them *frecklecutables*) that contain a list of Ansible tasks and/or roles to execute, along with configuration for those tasks and roles. Here's a short *frecklecutable* to create the folder I need, and install *docker* using a role I found on Ansible galaxy: https://galaxy.ansible.com/mongrelion/docker/
+For those more specialized tasks *freckelize* is not a really good fit (although we could probably create an adapter for this, or expand the existing ``dotfiles`` one), so it's easier to use ``frecklecute``. ``frecklecute`` operates on (yaml) text files (I call them *frecklecutables*) that contain a list of Ansible tasks and/or roles to execute, along with configuration for those tasks and roles. Here's a short *frecklecutable* to create the folder I need, and install *docker* using a role I found on Ansible galaxy: https://galaxy.ansible.com/mongrelion/docker/
 
 .. code-block:: yaml
 
@@ -239,9 +253,9 @@ For those more specialized tasks *freckles* is not a really good fit (although w
         meta:
          become: yes
 
-I'll not explain how all this works in detail here (instead, check out `this <https://docs.freckles.io/en/latest/frecklecute_command.html>`_), but basically *frecklecute* allows you to create a list of tasks in a yaml file, using the names of `any of the existing ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, and/or the name of any of the `roles on ansible galaxy <https://galaxy.ansible.com>`_, which then gets read and executed consecutively.
+I'll not explain how all this works in detail here (instead, check out `this <https://docs.freckles.io/en/latest/frecklecute_command.html>`_), but basically ``frecklecute`` allows you to create a list of tasks in a yaml file, using the names of `any of the existing ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, and/or the name of any of the `roles on ansible galaxy <https://galaxy.ansible.com>`_, which then gets read and executed consecutively.
 
-Right. Let's save the above yaml block into a file called ``housekeeping.yml``. And let *frecklecute* do it's thing:
+Right. Let's save the above yaml block into a file called ``housekeeping.yml``. And let ``frecklecute`` do it's thing:
 
 .. code-block:: console
 
@@ -273,6 +287,32 @@ You'll see something like:
        ...
 
 Neat, eh?
+
+
+using: ``freckles``
+===================
+
+Example #4, where we use ``freckles`` to execute everything we did so far in one go
+-----------------------------------------------------------------------------------
+
+Getting my new machine to include all my configuration, having setup the source code for *freckles* in order to work on it, as well as having *Docker* setup takes 3 commands. As I want to do those 3 tasks on every new machine I buy (even though regrettably that does not happen all that often), I want to be able to create a script to easily re-run the setup procedure. This can be done using the ``freckles`` command line interface. The yaml config file it needs looks as such:
+
+.. code-block:: yaml
+
+   - dotfiles:
+      freckle: gh:makkus/dotfiles
+   - python-dev:
+      freckle: gh:makkus/freckles
+   - gh:makkus/freckles/examples/housekeeping.yml
+
+
+Now we need to make sure that script is available from a new machine. We can either copy it manually before execution, or upload it somewhere ``freckles`` can download it from later. Let's assume we've done the latter. To run the script, we do:
+
+.. code-block:: console
+
+   freckles gh:makkus/freckles/examples/setup_example_script.yml
+
+That's all for the examples, folks.
 
 (Current) caveats
 *****************
