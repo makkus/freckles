@@ -1,6 +1,8 @@
 #! /usr/bin/env frecklecute
 
 tasks:
+  - apt:
+      name: apt-transport-https
   - docker_ubuntu:
       meta:
         become: yes
