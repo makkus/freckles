@@ -109,11 +109,26 @@ class CommandRepo(object):
 
                 command_name = command[0]
                 command_file = command[1]
-                if not command_name or not command_file:
+
+                if not command_name and not command_file:
                     continue
-                path = command_file.split(os.sep)
-                command = self.create_command(command_file, command_file)
-                self.commands[command_name] = command
+                elif command_name and not command_file:
+                    # in repo or remote
+                    if command_name in self.commands.keys():
+                        # in one of the repos
+                        continue
+
+                    self.commands[command_name] = self.create_command(command_name, command_name)
+                    continue
+                elif not command_name and command_file:
+                    # not possible (I think)
+                    continue
+                else:
+                    # local file
+                    path = command_file.split(os.sep)
+                    command = self.create_command(command_file, command_file)
+
+                    self.commands[command_name] = command
 
         return self.commands
 

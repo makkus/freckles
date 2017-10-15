@@ -36,16 +36,25 @@ current_command = None
 # temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
 # command_list = temp_repo.get_commands().keys()
 
+VALID_CLI_OPTIONS = ["-r", "--use-repo", "-o", "--output", "-pw", "--ask-become-pass"]
+
 if sys.argv[0].endswith("frecklecute"):
+
+    last_opt = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     for arg in sys.argv[1:]:
 
         if arg.startswith("-"):
+            last_opt = arg
             continue
 
             # if arg in command_list:
             # current_command = None
             # current_command_path = None
             # break
+
+        if last_opt in VALID_CLI_OPTIONS:
+            last_opt = arg
+            continue
 
         if os.path.exists(arg):
             current_command = arg
@@ -54,10 +63,12 @@ if sys.argv[0].endswith("frecklecute"):
             # current_command = frkl_obj.process()[0]
             break
 
-if not current_command:
-    current_command = None
-    current_command_path = None
+        # frkl_obj = frkl.Frkl(arg, [
+            # frkl.UrlAbbrevProcessor(init_params={"abbrevs": frkl.DEFAULT_ABBREVIATIONS, "add_default_abbrevs": False, "verbose": True})])
+        # result = frkl_obj.process()
 
+        current_command = arg
+        current_command_path = None
 
 class FrecklecuteCommand(click.MultiCommand):
 
