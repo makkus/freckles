@@ -24,7 +24,7 @@ Ideally the remote dataset includes all the metadata that is needed to setup the
 
 Locally available adapters for supported profiles are listed below, each having their own configuration. You can specify a 'global' url by adding it's '--freckle' option before any of the subsequently specified adapters, prompting any of those adapters to apply their tasks to it. Or you can assign one (or multiple) freckle to an adapter by providing it after the adapter name.
 
-For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckles_command.html
+For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckelize_command.html
 """
 
 FRECKELIZE_EPILOG_TEXT = "freckelize is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"

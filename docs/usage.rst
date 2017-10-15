@@ -12,7 +12,7 @@ The former is designed to require little to no configuration to achive its goal,
 .. toctree::
    :maxdepth: 5
 
-   freckles_command
+   freckelize_command
    frecklecute_command
 
 ``freckles`` consists of a few different commands, which all use the same underlying codebase and configuration format.
