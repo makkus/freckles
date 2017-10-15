@@ -71,7 +71,7 @@ def log_current(ctx, follow):
     ansible_log_file = os.path.join(last_run_log_folder, "ansible_run_log")
 
     if not follow:
-        f = subprocess.Popen(['tail','-F', ansible_log_file], shell=False)
+        f = subprocess.Popen(['cat', ansible_log_file], shell=False)
 
     else:
 
