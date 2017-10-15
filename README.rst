@@ -324,7 +324,7 @@ That's all for the examples, folks.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
 - mostly developed on Debian & Ubuntu, so RedHat-based platforms and Mac OS X might not work as well just yet (although I spent a shitload of time to support Mac OS X, so it shouldn't be far off)
 - as *freckles* and it's adapters use conventions to minimize the need for configuration, it is fairly opinionated on how to do things, necessarily. You might, for example, not like the way ``dotfiles`` are 'stowed' (preferring maybe using an external git work-tree, or whatnot), or how the ``python-dev`` adapter handles python code. That being said, it is certainly possible to just write another adapter, or add different options to existing ones.
-
+- on Mac OS X, in most cases the Command-line tools package as well as 'homebrew' will be installed. I'm not a Mac user, but I assume that is what most people will want anyway. Or at least don't mind.
 
 License
 *******
