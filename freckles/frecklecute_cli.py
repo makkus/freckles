@@ -32,11 +32,14 @@ COMMAND_PROCESSOR_CHAIN = [
 
 # we need the current command to dynamically add it to the available ones
 current_command = None
+current_command_path = None
 
 # temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
 # command_list = temp_repo.get_commands().keys()
 
 VALID_CLI_OPTIONS = ["-r", "--use-repo", "-o", "--output", "-pw", "--ask-become-pass"]
+
+
 
 if sys.argv[0].endswith("frecklecute"):
 
@@ -69,6 +72,7 @@ if sys.argv[0].endswith("frecklecute"):
 
         current_command = arg
         current_command_path = None
+        break
 
 class FrecklecuteCommand(click.MultiCommand):
 
