@@ -67,6 +67,8 @@ def create_cli_list(vars, current_result):
 @click.option("--ask-become-pass", "-pw", help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="auto")
 @click.option("--no-run", help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
 @click.option("--output", "-o", required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
+@click.option("--version", help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+
 @click.argument('script', nargs=-1, required=True)
 @click.pass_context
 def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
