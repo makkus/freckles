@@ -36,7 +36,7 @@ setup(
             'freckles=freckles.freckles_cli:cli',
             'freckelize=freckles.freckelize_cli:cli',
             'frecklecute=freckles.frecklecute_cli:cli',
-            '_freckfreckfreck=freckles.freckles_dev_cli:cli'
+            'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
     include_package_data=True,
