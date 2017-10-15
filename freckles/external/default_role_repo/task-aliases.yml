@@ -186,9 +186,6 @@ tasks:
         var-keys:
           - packages
           - pkg_mgr
-  - checkout-git:
-      meta:
-        default-key: repos
   - delete:
       meta:
          default-key: path
