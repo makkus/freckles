@@ -30,14 +30,14 @@ I honestly don't know, I think there is no real good answer. Ideally, all you wo
 
 If you need to install more recent versions, or applications that are not in your distributions repositories, try to limit yourself to widely used packages, as you can reasonably assume that the bigger the community, the more eyes were on the source code.
 
-If you need to install something niche, install it in a container, or Virtual Machine (ideally, use something like [Qubes](https://www.qubes-os.org/)!).
+If you need to install something niche, install it in a container, or Virtual Machine (ideally, use something like `Qubes <https://www.qubes-os.org/>`_!).
 
 freckles
 ********
 
-So, what about *freckles*? Obviously, I can't give you any valid advice here.
+So, what about *freckles*? Obviously, I'm not the best person to give advice here.
 
-Obviously I want you to use it if you think it's interesting, or useful. I do hope there'll be a sizeable community around it at some stage, but that might never happen. Maybe start using it in your Vagrant containers, not your main machine or production servers (you shouldn't do that anyway, since *freckles* is nowhere near production quality code yet).
+Obviously I'd like you to be able to  use *freckles* if you think it's interesting, or useful. I do hope there'll be a reasonably sized community around it at some stage, but that might never happen. Maybe start using it in your Vagrant containers, not your main machine or production servers (you shouldn't do that anyway, since *freckles* is nowhere near production quality code yet).
 
 *freckles* can download and execute *ansible roles*, *frecklecutables*, and *freckelize adapters* from online repos. This is one of the main features of *freckles*, and it is the reason why it can get a machine into the state you want it to be without anything other on the box than ``curl`` or ``wget``.
 
@@ -46,7 +46,7 @@ That means you have to be careful which of the bits and pieces you download and 
 inaugurate
 ==========
 
-I'd recommend read it thorougly, then you host the [inaugurate script](https://github.com/makkus/inaugurate/blob/master/inaugurate.sh) that is used to bootstrap *freckles* somewhere on your own infrastructure. That way you can be sure no changes were made since the last time you looked.
+I'd recommend you read the `inaugurate script <https://github.com/makkus/inaugurate/blob/master/inaugurate.sh>`_ that is used to bootstrap *freckles* thorougly, then host it somewhere on your own infrastructure. That way you can be sure no changes were made since the last time you looked.
 You can always updated it once you review the commit log on it's repository.
 
 Ansible roles
@@ -54,7 +54,7 @@ Ansible roles
 
 Not sure about those, as at the moment people seem to be using them mostly straight out of Ansible galaxy. Ansible Galaxy, like a lot of 'official' language/framework repos is not audited in any way (nor would I expect it to), so it's fairly easy to sneak in something malicious. For anything of importance, I'd recommend creating your own "role collection" on Github (using ``git submodule`` or ``git subtree``).
 
-My plan is to host two community repositories: [freckles-io roles](https://github.com/freckles-io/roles) and the [ark](https://github.com/freckles-io/ark). The former will be a collection of curated roles that are generally considered useful in the context of *freckles*, the latter I'd like to be a place where there is one role (and one role only) for a specific task (i.e. install docker, install nginx, etc.). I haven't gotten around to write up some requirements for roles to end up in the *ark*, but it'll be something like: 'support the latest versions of all the major Distros, Mac OS X (if applicable), have testing and a maintainer, etc.
+My plan is to host two community repositories: `freckles-io roles <https://github.com/freckles-io/roles>`_ and the `ark <https://github.com/freckles-io/ark>`. The former will be a collection of curated roles that are generally considered useful in the context of *freckles*, the latter I'd like to be a place where there is one role (and one role only) for a specific task (i.e. install docker, install nginx, etc.). I haven't gotten around to write up some requirements for roles to end up in the *ark*, but it'll be something like: 'support the latest versions of all the major Distros, Mac OS X (if applicable), have testing and a maintainer, etc.
 
 If that works out, and there really is no indication that it will!!!, this could be a place to get 'somewhat trustworthy' Ansible roles from.
 
