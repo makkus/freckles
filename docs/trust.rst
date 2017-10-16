@@ -2,7 +2,7 @@
 Trust
 #####
 
-This is a fairly important topic, especially for a tool like *freckles* which downloads and uses bits and pieces from all over the place. On this page what I think makes sense (or at least is practical) in terms of security, be aware that I'm not always sure about what to do in that area myself, and that it's very likely that I'm getting some of the things I'm about to write wrong.
+This is a fairly important topic, especially for a tool like *freckles* which downloads and uses bits and pieces from all over the place. On this page I'll tell you what I think makes sense (or at least is practical) in terms of security, be aware that I'm not always sure about what to do in that area myself, and that it's very likely that some of the things I'm writing about will probably be wrong.
 
 Use your own judgment, and brain.
 
