@@ -1,11 +1,11 @@
-#########################
-Creating freckle adapters
-#########################
+############################
+Creating freckelize adapters
+############################
 
 Quick-start
 ***********
 
-*freckles adapters* use *Ansible's* configuration format (facilitating *yaml*), similar to how to create Ansible playbooks and tasks for roles. I'll assume you have some experience with *Ansible* here. If that is not the case, maybe check out the `Ansible documentation <http://docs.ansible.com/ansible/latest/playbooks_intro.html>`_ before continuing here.
+*frecklelize adapters* use *Ansible's* configuration format (facilitating *yaml*), similar to how to create Ansible playbooks and tasks for roles. I'll assume you have some experience with *Ansible* here. If that is not the case, maybe check out the `Ansible documentation <http://docs.ansible.com/ansible/latest/playbooks_intro.html>`_ before continuing here.
 
 *freckles* comes with a *frecklecute* (called `'create_adapter' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/create-adapter>`_ that can help you creating a *freckles adapter* stub in ``$HOME/.freckles/adapters/<adapter_name>``:
 
