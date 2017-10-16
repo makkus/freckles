@@ -9,23 +9,24 @@ Use your own judgment, and brain.
 Bootstrap scripts
 *****************
 
-First of all, as you've probably seen, you don't have to use the *'inaugurate'* bootstrap script to get *freckles* running. So, if you want, just `install it manually <Install manually via pip>`_.
+First of all, as you've probably seen, you don't have to use the *'inaugurate'* bootstrap script to get *freckles* running. So, if you feel better that way, just `install it manually <Install manually via pip>`_.
 
 That being said, it probably doesn't make much sense in terms of being 'more secure'. I've always wondered why shell scripts that are downloaded and executed directly get a so much worse rep than all the other programms we install on our computers.
 
-Because, most of the time those bootstrap scripts are offered and written by the people who have also written the applications those scripts install. If doesn't make much sense to trust somebody to write a python package that is hosted on *pypi* (or whatever the other language specific repos are for nodejs, Java, Ruby, etc), but not the bootstrap script that installs said package from *pypi*. Except, of course, that person has a reputation for writing terrible bash scripts, but is otherwise a decent Python programmer.
+Because, most of the time those bootstrap scripts are offered and written by the people who have also written the applications those scripts install. If doesn't make much sense to trust somebody to write a python package that is hosted on *pypi* (or whatever the other language specific repos are for nodejs, Java, Ruby, etc), but not the bootstrap script that installs said package from *pypi*. Except, of course, that person has a reputation for writing really terrible bash scripts, but is otherwise a decent Python programmer. But that's a different issue then.
 
 Trust threshold
 ***************
 
-Basically, I think, you have to think about and decide who you trust (enough) to run applications written by them on your computer. Depending on the machine you are running those applications on, you might have to tighten security a bit, or you might be able to loosen it. If the application needs root access, you might up the trust-threshold a bit, but in the end it doesn't make much difference. If somebody tries to do something, even normal user access can be exploited quite badly. If it's just a virtual machine or container, you can probably install programs from more sketchy sources, as it's less likely to cause real harm in such a contained environment.
+Basically, in my opinion, you have to think about and decide who you trust (enough) to run applications written by them on your computer. Making that decision is hard, because you hardly know any of the people writing the tools you are using. Depending on the machine you are running those applications on, you might have to tighten security a bit, or you might be able to loosen it. If the application needs root access, you might up the trust-threshold a bit, but in the end it doesn't make much difference. If somebody tries to do something, even normal user access can be exploited quite badly. If it's just a virtual machine or container, you can probably install programs from more sketchy sources, as it's less likely to cause real harm in such a contained environment.
+
 
 Community
 *********
 
 So, how to decide which applications to install, and which to better not use at all?
 
-I honestly don't know, I think there is no real good answer. Ideally, all you would ever install are applications that come with your Distribution. And you choose a Distribution/OS that has a good reputation.
+I honestly don't know, I think there is no real good answer. Ideally, all you would ever install are applications that come with your distribution. After choosing a distribution/OS that has a good reputation.
 
 If you need to install more recent versions, or applications that are not in your distributions repositories, try to limit yourself to widely used packages, as you can reasonably assume that the bigger the community, the more eyes were on the source code.
 
