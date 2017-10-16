@@ -121,7 +121,7 @@ Really quick start
 
 (... or a quick reminder how to bootstrap *freckles*, if that's why you're here)
 
-Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you continue you might want to read `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run ``freckelize`` straight away to display it's help, issue:
+Most examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you continue you might want to read `this <https://docs.freckles.io/en/latest/trust.html>`_, `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run ``freckelize`` straight away to display it's help, issue:
 
 .. code-block:: console
 
