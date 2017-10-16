@@ -11,6 +11,7 @@ Welcome to the *freckles* documentation! *freckles* is a project to help you do 
    readme
    bootstrap
    usage
+   trust
    code_overview
 
 Indices and tables
