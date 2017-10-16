@@ -52,7 +52,7 @@ You can always updated it once you review the commit log on it's repository.
 Ansible roles
 =============
 
-Not sure about those, as at the moment people seem to be using them mostly straight out of Ansible galaxy. Ansible Galaxy, like a lot of 'official' language/framework repos is not audited in any way (nor would I expect it to), so it's fairly easy to sneak in something malicious. For anything of importance, I'd recommend creating your own "role collection" on Github (using ``git submodule`` or ``git subtree``).
+Not sure about those, as at the moment people seem to be using them mostly straight out of Ansible galaxy, without much care. Ansible Galaxy, like a lot of 'official' language/framework repos is not audited in any way (nor would I expect it to), so it's fairly easy to sneak in something malicious. For anything of importance, I'd recommend creating your own "role collection" on Github (using ``git submodule`` or ``git subtree``).
 
 My plan is to host two community repositories: `freckles-io roles <https://github.com/freckles-io/roles>`_ and the `ark <https://github.com/freckles-io/ark>`. The former will be a collection of curated roles that are generally considered useful in the context of *freckles*, the latter I'd like to be a place where there is one role (and one role only) for a specific task (i.e. install docker, install nginx, etc.). I haven't gotten around to write up some requirements for roles to end up in the *ark*, but it'll be something like: 'support the latest versions of all the major Distros, Mac OS X (if applicable), have testing and a maintainer, etc.
 
