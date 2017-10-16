@@ -1,4 +1,6 @@
 # TODO: check for VirtualBox executable, omit calling the install role if found (to speed up execution)
+- name: "starting vagrant setup for {{ freckle_path }}"
+  debug: msg="starting vagrant setup for {{ freckle_path }}"
 
 - name: "[install virtualbox]"
   include_role:
