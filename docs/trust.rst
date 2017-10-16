@@ -52,16 +52,16 @@ You can always updated it once you review the commit log on it's repository.
 Ansible roles
 =============
 
-Not sure about those, as at the moment people seem to be using them mostly straight out of Ansible galaxy, without much care. Ansible Galaxy, like a lot of 'official' language/framework repos is not audited in any way (nor would I expect it to), so it's fairly easy to sneak in something malicious. For anything of importance, I'd recommend creating your own "role collection" on Github (using ``git submodule`` or ``git subtree``).
+Not sure about those, as at the moment people seem to be using them mostly straight out of Ansible galaxy, without much care. Ansible Galaxy, like a lot of 'official' language/framework repos is not audited as far as I know (nor would I expect it to be), so it'd be fairly easy to sneak in something malicious. For anything of importance, I'd recommend creating your own "role collection" on Github (using ``git submodule`` or ``git subtree``) and put roles you have reviewed personally in there. Reviewing a role is fairly quick, as you really only need to go through the list of tasks to see what it does.
 
-My plan is to host two community repositories: `freckles-io roles <https://github.com/freckles-io/roles>`_ and the `ark <https://github.com/freckles-io/ark>`. The former will be a collection of curated roles that are generally considered useful in the context of *freckles*, the latter I'd like to be a place where there is one role (and one role only) for a specific task (i.e. install docker, install nginx, etc.). I haven't gotten around to write up some requirements for roles to end up in the *ark*, but it'll be something like: 'support the latest versions of all the major Distros, Mac OS X (if applicable), have testing and a maintainer, etc.
+Sometime in the (hopefully near) future, my plan is to host two community repositories: `freckles-io roles <https://github.com/freckles-io/roles>`_ and the `ark <https://github.com/freckles-io/ark>`_. The former will be a collection of curated roles that are generally considered useful in the context of *freckles*, the latter I'd like to be a place where there is one high-quality role (and one role only) for any specific task (i.e. install nginx, setup Postgresql, etc.). I haven't gotten around to write up some requirements for roles to end up in the *ark*, but it'll be something like: "support the latest versions of all the major Distros, Mac OS X (if applicable), have testing and a maintainer, etc".
 
-If that works out, and there really is no indication that it will!!!, this could be a place to get 'somewhat trustworthy' Ansible roles from.
+If that works out, and there really is no indication at all that it will, this could be a place to get 'somewhat trustworthy' Ansible roles from. If you think this is a good idea, and you'd like to help, ping me!
 
 frecklecutables
 ===============
 
-There are two part to those: the script itself, and the roles it might or might not call. As *frecklecutables* are fairly easy to read, it should be easy and quick enough to scan and see whether they do what you expect them to do. If they call roles, you'll have to look those up, and check out the tasks in them as well. No way around it, I reckon.
+There are two parts to those: the script itself, and the roles it might or might not call. As *frecklecutables* are fairly easy to read, it should be easy and quick enough to scan and see whether they do what you expect them to do. If they call roles, you'll have to look those up, and check out the tasks in them as well. No way around it, I reckon.
 
 As with roles, you can put *frecklecutables* you trust in their own repository (or even the same as the roles).
 
