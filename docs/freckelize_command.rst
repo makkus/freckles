@@ -127,4 +127,4 @@ If you are keen to get started, check out the relevant documentation:
 .. toctree::
    :maxdepth: 2
 
-   creating_freckle_adapters
+   creating_frecklelize_adapters
