@@ -77,7 +77,7 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
     ctx.obj = {}
     ctx.obj["config"] = DEFAULT_FRECKLES_CONFIG
     download_extra_repos(ctx, None, use_repo)
-    current_command = "create-adapter"
+    current_command = None
     current_command_path = None
 
     chain = [frkl.UrlAbbrevProcessor(), frkl.EnsureUrlProcessor(), frkl.EnsurePythonObjectProcessor(), frkl.FrklProcessor(DEFAULT_FRECKLES_COMMAND_FORMAT)]
@@ -103,8 +103,12 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
         if command_type == 'frecklecute':
 
             command_title = command.get("title", "frecklecutable: {}".format(command_name))
+            if os.path.exists(command_name):
+                command_path = os.path.abspath(command_name)
+            else:
+                command_path = None
 
-            cli_command = FrecklecuteCommand((current_command, current_command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLECUTE_HELP_TEXT, epilog=FRECKLECUTE_EPILOG_TEXT)
+            cli_command = FrecklecuteCommand((command_name, command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLECUTE_HELP_TEXT, epilog=FRECKLECUTE_EPILOG_TEXT)
 
             click.echo("\n# Executing {}...".format(command_title))
             c = cli_command.get_command(ctx, command_name)
