@@ -133,9 +133,8 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
 
                 msg = "   xxx> no value for key 'freckle' specified in freckelize run '{}'".format(command_name)
                 click.echo(msg)
-                vars_msg = pprint.pformat(item.get("vars", {}))
-                wrapper=textwrap.TextWrapper(initial_indent='      x> ', subsequent_indent='      x> ')
-                click.echo(wrapper.fill(vars_msg))
+                vars_msg = "     x> " + pprint.pformat(item.get("vars", {})).replace("\n", "     x> \n")
+                click.echo(vars_msg)
                 click.echo("\nExiting...\n")
                 sys.exit(1)
 
@@ -159,9 +158,8 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
                 msg = "   xxx> 'freckelize' using adapter '{}' failed. Used vars:\n".format(command_name)
 
             click.echo(msg)
-            vars_msg = pprint.pformat(vars)
-            wrapper=textwrap.TextWrapper(initial_indent='      x> ', subsequent_indent='      x> ')
-            click.echo(wrapper.fill(vars_msg))
+            vars_msg = "     x> " + pprint.pformat(item.get("vars", {})).replace('\n', '\n     x> ')
+            click.echo(vars_msg)
             click.echo("\nExiting...\n")
 
             sys.exit(exit_code)
