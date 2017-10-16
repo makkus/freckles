@@ -2,18 +2,20 @@
 Usage
 #####
 
-The *freckles* project currently provides two command-line applications: ``freckles`` and ``frecklecute``. Both use mostly the same underlying code, but they differ slightly in what they can do:
+The *freckles* project currently provides three command-line applications: ``freckelize``, ``frecklecute`` and ``freckles``. All of them share most of the underlying code, but they differ slightly in what they can do:
 
-- ``freckles`` helps retrieving a set of data or code, and preparing the host environment to handle it meaningfully
+- ``freckelize`` helps retrieving a set of data or code, and preparing the host environment to handle it meaningfully
 - ``frecklecute`` can execute a list of tasks (ansible modules and/or roles) defined in a yaml-formatted text file, to get the local machine into a certain state
+- ``freckles`` binds the above two applications together, and lets you script their execution(s)
 
-The former is designed to require little to no configuration to achive its goal, the latter is more flexible, but needs a tad more effort in preparing the list of tasks:
+``freckelize`` is designed to require little to no configuration to achive its goal, ``frecklecute`` is more flexible, but needs a tad more effort in preparing the list of tasks:
 
 .. toctree::
    :maxdepth: 5
 
    freckelize_command
    frecklecute_command
+   freckles_command
 
 ``freckles`` consists of a few different commands, which all use the same underlying codebase and configuration format.
 

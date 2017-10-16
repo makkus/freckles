@@ -317,13 +317,12 @@ That's all for the examples, folks.
 (Current) caveats
 *****************
 
-- this whole thing is still very much work in progress, so things might break, or they might break your machine. Use at your own risk.
-- error messages are very raw, testing is, apart from a few bits and pieces, non-existent
-- sometimes, cancelling it's execution can result in some runaway tasks (e.g. a kicked-off 'apt' process isn't killed and will run until it is finished by itself) -- this doesn't happen often, and it's usually of no consequence. But important to know I guess.
+- this whole thing is still very much work in progress, so things might break, or they might break your machine. I'd say, currently, it can be considered 'working prototype' level of quality. Error messages are raw, logging and testing is not implemented yet. That being said, I've used it for a while now with no major hickups (mostly on Debian-based platforms, others might have more issues)
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
+- the whole thing is written to make efficient use of ansible modules and roles, and thus depends a lot on the quality and availability of such roles.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
-- mostly developed on Debian & Ubuntu, so RedHat-based platforms and Mac OS X might not work as well just yet (although I spent a shitload of time to support Mac OS X, so it shouldn't be far off)
-- as *freckles* and it's adapters use conventions to minimize the need for configuration, it is fairly opinionated on how to do things, necessarily. You might, for example, not like the way ``dotfiles`` are 'stowed' (preferring maybe using an external git work-tree, or whatnot), or how the ``python-dev`` adapter handles python code. That being said, it is certainly possible to just write another adapter, or add different options to existing ones.
+- sometimes, cancelling it's execution can result in some runaway tasks (e.g. a kicked-off 'apt' process isn't killed and will run until it is finished by itself) -- this doesn't happen often, and it's usually of no consequence. But important to know I guess.
+- as *freckelize* and it's adapters use conventions to minimize the need for configuration, it is fairly opinionated on how to do things, necessarily. You might, for example, not like the way ``dotfiles`` are 'stowed' (preferring maybe using an external git work-tree, or whatnot), or how the ``python-dev`` adapter handles python code. That being said, it is certainly possible to just write another adapter, or add different options to existing ones.
 - on Mac OS X, in most cases the Command-line tools package as well as 'homebrew' will be installed. I'm not a Mac user, but I assume that is what most people will want anyway. Or at least don't mind.
 
 License
