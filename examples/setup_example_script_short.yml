@@ -1,6 +1,12 @@
 - dotfiles:
-    freckle: gh:makkus/dotfiles
-    include: minimal
+    freckle:
+      - gh:makkus/dotfiles
+    include:
+      - minimal
 - python-dev:
-   freckle: gh:makkus/freckles
+   freckle:
+     - gh:makkus/freckles
+- vagrant-dev:
+   freckle:
+     - gh:makkus/freckles
 - gh:makkus/freckles/examples/housekeeping.yml
