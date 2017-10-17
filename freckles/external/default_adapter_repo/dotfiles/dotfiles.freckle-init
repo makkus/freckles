@@ -2,22 +2,6 @@
 # include makkus.dotfiles role
 # - debug: var=freckles_profile_folders
 
-# sometimes this needs to be done on a new box, otherwise apt install fails
-- name: "update apt cache"
-  become: yes
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-  when: "ansible_distribution == 'Debian' and (pkg_mgr is defined and (pkg_mgr == 'auto' or pkg_mgr == 'apt'))"
-  ignore_errors: true
-- name: "[update apt cache]"
-  become: yes
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-  when: "ansible_distribution == 'Debian' and (pkg_mgr is defined and (pkg_mgr == 'auto' or pkg_mgr == 'apt'))"
-  ignore_errors: false
-
 - name: "starting dotfile adapter execution"
   include_role:
     name: "makkus.dotfiles"
