@@ -8,7 +8,14 @@
   apt:
     update_cache: yes
     cache_valid_time: 3600
-  when: "ansible_os_family == 'Debian' and (pkg_mgr is defined and (pkg_mgr == 'auto' or pkg_mgr == 'apt'))"
+  when: "ansible_distribution == 'Debian' and (pkg_mgr is defined and (pkg_mgr == 'auto' or pkg_mgr == 'apt'))"
+  ignore_errors: true
+- name: "[update apt cache]"
+  become: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: "ansible_distribution == 'Debian' and (pkg_mgr is defined and (pkg_mgr == 'auto' or pkg_mgr == 'apt'))"
   ignore_errors: false
 
 - name: "starting dotfile adapter execution"
