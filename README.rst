@@ -325,6 +325,8 @@ That's all for the examples, folks.
 - sometimes, cancelling it's execution can result in some runaway tasks (e.g. a kicked-off 'apt' process isn't killed and will run until it is finished by itself) -- this doesn't happen often, and it's usually of no consequence. But important to know I guess.
 - as *freckelize* and it's adapters use conventions to minimize the need for configuration, it is fairly opinionated on how to do things, necessarily. You might, for example, not like the way ``dotfiles`` are 'stowed' (preferring maybe using an external git work-tree, or whatnot), or how the ``python-dev`` adapter handles python code. That being said, it is certainly possible to just write another adapter, or add different options to existing ones.
 - on Mac OS X, in most cases the Command-line tools package as well as 'homebrew' will be installed. I'm not a Mac user, but I assume that is what most people will want anyway. Or at least don't mind.
+- I haven't figured out yet how exactly to deal with password entry, or other kind of secrets. Currently *freckles* does not ask for any passwords itself. If an ansible run needs a password, that request is forwarded by *freckles* though.
+- also, I haven't decided whether *freckles* will allow download of remote resources by default (as it is now), or whether some config setting will have to be set (to maybe trust certain urls). So, default behaviour as it is now might change. Just saying, so nobody complains later because they were getting used to it.
 
 License
 *******

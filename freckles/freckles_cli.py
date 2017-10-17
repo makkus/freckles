@@ -99,6 +99,12 @@ def cli(ctx, use_repo, no_run, output, script):
             else:
                 command_type = 'frecklecute'
 
+        # ask_become_pass = item.get("vars", {}).pop("ask-become-pass", False)
+        # if not ask_become_pass:
+        #     ask_become_pass = item.get("vars", {}).pop("--ask-become-pass", False)
+        #     if not ask_become_pass:
+        #         ask_become_pass = item.get("vars", {}).pop("-pw", False)
+
         arguments = create_cli_list(item.get("vars", {}))
 
         if command_type == 'frecklecute':
