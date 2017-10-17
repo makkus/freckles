@@ -32,46 +32,48 @@ FRECKLES_HELP_TEXT = """Run a series of freckelize and/or frecklecute commands a
 
 FRECKLES_EPILOG_TEXT = "freckles is free and open source software, for more information visit: https://docs.freckles.io"
 
-def create_cli_list(vars, current_result):
+def create_cli_list(task_vars):
 
-    if isinstance(vars, dict):
+    if not isinstance(task_vars, dict):
+        raise Exception("task vars need to be of type dict, not '{}'".format(type(task_vars)))
 
-        for key, value in vars.items():
-            if key != "args":
-                if not key.startswith("-"):
-                    key = "--{}".format(key)
-                current_result.append(key)
-                current_result.append(value)
+    result = []
+    for key, value in task_vars.items():
+        if key == "args":
+            continue
 
-        if "args" in vars.keys():
-            if not isinstance(vars["args"], (list, tuple)):
-                current_result.append(vars["args"])
-            else:
-                for v in vars["args"]:
-                    current_result.append(v)
+        if not key.startswith("-"):
+            key = "--{}".format(key)
 
-    elif isinstance(vars, (list, tuple)):
+        if key == "--ask-become-pass" or key == "-pw":
+            value = str(value).lower()
+            print(value)
 
-        for v in vars:
-            if isinstance(v, dict):
-                create_cli_list(v, current_result)
-            elif isinstance(v, string_types):
-                if not v.startswith("-"):
-                    v = "--{}".format(v)
+        if isinstance(value, (list, dict)):
+            for v in value:
+                result.append(key)
+                result.append(v)
+        else:
+            result.append(key)
+            if value != "FLAG":
+                result.append(value)
 
-                current_result.append(v)
+    if "ARGS" in task_vars.keys():
+        for a in task_vars["ARGS"]:
+            result.append(a)
+
+    return result
 
 
 @click.command()
 @click.option('--use-repo', '-r', multiple=True, required=False, help="extra context repos to use")
-@click.option("--ask-become-pass", "-pw", help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)', type=click.Choice(["auto", "true", "false"]), default="auto")
 @click.option("--no-run", help='don\'t execute frecklecute, only prepare environment and print task list', type=bool, is_flag=True, default=False, required=False)
 @click.option("--output", "-o", required=False, default="default", metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), help="format of the output")
 @click.option("--version", help='prints the version of freckles', type=bool, is_flag=True, is_eager=True, expose_value=False, callback=print_version)
 
 @click.argument('script', nargs=-1, required=True)
 @click.pass_context
-def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
+def cli(ctx, use_repo, no_run, output, script):
     """'freckles' command line interface"""
 
     ctx.obj = {}
@@ -97,8 +99,7 @@ def cli(ctx, use_repo, ask_become_pass, no_run, output, script):
             else:
                 command_type = 'frecklecute'
 
-        arguments = []
-        create_cli_list(item.get("vars", {}), arguments)
+        arguments = create_cli_list(item.get("vars", {}))
 
         if command_type == 'frecklecute':
 
