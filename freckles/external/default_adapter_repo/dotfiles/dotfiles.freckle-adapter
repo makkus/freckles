@@ -11,6 +11,12 @@ args:
     default: "auto"
     metavar: "PKG_MGR"
     is_var: true
+  unstow:
+    help: unstow all currently stowed config files of this freckle
+    required: false
+    default: false
+    is_var: true
+    is_flag: true
   no_stow:
     arg_name: no-stow
     help: prevent 'stowing' of config files
