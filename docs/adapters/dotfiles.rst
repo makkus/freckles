@@ -2,7 +2,7 @@
 dotfiles
 ########
 
-The *dotfiles* adapter handles git repositories (or local folders) that contain information about packages to install as well as configuration files for those packages. Once checked out, *freckles* will install the listed packages and link the configuration files to the appropriate location inside a users home directory.
+The *dotfiles* adapter handles git repositories (or local folders) that contain information about packages to install as well as configuration files for those packages. Once checked out, *freckelize* will install the listed packages and link the configuration files to the appropriate location inside a users home directory.
 
 
 Usage
@@ -10,7 +10,7 @@ Usage
 
 .. code-block:: console
 
-   freckles dotfiles [OPTIONS] --freckle <freckle_url_or_path>
+   freckelize dotfiles [OPTIONS] --freckle <freckle_url_or_path>
 
 At least one path or url to a freckle needs to be provided (multiple paths can be supplied by simply providing multiple ``--freckle`` options, e.g. ``--freckle gh:makkus/dotfiles-test-simple --freckle gh:makkus/dotfiles-test-simple-2``)
 
@@ -27,7 +27,7 @@ Options
     flag to disable the 'install' step of this adapter completely, no packages will be installed
 
 ``--pkg-mgr``
-    the (default) pkg_mgr to use, defaults to 'auto' (which is the system default package manager, e.g. apt, yum, homebrew). Also supported: 'conda', 'nix' and most of the package managers that have an Ansible module (those might need to be installed in an extra step as not all of them are natively supported by *freckles* yet
+    the (default) pkg_mgr to use, defaults to 'auto' (which is the system default package manager, e.g. apt, yum, homebrew). Also supported: 'conda', 'nix' and most of the package managers that have an Ansible module (those might need to be installed in an extra step as not all of them are natively supported by *freckelize* yet
 
 Metadata
 ========
@@ -41,7 +41,7 @@ vars
     a list of packages to install
 
 ``pkg_mgr``
-    the (default) pkg_mgr to use, defaults to 'auto' (which is the system default package manager, e.g. apt, yum, homebrew). Also supported: 'conda', 'nix' and most of the package managers that have an Ansible module (those might need to be installed in an extra step as not all of them are natively supported by *freckles* yet
+    the (default) pkg_mgr to use, defaults to 'auto' (which is the system default package manager, e.g. apt, yum, homebrew). Also supported: 'conda', 'nix' and most of the package managers that have an Ansible module (those might need to be installed in an extra step as not all of them are natively supported by *freckelize* yet
 
 ``no_install``
     flag to disable installing a package (mostly useful for the folder-based package specification)
@@ -110,7 +110,7 @@ This is the simplest, and probably most common case. Just a list of package name
 Alternative (supported) package managers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Currently *freckles* supports  *conda* and *nix* as alternative options to install packages. If any of those is specified, but not present on the system, it'll be installed before *freckles* attempts to install any packages.
+Currently *freckelize* supports  *conda* and *nix* as alternative options to install packages. If any of those is specified, but not present on the system, it'll be installed before *freckelize* attempts to install any packages.
 
 TODO: more details about supported/unsupported package managers
 
@@ -126,7 +126,7 @@ TODO: more details about supported/unsupported package managers
 Alternative (unsupported) package managers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Although at the moment *freckles* only supports a few selected package managers, Ansible has modules for quite a few more. It's possible to use those by using the name of the ansible module as value for the ``pkg_mgr`` key.
+Although at the moment *freckelize* only supports a few selected package managers, Ansible has modules for quite a few more. It's possible to use those by using the name of the ansible module as value for the ``pkg_mgr`` key.
 
 .. code-block:: yaml
 
@@ -218,17 +218,17 @@ In it's most simple form, a `*dotfiles*` freckle is a folder that contains subfo
            │      └── <pkg2_config>
            │
 
-The configuration files are layed out as they would be if they were located in the users home directory. So, e.g. *fish* (a shell) needs a configuration file ``$HOME/.config/fish/config.fish``. In this case the path to the configuration file would be: ``<freckle-root>/fish/.config/fish/config.fish``. *freckles* will ensure (with the help of stow_) that ``config.fish`` will be symbolically linked from it's actual location to where *fish* expects it to be.
+The configuration files are layed out as they would be if they were located in the users home directory. So, e.g. *fish* (a shell) needs a configuration file ``$HOME/.config/fish/config.fish``. In this case the path to the configuration file would be: ``<freckle-root>/fish/.config/fish/config.fish``. *freckelize* will ensure (with the help of stow_) that ``config.fish`` will be symbolically linked from it's actual location to where *fish* expects it to be.
 
-I've prepared an example repository containing two applications (``fish``, and ``zile``, an emacs-like text editor -- I tried to find applications that are not super-likely to conflict with what people are already using, to make it easier to try this out) here: https://github.com/makkus/dotfiles-test-simple). The package names for those two should be the same on all major package managers, so in theory you can try this out on any of the platforms that are supported by *freckles*:
+I've prepared an example repository containing two applications (``fish``, and ``zile``, an emacs-like text editor -- I tried to find applications that are not super-likely to conflict with what people are already using, to make it easier to try this out) here: https://github.com/makkus/dotfiles-test-simple). The package names for those two should be the same on all major package managers, so in theory you can try this out on any of the platforms that are supported by *freckelize*:
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles dotfiles -f gh:makkus/dotfiles-test-simple
+   curl https://freckles.io | bash -s -- freckelize dotfiles -f gh:makkus/dotfiles-test-simple
 
    # or, if you already have freckles installed and in your $PATH, just:
 
-   freckles dotfiles -f gh:makkus/dotfiles-test-simple
+   freckelize dotfiles -f gh:makkus/dotfiles-test-simple
 
 (from now on I'll assume you already have *freckles* installed, and either logged out and logged in again, or did a ``source ~/.profile`` to make sure it's in your path)
 
@@ -241,12 +241,12 @@ This will:
 - `stow` the contents of the two top-level sub-folders into the home directory
 
 
-Mixing and matching two ``dotfile`` freckles
+Mixing and matching two ``dotfile`` freckle folders
 ============================================
 
 Now, lets assume you are an avid user of both ``fish`` and ``zile``, so you install them everywhere you do work on (your laptop, every Vagrant_ dev box, every Docker_ container (while you are still developing your Dockerfile) remote ssh servers, etc...).
 
-*freckles* lets you do that fairly easily in all of those cases, doing what we did above. Now, in some cases you want some additional applications which are unnecessary in others. For example, say, on systems where you have a graphical frontend you want to have the the terminator_ X terminal available.
+*freckelize* lets you do that fairly easily in all of those cases, doing what we did above. Now, in some cases you want some additional applications which are unnecessary in others. For example, say, on systems where you have a graphical frontend you want to have the the terminator_ X terminal available.
 
 You don't want to put that into the same `*dotfiles*` *freckle* as the other two packages, since that would install it every time, even on system where that doesn't make sense (like a container). So, one way to do this would be to create a 2nd, separate `*dotfiles*` *freckle* which contains the ``terminator`` config directory. I've done this here: https://github.com/makkus/dotfiles-test-simple-2
 
@@ -254,7 +254,7 @@ Now, on systems where we want to have both sets of dotfiles (and applications in
 
 .. code-block:: console
 
-    freckles dotfiles -f gh:makkus/dotfiles-test-simple -f gh:makkus/dotfiles-test-simple-2
+    freckelize dotfiles -f gh:makkus/dotfiles-test-simple -f gh:makkus/dotfiles-test-simple-2
 
 One little thing we have to adjust so ``stow`` is happy with us *stowing* from two different source directories: we have to create (empty) marker files with the filename ``.stow`` in the root of each *freckle*.
 
@@ -262,7 +262,7 @@ One little thing we have to adjust so ``stow`` is happy with us *stowing* from t
 Mixing and matching two sets of dotfiles, using only one *freckle*
 ==================================================================
 
-We can achive the same outcome as in the above example by creating subfolders in the same *freckle*. In order to let *freckles* know which folders are a *freckle*, we need to mark those with an empty file named ``.freckle``. Thus, the folder structure will look like this:
+We can achive the same outcome as in the above example by creating subfolders in the same *freckle*. In order to let *freckelize* know which folders are a *freckle*, we need to mark those with an empty file named ``.freckle``. Thus, the folder structure will look like this:
 
 .. code-block:: console
 
@@ -292,15 +292,15 @@ To use both (sub-) *freckles*, just issue:
 
 .. code-block:: console
 
-   freckles dotfiles -f gh:makkus/dotfiles-test-simple-combined
+   freckelize dotfiles -f gh:makkus/dotfiles-test-simple-combined
 
 If you only want the *minimal* sub-folder, you can do either:
 
 .. code-block:: console
 
-    freckles --include minimal dotfiles -f gh:makkus/dotfiles-test-simple-combined
+    freckelize --include minimal dotfiles -f gh:makkus/dotfiles-test-simple-combined
     # or
-    freckles --exclude gui-pkgs dotfiles -f gh:makkus/dotfiles-test-simple-combined
+    freckelize --exclude gui-pkgs dotfiles -f gh:makkus/dotfiles-test-simple-combined
 
 Both ``--include`` and ``--exclude`` options check whether the (full) path to the *freckle* ends with the provided string. If it does, the directive is applied to the *freckle*.
 

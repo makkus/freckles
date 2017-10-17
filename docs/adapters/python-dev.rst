@@ -9,7 +9,7 @@ Usage
 
 .. code-block:: console
 
-   freckles dotfiles [OPTIONS] -f <freckle_url_or_path>
+   freckelize python-dev [OPTIONS] -f <freckle_url_or_path>
 
 At least one path or url to a freckle needs to be provided (multiple paths can be supplied by simply providing multiple ``--freckle`` options)
 
@@ -17,7 +17,7 @@ Options
 =======
 
 ``--freckle``
-    the path or url that points to a 'dotfiles' freckle
+    the path or url that points to a 'python-dev' freckle
 
 ``--pkg-mgr``
     the package manager and way of creating the virtual environment to use. defaults to "auto", which uses system dependencies and python virtualenv. The other option is ``conda``.
@@ -107,7 +107,7 @@ Examples
 
 Below are some more exmaples with a detailed explanations to illustrate how to use the *python-dev* adapter.
 
-``.freckle`` file for *freckles* itself
+``.freckle`` file for *freckelize* itself
 =======================================
 
 This is the configuration *freckles* itself uses. Because of Ansible still not being fully supported on Python 3, *freckles* also uses Python 2. Ansible also has a few non-python dependencies that are required to build the ``cryptography`` python library, which can be installed either via the system package manager, or we use conda to get the compiled ``cryptography`` and ``pycrypto`` dependencies directly. Mac OS X (homebrew) does not need any extra system dependencies installed.
