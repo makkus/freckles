@@ -336,14 +336,14 @@ Now we need to make sure that script is available from a new machine. We can eit
 
    freckles gh:makkus/freckles/examples/setup_example_script.yml
 
-That's all for the examples, folks.
+And that's it for now with examples folks! Hope that gave you an idea whether *freckles* can be of use for you or not.
 
 (Current) caveats
 *****************
 
 - this whole thing is still very much work in progress, so things might break, or they might break your machine. I'd say, currently, it can be considered 'working prototype' level of quality. Error messages are raw, logging and testing is not implemented yet. That being said, I've used it for a while now with no major hickups (mostly on Debian-based platforms, others might have more issues)
 - by it's nature, *freckles* changes your system and configuration. Whatever you do is your own responsibity, don't just copy and paste commands you don't understand.
-- the whole thing is written to make efficient use of ansible modules and roles, and thus depends a lot on the quality and availability of such roles.
+- the whole thing is written to make efficient use of ansible modules and roles, and thus depends a lot on the quality and availability of such roles. The included roles are not yet at the quality level I would like them to be, but all this has been just too much work to get going to worry too much about it. I hope to be able to find some time in the near future to do some more polishig in that area. Or, ideally, get some community going and scale up the effort that way.
 - performance and 'bloat': I haven't worried about performance yet, so I'm sure there are a few things to optimize. The bootloading takes a small while, and as there is stuff to download it depends on the speed of the internet connection available. If using the 'non-sudo' way of installing, *freckles* takes about 400MB of space. Those file can be safely deleted once a box is setup, and *freckles* is not used anymore. Or of course it can be kept to use it again later, 400MB isn't all that much hard-disk space those days. Either way, if that is in any way important to you (it isn't to me at all which is why I don't put it high up my list of things to tackle), now you know.
 - performance, part II: it looks like, depending on the roles that are being executed, 1 GB of RAM is not always enough for a run. I haven't really looked into that issue, and I'm fairly confident that it should be possible to lower that threshold, as all that is executed is ansible. Not 100% sure though.
 - everything ``git`` related is done using the `ansible git module <http://docs.ansible.com/ansible/latest/git_module.html>`_, which 'shadows' a git repository with the latest remote version, if the local version has commited changes that aren't pushed yet. Nothing is lost, but it's an inconvenience when that happens.
