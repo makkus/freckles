@@ -47,7 +47,6 @@ def create_cli_list(task_vars):
 
         if key == "--ask-become-pass" or key == "-pw":
             value = str(value).lower()
-            print(value)
 
         if isinstance(value, (list, dict)):
             for v in value:
