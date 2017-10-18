@@ -108,7 +108,7 @@ The interface that brings ``freckelize`` and ``frecklecute`` together. It allows
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles -pw false XXX-TO_DO
+   curl https://freckles.io | bash -s -- freckles gh:makkus/freckles/examples/setup_example_script.yml
 
 This is what a *freckles* script looks like:
 
