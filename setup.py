@@ -45,12 +45,17 @@ setup(
     zip_safe=False,
     keywords='freckles',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
         'Intended Audience :: Developers',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: System Administrators',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Topic :: System :: Software Distribution',
+        'Topic :: System :: Systems Administration'
     ],
     test_suite='tests',
     tests_require=test_requirements
