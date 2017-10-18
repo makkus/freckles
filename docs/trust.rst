@@ -13,7 +13,7 @@ First of all, as you've probably seen, you don't have to use the *'inaugurate'* 
 
 That being said, it probably doesn't make much sense in terms of being 'more secure'. I've always wondered why shell scripts that are downloaded and executed directly get a so much worse rep than all the other programms we install on our computers.
 
-Because, most of the time those bootstrap scripts are offered and written by the people who have also written the applications those scripts install. If doesn't make much sense to trust somebody to write a python package that is hosted on *pypi* (or whatever the other language specific repos are for nodejs, Java, Ruby, etc), but not the bootstrap script that installs said package from *pypi*. Except, of course, that person has a reputation for writing really terrible bash scripts, but is otherwise a decent Python programmer. But that's a different issue then.
+Because, most of the time those bootstrap scripts are offered and written by the people who have also written the applications those scripts install. It doesn't make much sense to trust somebody to write a python package that is hosted on *pypi* (or whatever the other language specific repos are for nodejs, Java, Ruby, etc), but not the bootstrap script that installs said package from *pypi*. Except, of course, that person has a reputation for writing really terrible bash scripts, but is otherwise a decent Python programmer. But that's a different issue then.
 
 Trust threshold
 ***************

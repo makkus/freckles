@@ -151,7 +151,7 @@ or, using ``wget`` instead of ``curl``, and executing ``frecklecute`` instead of
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps ('inaugurates') ``freckelize``, ``frecklecute`` or *freckles* and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
+This bootstraps ('inaugurates') ``freckelize``, ``frecklecute`` or ``freckles`` and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
 
 This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 
@@ -190,7 +190,7 @@ Examples
 
 Probably best to show what *freckles* is, and what it can do using examples. Do not try those at home, as they'll install loads of packages you most likely don't need.
 
-I'll show you how I use ``freckelize``, ``frecklecute`` and *freckles* to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use ``freckelize`` on the *freckles* source code itself. I'll quickly outline how to use ``frecklecute`` to do some other, more specialized, housekeeping tasks. And finally I'll show how to tie everything together using the *freckles* command.
+I'll show you how I use ``freckelize``, ``frecklecute`` and ``freckles`` to install a new machine, after a) I buy a new Thinkpad or b) unfortunately way more often, did something silly that requires a re-install. Or, even more often still, c) want to use parts of my personal configuration on a VM or container or remote server, to have a decent editor and shell and such available while working in/on them. Then I'll show how to use ``freckelize`` on the *freckles* source code itself. I'll quickly outline how to use ``frecklecute`` to do some other, more specialized, housekeeping tasks. And finally I'll show how to tie everything together using the ``freckles`` command.
 
 
 using: ``freckelize``
@@ -236,16 +236,18 @@ Here's what happens:
 - checks out the repository to ``$HOME/freckles/freckles``
 - reads (optional)  metadata in the folder
 - loads the instructions for the ``python_dev`` adapter, which:
-- installs the packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
+- installs the system packages that are necessary (virtualenv and pycrypto dependencies, mostly, in this case)
 - creates a virtualenv
 - installs all the requirements it can find (in requirement*.txt files in the root folder of the repo) into the new virtualenv
 - executes ``pip install -e .`` in the project folder, within that same virtualenv
 
-By default, virtualenvs are put under ``$HOME/.local/virtualenvs`` and are named after the project folder, with an appended ``-dev``. Thus, ``freckles-dev``, in our exmple. If I want to work on *freckles* I can activate the python virtualenv *freckles* just created via:
+By default, virtualenvs are put under ``$HOME/.virtualenvs`` and are named after the project folder, with an appended ``-dev``. Thus, ``freckles-dev``, in our exmple. If I want to work on *freckles* I can activate the python virtualenv *freckles* just created via:
 
 .. code-block:: console
 
-   source $HOME/.local/virtualenvs/freckles-dev/bin/activate
+   source $HOME/.virtualenvs/freckles-dev/bin/activate
+
+Or you just download and use the `virtualenvwrapper <https://virtualenvwrapper.readthedocs.io/en/latest/>`_
 
 More information about the ``python-doc`` adapter: `python-doc <https://docs.freckles.io/en/latest/adapters/python-dev.html>`_.
 
@@ -318,9 +320,13 @@ Getting my new machine to include all my configuration, having setup the source 
 .. code-block:: yaml
 
    - dotfiles:
-      freckle: gh:makkus/dotfiles
+       freckle:
+         - gh:makkus/dotfiles
+       ask-become-pass: true
    - python-dev:
-      freckle: gh:makkus/freckles
+       freckle:
+         - gh:makkus/freckles
+       ask-become-pass: true
    - gh:makkus/freckles/examples/housekeeping.yml
 
 
