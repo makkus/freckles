@@ -108,13 +108,31 @@ The interface that brings ``freckelize`` and ``frecklecute`` together. It allows
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- freckles gh:makkus/freckles/examples/setup_example_script.yml
+   curl https://freckles.io | bash -s -- freckles gh:makkus/dotfiles/misc/setup_all.yml
 
-This is what a *freckles* script looks like:
+This is what my *freckles* script to setup a new workstation with my dotfiles, applications, and the *freckles* python project code looks like:
 
 .. code-block:: yaml
 
-   TODO
+   - dotfiles:
+      target: ~/
+      freckle:
+        - gh:makkus/dotfiles
+      ask-become-pass: true
+
+   - python-dev:
+       freckle:
+         - gh:makkus/freckles
+       ask-become-pass: true
+
+   - vagrant-dev:
+       freckle:
+         - gh:makkus/freckles
+       ask-become-pass: true
+
+   - gh:makkus/dotfiles/misc/housekeeping.yml
+
+*freckles* can figure out itself whether a task is of type *freckelize*, or *frecklecutable* by checking whether one of the variables is called ``freckles`` (a requirement for *freckelize* tasks).
 
 Really quick start
 ******************
