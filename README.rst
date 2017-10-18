@@ -43,7 +43,7 @@ For now, the *freckles* project provides three (command-line) interfaces, which 
 
 Configuration management for your desktop, with a slight twist. Instead of describing your infrastructure, you describe the shape of the code or data packages you work with, and ``freckelize`` tries to figure out how to map that onto whatever (physical or virtual) hardware you are working on by using an appropriate *adapter* for that type of data.
 
-One example would be pointing it to a repository of your (well, my, in this case) dotfiles:
+One example would be pointing it to a repository of your (well, `my <https://github.com/makkus/dotfiles>`_, in this case) dotfiles:
 
 .. code-block:: console
 
@@ -64,7 +64,7 @@ Or, maybe you are working on a webpage. If somebody writes an adapter for your u
 ``frecklecute``
 ===============
 
-Basically a wrapper around Ansible_, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As all of *freckles* is built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
+Basically a wrapper around Ansible_ playbooks, making it easier to get started writing and executing task lists ('playbooks' in Ansible-speak) locally. It allows you to execute short (yaml) scriptlets ('*frecklecutables*'). As all of *freckles* is built on top of *Ansible*, `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_, as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_ can be used as building blocks for such a *frecklecutable*.
 
 ``frecklecute`` comes with a few default *frecklecutables*, for example one (called `'ansible-task' <https://github.com/makkus/freckles/blob/master/freckles/external/frecklecutables/ansible-task>`_) that lets you execute any arbitrary Ansible module or role directly. This is what it looks like to ensure a folder exists, using ``frecklecute`` (including '`inaugurating <inaugurate_>`_'/bootstrapping ``frecklecute`` itself):
 
@@ -80,7 +80,7 @@ This has to be, by the way, the most bloated and roundabout way to create a fold
 
 This will install docker with everything that is required on your local machine (check the `source code of the role <https://github.com/mongrelion/ansible-role-docker>`_ to see what exactly it is doing, and how, and which target environments it supports).
 
-In addition to using the pre-existing *frecklecutables*, it's easy to `write your own <https://docs.freckles.io/en/latest/writing_frecklecutables.html>`_. Using the two tasks above, we could write one like the following (note how it's possible to make a cli option for the ``path`` var), and store it in a file called ``example.yml``:
+In addition to using the `pre-existing *frecklecutables*` <https://github.com/makkus/freckles/tree/master/freckles/external/frecklecutables>`_, it's easy to `write your own <https://docs.freckles.io/en/latest/writing_frecklecutables.html>`_. Using the two tasks above, we could write one like the following (note how it's possible to make a cli option for the ``path`` var), and store it in a file called ``example.yml``:
 
 .. code-block:: yaml
 
@@ -191,7 +191,7 @@ On a newly installed machine, I run:
 This is what happens:
 
 - bootstraps *freckles* itself, then straight away executes ``freckelize``
-- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (those short urls are optional, and their format might change later, read about the topic [here](https://docs.freckles.io/en/latest/usage.html#notes)
+- expands the ``gh:makkus/freckles`` url to https://github.com/makkus/dotfiles (those short urls are optional, and their format might change later, read about the topic `here <https://docs.freckles.io/en/latest/usage.html#notes>`_)
 - checks out the repository to ``$HOME/freckles/dotfiles`` (this is configurable of course)
 - reads all the metadata  it can find in that repository, describing mostly which packages to install
 - loads the instructions for the ``dotfiles`` adapter, which:
