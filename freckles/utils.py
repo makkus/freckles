@@ -4,6 +4,7 @@ import copy
 import fnmatch
 import json
 import pprint
+import os
 import re
 import shutil
 from pydoc import locate
@@ -365,6 +366,24 @@ def download_extra_repos(ctx, param, value):
     elif hasattr(ctx.find_root(), "obj"):
         ctx.find_root().obj["config"].add_repos(repos)
 
+def execute_run_box_basics(output="default"):
+
+    if os.path.exists(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER):
+        return {"return_code": -1}
+
+    task_config = [{'tasks':
+                    ['makkus.box-basics']
+    }]
+
+    result = create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=True, run_box_basics=False)
+
+    if result["return_code"] == 0:
+        with open(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER, 'a'):
+            os.utime(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER, None)
+
+
+    return result
+
 
 def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
 
@@ -563,7 +582,7 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto", no_run=False,
+def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="true", no_run=False,
                         output_format="default"):
     profiles = extract_all_used_profiles(freckle_repos)
     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
@@ -573,11 +592,18 @@ def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="auto
     task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
 
     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles)
+                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True)
 
 
-def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
-                               pre_run_callback=None, no_run=False, additional_roles=[], config=None):
+def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",
+                               pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False):
+
+    if run_box_basics:
+        result = execute_run_box_basics(output_format)
+
+        if result["return_code"] > 0:
+            return result
+
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 

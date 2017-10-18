@@ -182,7 +182,7 @@ class CommandRepo(object):
                 result = None
             else:
                 result = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                           ask_become_pass=ask_become_pass, config=self.config)
+                                                    ask_become_pass=ask_become_pass, config=self.config, run_box_basics=True)
                 # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
             return result

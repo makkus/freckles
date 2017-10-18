@@ -157,7 +157,7 @@ def cli(ctx, use_repo, no_run, output, script):
             sys.exit(1)
 
 
-        if exit_code != 0 and no_run != True:
+        if exit_code > 0 and no_run != True:
             if command_type == "frecklecute":
                 msg = "   xxx> 'frecklecutable' '{}' failed. Used vars:\n".format(command_name)
             else:
