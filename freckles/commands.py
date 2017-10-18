@@ -167,11 +167,11 @@ class CommandRepo(object):
 
             if ctx:
                 output = ctx.params.get("output", "default")
-                ask_become_pass = ctx.params.get("ask_become_pass", True)
+                ask_become_pass = ctx.params.get("ask_become_pass", "auto")
                 no_run = ctx.params.get("no_run", False)
             else:
                 output = "default"
-                ask_become_pass = True
+                ask_become_pass = "auto"
                 no_run = False
 
             if no_run:
