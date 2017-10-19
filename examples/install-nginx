@@ -1,9 +1,7 @@
 tasks:
-  - install-nginx:
+  - craneworks.nginx:
       meta:
         become: yes
-        task-roles:
-            install-nginx: craneworks.nginx
       vars:
         nginx_vhosts:
           - name: www.domain.tld
