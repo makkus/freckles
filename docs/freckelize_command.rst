@@ -1,6 +1,6 @@
-############
+##############
 ``freckelize``
-############
+##############
 
 - Description_
 - `Application Interface`_

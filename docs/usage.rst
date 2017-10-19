@@ -8,7 +8,9 @@ The *freckles* project currently provides three command-line applications: ``fre
 - ``frecklecute`` can execute a list of tasks (ansible modules and/or roles) defined in a yaml-formatted text file, to get the local machine into a certain state
 - ``freckles`` binds the above two applications together, and lets you script their execution(s)
 
-``freckelize`` is designed to require little to no configuration to achive its goal, ``frecklecute`` is more flexible, but needs a tad more effort in preparing the list of tasks:
+In addition, the project also provides a tool to help developing *adapters*, *frecklecutables* and *ansible roles*: ``freckfreckfreck``
+
+For more details, check out any or all of those:
 
 .. toctree::
    :maxdepth: 5
@@ -16,8 +18,8 @@ The *freckles* project currently provides three command-line applications: ``fre
    freckelize_command
    frecklecute_command
    freckles_command
+   freckfreckfreck_command
 
-``freckles`` consists of a few different commands, which all use the same underlying codebase and configuration format.
 
 Notes
 *****

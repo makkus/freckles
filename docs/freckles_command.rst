@@ -4,7 +4,7 @@
 
 - Description_
 - `Application Interface`_
-- `Adapters (& profiles)`_
+- `freckles scripts`_
     - `Overview`_
     - `Development`_
 
@@ -23,8 +23,8 @@ Application interface
        :prog: freckles
 
 
-Adapters (& profiles)
-*********************
+freckles scripts
+****************
 
 Overview
 ========
