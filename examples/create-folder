@@ -1,0 +1,11 @@
+#! /usr/bin/env frecklecute
+doc:
+  help: create a folder
+args:
+  path:
+    help: the folder path
+    default: ~/cool_folder
+tasks:
+  - file:
+      state: directory
+
