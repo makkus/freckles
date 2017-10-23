@@ -89,11 +89,11 @@ Vagrant.configure("2") do |config|
      sudo rm -f /etc/apt/sources.list.d/unstable.list
 
      wget -O- https://freckles.io | sudo bash -s -- freckelize dotfiles -i terminal/minimal -f gh:makkus/dotfiles
-     wget -O- https://freckles.io | sudo bash -s -- freckelize python-dev -f /vagrant
+     wget -O- https://freckles.io | sudo bash -s -- freckelize python-dev -f /freckles
 
-     echo '. /home/vagrant/.virtualenvs/vagrant-dev/bin/activate' >> /home/vagrant/.profile
+     echo '. /home/vagrant/.virtualenvs/freckles-dev/bin/activate' >> /home/vagrant/.profile
 
-     . /home/vagrant/.virtualenvs/vagrant-dev/bin/activate
+     . /home/vagrant/.virtualenvs/freckles-dev/bin/activate
      cd /nsbl
      pip install -e .
      cd /frkl

@@ -55,7 +55,7 @@ def get_freckles_option_set():
                                   type=str, metavar=EXCLUDE_ARG_METAVAR, default=[], multiple=True)
     ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"],
                                           help=ASK_PW_HELP,
-                                          type=ASK_PW_CHOICES, default="auto")
+                                          type=ASK_PW_CHOICES, default="true")
 
     params = [freckle_option, target_option, include_option, exclude_option,
                        ask_become_pass_option]

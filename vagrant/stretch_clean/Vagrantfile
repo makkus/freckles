@@ -15,13 +15,13 @@ Vagrant.configure("2") do |config|
 #    config.proxy.no_proxy = "localhost,127.0.0.1,.lan"
 #  end
 
-  Vagrant.configure('2') do |config|
-    config.cache.scope = :box
-    config.proxy.enabled = true
-    config.ca_certificates.enabled = true
-    # config.ca_certificates.certs = Dir.glob('/etc/pki/ca-trust/source/anchors/*.crt')
-    config.ca_certificates.certs = Dir.glob('/etc/ssl/certs/*.pem')
-  end
+  # Vagrant.configure('2') do |config|
+  #   config.cache.scope = :box
+  #   config.proxy.enabled = true
+  #   config.ca_certificates.enabled = true
+  #   # config.ca_certificates.certs = Dir.glob('/etc/pki/ca-trust/source/anchors/*.crt')
+  #   config.ca_certificates.certs = Dir.glob('/etc/ssl/certs/*.pem')
+  # end
 
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -66,8 +66,8 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl"
   config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
   config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
-  config.vm.synced_folder "../../../frecklets", "/frecklets", id: "frecklets"
-  config.vm.synced_folder "~/.pip", "/pip", id: "pip"
+  #config.vm.synced_folder "../../../frecklets", "/frecklets", id: "frecklets"
+
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -79,7 +79,7 @@ Vagrant.configure("2") do |config|
     # Customize the amount of memory on the VM:
     vb.memory = "2048"
     # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    config.proxy.enabled = false 
+    # config.proxy.enabled = false
   end
   #
   # View the documentation for the provider you are using for more
@@ -95,9 +95,10 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+  sudo rm -f /etc/apt/sources.list.d/unstable.list
+
+  wget -O- https://freckles.io | sudo bash -s -- freckelize dotfiles -i terminal/minimal -f gh:makkus/dotfiles
+  SHELL
   #config.vm.provision :shell, path: "vagrant_bootstrap.sh", privileged: false
 end
