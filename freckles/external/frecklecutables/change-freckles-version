@@ -1,6 +1,7 @@
 #! /usr/bin/env frecklecute
 doc:
-  help: install a specific version of freckles
+  short_help: "Change to a specific version of freckles."
+  help: "Change to a specific version of freckles.\n\nYou can either specify a (valid) version number, 'git' for the current git (master) branch, or a path to a local folder with the source-code."
 
 args:
   freckles_version:
