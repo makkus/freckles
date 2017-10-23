@@ -1,0 +1,15 @@
+doc:
+  help: adapter to execute one or several ansible task lists which are located in a repository
+  short_help: adapter to execute one or several ansible task lists
+# args:
+#   test_arg:
+#     arg_name: test-arg
+#     help: example help text for arg
+#     type: str  # (optional)
+#     multiple: false  # (optional)
+#     required: false  # (optional)
+#     default: default-string  # (optional)
+#     metavar: TEST_ARG  # (optional)
+#     is_flag: false  # (optional)
+#     is_var: true  # (optional)
+#     is_argument: false  # (optional)
