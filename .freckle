@@ -1,4 +1,4 @@
-python-dev:
+- python-dev:
    python_version: 2.7
 
    setup_command: "develop"
@@ -15,3 +15,10 @@ python-dev:
               - cryptography
               - pycrypto
             other: omit
+
+- vagrant-dev:
+   providers:
+     - virtualbox
+
+
+
