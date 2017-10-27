@@ -70,7 +70,7 @@ Basically a wrapper around Ansible_ playbooks, making it easier to get started w
 
 .. code-block:: console
 
-   curl https://freckles.io | bash -s -- frecklecute -pw false ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
+   curl https://freckles.io | bash -s -- frecklecute  ansible-task --task-name file --vars '{"path": "~/cool_folder", "state": "directory"}'
 
 This has to be, by the way, the most bloated and roundabout way to create a folder in the history of creating folders. We've come a long way from ``mkdir`` :-) . Although, of course, that particular example doesn't make any sense, I hope it is plain to see how use- and powerful a scripting tool like this, with access to all Ansible modules and roles, can be. Let's use another example and install Docker (using the `mongrelion.docker <https://galaxy.ansible.com/mongrelion/docker/>`_ role from Ansible galaxy -- I'll asume ``frecklecute``/*freckles* is already installed this time):
 
