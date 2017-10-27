@@ -79,7 +79,7 @@ class RepoType(click.ParamType):
 
         try:
 
-            print_repos_expand(value, warn=True)
+            print_repos_expand(value, warn=True, default_local_path=False)
             result = nsbl_tasks.expand_string_to_git_repo(value, DEFAULT_ABBREVIATIONS)
 
             return result
@@ -385,7 +385,7 @@ def execute_run_box_basics(output="default"):
     return result
 
 
-def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
+def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, default_local_path=True):
 
     expanded = expanded_repos_dict(repos)
 
@@ -411,7 +411,7 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False):
                 if r != v["url"]:
                     exp = True
                     click.echo("     -> remote: '{}'".format(v["url"]))
-            if v["path"]:
+            if v["path"] and default_local_path:
                 if r != v["path"]:
                     exp = True
                     click.echo("     -> local: '{}'".format(v["path"]))
