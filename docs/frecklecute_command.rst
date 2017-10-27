@@ -20,7 +20,7 @@ If you've ever used Ansible then you know about their so-called `'playbooks' <ht
 
 Ansible is very powerful, and mainly designed to manage infrastructure, not single machines. Although, of course, Ansible can do that too. The issue is that -- for single machines -- setting up Ansible and a playbook, and the environment and configuration that playbook needs, is often more effort than just doing whatever needs doing manually. Esp. if those are things that don't need to be done very often, relatively.
 
-So, If you find yourself in a situation where you'd like to have some 'managed state change', but can't really be bothered (or afford) to setup Ansible and write a playbook, maybe *frecklecute* is for you. It is (deliberately) not as powerful and as a full-blown *playbook*, but it can be used to execute `Ansible roles <http://docs.ansible.com/ansible/latest/playbooks_reuse.html>`_, which means you can, if need be, get all of Ansible's power by just writing a 'normal' Asible role, but the ease of execution that *frecklecute* provides.
+So, If you find yourself in a situation where you'd like to have some 'managed state change', but can't really be bothered (or afford) to setup Ansible and write a playbook, maybe *frecklecute* is for you. It is (deliberately) not as powerful as a full-blown Ansible *playbook*, but it can be used to execute `Ansible roles <http://docs.ansible.com/ansible/latest/playbooks_reuse.html>`_, which means you can, if need be, get all of Ansible's power by just writing a 'normal' Asible role, but the ease of execution that *frecklecute* provides.
 
 
 Application interface
