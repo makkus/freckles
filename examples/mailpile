@@ -1,0 +1,12 @@
+tasks:
+  - install:
+      - curl
+      - apt-transport-https
+      - gnupg
+  - APT_KEY:
+      url: https://packages.mailpile.is/deb/key.asc
+  - APT_REPOSITORY:
+      repo: deb https://packages.mailpile.is/deb release main
+      filename: mailpile
+  - install:
+      - mailpile
