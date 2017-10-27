@@ -2,6 +2,13 @@
 History
 =======
 
+0.4.3 (20017-10-27)
+-------------------
+
+* Added 'ansible-tasks' adapter
+* Updated ansible to 2.4.1.0, also updated other dependencies
+* Updated mac-os-x-cli-tools & homebrew roles
+
 0.4.2 (2017-10-22)
 ------------------
 
