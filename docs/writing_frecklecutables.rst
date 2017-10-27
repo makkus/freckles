@@ -167,7 +167,36 @@ For configuration purposes *frecklecute* does not require the user to explicitly
 - if the task contains a '.', it is assumed to be an Ansible role
 - if the task contains no '.', it is assumed to either be an Ansible task module
 
+Root/sudo permissions
+---------------------
 
+The `become` key, which specifies whether a task should be executed with root/sudo privileges or not, is part of the keys that specify 'meta' properties of a task. This area clearly needs more documentation, but until this is done I'll quickly explain the two ways to tell *frecklecute* to execute a task with elevated privileges:
+
+via the 'meta' dictionary
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+via the task-name case
+^^^^^^^^^^^^^^^^^^^^^^
+
+As the `become` key is the most often used one, *frecklecute* allows for a shortcut that doesn't require adding a 'meta' dictionary to a task: if a task name (module or ansible role) is all uppercase, *frecklecute* will convert the string to an all-lowercase one, and add the 'meta' dictionary with a `become: true` key/value pair. E.g.
+
+.. code-block:: console
+
+   tasks:
+     - MONGRELION.DOCKER
+
+will become:
+
+.. code-block:: console
+
+   tasks:
+     - meta:
+         become: true
+         task-name: mongrelion.docker
+
+.. note::
+
+   this works for all Ansible modules, as those don't contain uppercase letters in their name. Some Ansible roles contain uppercase letters, even though it's rare. If you want to use one of those you'll have to manually specify the `become` key.
 
 Examples
 ********
