@@ -175,6 +175,27 @@ The `become` key, which specifies whether a task should be executed with root/su
 via the 'meta' dictionary
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+If a *frecklecutable* task needs any special metadata attached to it, this happens by 'exploding' the task-name string into a metadata dictionary. For example, creating a folder using the `file` Ansible module when no root permissions are required looks like:
+
+.. code-block:: console
+
+   tasks:
+     - file:
+         state: directory
+         path: ~/.cache
+
+While creating a folder with root permissions is done like so:
+
+.. code-block:: console
+
+   tasks:
+     - meta:
+         become: true
+         task-name: file
+       vars:
+         state: directory
+         path: /var/lib/whatever
+
 via the task-name case
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -183,7 +204,9 @@ As the `become` key is the most often used one, *frecklecute* allows for a short
 .. code-block:: console
 
    tasks:
-     - MONGRELION.DOCKER
+     - FILE:
+        state: directory
+        path: /var/lib/whatever
 
 will become:
 
@@ -192,7 +215,10 @@ will become:
    tasks:
      - meta:
          become: true
-         task-name: mongrelion.docker
+         task-name: file
+       vars:
+         state: directory
+         path: /var/lib/whatever
 
 .. note::
 
