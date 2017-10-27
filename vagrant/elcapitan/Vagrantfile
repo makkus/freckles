@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl", type: "rsync", owner: "vagrant", group: "admin", rsync__exclude: [".git", ".tox", "vagrant", ".vagrant"]
   config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl", type: "rsync", owner: "vagrant", group: "admin", rsync__exclude: [".git", ".tox", "vagrant", ".vagrant"]
   config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate", type: "rsync", owner: "vagrant", group: "admin", rsync__exclude: [".git", ".tox", "vagrant", ".vagrant"]
-  config.vm.synced_folder "~/.pip", "/pip", id: "pip", type: "rsync", owner: "vagrant", group: "admin"
+
 
     # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
