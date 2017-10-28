@@ -21,13 +21,14 @@ For more details, check out any or all of those:
    freckfreckfreck_command
 
 
-Notes
-*****
+Common options and conventions
+******************************
 
-Common cli options
-==================
+As All three cli tools (`freckles`, `freckelize`, `frecklecute`) are mostly using the same underlying code, and do basically the same thing but providing slightly different interfaces. This is why they share a few cli options and usage conventions, which can be used in all of them:
 
-As All three cli tools (`freckles`, `freckelize`, `frecklecute`) are mostly using the same underlying code, and do basically the same thing but providing slightly different interfaces. This is why they share a few cli options, which can be used in all of them:
+
+cli options/arguments
+=====================
 
 `--user-repo`: add one or more context repositories
 ---------------------------------------------------
