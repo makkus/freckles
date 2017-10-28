@@ -340,7 +340,15 @@ def download_extra_repos(ctx, param, value):
 
     if not value:
         return
-    repos = list(value)
+    # repos = list(value)
+
+    repos = []
+    for repo in value:
+        if os.path.exists(repo):
+            temp = os.path.abspath(repo)
+            repos.append(temp)
+        else:
+            repos.append(repo)
 
     print_repos_expand(repos, repo_source="using extra repo(s)", warn=True)
 
