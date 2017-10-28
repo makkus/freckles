@@ -34,8 +34,13 @@ def parse_config_file(path):
         if c.get("profile", {}).get("name", None) == "config":
             temp = c.get("vars", {}).get("trusted-repos", [])
             for r in temp:
-                if r not in repos:
-                    repos.append(r)
+                if os.path.exists(os.path.expanduser(r)):
+                    expanded = os.path.abspath(os.path.expanduser(r))
+                else:
+                    expanded = r
+
+                if expanded not in repos:
+                    repos.append(expanded)
 
             temp = c.get("vars", {}).get("trusted-urls", [])
             for u in temp:
