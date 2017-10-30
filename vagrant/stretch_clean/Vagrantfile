@@ -41,7 +41,7 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
-#  config.vm.network "forwarded_port", guest: 80, host: 8090
+   config.vm.network "forwarded_port", guest: 8180, host: 8180
 #  config.vm.network "forwarded_port", guest: 81, host: 8091
 #  config.vm.network "forwarded_port", guest: 9191, host: 9191
 #  config.vm.network "forwarded_port", guest: 8888, host: 8888
@@ -66,7 +66,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl"
   config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
   config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
-  #config.vm.synced_folder "../../../frecklets", "/frecklets", id: "frecklets"
+  config.vm.synced_folder "../../../frecklets", "/frecklets", id: "frecklets"
 
 
   # Provider-specific configuration so you can fine-tune various
