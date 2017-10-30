@@ -2,11 +2,12 @@
 History
 =======
 
-0.4.3 (20017-10-27)
+0.4.3 (20017-10-30)
 -------------------
 
 * Added 'ansible-tasks' adapter
 * Improved 'change-freckles-version' *frecklecutable*, allows to use current git master, as well as a local source folder
+* Fixed several issues with adding extra repos
 * Updated ansible to 2.4.1.0, also updated other dependencies
 * Updated mac-os-x-cli-tools & homebrew roles
 
