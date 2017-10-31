@@ -305,9 +305,17 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
 
     final_vars = {}
 
+    use_environment_vars = True
+    env_dict = copy.deepcopy(new_args)
+    if use_environment_vars:
+        envs = os.environ
+        dict_merge(envs, env_dict, copy_dct=True)
+        env_dict = envs
+
     for key, template in task_vars.items():
         if isinstance(template, string_types) and "{" in template:
-            template_var_string = render_vars_template(template, new_args)
+
+            template_var_string = render_vars_template(template, env_dict)
             try:
                 template_var_new = yaml.safe_load(template_var_string)
                 final_vars[key] = template_var_new
