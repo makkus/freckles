@@ -138,7 +138,7 @@ Another way would be to 'tell' `frecklecute` which vars to forward to a task ite
          vars:
            free_form: cat /tmp/downloads/README.rst >> /tmp/some_file
 
-Even though key/value pairs from `vars' can't be used as substitution 'sources' they can themselves be 'targets' for variables from `defaults`. To continue the example from above, we could do something like this:
+Even thoughh key/value pairs from ``vars`` can't be used as substitution 'sources' they can themselves be 'targets' for variables from ``defaults``. To continue the example from above, we could do something like this:
 
 .. code-block:: yaml
 
