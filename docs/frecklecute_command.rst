@@ -155,5 +155,6 @@ Even though it is fairly easy to write a basic *frecklecutable*, there are still
    :maxdepth: 2
 
    writing_frecklecutables
+   frecklecutables_templating
 
 .. _ansible: https://ansible.com

@@ -71,7 +71,7 @@ An example:
            url: https://raw.githubusercontent.com/makkus/freckles/master/HISTORY.rst
 
 
-This is generally not as useful as using ``defaults``, as most of the time you want finer-grained control. Also, this adds the additional complication that *Ansible modules* behave differently than *Ansible roles* when a variable is added to it's tsak description in an *Ansible playbook*: *roles* just ignore them, *modules* error out. By default, *frecklecute* does not know which variable keys are supported by a *module*, so in a case where you want to use ``vars``, but your task list includes an Ansible module that doesn't support one of the ``vars`` keys in your frecklecutable, you have to provide it with a list of 'valid' keys. For example, this would fail:
+This is generally not as useful as using ``defaults``, as most of the time you want finer-grained control. Also, this adds the additional complication that *Ansible modules* behave differently than *Ansible roles* when a non-supported variable is added to it's task description in an *Ansible playbook*: *roles* just ignore them, *modules* error out. By default, *frecklecute* does not know which variable keys are supported by a *module*, so in a case where you want to use ``vars``, but your task list includes an Ansible module that doesn't support one of the ``vars`` keys in your frecklecutable, you have to provide it with a list of 'valid' keys. For example, this would fail:
 
 .. code-block:: yaml
 
@@ -118,7 +118,7 @@ One way to resolve this would be to use ``defaults``:
           dest: "{{ path }}"
           url: https://raw.githubusercontent.com/makkus/freckles/master/README.rst
       - shell:
-          free_form: cat /tmp/downloads/README.rst >> /tmp/some_file
+          free_form: "cat {{ path }}/README.rst >> /tmp/some_file"
 
 Another way would be to 'tell' `frecklecute` which vars to forward to a task item. This is only possible in the 'exploded` form of a task item (check :doc:`Writing frecklecutables </writing_frecklecutables>` for details on that):
 
