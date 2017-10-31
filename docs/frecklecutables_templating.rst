@@ -70,6 +70,18 @@ An example:
       - get_url:
            url: https://raw.githubusercontent.com/makkus/freckles/master/HISTORY.rst
 
+This would be the same as writing:
+
+.. code-block:: yaml
+
+   tasks:
+      - get_url:
+           dest: /tmp/
+           url: https://raw.githubusercontent.com/makkus/freckles/master/README.rst
+      - get_url:
+           dest: /tmp/
+           url: https://raw.githubusercontent.com/makkus/freckles/master/HISTORY.rst
+
 
 This is generally not as useful as using ``defaults``, as most of the time you want finer-grained control. Also, this adds the additional complication that *Ansible modules* behave differently than *Ansible roles* when a non-supported variable is added to it's task description in an *Ansible playbook*: *roles* just ignore them, *modules* error out. By default, *frecklecute* does not know which variable keys are supported by a *module*, so in a case where you want to use ``vars``, but your task list includes an Ansible module that doesn't support one of the ``vars`` keys in your frecklecutable, you have to provide it with a list of 'valid' keys. For example, this would fail:
 
