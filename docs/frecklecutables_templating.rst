@@ -15,6 +15,11 @@ Overview
 
 ``frecklecute`` supports basic templating (similar to Ansible, using Jinja2). There are a few differences in how it works, which are mostly due to technical limitations.
 
+Jinja2 markers
+==============
+
+As *Ansible* already uses the default Jinja2 markers ('{{', '}}', '{%', and '%}'), and we want to be able to forward those directly to the generated Ansible playbook, *frecklecute* adds '::' to each of those ('{{::', '::}}', '{%::', and '::%}') to not get in the way.
+
 'Allowed' keys
 ==============
 
@@ -45,10 +50,10 @@ Using templating, you can 'extract' the *path* variable and put it somewhere sep
      path: /tmp/downloads
    tasks:
      - file:
-         dest: "{{ path }}"
+         dest: "{{:: path ::}}"
          state: directory
      - get_url:
-         dest: "{{ path }}"
+         dest: "{{:: path ::}}"
          url: https://raw.githubusercontent.com/makkus/freckles/master/README.rst
 
 Values from the ``defaults`` key will never directly end up as a task item value. They always have to be used as a 'replacement' value under either the ``vars`` or ``tasks`` key.
@@ -100,7 +105,7 @@ This is generally not as useful as using ``defaults``, as most of the time you w
 
 .. note::
 
-    Remember, we can't do ``cat "{{ dest }}/README.rst" >> /tmp/some_file`` because ``vars`` can't be used as templating variables themselves.
+    Remember, we can't do ``cat "{{:: dest ::}}/README.rst" >> /tmp/some_file`` because ``vars`` can't be used as templating variables themselves.
 
 Both the ``file`` as well as the ``get_url`` task items are Ansible modules and support the ``dest`` key (in the case of ``file``, ``dest`` is an alias for ``path``). The ``shell`` module, however, doesn't support ``dest``, which will lead to an error message:
 
@@ -124,13 +129,13 @@ One way to resolve this would be to use ``defaults``:
       path: /tmp/downloads
     tasks:
       - file:
-          dest: "{{ path }}"
+          dest: "{{:: path ::}}"
           state: directory
       - get_url:
-          dest: "{{ path }}"
+          dest: "{{:: path ::}}"
           url: https://raw.githubusercontent.com/makkus/freckles/master/README.rst
       - shell:
-          free_form: "cat {{ path }}/README.rst >> /tmp/some_file"
+          free_form: "cat {{:: path ::}}/README.rst >> /tmp/some_file"
 
 Another way would be to 'tell' `frecklecute` which vars to forward to a task item. This is only possible in the 'exploded` form of a task item (check :doc:`Writing frecklecutables </writing_frecklecutables>` for details on that):
 
@@ -157,7 +162,7 @@ Even thoughh key/value pairs from ``vars`` can't be used as substitution 'source
     defaults:
         path: /tmp/downloads
     vars:
-        dest: "{{ path }}"
+        dest: "{{:: path ::}}"
     tasks:
         - file:
             state: directory
@@ -168,7 +173,7 @@ Even thoughh key/value pairs from ``vars`` can't be used as substitution 'source
             var-keys:
                - free_form
           vars:
-            free_form: "cat {{ path }}/README.rst >> /tmp/some_file"
+            free_form: "cat {{:: path ::}}/README.rst >> /tmp/some_file"
 
 
 ``args``
@@ -183,7 +188,7 @@ Even thoughh key/value pairs from ``vars`` can't be used as substitution 'source
         help: the download path
         is_var: false
    vars:
-        dest: "{{ path }}"
+        dest: "{{:: path ::}}"
    tasks:
         - file:
             state: directory
@@ -194,7 +199,7 @@ Even thoughh key/value pairs from ``vars`` can't be used as substitution 'source
             var-keys:
                - free_form
           vars:
-            free_form: "cat {{ path }}/README.rst >> /tmp/some_file"
+            free_form: "cat {{:: path ::}}/README.rst >> /tmp/some_file"
 
 This is how we'd execute this:
 
