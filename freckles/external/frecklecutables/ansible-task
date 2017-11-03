@@ -25,5 +25,5 @@ args:
     type: freckles.utils.VarsType
 tasks:
   - meta:
-     name: "{{ task_name }}"
-     become: "{{ become_root }}"
+     name: "{{:: task_name ::}}"
+     become: "{{:: become_root ::}}"

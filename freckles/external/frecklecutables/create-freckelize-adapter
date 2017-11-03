@@ -14,4 +14,4 @@ tasks:
       dest: ~/.local/freckles/templates/freckle-adapter-template
       update: true
   - command:
-      free_form: cookiecutter --no-input --output-dir ~/.freckles/adapters ~/.local/freckles/templates/freckle-adapter-template adapter_name="{{ adapter_name }}"
+      free_form: "cookiecutter --no-input --output-dir ~/.freckles/adapters ~/.local/freckles/templates/freckle-adapter-template adapter_name='{{:: adapter_name ::}}'"

@@ -153,7 +153,14 @@ def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[],
 
 
 def replace_string(template_string, replacement_dict):
-    result = Environment(extensions=[freckles_jinja_utils]).from_string(template_string).render(replacement_dict)
+
+    trim_blocks = True
+    block_start_string = '{%::'
+    block_end_string = '::%}'
+    variable_start_string = '{{::'
+    variable_end_string = '::}}'
+
+    result = Environment(extensions=[freckles_jinja_utils], trim_blocks=trim_blocks, block_start_string=block_start_string, block_end_string=block_end_string, variable_start_string=variable_start_string, variable_end_string=variable_end_string).from_string(template_string).render(replacement_dict)
     return result
 
 
@@ -307,7 +314,7 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     sub_dict = copy.deepcopy(new_args)
     use_environment_vars = True
     if use_environment_vars:
-        envs_dict = copy.deepcopy({"env": os.environ})
+        envs_dict = copy.deepcopy({"LOCAL_ENV": os.environ})
         dict_merge(envs_dict, sub_dict, copy_dct=False)
         sub_dict = envs_dict
 
