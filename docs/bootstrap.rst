@@ -13,38 +13,6 @@ The main way of bootstrapping *freckles* is by utilizing *inaugurate*, a thing I
 For how it exactly works, and why you should or should not trust it, head over `to it's homepage <https://github.com/makkus/inaugurate/>`_. This method of bootstrapping is the easiest, and fricktionlessest. One of the main reasons for creating *freckles* was that I wanted a way to setup a new box (physical or virtual) by executing only one (easy to remember) line on a commandline terminal. *inaugurate* provides that functionality.
 
 
-Supported platforms
-===================
-
-Those are the platforms I have tested so far, others might very well work too. I did my development mainly on Debian-based systems, so other Linux distributions might not (yet) be up to scratch:
-
-- Linux
-
-  - Debian
-
-    - Stretch
-    - Jessie
-
-  - Ubuntu
-
-    - 17.04
-    - 16.10
-    - 16.04
-
-  - CentOS
-
-    - 7
-
-- Mac OS X
-
-  - El Capitan
-  - Sierra
-
-- Windows
-
-  - Windows 10 (Ubuntu subsystem) -- not tested/working yet
-
-
 Description
 ===========
 
@@ -132,6 +100,39 @@ What does this do?
 This installs all the requirements that are needed to create a Python virtualenv for *freckles*. What exactly those requirements are differs depending on the OS/Distribution that is used (check the :ref:`Install manually via pip` section for details). Then a Python virtual environment is created in ``$HOME/.local/inaugurate/virtualenvs/inaugurate`` into which *freckles* and all its requirements are installed (~70mb).
 
 A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the users ``$PATH`` environment variable.
+
+Supported platforms
+===================
+
+Those are the platforms I have tested so far, others might very well work too. I did my development mainly on Debian-based systems, so other Linux distributions might not (yet) be up to scratch:
+
+- Linux
+
+  - Debian
+
+    - Stretch
+    - Jessie
+
+  - Ubuntu
+
+    - 17.04
+    - 16.10
+    - 16.04
+
+  - CentOS
+
+    - 7
+
+- Mac OS X
+
+  - El Capitan
+  - Sierra
+
+- Windows
+
+  - Windows 10 (Ubuntu subsystem) -- not tested/working yet
+
+
 
 
 Install manually via ``pip``
