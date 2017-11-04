@@ -1,0 +1,19 @@
+args:
+  user_name:
+     help: the name of the user
+     is_var: false
+     required: yes
+  password:
+     help: the user password hash (generate with 'mkpasswd -m sha-512')
+     is_var: false
+     required: yes
+tasks:
+  - USER:
+      name: "{{:: user_name ::}}"
+      password: "{{:: password ::}}"
+      update_password: always
+  - GEERLINGGUY.SECURITY:
+      security_sudoers_passwordless:
+        - "{{:: user_name ::}}"
+      security_ssh_password_authentication: "no"
+      security_ssh_permit_root_login: "no"

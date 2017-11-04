@@ -1,0 +1,31 @@
+doc:
+  short_help: "setup new sudo user"
+  help: "Setups a new user with (passwordless) sudo privileges.\n\nInstalls the 'sudo' package if necessary, and creates a group 'wheel' which will be allowed passwordless sudo-access."
+args:
+  user_name:
+     help: the name of the user
+     is_var: false
+     required: yes
+  password:
+     help: the user password hash (generate with 'mkpasswd -m sha-512')
+     is_var: false
+     required: yes
+tasks:
+  - group:
+      name: wheel
+      state: present
+  - package:
+      name: sudo
+      state: present
+  - lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: "^%wheel"
+      line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+      validate: "/usr/sbin/visudo -cf %s"
+  - user:
+      name: "{{:: user_name ::}}"
+      password: "{{:: password ::}}"
+      update_password: always
+      groups: wheel
+      append: yes
