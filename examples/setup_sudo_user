@@ -11,19 +11,19 @@ args:
      is_var: false
      required: yes
 tasks:
-  - group:
+  - GROUP:
       name: wheel
       state: present
-  - package:
+  - PACKAGE:
       name: sudo
       state: present
-  - lineinfile:
+  - LINEINFILE:
       dest: /etc/sudoers
       state: present
       regexp: "^%wheel"
       line: "%wheel ALL=(ALL) NOPASSWD: ALL"
       validate: "/usr/sbin/visudo -cf %s"
-  - user:
+  - USER:
       name: "{{:: user_name ::}}"
       password: "{{:: password ::}}"
       update_password: always
