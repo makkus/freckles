@@ -105,6 +105,7 @@ class CommandRepo(object):
                     else:
                         self.commands[command_name] = command
 
+
             for command in self.additional_commands:
 
                 command_name = command[0]

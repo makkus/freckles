@@ -59,7 +59,7 @@ if sys.argv[0].endswith("frecklecute"):
             last_opt = arg
             continue
 
-        if os.path.exists(arg):
+        if os.path.exists(arg) and os.path.isfile(os.path.abspath(arg)):
             current_command = arg
             current_command_path = os.path.abspath(arg)
             # frkl_obj = frkl.Frkl(current_command, COMMAND_PROCESSOR_CHAIN)
@@ -112,6 +112,7 @@ class FrecklecuteCommand(click.MultiCommand):
         self.command_repo = CommandRepo(config=self.config, additional_commands=[current_command])
         self.current_command = current_command[0]
 
+
     def list_commands(self, ctx):
         """Lists all commands (frecklecutables) that are available
         """
@@ -124,6 +125,7 @@ class FrecklecuteCommand(click.MultiCommand):
         self.commands = {}
         for name in self.command_names:
             self.commands[name] = self.get_command(None, name)
+
 
         return self.command_names
 
@@ -139,7 +141,6 @@ class FrecklecuteCommand(click.MultiCommand):
 
 click.core.SUBCOMMAND_METAVAR = 'FRECKLECUTABLE [ARGS]...'
 click.core.SUBCOMMANDS_METAVAR = 'FRECKLECUTABLE1 [ARGS]... [FRECKLECUTABLE2 [ARGS]...]...'
-
 
 cli = FrecklecuteCommand((current_command, current_command_path), config=DEFAULT_FRECKLES_CONFIG, help=FRECKLECUTE_HELP_TEXT,
                       epilog=FRECKLECUTE_EPILOG_TEXT)
