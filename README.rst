@@ -80,7 +80,7 @@ This has to be, by the way, the most bloated and roundabout way to create a fold
 
 This will install docker with everything that is required on your local machine (check the `source code of the role <https://github.com/mongrelion/ansible-role-docker>`_ to see what exactly it is doing, and how, and which target environments it supports).
 
-In addition to using the `pre-existing *frecklecutables*` <https://github.com/makkus/freckles/tree/master/freckles/external/frecklecutables>`_, it's easy to `write your own <https://docs.freckles.io/en/latest/writing_frecklecutables.html>`_. Using the two tasks above, we could write one like the following (note how it's possible to make a cli option for the ``path`` var), and store it in a file called ``example.yml``:
+In addition to using the `pre-existing *frecklecutables* <https://github.com/makkus/freckles/tree/master/freckles/external/frecklecutables>`_, it's easy to `write your own <https://docs.freckles.io/en/latest/writing_frecklecutables.html>`_. Using the two tasks above, we could write one like the following (note how it's possible to make a cli option for the ``path`` var), and store it in a file called ``example.yml``:
 
 .. code-block:: yaml
 
