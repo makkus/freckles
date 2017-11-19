@@ -318,7 +318,8 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
         if isinstance(template, string_types):
             template_var_string = replace_string(template, sub_dict)
             if template_var_string.startswith('{') and not \
-               template_var_string.startswith('{{'):
+               template_var_string.startswith('{{') and not \
+               template_var_string.startswith('{%'):
                 # if template_var_string is json, load value
                 # (but do not handle {{ ansible-side substitution)
                 try:
