@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "kennasecurity/27-cloud-base"
+
+
+  config.vm.synced_folder ".", "/vagrant", id: "vagrant"
+  config.vm.synced_folder "../../", "/freckles", id: "freckles"
+  config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl"
+  config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
+  config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
+
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+    # Customize the amount of memory on the VM:
+    vb.memory = "2048"
+    # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
+
+end
