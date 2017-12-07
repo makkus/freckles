@@ -160,6 +160,17 @@ tasks:
            - makkus.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
+  - freckles_checkout:
+      meta:
+        task-desc: checking out freckle(s)
+        task-name: makkus.freckles
+        task-roles:
+          - makkus.box-basics
+          - makkus.freckles
+          - makkus.install-pkg-mgrs
+      vars:
+        checkout_phase: true
+
   - freckles:
       meta:
         task-desc: starting to process freckle(s)
@@ -177,6 +188,8 @@ tasks:
            - geerlingguy.homebrew
            - makkus.virtualbox
            - elliotweiser.osx-command-line-tools
+      vars:
+        checkout_phase: false
   - install:
       meta:
         task-name: install
@@ -278,5 +291,3 @@ tasks:
            - ssh_key_type
            - system
            - uid
-
-
