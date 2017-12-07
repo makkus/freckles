@@ -168,6 +168,11 @@ tasks:
           - makkus.box-basics
           - makkus.freckles
           - makkus.install-pkg-mgrs
+          - makkus.install-packages
+          - makkus.install-nix
+          - makkus.install-conda
+          - geerlingguy.homebrew
+          - elliotweiser.osx-command-line-tools
       vars:
         checkout_phase: true
 
