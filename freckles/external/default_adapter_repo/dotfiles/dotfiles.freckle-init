@@ -1,15 +1,14 @@
 ---
-# include makkus.dotfiles role
-# - debug: var=freckles_profile_folders
-
-- name: "starting dotfile adapter execution"
-  include_role:
-    name: "makkus.dotfiles"
-  vars:
+- name: "[setting adapter variables]"
+  set_fact:
     dotfile_folders: "{{ freckles_profile_folders }}"
     pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default(omit) }}"
+    dotfiles_stow_method: "{{ freckles_user_vars.stow_method | default(omit) }}"
     dotfiles_unstow: "{{ freckles_user_vars.unstow | default(omit) }}"
     dotfiles_no_stow: "{{ freckles_user_vars.no_stow | default(omit) }}"
     dotfiles_no_package_install: "{{ freckles_user_vars.no_package_install | default(omit) }}"
     dotfiles_no_folder_install: "{{ freckles_user_vars.no_folder_install | default(omit) }}"
-    dotfiles_stow_method: "{{ freckles_user_vars.stow_method | default(omit) }}"
+
+- name: "starting dotfile adapter execution"
+  include_role:
+    name: "makkus.dotfiles"
