@@ -184,11 +184,6 @@ def render_dict(obj, replacement_dict):
         return obj
 
 
-def render_vars_template(vars_template, replacement_dict):
-    result = Environment(extensions=[freckles_jinja_utils]).from_string(vars_template).render(replacement_dict)
-    return result
-
-
 def find_supported_profiles(config=None):
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
@@ -311,15 +306,23 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
         dict_merge(envs_dict, sub_dict, copy_dct=False)
         sub_dict = envs_dict
 
+    # inject subdict (args and envs) in vars
     for key, template in task_vars.items():
-        if isinstance(template, string_types) and "{" in template:
-
-            template_var_string = render_vars_template(template, sub_dict)
-            try:
-                template_var_new = yaml.safe_load(template_var_string)
-                final_vars[key] = template_var_new
-            except (Exception) as e:
-                raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
+        if isinstance(template, string_types):
+            template_var_string = replace_string(template, sub_dict)
+            if template_var_string.startswith('{') and not \
+               template_var_string.startswith('{{') and not \
+               template_var_string.startswith('{%'):
+                # if template_var_string is json, load value
+                # (but do not handle {{ ansible-side substitution)
+                try:
+                    template_var_new = yaml.safe_load(template_var_string)
+                    final_vars[key] = template_var_new
+                except (Exception) as e:
+                    raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
+            else:
+                # else push value
+                final_vars[key] = template_var_string
         else:
             final_vars[key] = template
 
