@@ -106,13 +106,6 @@ class FreckleUrlType(click.ParamType):
 FRECKLES_REPO = RepoType()
 FRECKLES_URL = FreckleUrlType()
 
-DEFAULT_ABBREVIATIONS = {
-    'gh':
-        ["https://github.com/", PLACEHOLDER, "/", PLACEHOLDER, ".git"],
-    'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"]
-}
-
-
 def url_is_local(url):
     if url.startswith("~") or url.startswith(os.sep):
         return True
@@ -582,6 +575,7 @@ def find_adapter_files_callback(extensions, valid_profiles=None):
 
 
 def get_adapter_dependency_roles(profiles):
+
     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
 
     all_deps = set()
@@ -604,17 +598,28 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(freckle_repos, extra_profile_vars, ask_become_pass="true", no_run=False,
+def create_freckles_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
                         output_format="default"):
+
     profiles = extract_all_used_profiles(freckle_repos)
     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
 
     additional_roles = get_adapter_dependency_roles(profiles)
 
-    task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars}, "tasks": ["freckles"]}]
+    task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles"]}]
 
     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True)
+
+
+def create_freckles_checkout_run(freckle_repos, repo_metadata_file, ask_become_pass="true", no_run=False, output_format="default"):
+
+    repos_list = [(k, v) for k, v in freckle_repos.items()]
+
+    task_config = [{"vars": {"freckles": repos_list, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
+
+    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+                                      no_run=no_run, run_box_basics=True)
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",

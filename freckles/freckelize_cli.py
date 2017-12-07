@@ -50,7 +50,6 @@ class FreckelizeCommand(click.MultiCommand):
         click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True,
                                     **kwargs)
 
-
         use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos)
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
                                      metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), is_eager=True,

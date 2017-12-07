@@ -7,6 +7,8 @@ import collections
 import logging
 
 import click
+import copy
+import json
 import os
 import sys
 import yaml
@@ -19,7 +21,9 @@ except NameError:
 from .utils import (RepoType,
                     create_freckle_desc,
                     find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
-                    get_vars_from_cli_input, print_repos_expand)
+                    create_freckles_checkout_run, get_vars_from_cli_input, print_repos_expand)
+from .freckle_detect import create_freckle_descs
+from .freckles_defaults import *
 
 log = logging.getLogger("freckles")
 
@@ -63,58 +67,6 @@ def get_freckles_option_set():
     return params
 
 
-# def parse_commands(args):
-#     """Parse the provided arguments/commands."""
-
-#     for p in args[0]:
-#         pn = p["name"]
-
-#         if pn == BREAK_COMMAND_NAME:
-#             continue
-
-#         metadata[pn] = p["metadata"]
-
-#         if pn in profiles:
-#             raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
-#         else:
-#             profiles.append(pn)
-
-#         pvars = p["vars"]
-#         freckles = pvars.pop("freckle", [])
-#         include = pvars.pop("include", [])
-#         exclude = pvars.pop("exclude", [])
-#         target = pvars.pop("target", None)
-#         ask_become_pass = pvars.pop("ask_become_pass", None)
-
-#         if pvars:
-#             extra_profile_vars[pn] = {}
-#             for pk, pv in pvars.items():
-#                 if pv != None:
-#                     extra_profile_vars[pn][pk] = pv
-
-#         all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
-#         for freckle_url in all_freckles_for_this_profile:
-#             if target:
-#                 t = target
-#             else:
-#                 t = default_target
-
-#             for i in default_include:
-#                 if i not in include:
-#                     include.add(i)
-#             for e in default_exclude:
-#                 if e not in exclude:
-#                     exclude.add(e)
-#             fr = {
-#                 "target": t,
-#                 "includes": include,
-#                 "excludes": exclude,
-#                 "password": ask_become_pass
-#             }
-#             repos.setdefault(freckle_url, fr)
-#             repos[freckle_url].setdefault("profiles", []).append(pn)
-
-
 def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default"):
     """Executes a freckles run using the provided run details.
 
@@ -127,42 +79,32 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     all_freckle_repos = []
     ask_become_pass = "auto"
 
-    for freckle_url, freckle_details in repos.items():
-        ask_pw = freckle_details.pop("password", "auto")
+    # augment repo data
+    create_freckle_descs(repos)
 
-        if ask_pw != "auto":
-            if ask_pw == "true":
-                ask_become_pass = "true"
-            else:
-                ask_become_pass = "false"
+    repo_metadata_file = "/tmp/repo_metadata"
 
-        freckle_repo = create_freckle_desc(freckle_url, freckle_details["target"], True,
-                                           profiles=freckle_details["profiles"], includes=freckle_details["includes"],
-                                           excludes=freckle_details["excludes"])
-        all_freckle_repos.append(freckle_repo)
+    result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, ask_become_pass=ask_become_pass, output_format=output_format)
 
 
-    if not all_freckle_repos:
-        click.echo("No adapters specified, doing nothing. Use '--help' to display this tools help as well as available adapters.")
-        sys.exit(0)
+    if not profiles:
 
-    if no_run:
-        run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
-                                             output_format=output_format, no_run=True)
+        profiles = []
+        all_repo_metadata = json.load(open(repo_metadata_file))
+
+        for repo, metadata in all_repo_metadata.items():
+
+            for vars in metadata["vars"]:
+                profile_temp = vars["profile"]["name"]
+                if profile_temp not in profiles:
+                    profiles.append(profile_temp)
 
 
-        click.echo("")
-        click.echo("Used adapters:")
+        click.echo("\n# no adapters specified, using repo-defaults:")
         for p in profiles:
-            click.echo("\tadapter: {}".format(p))
-            click.echo("\tpath: {}".format(metadata[p]["command_path"]))
-        click.echo("")
-        click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
-        click.echo("")
-        return None
-    else:
+            click.echo("  - {}".format(p))
 
-        return create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
+    return create_freckles_run(all_freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass,
                             output_format=output_format)
 
 
@@ -173,7 +115,7 @@ def assemble_freckle_run(*args, **kwargs):
 
     default_target = kwargs.get("target", None)
     if not default_target:
-        default_target = "~/freckles"
+        default_target = DEFAULT_FRECKLE_TARGET_MARKER
 
     default_freckle_urls = list(kwargs.get("freckle", []))
     default_output_format = kwargs.get("output", "default")
@@ -189,68 +131,71 @@ def assemble_freckle_run(*args, **kwargs):
 
     metadata = {}
 
-    for p in args[0]:
+    if not args[0]:
 
-        pn = p["name"]
+        metadata["__auto__"] = {}
 
-        if pn == BREAK_COMMAND_NAME:
+        fr = {
+            "target": default_target,
+            "includes": default_include,
+            "excludes": default_exclude,
+            "password": default_ask_become_pass
+        }
 
-            temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+        for f in default_freckle_urls:
+            repos[f] = copy.deepcopy(fr)
+            repos[f]["profiles"] = ["__auto__"]
 
-            result.append(temp)
-            repos = collections.OrderedDict()
-            extra_profile_vars = {}
-            profiles = []
-            metadata = {}
-            click.echo("\n# starting new ansible run...")
-            continue
+    else:
 
-        metadata[pn] = p["metadata"]
+        for p in args[0]:
 
-        if pn in profiles:
-            raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
-        else:
-            profiles.append(pn)
+            pn = p["name"]
 
-        pvars = p["vars"]
-        freckles = list(pvars.pop("freckle", []))
-        include = set(pvars.pop("include", []))
-        exclude = set(pvars.pop("exclude", []))
-        target = pvars.pop("target", None)
-        ask_become_pass = pvars.pop("ask_become_pass", "auto")
+            metadata[pn] = p["metadata"]
 
-        if ask_become_pass == "auto" and default_ask_become_pass != "auto":
-            ask_become_pass = default_ask_become_pass
-
-        if pvars:
-            extra_profile_vars[pn] = {}
-            for pk, pv in pvars.items():
-                if pv != None:
-                    extra_profile_vars[pn][pk] = pv
-
-        all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
-        for freckle_url in all_freckles_for_this_profile:
-            if target:
-                t = target
+            if pn in profiles:
+                raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
             else:
-                t = default_target
+                profiles.append(pn)
 
-            for i in default_include:
-                if i not in include:
-                    include.add(i)
-            for e in default_exclude:
-                if e not in exclude:
-                    exclude.add(e)
-            fr = {
-                "target": t,
-                "includes": list(include),
-                "excludes": list(exclude),
-                "password": ask_become_pass
-            }
-            repos.setdefault(freckle_url, fr)
-            repos[freckle_url].setdefault("profiles", []).append(pn)
+            pvars = p["vars"]
+            freckles = list(pvars.pop("freckle", []))
+            include = set(pvars.pop("include", []))
+            exclude = set(pvars.pop("exclude", []))
+            target = pvars.pop("target", None)
+            ask_become_pass = pvars.pop("ask_become_pass", "auto")
 
-            # freckle_repo = create_freckle_desc(freckle_url, target, True, profiles=profile_names, includes=include_all, excludes=exclude_all)
+            if ask_become_pass == "auto" and default_ask_become_pass != "auto":
+                ask_become_pass = default_ask_become_pass
+
+            if pvars:
+                extra_profile_vars[pn] = {}
+                for pk, pv in pvars.items():
+                    if pv != None:
+                        extra_profile_vars[pn][pk] = pv
+
+            all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
+            for freckle_url in all_freckles_for_this_profile:
+                if target:
+                    t = target
+                else:
+                    t = default_target
+
+                for i in default_include:
+                    if i not in include:
+                        include.add(i)
+                for e in default_exclude:
+                    if e not in exclude:
+                        exclude.add(e)
+                fr = {
+                    "target": t,
+                    "includes": list(include),
+                    "excludes": list(exclude),
+                    "password": ask_become_pass
+                }
+                repos.setdefault(freckle_url, fr)
+                repos[freckle_url].setdefault("profiles", []).append(pn)
 
     if (repos):
         click.echo("\n# starting ansible run...")
@@ -258,37 +203,6 @@ def assemble_freckle_run(*args, **kwargs):
         result.append(temp)
 
     return result
-
-    # all_freckle_repos = []
-    # for freckle_url, freckle_details in repos.items():
-    #     freckle_repo = create_freckle_desc(freckle_url, freckle_details["target"], True,
-    #                                        profiles=freckle_details["profiles"], includes=freckle_details["includes"],
-    #                                        excludes=freckle_details["excludes"])
-    #     all_freckle_repos.append(freckle_repo)
-
-
-    # if not all_freckle_repos:
-    #     click.echo("No adapters specified, doing nothing. Use '--help' to display this tools help as well as available adapters.")
-    #     sys.exit(0)
-
-    # if no_run:
-    #     run_parameters = create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
-    #                                          output_format=output_format, no_run=True)
-
-    #     click.echo("")
-    #     click.echo("Used adapters:")
-    #     for p in profiles:
-    #         click.echo("\tadapter: {}".format(p))
-    #         click.echo("\tpath: {}".format(metadata[p]["command_path"]))
-    #     click.echo("")
-    #     click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
-    #     click.echo("")
-    # else:
-    #     import pprint
-    #     pprint.pprint(all_freckle_repos)
-    #     sys.exit(0)
-    #     create_freckles_run(all_freckle_repos, extra_profile_vars, ask_become_pass=ask_become_pass,
-    #                         output_format=output_format)
 
 
 class ProfileRepo(object):

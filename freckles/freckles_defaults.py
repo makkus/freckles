@@ -1,6 +1,7 @@
 import os
 import click
 from nsbl import defaults
+from frkl.frkl import PLACEHOLDER
 
 FRECKLE_MARKER_FILE_NAME = ".freckle"
 SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
@@ -43,6 +44,8 @@ ADAPTER_MARKER_EXTENSION = "freckle-adapter"
 ADAPTER_TASKS_EXTENSION = "freckle-tasks"
 ADAPTER_INIT_EXTENSION = "freckle-init"
 
+DEFAULT_FRECKLE_TARGET_MARKER = "__auto__"
+
 DEFAULT_REPOS = {
     "default": {"roles": [(None, defaults.DEFAULT_ROLES_PATH)],
                 "adapters": [(None, DEFAULT_ADAPTERS_PATH)],
@@ -60,6 +63,16 @@ DEFAULT_REPOS = {
             "frecklecutables": [(None, ARK_REPO_PATH)]
             }
 }
+
+# url abbreviations
+DEFAULT_ABBREVIATIONS = {
+    'gh':
+        ["https://github.com/", PLACEHOLDER, "/", PLACEHOLDER, ".git"],
+    'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"]
+}
+
+
+
 
 
 # .freckle (raw) format
