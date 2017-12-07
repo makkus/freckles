@@ -617,6 +617,7 @@ def create_freckles_run(freckle_repos, repo_metadata_file, extra_profile_vars, a
 
 def create_freckles_checkout_run(freckle_repos, repo_metadata_file, ask_become_pass="true", no_run=False, output_format="default"):
 
+
     repos_list = [(k, v) for k, v in freckle_repos.items()]
 
     task_config = [{"vars": {"freckles": repos_list, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
