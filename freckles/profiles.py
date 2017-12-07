@@ -105,8 +105,10 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
                     profiles.append(profile_temp)
 
 
-        click.echo("\n# no adapters specified, using repo-defaults:")
+        click.echo("\n# no adapters specified, using repo-defaults:\n")
         for p in profiles:
+            if p == "freckle":
+                continue
             click.echo("  - {}".format(p))
 
     return create_freckles_run(all_freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass,
@@ -206,7 +208,7 @@ def assemble_freckle_run(*args, **kwargs):
         click.echo("\n# starting ansible run...")
         temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
         result.append(temp)
-
+        click.echo("")
     return result
 
 
