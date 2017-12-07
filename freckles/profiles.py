@@ -86,6 +86,11 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
     result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, ask_become_pass=ask_become_pass, output_format=output_format)
 
+    return_code = result_checkout["return_code"]
+
+    if return_code != 0:
+        click.echo("Checkout phase failed, not continuing...")
+        sys.exit(1)
 
     if not profiles:
 
