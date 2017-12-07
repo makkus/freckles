@@ -2,6 +2,14 @@
 History
 =======
 
+0.4.5 (2017-12-07)
+------------------
+
+* refactored `freckelize`: checkout phase is now a separate run, which enables:
+* auto-detecting freckle repo profile(s)
+* minor bug fixes and improvements
+
+
 0.4.4 (2017-11-04)
 ------------------
 
