@@ -8,33 +8,28 @@ args:
     type: str
     multiple: false
     required: false
-    default: "auto"
     metavar: "PKG_MGR"
     is_var: true
   unstow:
     help: unstow all currently stowed config files of this freckle
     required: false
-    default: false
     is_var: true
     is_flag: true
   no_stow:
     arg_name: no-stow
     help: prevent 'stowing' of config files
     required: false
-    default: false
     is_var: true
     is_flag: true
   no_package_install:
     arg_name: no-install
     help: "don't install any packages"
     required: false
-    default: false
     is_var: true
     is_flag: true
   no_folder_install:
     arg_name: no-folder-install
     help: "don't install any packages from (sub-)folder names"
     required: false
-    default: false
     is_var: true
     is_flag: true
