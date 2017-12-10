@@ -205,7 +205,7 @@ def assemble_freckle_run(*args, **kwargs):
                 repos[freckle_url].setdefault("profiles", []).append(pn)
 
     if (repos):
-        click.echo("\n# starting ansible run...")
+        click.echo("\n# starting ansible run(s)...")
         temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
         result.append(temp)
         click.echo("")
