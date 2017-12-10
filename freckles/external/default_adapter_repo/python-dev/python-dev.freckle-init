@@ -4,5 +4,5 @@
   include_role:
     name: "makkus.python-dev"
     tasks_from: python-prepare
-  vars:
-    pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default('auto') }}"
+  # vars:
+    # pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default('auto') }}"

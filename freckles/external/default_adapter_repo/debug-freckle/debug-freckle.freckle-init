@@ -1,5 +1,10 @@
-- name: debug profile init
+- name: "debug 'freckles_profile_name'"
+  debug: var=freckles_profile_name
+- name: "debug 'freckles_global_vars'"
+  debug: var=freckles_global_vars
+- name: "debug 'freckles_profile_folders'"
   debug: var=freckles_profile_folders
-
-- name: debug user vars
-  debug: var=freckles_user_vars
+- name: "debug 'freckle_profile'"
+  debug: var=freckle_profile
+- name: "debug 'freckle_global_folder_vars'"
+  debug: var=freckle_global_folder_vars
