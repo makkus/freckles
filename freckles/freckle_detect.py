@@ -45,12 +45,14 @@ def create_freckle_descs(repos):
 
         if os.path.exists(os.path.expanduser(url)):
 
+            # TODO: check whether host is local
             repo_desc = {"type": "local"}
             repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
             repo_desc["checkout_become"] = target_become
             repo_desc["local_name"] = os.path.basename(repo_desc["remote_url"])
             if target == DEFAULT_FRECKLE_TARGET_MARKER:
                 repo_desc["checkout_skip"] = True
+                repo_desc["local_parent"] = os.path.dirname(repo_desc["remote_url"])
                 pass
             else:
                 repo_desc["local_parent"] = target

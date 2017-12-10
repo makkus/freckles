@@ -84,7 +84,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
     repo_metadata_file = "/tmp/repo_metadata"
 
-    result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, ask_become_pass=ask_become_pass, output_format=output_format)
+    result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format)
 
     return_code = result_checkout["return_code"]
 
