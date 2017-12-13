@@ -20,11 +20,11 @@ DEFAULT_USER_FRECKLECUTABLES_PATH = os.path.join(os.path.expanduser("~"), ".frec
 DEFAULT_LOCAL_FRECKLES_BASE = os.path.join(os.path.expanduser("~"), ".local", "freckles")
 DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER = os.path.join(os.path.expanduser("~"), ".local", "freckles", ".box_basics_run_successfully")
 DEFAULT_LOCAL_REPO_PATH_BASE = os.path.join(os.path.expanduser("~"), ".local", "freckles", "repos")
-DEFAULT_FRECKLES_IO_ROLES_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_roles")
+DEFAULT_FRECKLES_IO_ROLES_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_extra")
 DEFAULT_FRECKLES_IO_ADAPTERS_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_adapters")
 DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_frecklecutables")
 
-DEFAULT_FRECKLES_IO_ROLES_REPO_URL = "https://github.com/freckles-io/roles.git"
+DEFAULT_FRECKLES_IO_ROLES_REPO_URL = "https://github.com/freckles-io/extra.git"
 DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL = "https://github.com/freckles-io/adapters.git"
 DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL = "https://github.com/freckles-io/frecklecutables.git"
 
@@ -53,8 +53,11 @@ DEFAULT_REPOS = {
     "user": {"roles": [(None, DEFAULT_USER_ROLE_REPO_PATH)],
              "adapters": [(None, DEFAULT_USER_ADAPTERS_PATH)],
              "frecklecutables": [(None, DEFAULT_USER_FRECKLECUTABLES_PATH)]},
-    "freckles_io": {"roles": [(DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)],
-                  "adapters": [(DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL, DEFAULT_FRECKLES_IO_ADAPTERS_PATH)],
+    "freckles-io": {"roles": [(DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)],
+                  "adapters": [
+                      (DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL, DEFAULT_FRECKLES_IO_ADAPTERS_PATH),
+                      (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
+                  ],
                   "frecklecutables": [
                       (DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL, DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH)]
                   },
