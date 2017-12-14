@@ -12,10 +12,12 @@ FRECKLES_DEFAULT_CONFIG_FILE = os.path.join(FRECKLES_DEFAULT_CONFIG_FOLDER, FREC
 defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 DEFAULT_ADAPTERS_PATH = os.path.join(os.path.dirname(__file__), "external", "default_adapter_repo")
 DEFAULT_FRECKLECUTABLES_PATH = os.path.join(os.path.dirname(__file__), "external", "frecklecutables")
+DEFAULT_BLUEPRINTS_PATH = os.path.join(os.path.dirname(__file__), "external", "blueprints")
 
 DEFAULT_USER_ADAPTERS_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "adapters")
 DEFAULT_USER_ROLE_REPO_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "roles")
 DEFAULT_USER_FRECKLECUTABLES_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "frecklecutables")
+DEFAULT_USER_BLUEPRINTS_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "blueprints")
 
 DEFAULT_LOCAL_FRECKLES_BASE = os.path.join(os.path.expanduser("~"), ".local", "freckles")
 DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER = os.path.join(os.path.expanduser("~"), ".local", "freckles", ".box_basics_run_successfully")
@@ -23,10 +25,12 @@ DEFAULT_LOCAL_REPO_PATH_BASE = os.path.join(os.path.expanduser("~"), ".local", "
 DEFAULT_FRECKLES_IO_ROLES_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_extra")
 DEFAULT_FRECKLES_IO_ADAPTERS_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_adapters")
 DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_frecklecutables")
+DEFAULT_FRECKLES_IO_BLUEPRINTS_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_blueprints")
 
 DEFAULT_FRECKLES_IO_ROLES_REPO_URL = "https://github.com/freckles-io/extra.git"
 DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL = "https://github.com/freckles-io/adapters.git"
 DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL = "https://github.com/freckles-io/frecklecutables.git"
+DEFAULT_FRECKLES_IO_BLUEPRINTS_REPO_URL = "https://github.com/freckles-io/blueprints.git"
 
 ARK_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "ark")
 ARK_REPO_URL = "https://github.com/freckles-io/ark.git"
@@ -44,22 +48,33 @@ ADAPTER_MARKER_EXTENSION = "freckle-adapter"
 ADAPTER_TASKS_EXTENSION = "freckle-tasks"
 ADAPTER_INIT_EXTENSION = "freckle-init"
 
+BLUEPRINT_URL_PREFIX = "blueprint:"
+BLUEPRINT_MARKER_EXTENSION = "blueprint.freckle"
+
 DEFAULT_FRECKLE_TARGET_MARKER = "__auto__"
 
 DEFAULT_REPOS = {
     "default": {"roles": [(None, defaults.DEFAULT_ROLES_PATH)],
                 "adapters": [(None, DEFAULT_ADAPTERS_PATH)],
-                "frecklecutables": [(None, DEFAULT_FRECKLECUTABLES_PATH)]},
+                "frecklecutables": [(None, DEFAULT_FRECKLECUTABLES_PATH)],
+                "blueprints": [(None, DEFAULT_BLUEPRINTS_PATH)]
+    },
     "user": {"roles": [(None, DEFAULT_USER_ROLE_REPO_PATH)],
              "adapters": [(None, DEFAULT_USER_ADAPTERS_PATH)],
-             "frecklecutables": [(None, DEFAULT_USER_FRECKLECUTABLES_PATH)]},
+             "frecklecutables": [(None, DEFAULT_USER_FRECKLECUTABLES_PATH)],
+             "blueprints": [(None, DEFAULT_USER_BLUEPRINTS_PATH)]
+    },
     "freckles-io": {"roles": [(DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)],
                   "adapters": [
                       (DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL, DEFAULT_FRECKLES_IO_ADAPTERS_PATH),
                       (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
                   ],
                   "frecklecutables": [
-                      (DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL, DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH)]
+                      (DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL, DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH)],
+                  "blueprints": [
+                      (DEFAULT_FRECKLES_IO_BLUEPRINTS_REPO_URL, DEFAULT_FRECKLES_IO_BLUEPRINTS_PATH),
+                      (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
+                  ],
                   },
     "ark": {"roles": [(ARK_REPO_URL, ARK_REPO_PATH)],
             "adapters": [(None, ARK_REPO_PATH)],

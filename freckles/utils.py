@@ -185,6 +185,7 @@ def render_dict(obj, replacement_dict):
 
 
 def find_supported_profiles(config=None):
+
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
@@ -198,6 +199,19 @@ def find_supported_profiles(config=None):
 
     return result
 
+def find_supported_blueprints(config=None):
+
+    if not config:
+        config = DEFAULT_FRECKLES_CONFIG
+
+    trusted_repos = config.trusted_repos
+    repos = nsbl_tasks.get_local_repos(trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    result = {}
+    for r in repos:
+        p = get_blueprints_from_repo(r)
+        result.update(p)
+    return result
 
 def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
                             run_parameters={}):
@@ -497,8 +511,11 @@ def find_supported_profile_names(config=None):
 
 ADAPTER_CACHE = {}
 
-
 def get_adapters_from_repo(adapter_repo):
+    """Find all freckelize adapters under a folder.
+
+    An adapter consists of 3 files: XXX
+    """
     if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
         return {}
 
@@ -519,6 +536,52 @@ def get_adapters_from_repo(adapter_repo):
             result[profile_name] = adapter_folder
 
     ADAPTER_CACHE[adapter_repo] = result
+    return result
+
+BLUEPRINT_CACHE = {}
+def get_available_blueprints(config=None):
+    """Find all available blueprints."""
+
+    if not config:
+        config = DEFAULT_FRECKLES_CONFIG
+
+    repos = nsbl_tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    result = {}
+    for repo in repos:
+
+        blueprints = get_blueprints_from_repo(repo)
+        for name, path in blueprints.items():
+            result[name] = path
+
+    return result
+
+
+def get_blueprints_from_repo(blueprint_repo):
+    """Find all blueprints under a folder.
+
+    A blueprint is a folder that has a .blueprint.freckle marker file in it's root.
+    """
+    if not os.path.exists(blueprint_repo) or not os.path.isdir(os.path.realpath(blueprint_repo)):
+        return {}
+
+    if blueprint_repo in BLUEPRINT_CACHE.keys():
+        return BLUEPRINT_CACHE[blueprint_repo]
+
+    result = {}
+    for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
+
+        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+        for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
+            blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
+            blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
+
+            profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+
+            result[profile_name] = blueprint_folder
+
+    BLUEPRINT_CACHE[blueprint_repo] = result
+
     return result
 
 

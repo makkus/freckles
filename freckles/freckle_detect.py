@@ -25,16 +25,16 @@ from .freckles_defaults import *
 from .utils import (RepoType,
                     create_freckle_desc,
                     find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
-                    get_vars_from_cli_input, print_repos_expand)
+                    get_vars_from_cli_input, print_repos_expand, get_available_blueprints)
 
 log = logging.getLogger("freckles")
 
 
-def create_freckle_descs(repos):
+def create_freckle_descs(repos, config=None):
     """Augments freckle urls provided by the user via cli (if necessary).
     """
 
-    for url, metadata in repos.items():
+    for temp_url, metadata in repos.items():
 
         target = metadata["target"]
 
@@ -42,6 +42,22 @@ def create_freckle_descs(repos):
             target_become = False
         else:
             target_become = True
+
+        if temp_url.startswith(BLUEPRINT_URL_PREFIX):
+
+            blueprint_name = ":".join(temp_url.split(":")[1:])
+            blueprints = get_available_blueprints(config)
+            match = blueprints.get(blueprint_name, False)
+
+            if not match:
+                raise Exception("No blueprint with name '{}' available.".format(blueprint_name))
+
+            if target == DEFAULT_FRECKLE_TARGET_MARKER:
+                raise Exception("No target directory specified when using blueprint.")
+
+            url = match
+        else:
+            url = temp_url
 
         if os.path.exists(os.path.expanduser(url)):
 

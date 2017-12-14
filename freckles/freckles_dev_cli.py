@@ -21,7 +21,7 @@ from .commands import CommandRepo
 from .freckles_defaults import *
 from nsbl import tasks
 from nsbl.defaults import *
-from .utils import get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
+from .utils import get_blueprints_from_repo, get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
 
 
 def output(python_object, format="raw", pager=False):
@@ -244,6 +244,32 @@ def list_roles_cli(ctx, filter, readme, defaults):
 
 
     click.echo("")
+
+
+@cli.command("list-blueprints")
+@click.option('--filter', '-f', help="filters blueprints names containing this string", required=False, default=None)
+@click.pass_context
+def list_blueprints_cli(ctx, filter):
+
+    config = ctx.obj["config"]
+
+    repos = tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    click.echo("")
+    click.echo("Available blueprints:")
+    click.echo("")
+
+    for repo in repos:
+
+        blueprints = get_blueprints_from_repo(repo)
+        for name, path in blueprints.items():
+            if filter and filter not in name:
+                continue
+
+            click.echo("{}: {}".format(name, path))
+
+    click.echo("")
+
 
 @cli.command("list-aliases")
 @click.option("--filter", "-f", help="filter aliases contains the provided string", required=False, default=None)
