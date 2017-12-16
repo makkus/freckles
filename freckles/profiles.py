@@ -271,7 +271,7 @@ class ProfileRepo(object):
     def create_command(self, command_name, command_path):
 
         log.debug("Creating command for profile: '{}...'".format(command_name))
-        profile_metadata_file = os.path.join(command_path, "{}.{}".format(command_name, ADAPTER_MARKER_EXTENSION))
+        profile_metadata_file = os.path.join(command_path, ".{}.{}".format(command_name, ADAPTER_MARKER_EXTENSION))
         with open(profile_metadata_file, 'r') as f:
             md = yaml.safe_load(f)
 

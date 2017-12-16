@@ -531,7 +531,7 @@ def get_adapters_from_repo(adapter_repo):
             adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
             adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
-            profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[0:-1])
+            profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
 
             result[profile_name] = adapter_folder
 
@@ -595,7 +595,7 @@ def find_adapter_files(extension, valid_profiles=None, config=None):
         if valid_profiles and profile_name not in valid_profiles:
             continue
 
-        profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
+        profile_child_file = os.path.join(profile_path, ".{}.{}".format(profile_name, extension))
 
         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
             continue

@@ -44,9 +44,9 @@ DEFAULT_RUN_SYMLINK_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "current"
 DEFAULT_RUN_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "archive", "run")
 
 DEFAULT_EXCLUDE_DIRS = [".git", ".tox", ".cache"]
-ADAPTER_MARKER_EXTENSION = "freckle-adapter"
-ADAPTER_TASKS_EXTENSION = "freckle-tasks"
-ADAPTER_INIT_EXTENSION = "freckle-init"
+ADAPTER_MARKER_EXTENSION = "adapter.freckle"
+ADAPTER_TASKS_EXTENSION = "tasks.adapter.freckle"
+ADAPTER_INIT_EXTENSION = "init.adapter.freckle"
 
 BLUEPRINT_URL_PREFIX = "blueprint:"
 BLUEPRINT_MARKER_EXTENSION = "blueprint.freckle"
