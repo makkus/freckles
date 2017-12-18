@@ -117,7 +117,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     # TODO: maybe sort profile order also when specified manually?
 
     return create_freckles_run(sorted_profiles, repo_metadata_file_abs, extra_profile_vars, ask_become_pass=ask_become_pass,
-                            output_format=output_format)
+                               output_format=output_format, no_run=no_run)
 
 
 def assemble_freckle_run(*args, **kwargs):
