@@ -642,6 +642,9 @@ def find_adapter_files_callback(extensions, valid_profiles=None):
 
 def get_adapter_dependency_roles(profiles):
 
+    if not profiles:
+        return []
+
     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
 
     all_deps = set()
@@ -655,6 +658,27 @@ def get_adapter_dependency_roles(profiles):
 
     return list(all_deps)
 
+def get_adapter_profile_priorities(profiles):
+
+    if not profiles:
+        return []
+
+    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
+
+    prios = []
+    for profile_name, dep_file in dep_files.items():
+
+        with open(dep_file, 'r') as f:
+            deps = yaml.safe_load(f)
+            if not deps:
+                deps = {}
+
+        priority = deps.get("priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
+        prios.append([priority, profile_name])
+
+    profiles_sorted = sorted(prios, key=lambda tup: tup[0])
+
+    return [item[1] for item in profiles_sorted]
 
 def extract_all_used_profiles(freckle_repos):
     all_profiles = []
@@ -664,15 +688,16 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
+def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
                         output_format="default"):
 
-    profiles = extract_all_used_profiles(freckle_repos)
+    # profiles = extract_all_used_profiles(freckle_repos)
+
     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
 
     additional_roles = get_adapter_dependency_roles(profiles)
 
-    task_config = [{"vars": {"freckles": freckle_repos, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles"]}]
+    task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
 
     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True)
@@ -685,8 +710,10 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
 
     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
 
-    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+    result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       no_run=no_run, run_box_basics=True)
+
+    return result
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",

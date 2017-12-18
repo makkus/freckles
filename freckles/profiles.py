@@ -21,7 +21,7 @@ except NameError:
 from .utils import (RepoType,
                     create_freckle_desc,
                     find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
-                    create_freckles_checkout_run, get_vars_from_cli_input, print_repos_expand)
+                    create_freckles_checkout_run, get_vars_from_cli_input, print_repos_expand, get_adapter_profile_priorities)
 from .freckle_detect import create_freckle_descs
 from .freckles_defaults import *
 
@@ -82,9 +82,12 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     # augment repo data
     create_freckle_descs(repos)
 
-    repo_metadata_file = "/tmp/repo_metadata"
+    repo_metadata_file = "repo_metadata"
 
     result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format)
+
+    playbook_dir = result_checkout["playbook_dir"]
+    repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
 
     return_code = result_checkout["return_code"]
 
@@ -95,7 +98,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     if not profiles:
 
         profiles = []
-        all_repo_metadata = json.load(open(repo_metadata_file))
+        all_repo_metadata = json.load(open(repo_metadata_file_abs))
 
         for repo, metadata in all_repo_metadata.items():
 
@@ -104,14 +107,16 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
                 if profile_temp not in profiles:
                     profiles.append(profile_temp)
 
-
+        sorted_profiles = get_adapter_profile_priorities(profiles)
         click.echo("\n# no adapters specified, using repo-defaults:\n")
-        for p in profiles:
+        for p in sorted_profiles:
             if p == "freckle":
                 continue
             click.echo("  - {}".format(p))
 
-    return create_freckles_run(all_freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass,
+    # TODO: maybe sort profile order also when specified manually?
+
+    return create_freckles_run(sorted_profiles, repo_metadata_file_abs, extra_profile_vars, ask_become_pass=ask_become_pass,
                             output_format=output_format)
 
 
