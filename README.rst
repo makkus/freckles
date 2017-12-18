@@ -352,6 +352,7 @@ And that's it for now with examples folks! Hope that gave you an idea whether *f
 - on Mac OS X, in most cases the Command-line tools package as well as 'homebrew' will be installed. I'm not a Mac user, but I assume that is what most people will want anyway. Or at least don't mind.
 - I haven't figured out yet how exactly to deal with password entry, or other kind of secrets. Currently *freckles* does not ask for any passwords itself. If an ansible run needs a password, that request is forwarded by *freckles* though.
 - also, I haven't decided whether *freckles* will allow download of remote resources by default (as it is now), or whether some config setting will have to be set (to maybe trust certain urls). So, default behaviour as it is now might change. Just saying, so nobody complains later because they were getting used to it.
+- passwords used as variables might be logged to a log file on disk
 
 License
 *******
