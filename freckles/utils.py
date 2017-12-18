@@ -713,6 +713,10 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       no_run=no_run, run_box_basics=True)
 
+    if no_run:
+        click.echo("'no-run' option specified, finished")
+
+
     return result
 
 
