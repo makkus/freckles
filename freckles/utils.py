@@ -739,9 +739,6 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
 
     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
 
-    import pprint, sys
-    pprint.pprint(task_config)
-
     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       no_run=no_run, run_box_basics=True)
 
