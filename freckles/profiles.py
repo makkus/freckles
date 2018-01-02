@@ -13,12 +13,14 @@ import os
 import sys
 import yaml
 
+from frkl.frkl import dict_merge
+
 try:
     set
 except NameError:
     from sets import Set as set
 
-from .utils import (RepoType,
+from .utils import (RepoType, VarsType,
                     create_freckle_desc,
                     find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
                     create_freckles_checkout_run, get_vars_from_cli_input, print_repos_expand, get_adapter_profile_priorities)
@@ -42,13 +44,15 @@ EXCLUDE_ARG_HELP = 'if specified, omit process folders that end with one of the 
 EXCLUDE_ARG_METAVAR = 'FILTER_STRING'
 ASK_PW_HELP = 'whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)'
 ASK_PW_CHOICES = click.Choice(["auto", "true", "false"])
+EXTRA_VARS_ARG_HELP = "extra vars, overlayed on top of potential folder/adapter variables"
+EXTRA_VARS_METAVAR = "EXTRA_VARS_FILE"
 
-def get_freckles_option_set():
+def get_freckelize_option_set():
     """Helper method to create some common cli options."""
 
     freckle_option = click.Option(param_decls=["--freckle", "-f"], required=False, multiple=True, type=RepoType(),
                                   metavar=FRECKLE_ARG_METAVAR, help=FRECKLE_ARG_HELP)
-    target_option = click.Option(param_decls=["--target", "-t"], required=False, multiple=False, type=str,
+    target_option = click.Option(param_decls=["--target-folder", "-t"], required=False, multiple=False, type=str,
                                  metavar=TARGET_ARG_METAVAR,
                                  help=TARGET_ARG_HELP)
     include_option = click.Option(param_decls=["--include", "-i"],
@@ -60,8 +64,14 @@ def get_freckles_option_set():
     ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"],
                                           help=ASK_PW_HELP,
                                           type=ASK_PW_CHOICES, default="true")
+    extra_vars_option = click.Option(param_decls=["--extra-vars", "-v"],
+                                     help=EXTRA_VARS_ARG_HELP,
+                                     multiple=True,
+                                     type=VarsType(),
+                                     metavar=EXTRA_VARS_METAVAR,
+                                     required=False)
 
-    params = [freckle_option, target_option, include_option, exclude_option,
+    params = [freckle_option, extra_vars_option, target_option, include_option, exclude_option,
                        ask_become_pass_option]
 
     return params
@@ -122,10 +132,11 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
 def assemble_freckle_run(*args, **kwargs):
 
+
     result = []
     no_run = kwargs.get("no_run")
 
-    default_target = kwargs.get("target", None)
+    default_target = kwargs.get("target_folder", None)
     if not default_target:
         default_target = DEFAULT_FRECKLE_TARGET_MARKER
 
@@ -137,6 +148,13 @@ def assemble_freckle_run(*args, **kwargs):
 
     default_ask_become_pass = kwargs.get("ask_become_pass", True)
 
+    default_extra_vars_raw = list(kwargs.get("extra_vars", []))
+
+    default_extra_vars = {}
+
+    for ev in default_extra_vars_raw:
+        dict_merge(default_extra_vars, ev, copy_dct=False)
+
     extra_profile_vars = {}
     repos = collections.OrderedDict()
     profiles = []
@@ -144,19 +162,22 @@ def assemble_freckle_run(*args, **kwargs):
     metadata = {}
 
     if not args[0]:
+        # auto-detect
 
         metadata["__auto__"] = {}
 
         fr = {
-            "target": default_target,
+            "target_folder": default_target,
             "includes": default_include,
             "excludes": default_exclude,
             "password": default_ask_become_pass
-        }
+            }
 
         for f in default_freckle_urls:
             repos[f] = copy.deepcopy(fr)
             repos[f]["profiles"] = ["__auto__"]
+
+        extra_profile_vars = default_extra_vars
 
     else:
 
@@ -175,14 +196,14 @@ def assemble_freckle_run(*args, **kwargs):
             freckles = list(pvars.pop("freckle", []))
             include = set(pvars.pop("include", []))
             exclude = set(pvars.pop("exclude", []))
-            target = pvars.pop("target", None)
+            target = pvars.pop("target_folder", None)
             ask_become_pass = pvars.pop("ask_become_pass", "auto")
 
             if ask_become_pass == "auto" and default_ask_become_pass != "auto":
                 ask_become_pass = default_ask_become_pass
 
+            extra_profile_vars[pn] = copy.deepcopy(default_extra_vars.get(pn, {}))
             if pvars:
-                extra_profile_vars[pn] = {}
                 for pk, pv in pvars.items():
                     if pv != None:
                         extra_profile_vars[pn][pk] = pv
@@ -201,7 +222,7 @@ def assemble_freckle_run(*args, **kwargs):
                     if e not in exclude:
                         exclude.add(e)
                 fr = {
-                    "target": t,
+                    "target_folder": t,
                     "includes": list(include),
                     "excludes": list(exclude),
                     "password": ask_become_pass
@@ -294,7 +315,7 @@ class ProfileRepo(object):
             "is_var": True
         }
 
-        extra_options["target"] = {
+        extra_options["target-folder"] = {
             "help": TARGET_ARG_HELP,
             "extra_arg_names": ["-t"],
             "required": False,

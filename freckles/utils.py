@@ -11,7 +11,7 @@ from pydoc import locate
 
 import click
 from ansible.plugins.filter.core import FilterModule
-from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge
+from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, LoadMoreConfigsProcessor, FrklProcessor, MergeDictResultCallback, MergeResultCallback
 from jinja2 import Environment
 from jinja2.ext import Extension
 from nsbl import nsbl, tasks as nsbl_tasks
@@ -45,9 +45,38 @@ freckles_jinja_utils = FrecklesUtilsExtension
 
 DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
 
-
 class VarsType(click.ParamType):
+
     name = 'vars_type'
+
+    def convert(self, value, param, ctx):
+
+        chain = [
+            UrlAbbrevProcessor(), EnsureUrlProcessor(), EnsurePythonObjectProcessor(), LoadMoreConfigsProcessor()]
+
+        try:
+            if not isinstance(value, (list, tuple)):
+                value = [value]
+
+            frkl_obj = Frkl(value, chain)
+            result = frkl_obj.process()
+
+            if isinstance(result[0], (list, tuple)):
+
+                result_dict = {}
+                for item in result[0]:
+                    dict_merge(result_dict, item, copy_dct=False)
+
+                return result_dict
+            else:
+                return result[0]
+
+        except (Exception) as e:
+            self.fail("Can't read vars '{}': {}".format(value, str(e)))
+
+
+class VarsTypeJson(click.ParamType):
+    name = 'vars_type_json'
 
     def convert(self, value, param, ctx):
 
@@ -709,6 +738,9 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
     repos_list = [(k, v) for k, v in freckle_repos.items()]
 
     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
+
+    import pprint, sys
+    pprint.pprint(task_config)
 
     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       no_run=no_run, run_box_basics=True)
