@@ -22,7 +22,7 @@ args:
     required: false
     is_var: true
     use_value: true
-    type: freckles.utils.VarsType
+    type: freckles.utils.VarsTypeJson
 tasks:
   - meta:
      name: "{{:: task_name ::}}"
