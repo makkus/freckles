@@ -15,7 +15,7 @@ from . import print_version
 from .freckles_defaults import *
 from .frecklecute_cli import FrecklecuteCommand, FRECKLECUTE_HELP_TEXT, FRECKLECUTE_EPILOG_TEXT
 from .freckelize_cli import FreckelizeCommand, FRECKELIZE_HELP_TEXT, FRECKELIZE_EPILOG_TEXT
-from .profiles import ProfileRepo, assemble_freckle_run, get_freckles_option_set, BREAK_COMMAND_NAME
+from .profiles import ProfileRepo, assemble_freckle_run, get_freckelize_option_set, BREAK_COMMAND_NAME
 from .utils import DEFAULT_FRECKLES_CONFIG, RepoType, download_extra_repos
 
 try:

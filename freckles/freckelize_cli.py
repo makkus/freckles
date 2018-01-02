@@ -8,7 +8,7 @@ import click
 
 from . import print_version
 from .freckles_defaults import *
-from .profiles import ProfileRepo, assemble_freckle_run, get_freckles_option_set, BREAK_COMMAND_NAME
+from .profiles import ProfileRepo, assemble_freckle_run, get_freckelize_option_set, BREAK_COMMAND_NAME
 from .utils import DEFAULT_FRECKLES_CONFIG, RepoType, download_extra_repos
 
 try:
@@ -61,7 +61,7 @@ class FreckelizeCommand(click.MultiCommand):
                                       is_flag=True, is_eager=True, expose_value=False, callback=print_version)
 
 
-        self.params = get_freckles_option_set()
+        self.params = get_freckelize_option_set()
         self.params.extend([ use_repo_option, output_option,  no_run_option, version_option])
         self.config = config
 

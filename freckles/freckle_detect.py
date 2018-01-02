@@ -36,7 +36,7 @@ def create_freckle_descs(repos, config=None):
 
     for temp_url, metadata in repos.items():
 
-        target = metadata["target"]
+        target = metadata["target_folder"]
 
         if target == DEFAULT_FRECKLE_TARGET_MARKER or target.startswith("~") or target.startswith("/home"):
             target_become = False
