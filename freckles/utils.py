@@ -403,7 +403,7 @@ def download_extra_repos(ctx, param, value):
         else:
             repos.append(repo)
 
-    print_repos_expand(repos, repo_source="using extra repo(s)", warn=True)
+    print_repos_expand(repos, repo_source="using runtime context repo(s)", warn=True)
 
     click.echo("\n# processing extra repos...")
 
@@ -460,7 +460,7 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, defaul
     if repo_source:
         click.echo("# {}:".format(repo_source))
     else:
-        click.echo("# using repo(s):")
+        click.echo("# using freckle repo/folder(s):")
 
     click.echo("")
 
