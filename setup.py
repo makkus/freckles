@@ -39,6 +39,10 @@ setup(
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
+    scripts=[
+        'freckles/external/scripts/inaugurate/inaugurate',
+        'freckles/external/scripts/frankentree/frankentree',
+    ],
     include_package_data=True,
     install_requires=requirements,
     license="GNU General Public License v3",
