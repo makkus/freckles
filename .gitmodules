@@ -49,3 +49,9 @@
 [submodule "freckles/external/default_role_repo/makkus.virtualbox"]
 	path = freckles/external/default_role_repo/makkus.virtualbox
 	url = https://github.com/makkus/virtualbox_ansible.git
+[submodule "freckles/external/scripts/inaugurate"]
+	path = freckles/external/scripts/inaugurate
+	url = https://github.com/makkus/inaugurate.git
+[submodule "freckles/external/scripts/frankentree"]
+	path = freckles/external/scripts/frankentree
+	url = https://github.com/makkus/frankentree.git
