@@ -123,6 +123,8 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
             if p == "freckle":
                 continue
             click.echo("  - {}".format(p))
+    else:
+        sorted_profiles = profiles
 
     # TODO: maybe sort profile order also when specified manually?
 
