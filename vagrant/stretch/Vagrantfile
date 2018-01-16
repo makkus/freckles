@@ -15,16 +15,6 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "fujimakishouten/debian-stretch64"
 
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.auto_detect = false
-    config.cache.scope = :box
-    config.cache.enable :apt
-    config.cache.enable :generic, {
-                          # "conda" => { cache_dir: "/home/vagrant/.local/inaugurate/conda/pkgs" },
-                          "pip" => { cache_dir: "/home/vagrant/.cache/pip" },
-                        }
-  end
-
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
