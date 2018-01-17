@@ -51,6 +51,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
   config.vm.synced_folder "../../../extra", "/extra", id: "extra"
   config.vm.synced_folder "../../../adapters", "/adapters", id: "adapters"
+  config.vm.synced_folder "../../../compositions", "/compositions", id: "compositions"
   # config.vm.synced_folder "~/.pip", "/pip", id: "pip"
 
   # Provider-specific configuration so you can fine-tune various
