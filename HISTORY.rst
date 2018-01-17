@@ -7,6 +7,7 @@ History
 
 * added 'inaugurate' and 'frankentree' scripts to freckles package
 * improvements to `freckelize`, can take extra variables via commandline now
+* added 'frkl' abbreviation, points to the 'freckles-io' github account
 
 0.4.5 (2017-12-07)
 ------------------
