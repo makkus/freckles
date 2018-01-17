@@ -7,6 +7,7 @@ import pkgutil
 import pprint
 import subprocess
 import select
+import string
 import textwrap
 import time
 
@@ -16,12 +17,32 @@ import yaml
 
 import plugin_formatter
 
+from collections import OrderedDict
+
 from . import __version__ as VERSION
 from .commands import CommandRepo
 from .freckles_defaults import *
 from nsbl import tasks
 from nsbl.defaults import *
-from .utils import get_blueprints_from_repo, get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
+from .utils import get_blueprints_from_repo, get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS, find_adapter_files
+
+def reindent(s, numSpaces):
+    s = string.split(s, '\n')
+    s = [(numSpaces * ' ') + string.lstrip(line) for line in s]
+    s = string.join(s, '\n')
+    return s
+
+def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
+
 
 
 def output(python_object, format="raw", pager=False):
@@ -269,6 +290,82 @@ def list_blueprints_cli(ctx, filter):
             click.echo("{}: {}".format(name, path))
 
     click.echo("")
+
+@cli.command("list-adapters")
+@click.option('--filter', '-f', help="filters adapters names containing this string", required=False, default=None)
+@click.pass_context
+def list_adapters_cli(ctx, filter):
+
+    config = ctx.obj["config"]
+
+    repos = tasks.get_local_repos(config.trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    click.echo("")
+    click.echo("Available adapters:")
+    click.echo("")
+
+    adapters = get_all_adapters_in_repos(repos)
+
+    adapter_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, adapters, config=config)
+
+    for adapter_name, adapter_file in adapter_files.items():
+
+        metadata = get_adapter_metadata(adapter_file)
+        short_help = metadata.get("doc", {}).get("short_help", "n/a")
+
+        if filter:
+            if filter not in adapter_name and filter not in short_help:
+                continue
+
+        help_string = metadata.get("doc", {}).get("help", short_help)
+        click.echo("adapter name: {}\n  desc: {}\n  path: {}\n".format(adapter_name, short_help, adapter_file))
+
+
+@cli.command("adapter-help")
+@click.argument("adapter-name", nargs=1)
+@click.pass_context
+def print_adapter_help(ctx, adapter_name):
+
+    config = ctx.obj["config"]
+
+    repos = tasks.get_local_repos(config.trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    adapters = get_all_adapters_in_repos(repos)
+
+    adapter_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, adapters, config=config)
+
+    adapter_file = adapter_files.get(adapter_name, False)
+    if not adapter_file:
+        click.echo("\nNo adapter with the name '{}' found.\n".format(adapter_name))
+        sys.exit(0)
+
+    metadata = get_adapter_metadata(adapter_file)
+    short_help = metadata.get("doc", {}).get("short_help", "n/a")
+    help_string = metadata.get("doc", {}).get("help", False)
+    available_vars = metadata.get("available_vars", False)
+
+    click.echo("\nadapter name: {}\n\n  desc: {}\n  path: {}\n".format(adapter_name, short_help, adapter_file))
+
+    if available_vars:
+        click.echo("available vars:\n")
+        for var_name, md in available_vars.items():
+            click.echo("  {}: {}".format(var_name, md.get("help", "n/a")))
+        click.echo("")
+
+    if help_string:
+        click.echo("documentation:\n")
+        indented = reindent(help_string, 2)
+        click.echo(indented)
+
+def get_adapter_metadata(adapter_file):
+
+    with open(adapter_file, 'r') as f:
+        # metadata = yaml.safe_load(f)
+        metadata = ordered_load(f, yaml.SafeLoader)
+        if not metadata:
+            metadata = {}
+
+    return metadata
 
 
 @cli.command("list-aliases")
