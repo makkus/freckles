@@ -88,11 +88,9 @@ DEFAULT_REPOS = {
 DEFAULT_ABBREVIATIONS = {
     'gh':
         ["https://github.com/", PLACEHOLDER, "/", PLACEHOLDER, ".git"],
-    'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"]
+    'bb': ["https://bitbucket.org/", PLACEHOLDER, "/", PLACEHOLDER, ".git"],
+    'frkl': ["https://github.com/freckles-io/", PLACEHOLDER, ".git"]
 }
-
-
-
 
 
 # .freckle (raw) format
