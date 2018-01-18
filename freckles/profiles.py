@@ -77,7 +77,7 @@ def get_freckelize_option_set():
     return params
 
 
-def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default"):
+def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default", ask_become_pass="auto"):
     """Executes a freckles run using the provided run details.
 
     Args:
@@ -87,7 +87,6 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     """
 
     all_freckle_repos = []
-    ask_become_pass = "auto"
 
     # augment repo data
     create_freckle_descs(repos)
@@ -234,7 +233,7 @@ def assemble_freckle_run(*args, **kwargs):
 
     if (repos):
         click.echo("\n# starting ansible run(s)...")
-        temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format)
+        temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass)
         result.append(temp)
         click.echo("")
     return result
