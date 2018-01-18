@@ -5,8 +5,9 @@ History
 0.4.6
 -----
 
-* added 'inaugurate' and 'frankentree' scripts to freckles package
+* blueprint feature, freckelize can now use templates and doesn't need pre-existing data
 * improvements to `freckelize`, can take extra variables via commandline now
+* added 'inaugurate' and 'frankentree' scripts to freckles package
 * added 'frkl' abbreviation, points to the 'freckles-io' github account
 
 0.4.5 (2017-12-07)
