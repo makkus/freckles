@@ -4,13 +4,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 import collections
+from cookiecutter.main import cookiecutter
 import logging
 
 import click
+import tempfile
 import os
 import pprint
 import sys
 import yaml
+from os import listdir
+from os.path import isdir, join
 
 from frkl import frkl
 from nsbl import tasks as nsbl_tasks
@@ -37,6 +41,7 @@ def create_freckle_descs(repos, config=None):
     for temp_url, metadata in repos.items():
 
         target = metadata["target_folder"]
+        source_delete = False
 
         if target == DEFAULT_FRECKLE_TARGET_MARKER or target.startswith("~") or target.startswith("/home"):
             target_become = False
@@ -55,7 +60,26 @@ def create_freckle_descs(repos, config=None):
             if target == DEFAULT_FRECKLE_TARGET_MARKER:
                 raise Exception("No target directory specified when using blueprint.")
 
-            url = match
+            cookiecutter_file = os.path.join(match, "cookiecutter.json")
+            if os.path.exists(cookiecutter_file):
+
+                click.secho("\nFound interactive blueprint, please enter approriate values below:\n", bold=True)
+
+                temp_path = tempfile.mkdtemp(prefix='frkl.')
+                cookiecutter(match, output_dir=temp_path)
+
+                subdirs = [os.path.join(temp_path, f) for f in listdir(temp_path) if isdir(join(temp_path, f))]
+
+                if len(subdirs) != 1:
+                    raise Exception("More than one directories created by interactive template '{}'. Can't deal with that.".format(match))
+
+                url = subdirs[0]
+                source_delete = True
+
+            else:
+
+                url = match
+
         else:
             url = temp_url
 
@@ -66,6 +90,7 @@ def create_freckle_descs(repos, config=None):
             repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
             repo_desc["checkout_become"] = target_become
             repo_desc["local_name"] = os.path.basename(repo_desc["remote_url"])
+            repo_desc["source_delete"] = source_delete
             if target == DEFAULT_FRECKLE_TARGET_MARKER:
                 repo_desc["checkout_skip"] = True
                 repo_desc["local_parent"] = os.path.dirname(repo_desc["remote_url"])
