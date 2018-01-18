@@ -1,5 +1,4 @@
 ---
-# include makkus.dotfiles role
 - name: "[finding all requirments files]"
   set_fact:
     all_requirements_files: "{{ freckle_vars_raw.files | file_list_filter('.*requirements.*txt$') | relative_path_filter(freckle_path) }}"
@@ -9,7 +8,7 @@
     name: "makkus.python-dev"
     tasks_from: python-dev-item.yml
   vars:
-    # pkg_mgr: "{{ freckles_user_vars.get('pkg_mgr', 'auto') }}"
+    pkg_mgr: "{{ freckle_vars.pkg_mgr | default('auto') }}"
     python_dev_setup_command: "{{ freckle_vars.get('setup_command', 'install') }}"
     python_dev_setuptools_command: "{{ freckle_vars.get('setuptools_command', 'install') }}"
     python_dev_requirements_files: "{{ freckle_vars.get('requirements_files', all_requirements_files) }}"

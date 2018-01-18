@@ -1,6 +1,5 @@
 - python-dev:
    python_version: 2.7
-
    setup_command: "develop"
    requirements_files:
       - requirements_dev.txt
@@ -19,6 +18,3 @@
 - vagrant-dev:
    providers:
      - virtualbox
-
-
-
