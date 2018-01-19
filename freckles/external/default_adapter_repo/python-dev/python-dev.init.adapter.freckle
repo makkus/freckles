@@ -1,8 +1,0 @@
----
-# include makkus.dotfiles role
-- name: "[Starting python-dev setup]"
-  include_role:
-    name: "freckles-io.python-dev"
-    tasks_from: python-prepare
-  # vars:
-  #   pkg_mgr: "{{ freckles_user_vars.pkg_mgr | default('auto') }}"
