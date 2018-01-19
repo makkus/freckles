@@ -412,7 +412,7 @@ def download_extra_repos(ctx, param, value):
                         # {'install-pkg-mgrs': {   #
                         # 'pkg_mgr': 'auto',
                         # 'pkg_mgrs': ['homebrew']}},
-                      {'makkus.freckles-config': {
+                      {'freckles-io.freckles-config': {
                           'freckles_extra_repos': repos,
                           'freckles_config_update_repos': True
                       }
@@ -433,7 +433,7 @@ def execute_run_box_basics(output="default"):
         return {"return_code": -1}
 
     task_config = [{'tasks':
-                    ['makkus.box-basics']
+                    ['freckles-io.box-basics']
     }]
 
     result = create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=True, run_box_basics=False)
@@ -557,10 +557,12 @@ def get_adapters_from_repo(adapter_repo):
         dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
 
         for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
+
             adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
             adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
-            profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
+            # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
+            profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
 
             result[profile_name] = adapter_folder
 
@@ -624,7 +626,7 @@ def find_adapter_files(extension, valid_profiles=None, config=None):
         if valid_profiles and profile_name not in valid_profiles:
             continue
 
-        profile_child_file = os.path.join(profile_path, ".{}.{}".format(profile_name, extension))
+        profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
 
         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
             continue
@@ -645,6 +647,7 @@ def get_all_adapters_in_repos(repos):
 
 
 def find_adapter_files_callback(extensions, valid_profiles=None):
+
     if isinstance(extensions, string_types):
         extensions = [extensions]
 
@@ -657,12 +660,12 @@ def find_adapter_files_callback(extensions, valid_profiles=None):
     def copy_callback(ansible_environment_root):
 
         for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks",
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
                                        "init-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
         for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "makkus.freckles", "tasks",
+            target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
                                        "items-{}.yml".format(name))
             shutil.copyfile(path, target_path)
 
