@@ -1,7 +1,0 @@
-#! /usr/bin/env frecklecute
-doc:
-  help: updates freckles itself
-tasks:
-  - update-freckles:
-      install_method: auto
-      freckles_version: latest
