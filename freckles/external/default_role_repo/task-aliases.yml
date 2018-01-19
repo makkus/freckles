@@ -69,9 +69,9 @@ tasks:
       meta:
         task-type: ansible-role
         task_desc: updating freckles
-        task-name: makkus.install-freckles
+        task-name: freckles-io.install-freckles
         task-roles:
-          - makkus.install-conda
+          - freckles-io.install-conda
       vars:
         update: true
         install_method: auto
@@ -79,9 +79,9 @@ tasks:
       meta:
         task-type: ansible-role
         task_desc: updating freckles
-        task-name: makkus.install-freckles
+        task-name: freckles-io.install-freckles
         task-roles:
-          - makkus.install-conda
+          - freckles-io.install-conda
       vars:
         update: false
         install_method: auto
@@ -89,17 +89,12 @@ tasks:
         meta:
           task-type: ansible-role
           task-desc: installing 'nix' package manager
-          task-name: makkus.install-nix
+          task-name: freckles-io.install-nix
   - install-conda:
         meta:
           task-type: ansible-role
           task-desc: installing 'conda' package manager
-          task-name: makkus.install-conda
-  - install-vagrant:
-        meta:
-          task-type: ansible-role
-          task-desc: installing Vagrant
-          task-name: makkus.install-vagrant
+          task-name: freckles-io.install-conda
   - install-homebrew:
         meta:
           task-type: ansible-role
@@ -122,17 +117,17 @@ tasks:
       meta:
         task-type: ansible-role
         task-desc: installing vagrant
-        task-name: makkus.install-vagrant
+        task-name: freckles-io.install-vagrant
         task-roles:
-          - makkus.install-vagrant
+          - freckles-io.install-vagrant
         become: yes
   - install-virtualbox:
       meta:
         task-type: ansible-role
         task-desc: installing virtualbox
-        task-name: makkus.virtualbox
+        task-name: freckles-io.install-virtualbox
         task-roles:
-          - makkus.virtualbox
+          - freckles-io.install-virtualbox
         become: yes
   - yum:
       meta:
@@ -141,36 +136,35 @@ tasks:
       meta:
         default-key: pkg_mgrs
         task-desc: installing package managers
-        task-name: makkus.install-pkg-mgrs
+        task-name: freckles-io.install-pkg-mgrs
         task-roles:
-           - makkus.install-nix
-           - makkus.install-conda
-           - makkus.install-vagrant
+           - freckles-io.install-nix
+           - freckles-io.install-conda
+           - freckles-io.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - install-packages:
       meta:
         default-key: packages
         task-desc: installing packages
-        task-name: makkus.install-packages
+        task-name: freckles-io.install-packages
         task-roles:
-           - makkus.install-pkg-mgrs
-           - makkus.install-nix
-           - makkus.install-conda
-           - makkus.install-vagrant
+           - freckles-io.install-pkg-mgrs
+           - freckles-io.install-nix
+           - freckles-io.install-conda
+           - freckles-io.install-vagrant
            - geerlingguy.homebrew
            - elliotweiser.osx-command-line-tools
   - freckles_checkout:
       meta:
         task-desc: checking out freckle(s)
-        task-name: makkus.freckles
+        task-name: freckles-io.freckelize
         task-roles:
-          - makkus.box-basics
-          - makkus.freckles
-          - makkus.install-pkg-mgrs
-          - makkus.install-packages
-          - makkus.install-nix
-          - makkus.install-conda
+          - freckles-io.box-basics
+          - freckles-io.install-pkg-mgrs
+          - freckles-io.install-packages
+          - freckles-io.install-nix
+          - freckles-io.install-conda
           - geerlingguy.homebrew
           - elliotweiser.osx-command-line-tools
       vars:
@@ -179,19 +173,19 @@ tasks:
   - freckles:
       meta:
         task-desc: starting to process freckle(s)
-        task-name: makkus.freckles
+        task-name: freckles-io.freckelize
         task-roles:
-           - makkus.box-basics
-           - makkus.freckles-config
-           - makkus.install-pkg-mgrs
-           - makkus.install-packages
-           - makkus.install-nix
-           - makkus.install-conda
-           - makkus.install-vagrant
-           - makkus.dotfiles
-           - makkus.python-dev
+           - freckles-io.box-basics
+           - freckles-io.freckles-config
+           - freckles-io.install-pkg-mgrs
+           - freckles-io.install-packages
+           - freckles-io.install-nix
+           - freckles-io.install-conda
+           - freckles-io.install-vagrant
+           - freckles-io.dotfiles
+           - freckles-io.python-dev
            - geerlingguy.homebrew
-           - makkus.virtualbox
+           - freckles-io.install-virtualbox
            - elliotweiser.osx-command-line-tools
       vars:
         checkout_phase: false
