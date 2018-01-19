@@ -1,0 +1,29 @@
+- name: "[calculate task_lists]"
+  set_fact:
+    freckle_task_lists: '{{ freckles_metadata | create_result_list_filter("task_lists", {"child_marker": "task_lists", "default_leaf": "task_list", "default_leaf_key": "name", "key_move_map": {"*": "vars"}}) }}'
+
+- name: "[check whether .tasks.freckle file exists]"
+  stat:
+    path: "{{ freckle_path }}/.tasks.freckle"
+  register: default_tasks_file
+
+- name: "[set default task list]"
+  set_fact:
+     default_task_lists: [{'task_list': {'name': '.tasks.freckle'}}]
+  when: default_tasks_file.stat.exists
+
+- name: "[set default task list]"
+  set_fact:
+     default_task_lists: ""
+  when: not default_tasks_file.stat.exists
+
+- name: "[check whether task list is set, otherwise use '.tasks.freckle' file]"
+  set_fact:
+    task_lists: "{{ freckle_task_lists | first_valid_default_list_filter(default_task_lists, []) }}"
+
+- name: including tasks
+  include_tasks: "{{ freckle_path }}/{{ task_file['task_list']['name'] }}"
+  with_items:
+    - "{{ task_lists }}"
+  loop_control:
+    loop_var: task_file
