@@ -117,7 +117,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
                     profiles.append(profile_temp)
 
         sorted_profiles = get_adapter_profile_priorities(profiles)
-        click.echo("\n# no adapters specified, using repo-defaults:\n")
+        click.echo("\n# no adapters specified, using defaults from .freckle file:\n")
         for p in sorted_profiles:
             if p == "freckle":
                 continue
