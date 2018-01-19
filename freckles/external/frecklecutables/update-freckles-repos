@@ -2,5 +2,5 @@
 doc:
   help: updates the trusted repos configured in ~/.freckles/.freckle
 tasks:
-  - makkus.freckles-config:
+  - freckles-io.freckles-config:
       freckles_config_update_repos: true
