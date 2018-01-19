@@ -13,6 +13,3 @@
 [submodule "freckles/external/default_adapter_repo"]
 	path = freckles/external/default_adapter_repo
 	url = https://github.com/freckles-io/adapters.git
-[submodule "freckles/external/frecklecutables"]
-	path = freckles/external/frecklecutables
-	url = https://github.com/freckles-io/frecklecutables.git
