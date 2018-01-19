@@ -1,54 +1,6 @@
-[submodule "freckles/external/default_role_repo/makkus.install-nix"]
-	path = freckles/external/default_role_repo/makkus.install-nix
-        url = https://github.com/makkus/install-nix.git
-[submodule "freckles/external/default_role_repo/makkus.install-conda"]
-	path = freckles/external/default_role_repo/makkus.install-conda
-        url = https://github.com/makkus/install-conda.git
-[submodule "freckles/external/default_role_repo/elliotweiser.osx-command-line-tools"]
-	path = freckles/external/default_role_repo/elliotweiser.osx-command-line-tools
-	url = https://github.com/makkus/ansible-osx-command-line-tools.git
-[submodule "freckles/external/default_role_repo/geerlingguy.homebrew"]
-	path = freckles/external/default_role_repo/geerlingguy.homebrew
-	url = https://github.com/makkus/ansible-role-homebrew.git
-[submodule "freckles/external/default_role_repo/makkus.freckles"]
-	path = freckles/external/default_role_repo/makkus.freckles
-        url = https://github.com/makkus/freckles_ansible.git
-[submodule "freckles/external/default_role_repo/makkus.install-pkg-mgrs"]
-	path = freckles/external/default_role_repo/makkus.install-pkg-mgrs
-	url = https://github.com/makkus/install-pkg-mgrs.git
-[submodule "freckles/external/default_role_repo/makkus.box-basics"]
-	path = freckles/external/default_role_repo/makkus.box-basics
-	url = https://github.com/makkus/box-basics.git
-[submodule "freckles/external/default_role_repo/makkus.install-vagrant"]
-	path = freckles/external/default_role_repo/makkus.install-vagrant
-	url = https://github.com/makkus/install-vagrant.git
 [submodule "freckles/external/freckles_extra_plugins"]
 	path = freckles/external/freckles_extra_plugins
 	url = https://github.com/makkus/freckles_extra_plugins.git
-[submodule "freckles/external/default_role_repo/ansiblebit.oracle-java"]
-	path = freckles/external/default_role_repo/ansiblebit.oracle-java
-	url = https://github.com/makkus/oracle-java.git
-[submodule "freckles/external/default_role_repo/makkus.install-freckles"]
-	path = freckles/external/default_role_repo/makkus.install-freckles
-	url = https://github.com/makkus/install-freckles.git
-[submodule "freckles/external/default_role_repo/makkus.install-packages"]
-	path = freckles/external/default_role_repo/makkus.install-packages
-	url = https://github.com/makkus/install-packages.git
-[submodule "freckles/external/default_role_repo/makkus.dotfiles"]
-	path = freckles/external/default_role_repo/makkus.dotfiles
-	url = https://github.com/makkus/dotfiles_ansible.git
-[submodule "freckles/external/default_role_repo/makkus.python-dev"]
-	path = freckles/external/default_role_repo/makkus.python-dev
-	url = https://github.com/makkus/python-dev.git
-[submodule "freckles/external/default_role_repo/makkus.freckles-config"]
-	path = freckles/external/default_role_repo/makkus.freckles-config
-	url = https://github.com/makkus/freckles-config_ansible.git
-[submodule "freckles/external/default_role_repo/makkus.basic-security"]
-	path = freckles/external/default_role_repo/makkus.basic-security
-	url = https://github.com/makkus/basic-security.git
-[submodule "freckles/external/default_role_repo/makkus.virtualbox"]
-	path = freckles/external/default_role_repo/makkus.virtualbox
-	url = https://github.com/makkus/virtualbox_ansible.git
 [submodule "freckles/external/scripts/inaugurate"]
 	path = freckles/external/scripts/inaugurate
 	url = https://github.com/makkus/inaugurate.git
