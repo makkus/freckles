@@ -7,3 +7,6 @@
 [submodule "freckles/external/scripts/frankentree"]
 	path = freckles/external/scripts/frankentree
 	url = https://github.com/makkus/frankentree.git
+[submodule "freckles/external/default_role_repo"]
+	path = freckles/external/default_role_repo
+	url = https://github.com/freckles-io/roles.git
