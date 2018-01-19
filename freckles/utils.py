@@ -607,7 +607,8 @@ def get_blueprints_from_repo(blueprint_repo):
             blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
             blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
 
-            profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+            #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+            profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
 
             result[profile_name] = blueprint_folder
 
