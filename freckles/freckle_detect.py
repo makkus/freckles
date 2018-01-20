@@ -85,7 +85,7 @@ def create_freckle_descs(repos, config=None):
 
         if os.path.exists(os.path.expanduser(url)):
             # assuming archive
-            if os.path.isfile():
+            if os.path.isfile(os.path.expanduser(url)):
                 # TODO: check whether host is local
                 repo_desc = {"type": "local_archive"}
                 repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
