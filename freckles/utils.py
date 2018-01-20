@@ -213,12 +213,15 @@ def render_dict(obj, replacement_dict):
         return obj
 
 
-def find_supported_profiles(config=None):
+def find_supported_profiles(config=None, additional_context_repos=[]):
 
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
 
-    trusted_repos = config.trusted_repos
+    trusted_repos = copy.copy(config.trusted_repos)
+    if additional_context_repos:
+        trusted_repos.extend(additional_context_repos)
+
     repos = nsbl_tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
     result = {}
@@ -534,8 +537,8 @@ def expand_repos(repos):
     return result
 
 
-def find_supported_profile_names(config=None):
-    return sorted(list(set(find_supported_profiles(config).keys())))
+def find_supported_profile_names(config=None, additional_context_repos=[]):
+    return sorted(list(set(find_supported_profiles(config, additional_context_repos).keys())))
 
 
 ADAPTER_CACHE = {}
@@ -617,8 +620,9 @@ def get_blueprints_from_repo(blueprint_repo):
     return result
 
 
-def find_adapter_files(extension, valid_profiles=None, config=None):
-    profiles = find_supported_profiles(config)
+def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
+
+    profiles = find_supported_profiles(config, additional_context_repos)
 
     task_files_to_copy = {}
 
@@ -647,16 +651,24 @@ def get_all_adapters_in_repos(repos):
     return result
 
 
-def find_adapter_files_callback(extensions, valid_profiles=None):
+def find_adapter_files_callback(extensions, valid_profiles=None, additional_context_repos=[], print_used_adapter=True):
 
     if isinstance(extensions, string_types):
         extensions = [extensions]
 
     task_files_to_copy = {}
+    print_cache = {}
     for extension in extensions:
-        files = find_adapter_files(extension, valid_profiles)
+        files = find_adapter_files(extension, valid_profiles, additional_context_repos=additional_context_repos)
+
         for key, value in files.items():
+            print_cache[key] = value
             task_files_to_copy.setdefault(extension, {})[key] = value
+
+    if valid_profiles and print_used_adapter:
+        for p in valid_profiles:
+            if p in print_cache.keys():
+                click.echo("  - {}: {}".format(p, os.path.dirname(print_cache[p])))
 
     def copy_callback(ansible_environment_root):
 
@@ -673,12 +685,12 @@ def find_adapter_files_callback(extensions, valid_profiles=None):
     return copy_callback
 
 
-def get_adapter_dependency_roles(profiles):
+def get_adapter_dependency_roles(profiles, additional_context_repos=[]):
 
     if not profiles:
         return []
 
-    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
+    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
 
     all_deps = set()
     for profile_name, dep_file in dep_files.items():
@@ -691,12 +703,12 @@ def get_adapter_dependency_roles(profiles):
 
     return list(all_deps)
 
-def get_adapter_profile_priorities(profiles):
+def get_adapter_profile_priorities(profiles, additional_context_repos=[]):
 
     if not profiles:
         return []
 
-    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles)
+    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
 
     prios = []
     for profile_name, dep_file in dep_files.items():
@@ -726,9 +738,9 @@ def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_be
 
     # profiles = extract_all_used_profiles(freckle_repos)
 
-    callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles)
+    callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles, additional_context_repos=additional_repo_paths)
 
-    additional_roles = get_adapter_dependency_roles(profiles)
+    additional_roles = get_adapter_dependency_roles(profiles, additional_context_repos=additional_repo_paths)
 
     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
 

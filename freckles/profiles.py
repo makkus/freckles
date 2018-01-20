@@ -118,14 +118,11 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
                 if profile_temp not in profiles:
                     profiles.append(profile_temp)
 
-        sorted_profiles = get_adapter_profile_priorities(profiles)
+        sorted_profiles = get_adapter_profile_priorities(profiles, additional_context_repos=add_paths)
         click.echo("\n# no adapters specified, using defaults from .freckle file:\n")
-        for p in sorted_profiles:
-            if p == "freckle":
-                continue
-            click.echo("  - {}".format(p))
     else:
         sorted_profiles = profiles
+        click.echo("\n# using specified adapter(s):\n")
 
     # TODO: maybe sort profile order also when specified manually?
 
