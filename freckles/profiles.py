@@ -237,7 +237,7 @@ def assemble_freckle_run(*args, **kwargs):
             click.echo("")
         return result
     except (Exception) as e:
-        click.echo(e.message)
+        click.echo("\n{}\nExiting...".format(e.message))
         sys.exit(1)
 
 
