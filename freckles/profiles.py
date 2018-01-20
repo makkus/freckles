@@ -132,109 +132,114 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
 def assemble_freckle_run(*args, **kwargs):
 
-    result = []
-    no_run = kwargs.get("no_run")
+    try:
+        result = []
+        no_run = kwargs.get("no_run")
 
-    default_target = kwargs.get("target_folder", None)
-    if not default_target:
-        default_target = DEFAULT_FRECKLE_TARGET_MARKER
+        default_target = kwargs.get("target_folder", None)
+        if not default_target:
+            default_target = DEFAULT_FRECKLE_TARGET_MARKER
 
-    default_freckle_urls = list(kwargs.get("freckle", []))
-    default_output_format = kwargs.get("output", "default")
+        default_freckle_urls = list(kwargs.get("freckle", []))
+        default_output_format = kwargs.get("output", "default")
 
-    default_include = list(kwargs.get("include", []))
-    default_exclude = list(kwargs.get("exclude", []))
+        default_include = list(kwargs.get("include", []))
+        default_exclude = list(kwargs.get("exclude", []))
 
-    default_ask_become_pass = kwargs.get("ask_become_pass", True)
+        default_ask_become_pass = kwargs.get("ask_become_pass", True)
 
-    default_extra_vars_raw = list(kwargs.get("extra_vars", []))
+        default_extra_vars_raw = list(kwargs.get("extra_vars", []))
 
-    default_extra_vars = {}
+        default_extra_vars = {}
 
-    for ev in default_extra_vars_raw:
-        dict_merge(default_extra_vars, ev, copy_dct=False)
+        for ev in default_extra_vars_raw:
+            dict_merge(default_extra_vars, ev, copy_dct=False)
 
-    extra_profile_vars = {}
-    repos = collections.OrderedDict()
-    profiles = []
+        extra_profile_vars = {}
+        repos = collections.OrderedDict()
+        profiles = []
 
-    metadata = {}
+        metadata = {}
 
-    if not args[0]:
-        # auto-detect
+        if not args[0]:
+            # auto-detect
 
-        metadata["__auto__"] = {}
+            metadata["__auto__"] = {}
 
-        fr = {
-            "target_folder": default_target,
-            "includes": default_include,
-            "excludes": default_exclude,
-            "password": default_ask_become_pass
-            }
-
-        for f in default_freckle_urls:
-            repos[f] = copy.deepcopy(fr)
-            repos[f]["profiles"] = ["__auto__"]
-
-        extra_profile_vars = default_extra_vars
-
-    else:
-
-        for p in args[0]:
-
-            pn = p["name"]
-
-            metadata[pn] = p["metadata"]
-
-            if pn in profiles:
-                raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
-            else:
-                profiles.append(pn)
-
-            pvars = p["vars"]
-            freckles = list(pvars.pop("freckle", []))
-            include = set(pvars.pop("include", []))
-            exclude = set(pvars.pop("exclude", []))
-            target = pvars.pop("target_folder", None)
-            ask_become_pass = pvars.pop("ask_become_pass", "auto")
-
-            if ask_become_pass == "auto" and default_ask_become_pass != "auto":
-                ask_become_pass = default_ask_become_pass
-
-            extra_profile_vars[pn] = copy.deepcopy(default_extra_vars.get(pn, {}))
-            if pvars:
-                for pk, pv in pvars.items():
-                    if pv != None:
-                        extra_profile_vars[pn][pk] = pv
-
-            all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
-            for freckle_url in all_freckles_for_this_profile:
-                if target:
-                    t = target
-                else:
-                    t = default_target
-
-                for i in default_include:
-                    if i not in include:
-                        include.add(i)
-                for e in default_exclude:
-                    if e not in exclude:
-                        exclude.add(e)
-                fr = {
-                    "target_folder": t,
-                    "includes": list(include),
-                    "excludes": list(exclude),
-                    "password": ask_become_pass
+            fr = {
+                "target_folder": default_target,
+                "includes": default_include,
+                "excludes": default_exclude,
+                "password": default_ask_become_pass
                 }
-                repos.setdefault(freckle_url, fr)
-                repos[freckle_url].setdefault("profiles", []).append(pn)
 
-    if (repos):
-        click.echo("\n# starting ansible run(s)...")
-        temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass)
-        result.append(temp)
-        click.echo("")
-    return result
+            for f in default_freckle_urls:
+                repos[f] = copy.deepcopy(fr)
+                repos[f]["profiles"] = ["__auto__"]
+
+            extra_profile_vars = default_extra_vars
+
+        else:
+
+            for p in args[0]:
+
+                pn = p["name"]
+
+                metadata[pn] = p["metadata"]
+
+                if pn in profiles:
+                    raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
+                else:
+                    profiles.append(pn)
+
+                pvars = p["vars"]
+                freckles = list(pvars.pop("freckle", []))
+                include = set(pvars.pop("include", []))
+                exclude = set(pvars.pop("exclude", []))
+                target = pvars.pop("target_folder", None)
+                ask_become_pass = pvars.pop("ask_become_pass", "auto")
+
+                if ask_become_pass == "auto" and default_ask_become_pass != "auto":
+                    ask_become_pass = default_ask_become_pass
+
+                extra_profile_vars[pn] = copy.deepcopy(default_extra_vars.get(pn, {}))
+                if pvars:
+                    for pk, pv in pvars.items():
+                        if pv != None:
+                            extra_profile_vars[pn][pk] = pv
+
+                all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
+                for freckle_url in all_freckles_for_this_profile:
+                    if target:
+                        t = target
+                    else:
+                        t = default_target
+
+                    for i in default_include:
+                        if i not in include:
+                            include.add(i)
+                    for e in default_exclude:
+                        if e not in exclude:
+                            exclude.add(e)
+                    fr = {
+                        "target_folder": t,
+                        "includes": list(include),
+                        "excludes": list(exclude),
+                        "password": ask_become_pass
+                    }
+                    repos.setdefault(freckle_url, fr)
+                    repos[freckle_url].setdefault("profiles", []).append(pn)
+
+        if (repos):
+            click.echo("\n# starting ansible run(s)...")
+            temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass)
+            result.append(temp)
+            click.echo("")
+        return result
+    except (Exception) as e:
+        click.echo(e.msg)
+        sys.exit(1)
+
 
 
 class ProfileRepo(object):
