@@ -722,7 +722,7 @@ def extract_all_used_profiles(freckle_repos):
 
 
 def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
-                        output_format="default"):
+                        output_format="default", additional_repo_paths=[]):
 
     # profiles = extract_all_used_profiles(freckle_repos)
 
@@ -733,7 +733,7 @@ def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_be
     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
 
     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True)
+                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths)
 
 
 def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default"):
@@ -754,7 +754,7 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",
-                               pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False):
+                               pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False, additional_repo_paths=[]):
 
     if run_box_basics:
         result = execute_run_box_basics(output_format)
@@ -764,6 +764,10 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     if not config:
         config = DEFAULT_FRECKLES_CONFIG
+
+    if additional_repo_paths:
+        if config.use_freckle_as_repo:
+            config.add_repos(additional_repo_paths)
 
     config_trusted_repos = config.trusted_repos
     local_role_repos = nsbl_tasks.get_local_repos(config_trusted_repos, "roles", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)

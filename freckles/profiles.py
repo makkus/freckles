@@ -104,10 +104,12 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
         click.echo("Checkout phase failed, not continuing...")
         sys.exit(1)
 
+    all_repo_metadata = json.load(open(repo_metadata_file_abs))
+    add_paths = list(all_repo_metadata.keys())
+
     if not profiles:
 
         profiles = []
-        all_repo_metadata = json.load(open(repo_metadata_file_abs))
 
         for repo, metadata in all_repo_metadata.items():
 
@@ -128,11 +130,10 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     # TODO: maybe sort profile order also when specified manually?
 
     return create_freckles_run(sorted_profiles, repo_metadata_file_abs, extra_profile_vars, ask_become_pass=ask_become_pass,
-                               output_format=output_format, no_run=no_run)
+                               output_format=output_format, no_run=no_run, additional_repo_paths=add_paths)
 
 
 def assemble_freckle_run(*args, **kwargs):
-
 
     result = []
     no_run = kwargs.get("no_run")
