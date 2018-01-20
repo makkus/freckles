@@ -84,20 +84,31 @@ def create_freckle_descs(repos, config=None):
             url = temp_url
 
         if os.path.exists(os.path.expanduser(url)):
-
-            # TODO: check whether host is local
-            repo_desc = {"type": "local"}
-            repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
-            repo_desc["checkout_become"] = target_become
-            repo_desc["local_name"] = os.path.basename(repo_desc["remote_url"])
-            repo_desc["source_delete"] = source_delete
-            if target == DEFAULT_FRECKLE_TARGET_MARKER:
-                repo_desc["checkout_skip"] = True
-                repo_desc["local_parent"] = os.path.dirname(repo_desc["remote_url"])
-                pass
-            else:
+            # assuming archive
+            if os.path.isfile:
+                # TODO: check whether host is local
+                repo_desc = {"type": "local_archive"}
+                repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
+                repo_desc["checkout_become"] = target_become
+                #repo_desc["local_name"] = os.path.basename(url).split('.')[0]
+                repo_desc["source_delete"] = False
+                if target == DEFAULT_FRECKLE_TARGET_MARKER:
+                    raise Exception("No target directory specified when using archive file.")
                 repo_desc["local_parent"] = target
                 repo_desc["checkout_skip"] = False
+            else:
+                # TODO: check whether host is local
+                repo_desc = {"type": "local"}
+                repo_desc["remote_url"] = os.path.abspath(os.path.expanduser(url))
+                repo_desc["checkout_become"] = target_become
+                repo_desc["local_name"] = os.path.basename(repo_desc["remote_url"])
+                repo_desc["source_delete"] = source_delete
+                if target == DEFAULT_FRECKLE_TARGET_MARKER:
+                    repo_desc["checkout_skip"] = True
+                    repo_desc["local_parent"] = os.path.dirname(repo_desc["remote_url"])
+                else:
+                    repo_desc["local_parent"] = target
+                    repo_desc["checkout_skip"] = False
 
         elif url.endswith(".git"):
 
@@ -111,5 +122,19 @@ def create_freckle_descs(repos, config=None):
             else:
                 repo_desc["local_parent"] = target
 
+        elif url.startswith("http://") or url.startswith("https://"):
+            # TODO: check whether host is local
+            repo_desc = {"type": "remote_archive"}
+            repo_desc["remote_url"] = url
+            repo_desc["checkout_become"] = target_become
+            #repo_desc["local_name"] = os.path.basename(url).split('.')[0]
+            repo_desc["source_delete"] = False
+            if target == DEFAULT_FRECKLE_TARGET_MARKER:
+                raise Exception("No target directory specified when using archive file.")
+            repo_desc["local_parent"] = target
+            repo_desc["checkout_skip"] = False
+
+        else:
+            raise Exception("freckle url format unknown, don't know how to handle that: {}".format(url))
 
         frkl.dict_merge(metadata, repo_desc, copy_dct=False)
