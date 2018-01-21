@@ -35,6 +35,9 @@ DEFAULT_FRECKLES_IO_BLUEPRINTS_REPO_URL = "https://github.com/freckles-io/bluepr
 ARK_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "ark")
 ARK_REPO_URL = "https://github.com/freckles-io/ark.git"
 
+TESTING_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "testing")
+TESTING_REPO_URL = "https://github.com/freckles-io/testing.git"
+
 EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__), "external", "freckles_extra_plugins"))
 # DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
 DEFAULT_IGNORE_STRINGS = []
@@ -66,18 +69,22 @@ DEFAULT_REPOS = {
              "frecklecutables": [(None, DEFAULT_USER_FRECKLECUTABLES_PATH)],
              "blueprints": [(None, DEFAULT_USER_BLUEPRINTS_PATH)]
     },
-    "freckles-io": {"roles": [(DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)],
-                  "adapters": [
-                      (DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL, DEFAULT_FRECKLES_IO_ADAPTERS_PATH),
-                      (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
-                  ],
-                  "frecklecutables": [
-                      (DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL, DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH)],
-                  "blueprints": [
-                      (DEFAULT_FRECKLES_IO_BLUEPRINTS_REPO_URL, DEFAULT_FRECKLES_IO_BLUEPRINTS_PATH),
-                      (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
-                  ],
-                  },
+    # "freckles-io": {"roles": [(DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)],
+                  # "adapters": [
+                      # (DEFAULT_FRECKLES_IO_ADAPTERS_REPO_URL, DEFAULT_FRECKLES_IO_ADAPTERS_PATH),
+                      # (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
+                  # ],
+                  # "frecklecutables": [
+                      # (DEFAULT_FRECKLES_IO_FRECKLECUTABLES_REPO_URL, DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH)],
+                  # "blueprints": [
+                      # (DEFAULT_FRECKLES_IO_BLUEPRINTS_REPO_URL, DEFAULT_FRECKLES_IO_BLUEPRINTS_PATH),
+                      # (DEFAULT_FRECKLES_IO_ROLES_REPO_URL, DEFAULT_FRECKLES_IO_ROLES_REPO_PATH)
+                  # ],
+                  # },
+    "testing": {"roles": [(TESTING_REPO_URL, TESTING_REPO_PATH)],
+            "adapters": [(None, TESTING_REPO_PATH)],
+            "frecklecutables": [(None, TESTING_REPO_PATH)]
+            },
     "ark": {"roles": [(ARK_REPO_URL, ARK_REPO_PATH)],
             "adapters": [(None, ARK_REPO_PATH)],
             "frecklecutables": [(None, ARK_REPO_PATH)]
