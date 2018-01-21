@@ -231,8 +231,8 @@ def read_module(module_name):
 
 @cli.command("list-roles")
 @click.option('--filter', '-f', help="filters module names containing this string", required=False, default=None)
-@click.option('--readme', '-r', help="print readme of matching modules", required=False, default=False, is_flag=True)
-@click.option('--defaults', '-d', help="print defaults file of matching modules", required=False, default=False, is_flag=True)
+@click.option('--readme', '-r', help="print readme of matching roles", required=False, default=False, is_flag=True)
+@click.option('--defaults', '-d', help="print defaults file of matching roles", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_roles_cli(ctx, filter, readme, defaults):
 
@@ -245,7 +245,7 @@ def list_roles_cli(ctx, filter, readme, defaults):
     click.echo("")
 
     for repo in repos:
-        for role, role_details in tasks.get_role_details_in_repo(repo).items():
+        for role, role_details in sorted(tasks.get_role_details_in_repo(repo).items()):
 
             if filter and filter not in role:
                 continue
@@ -280,6 +280,7 @@ def list_blueprints_cli(ctx, filter):
     click.echo("Available blueprints:")
     click.echo("")
 
+    blueprints = {}
     for repo in repos:
 
         blueprints = get_blueprints_from_repo(repo)
@@ -287,7 +288,10 @@ def list_blueprints_cli(ctx, filter):
             if filter and filter not in name:
                 continue
 
-            click.echo("{}: {}".format(name, path))
+            blueprints[name] = path
+
+    for name, path in sorted(blueprints.items()):
+        click.echo("{}: {}".format(name, path))
 
     click.echo("")
 
@@ -308,7 +312,7 @@ def list_adapters_cli(ctx, filter):
 
     adapter_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, adapters, config=config)
 
-    for adapter_name, adapter_file in adapter_files.items():
+    for adapter_name, adapter_file in sorted(adapter_files.items()):
 
         metadata = get_adapter_metadata(adapter_file)
         short_help = metadata.get("doc", {}).get("short_help", "n/a")
@@ -318,7 +322,8 @@ def list_adapters_cli(ctx, filter):
                 continue
 
         help_string = metadata.get("doc", {}).get("help", short_help)
-        click.echo("adapter name: {}\n  desc: {}\n  path: {}\n".format(adapter_name, short_help, adapter_file))
+        click.secho("{}".format(adapter_name), bold=True)
+        click.echo("  desc: {}\n  path: {}\n".format(short_help, adapter_file))
 
 
 @cli.command("adapter-help")
@@ -379,6 +384,9 @@ def list_aliases_cli(ctx, filter, details):
 
     task_descs = calculate_task_descs(None, role_repos, add_upper_case_versions=False)
 
+    desc = {}
+    aliases = {}
+
     for d in task_descs:
 
         meta = d.get(TASKS_META_KEY, {})
@@ -396,14 +404,22 @@ def list_aliases_cli(ctx, filter, details):
         if filter and not filter in name:
             continue
 
-        if not details:
-            click.echo("{}: {} '{}'".format(name, task_type, task_name))
-        else:
+        desc[name] = {"task_type": task_type, "task_name": task_name}
+        if details:
             # vars = d.get(VARS_KEY)
-
-            click.echo("\nalias '{}' (type: {}):".format(name, task_type))
+            # click.echo("\nalias '{}' (type: {}):".format(name, task_type))
             yaml_string = yaml.safe_dump(d, default_flow_style=False, allow_unicode=True, encoding="utf-8")
-            click.echo("   " + yaml_string.replace("\n", "\n    "))
+            desc[name]["details"] = yaml_string
+            #click.echo("   " + yaml_string
+
+    click.echo("")
+    click.echo("Task overrides:\n")
+    for name, d in sorted(desc.items()):
+        click.secho("{}".format(name), bold=True, nl=False)
+        click.secho(": {} {}".format(d["task_type"], d["task_name"]), bold=False)
+        if details:
+            click.echo("   " + d["details"].replace("\n", "\n    "))
+    click.echo("")
 
 if __name__ == '__main__':
     cli()
