@@ -83,7 +83,8 @@ DEFAULT_REPOS = {
                   # },
     "testing": {"roles": [(TESTING_REPO_URL, TESTING_REPO_PATH)],
             "adapters": [(None, TESTING_REPO_PATH)],
-            "frecklecutables": [(None, TESTING_REPO_PATH)]
+            "frecklecutables": [(None, TESTING_REPO_PATH)],
+            "blueprints": [(None, TESTING_REPO_PATH)]
             },
     "ark": {"roles": [(ARK_REPO_URL, ARK_REPO_PATH)],
             "adapters": [(None, ARK_REPO_PATH)],
