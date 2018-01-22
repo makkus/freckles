@@ -42,14 +42,14 @@ Currently, only very few types/profiles of data are 'officially' supported by ``
 
 A *freckelize* adapter consists of two to three files, which need to located in the same folder:
 
-``adapter-name.freckle-adapter`` (required)
+``adapter-name.adapter.freckle`` (required)
     contains metadata about the adapter. The file is yaml-formated and contains 3 main sections: ``doc`` (help text), ``role-dependencies`` (Ansible roles that this adapter needs as dependencies), and ``args`` (optional, arguments to enable additional user input client-side)
-``adapter-name.freckle-init``    (optional)
+``adapter-name.init.freckle``    (optional)
     a list of tasks (in the format of an Ansible tasks file, or playbook) to execute once per run, per adapter.
-``adapter-name.freckle-tasks``   (optional)
+``adapter-name.tasks.freckle``   (optional)
     a list of tasks (in the format of an Ansible tasks file, or playbook) to execute once for every single *freckle* in a run.
 
-Only one of those latter two needs to exist (which one doesn't matter), but it's also possible for both of those to be there. ``freckle-init`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way -- and only once -- for every *freckle* that is processed), ``freckle-tasks`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*), using the *freckle* specific metadata.
+Only one of those latter two needs to exist (which one doesn't matter), but it's also possible for both of those to be there. ``init.freckle`` contains tasks that are 'adapter-specific' (tasks that need to be done the same way -- and only once -- for every *freckle* that is processed), ``tasks.freckle`` contains tasks that are 'freckle-specific' (tasks that need to be done for every *freckle*), using the *freckle* specific metadata.
 
 As an example for a reasonably complex *adapter*, check out the source-code of the ``python-dev`` one on github: https://github.com/makkus/freckles/tree/master/freckles/external/default_adapter_repo/python-dev
 
@@ -64,7 +64,7 @@ By default ``freckelize`` comes with a (small) set of 'officially supported' ada
 
 This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where ``freckelize`` will find it in subsequent runs.
 
-``freckelize`` will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.freckle-adapter``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.freckle-adapter``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``freckle-init`` or ``freckle-tasks`` (see above).
+``freckelize`` will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.adapter.freckle``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.adapter.freckle``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``.init.freckle`` or ``tasks.freckle`` (see above).
 
 Available adapters
 ==================
