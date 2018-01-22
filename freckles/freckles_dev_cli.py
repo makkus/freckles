@@ -343,23 +343,23 @@ def output_adapter_help(adapter_name, adapter_file, details=False, help=False):
         role_deps = metadata.get("role-dependencies", [])
         av_vars = metadata.get("available_vars", False)
 
-    click.secho("  role dependencies", bold=True, nl=False)
-    if role_deps:
-        click.echo(":")
-        for r in role_deps:
-            click.echo("    - {}".format(r))
-    else:
-        click.echo(": none")
-
-    if av_vars:
-        click.secho("  available vars", nl=False, bold=True)
-        if av_vars:
+        click.secho("  role dependencies", bold=True, nl=False)
+        if role_deps:
             click.echo(":")
-            for var_name, md in av_vars.items():
-                click.secho("    {}".format(var_name), nl=False, bold=True)
-                click.echo(": {}".format(md.get("help", "n/a")))
+            for r in role_deps:
+                click.echo("    - {}".format(r))
         else:
             click.echo(": none")
+
+        if av_vars:
+            click.secho("  available vars", nl=False, bold=True)
+            if av_vars:
+                click.echo(":")
+                for var_name, md in av_vars.items():
+                    click.secho("    {}".format(var_name), nl=False, bold=True)
+                    click.echo(": {}".format(md.get("help", "n/a")))
+            else:
+                click.echo(": none")
 
     if help:
         help_string = metadata.get("doc", {}).get("help", False)
