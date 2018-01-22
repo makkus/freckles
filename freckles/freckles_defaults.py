@@ -88,7 +88,8 @@ DEFAULT_REPOS = {
             },
     "ark": {"roles": [(ARK_REPO_URL, ARK_REPO_PATH)],
             "adapters": [(None, ARK_REPO_PATH)],
-            "frecklecutables": [(None, ARK_REPO_PATH)]
+            "frecklecutables": [(None, ARK_REPO_PATH)],
+            "blueprints": [(None, ARK_REPO_PATH)]
             }
 }
 
