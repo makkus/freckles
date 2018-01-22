@@ -297,8 +297,9 @@ def list_blueprints_cli(ctx, filter):
 
 @cli.command("list-adapters")
 @click.option('--filter', '-f', help="filters adapters names containing this string", required=False, default=None)
+@click.option('--details', '-d', help="print details about matching adapters", required=False, default=False, is_flag=True)
 @click.pass_context
-def list_adapters_cli(ctx, filter):
+def list_adapters_cli(ctx, filter, details):
 
     config = ctx.obj["config"]
 
@@ -314,6 +315,7 @@ def list_adapters_cli(ctx, filter):
 
     for adapter_name, adapter_file in sorted(adapter_files.items()):
 
+        # reading metadata twice, not ideal
         metadata = get_adapter_metadata(adapter_file)
         short_help = metadata.get("doc", {}).get("short_help", "n/a")
 
@@ -321,12 +323,55 @@ def list_adapters_cli(ctx, filter):
             if filter not in adapter_name and filter not in short_help:
                 continue
 
-        help_string = metadata.get("doc", {}).get("help", short_help)
-        click.secho("{}".format(adapter_name), bold=True)
-        click.echo("  desc: {}\n  path: {}\n".format(short_help, adapter_file))
+        output_adapter_help(adapter_name, adapter_file, details=details)
+
+    click.echo("")
+
+def output_adapter_help(adapter_name, adapter_file, details=False, help=False):
+
+    metadata = get_adapter_metadata(adapter_file)
+    short_help = metadata.get("doc", {}).get("short_help", "n/a")
+
+    help_string = metadata.get("doc", {}).get("help", short_help)
+    click.secho("\n{}\n{}\n".format(adapter_name, "-" * len(adapter_name)), bold=True)
+    click.secho("  desc", nl=False, bold=True)
+    click.echo(": {}".format(short_help))
+    click.secho("  path", nl=False, bold=True)
+    click.echo(": {}".format(adapter_file))
+
+    if details:
+        role_deps = metadata.get("role-dependencies", [])
+        av_vars = metadata.get("available_vars", False)
+
+    click.secho("  role dependencies", bold=True, nl=False)
+    if role_deps:
+        click.echo(":")
+        for r in role_deps:
+            click.echo("    - {}".format(r))
+    else:
+        click.echo(": none")
+
+    if av_vars:
+        click.secho("  available vars", nl=False, bold=True)
+        if av_vars:
+            click.echo(":")
+            for var_name, md in av_vars.items():
+                click.secho("    {}".format(var_name), nl=False, bold=True)
+                click.echo(": {}".format(md.get("help", "n/a")))
+        else:
+            click.echo(": none")
+
+    if help:
+        help_string = metadata.get("doc", {}).get("help", False)
+        if help_string:
+            click.echo("")
+            click.secho("  documentation", bold=True)
+            click.echo("")
+            indented = reindent(help_string, 4)
+            click.echo(indented)
 
 
-@cli.command("adapter-help")
+@cli.command("adapter-doc")
 @click.argument("adapter-name", nargs=1)
 @click.pass_context
 def print_adapter_help(ctx, adapter_name):
@@ -344,23 +389,10 @@ def print_adapter_help(ctx, adapter_name):
         click.echo("\nNo adapter with the name '{}' found.\n".format(adapter_name))
         sys.exit(0)
 
-    metadata = get_adapter_metadata(adapter_file)
-    short_help = metadata.get("doc", {}).get("short_help", "n/a")
-    help_string = metadata.get("doc", {}).get("help", False)
-    available_vars = metadata.get("available_vars", False)
+    output_adapter_help(adapter_name, adapter_file, details=True, help=True)
 
-    click.echo("\nadapter name: {}\n\n  desc: {}\n  path: {}\n".format(adapter_name, short_help, adapter_file))
+    click.echo("")
 
-    if available_vars:
-        click.echo("available vars:\n")
-        for var_name, md in available_vars.items():
-            click.echo("  {}: {}".format(var_name, md.get("help", "n/a")))
-        click.echo("")
-
-    if help_string:
-        click.echo("documentation:\n")
-        indented = reindent(help_string, 2)
-        click.echo(indented)
 
 def get_adapter_metadata(adapter_file):
 
