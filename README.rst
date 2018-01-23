@@ -370,7 +370,7 @@ License
 Credits
 *******
 
-For *freckles* (and the libraries that developed because of it, nsbl_ and frkl_) I am relying on quite a few free libraries, frameworks, ansible-roles and more. Here's a list, I hope I did not forget anything. Let me know if I did.
+For *freckles* (and the libraries that developed because of it, nsbl_ and frkl_) I am relying on quite a few free libraries, frameworks, ansible-roles and more. Here's a list for the main dependency libraries, and the first couple of Ansible roles that were used. There are a lot more now, so please forgive me if yours is not included below:
 
 ansible_
     obviously the most important dependency, not much more to say apart from that without it *freckles* would not exist.
