@@ -104,12 +104,12 @@ Then run it like so:
 ``freckles``
 ============
 
----
+-------
 
 .. note:: This command didn't get as much attention as the other two (yet).
    So it might not work as documented here anymore, or might break in weird places.
 
----
+-------
 
 The interface that brings ``freckelize`` and ``frecklecute`` together. It allows you to describe several runs of ``freckelize`` and/or ``frecklecute`` in a yaml file, which it will execute (after optionally downloading that file from a remote host).
 
