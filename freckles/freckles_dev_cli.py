@@ -547,11 +547,14 @@ def list_aliases_cli(ctx, filter, details):
             #click.echo("   " + yaml_string
 
     click.echo("")
-    click.echo("Task overrides:\n")
+    click.secho("task overrides", bold=True)
+    click.secho("==============", bold=True)
+    click.echo("")
     for name, d in sorted(desc.items()):
         click.secho("{}".format(name), bold=True, nl=False)
         click.secho(": {} {}".format(d["task_type"], d["task_name"]), bold=False)
         if details:
+            click.echo("")
             click.echo("   " + d["details"].replace("\n", "\n    "))
     click.echo("")
 
