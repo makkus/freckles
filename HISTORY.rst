@@ -2,6 +2,11 @@
 History
 =======
 
+0.5.0 (2018-01-23)
+------------------
+
+* actually, screw it. this is worth a new number further to the left
+
 0.4.6 (2018-01-23)
 ------------------
 
