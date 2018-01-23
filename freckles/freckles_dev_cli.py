@@ -269,16 +269,17 @@ def list_roles_cli(ctx, filter, readme, defaults):
 
 @cli.command("list-blueprints")
 @click.option('--filter', '-f', help="filters blueprints names containing this string", required=False, default=None)
+@click.option('--details', '-d', help="print details about matching blueprints", required=False, default=False, is_flag=True)
 @click.pass_context
-def list_blueprints_cli(ctx, filter):
+def list_blueprints_cli(ctx, filter, details):
 
     config = ctx.obj["config"]
 
     repos = tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
     click.echo("")
-    click.echo("Available blueprints:")
-    click.echo("")
+    click.secho("Available blueprints", bold=True)
+    click.secho("====================", bold=True)
 
     blueprints = {}
     for repo in repos:
@@ -290,7 +291,25 @@ def list_blueprints_cli(ctx, filter):
             blueprints[name] = path
 
     for name, path in sorted(blueprints.items()):
-        click.echo("{}: {}".format(name, path))
+
+        metadata = get_blueprint_metadata(os.path.join(path, "{}.blueprint.freckle".format(name)))
+
+        short_help = metadata.get("doc", {}).get("short_help", "n/a")
+        long_help = metadata.get("doc", {}).get("help", "n/a")
+
+        click.secho("\n{}\n{}\n".format(name, "-" * len(name)), bold=True)
+        click.secho("  desc", nl=False, bold=True)
+        click.echo(": {}".format(short_help))
+        click.secho("  path", nl=False, bold=True)
+        click.echo(": {}".format(path))
+
+        if details:
+            click.echo("")
+            click.secho("  documentation", bold=True)
+            click.echo("")
+            indented = reindent(long_help, 4)
+            click.echo(indented)
+
 
     click.echo("")
 
@@ -305,8 +324,8 @@ def list_adapters_cli(ctx, filter, details):
     repos = tasks.get_local_repos(config.trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
     click.echo("")
-    click.echo("Available adapters:")
-    click.echo("")
+    click.secho("Available adapters", bold=True)
+    click.secho("==================", bold=True)
 
     adapters = get_all_adapters_in_repos(repos)
 
@@ -402,6 +421,17 @@ def get_adapter_metadata(adapter_file):
             metadata = {}
 
     return metadata
+
+def get_blueprint_metadata(blueprint_file):
+
+    with open(blueprint_file, 'r') as f:
+        # metadata = yaml.safe_load(f)
+        metadata = ordered_load(f, yaml.SafeLoader)
+        if not metadata:
+            metadata = {}
+
+    return metadata
+
 
 
 @cli.command("list-aliases")
