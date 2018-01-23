@@ -43,7 +43,7 @@ def create_freckle_descs(repos, config=None):
         target = metadata["target_folder"]
         source_delete = False
 
-        if target != DEFAULT_FRECKLE_TARGET_MARKER or not target.startswith("~") or not target.startswith("/"):
+        if target != DEFAULT_FRECKLE_TARGET_MARKER and not target.startswith("~") and not target.startswith("/"):
             raise Exception("Relative path not supported for target option, please use an absolute one")
 
         if target == DEFAULT_FRECKLE_TARGET_MARKER or target.startswith("~") or target.startswith("/home"):
