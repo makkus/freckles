@@ -282,9 +282,8 @@ def list_blueprints_cli(ctx, filter):
 
     blueprints = {}
     for repo in repos:
-
-        blueprints = get_blueprints_from_repo(repo)
-        for name, path in blueprints.items():
+        blueprints_temp = get_blueprints_from_repo(repo)
+        for name, path in blueprints_temp.items():
             if filter and filter not in name:
                 continue
 
