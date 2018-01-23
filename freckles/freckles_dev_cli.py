@@ -506,7 +506,7 @@ def get_blueprint_metadata(blueprint_file):
 
 @cli.command("list-aliases")
 @click.option("--filter", "-f", help="filter aliases contains the provided string", required=False, default=None)
-@click.option('--details', '-r', help="print alias details", required=False, default=False, is_flag=True)
+@click.option('--details', '-d', help="print alias details", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_aliases_cli(ctx, filter, details):
     """
