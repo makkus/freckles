@@ -68,7 +68,10 @@ def output(python_object, format="raw", pager=False):
 @click.option("--use-repo", "-r", required=False, multiple=True, help="extra context repos to use")
 @click.pass_context
 def cli(ctx, version, use_repo):
-    """Console script for nsbl"""
+    """A helper script to make it easier to develop on and with freckles.
+
+    It contains a collection of tools to give developers and end-users quick access to context that is needed to develop and debug freckelize adapters and blueprints, as well as frecklecutables.
+    """
 
     if version:
         click.echo(VERSION)
@@ -84,7 +87,12 @@ def cli(ctx, version, use_repo):
 @click.option('--follow', '-f', help="follow the log file", is_flag=True, default=False)
 @click.pass_context
 def log_current(ctx, follow):
-    """Prints out the last runs ansible log (verbose)"""
+    """Prints out the last runs ansible log (verbose).
+
+    The normal output of any 'freckles' command is short-form. Which helps see what's going on. This is not helpful when there is an issue or during development of roles, adapters, blueprints or frecklecutables.
+
+    Instead of manually tailing that particular log-file, this commands lets you do that a tad quicker.
+    """
 
     last_run_folder = os.path.expanduser("~/.local/freckles/runs/current")
     last_run_log_folder = os.path.join(last_run_folder, "logs")
@@ -157,10 +165,14 @@ def get_all_modules(module_name, module_list):
 @click.option('--details', '-d', help="print details about matching modules", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_modules_cli(ctx, filter, details):
-    """Lists all ansible modules."""
+    """Lists all (default) ansible modules.
+
+    This is just a quick and dirty helper to get information about standard Ansible modules. Most likely you'll just want to use the Ansible documentation instead.
+    """
 
     module_list = []
     get_all_modules('ansible.modules', module_list)
+    click.echo("")
     for m in module_list:
 
         if filter and filter not in m:
@@ -171,14 +183,19 @@ def list_modules_cli(ctx, filter, details):
             module_metadata = read_module(m)
 
             if details:
-                click.echo("{}:".format(short_name))
+                # TODO: make that output nicer
+                click.secho("{}:".format(short_name), bold=True)
+                click.echo()
                 dets = pprint.pformat(module_metadata)
                 click.echo(dets)
             else:
-                click.echo("{}: {}".format(short_name, module_metadata["doc"]["short_description"]))
+                click.secho("{}".format(short_name), bold=True, nl=False)
+                click.echo(": {}".format(module_metadata["doc"]["short_description"]))
 
+            click.echo("")
         except (ImportError):
             click.echo("{}: {}".format(short_name, "n/a (probably because of missing python dependencies)"))
+
 
 def list_modules():
 
@@ -224,8 +241,14 @@ def read_module(module_name):
     doc_string = [x[1] for x in members if x[0] == "DOCUMENTATION"][0]
     examples_string = [x[1] for x in members if x[0] == "EXAMPLES"][0]
 
-    doc = yaml.safe_load(doc_string)
-    examples = yaml.safe_load(examples_string)
+    try:
+        doc = yaml.safe_load(doc_string)
+    except:
+        doc = "Error loading documentation."
+    try:
+        examples = yaml.safe_load(examples_string)
+    except:
+        examples = "Error loading examples."
 
     return {"doc": doc, "examples": examples}
 
@@ -233,15 +256,22 @@ def read_module(module_name):
 @click.option('--filter', '-f', help="filters module names containing this string", required=False, default=None)
 @click.option('--readme', '-r', help="print readme of matching roles", required=False, default=False, is_flag=True)
 @click.option('--defaults', '-d', help="print defaults file of matching roles", required=False, default=False, is_flag=True)
+@click.option('--meta', '-m', help="print meta details of matching roles", required=False, default=False, is_flag=True)
 @click.pass_context
-def list_roles_cli(ctx, filter, readme, defaults):
+def list_roles_cli(ctx, filter, readme, defaults, meta):
+    """
+    Lists all roles that are available in the current context (which means, in the default and extra repositories configured by the user in a particular run).
+
+    This command lists all roles in all repositories that are configure, it does not automatically tell you which one will be used if you have two roles with the same name. That depends on the order you specify repositories in a run (last repo wins).
+    """
 
     config = ctx.obj["config"]
 
     repos = tasks.get_local_repos(config.trusted_repos, "roles", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
     click.echo("")
-    click.echo("Available roles:")
+    click.secho("Available roles", bold=True)
+    click.secho("===============", bold=True)
     click.echo("")
 
     for repo in repos:
@@ -250,19 +280,50 @@ def list_roles_cli(ctx, filter, readme, defaults):
             if filter and filter not in role:
                 continue
 
+            click.secho("\n{}\n{}\n".format(role, "-" * len(role)), bold=True)
+
+            _path = role_details["path"]
+            _author = role_details["meta"].get("galaxy_info", {}).get("author", "n/a")
+            _desc = role_details["meta"].get("galaxy_info", {}).get("description", "n/a")
+            _role_repo = role_details["repo"]
+
+            click.secho("  desc", nl=False, bold=True)
+            click.echo(": {}".format(_desc))
+            click.secho("  path", nl=False, bold=True)
+            click.echo(": {}".format(_path))
+            click.secho("  repo", nl=False, bold=True)
+            click.echo(": {}".format(_role_repo))
+
+            click.secho("  author", nl=False, bold=True)
+            click.echo(": {}".format(_author))
+
             if readme:
-                click.echo(role_details["readme"])
-            else:
-                click.echo(role)
+                click.echo("")
+                click.secho("  readme", bold=True)
+                click.echo("")
+                indented = reindent(role_details["readme"], 4)
+                click.echo(indented)
 
             if defaults:
-                click.echo("Defaults:\n")
-                for key, value in role_details["defaults"].items():
-                    click.echo("file '{}':".format(key))
-                    yaml_string = yaml.dump(value, default_flow_style=False)
-                    click.echo("   " + yaml_string.replace("\n", "\n   "))
-                    click.echo("")
+                click.echo("")
+                click.secho("  defaults", bold=True)
+                click.echo("")
 
+                for key, value in role_details["defaults"].items():
+                    click.echo("    path: ", nl=False)
+                    click.secho(" {}".format(key), nl=True, bold=True)
+                    yaml_string = yaml.dump(value, default_flow_style=False)
+                    indented = reindent(yaml_string, 11)
+                    click.echo("")
+                    click.echo(indented)
+
+            if meta:
+                click.echo("")
+                click.secho("  meta", bold=True)
+                click.echo("")
+                yaml_string = yaml.dump(role_details["meta"], default_flow_style=False)
+                indented = reindent(yaml_string, 4)
+                click.echo(indented)
 
     click.echo("")
 
@@ -272,6 +333,9 @@ def list_roles_cli(ctx, filter, readme, defaults):
 @click.option('--details', '-d', help="print details about matching blueprints", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_blueprints_cli(ctx, filter, details):
+    """
+    Lists all blueprints that are available in the requested execution context.
+    """
 
     config = ctx.obj["config"]
 
@@ -318,6 +382,9 @@ def list_blueprints_cli(ctx, filter, details):
 @click.option('--details', '-d', help="print details about matching adapters", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_adapters_cli(ctx, filter, details):
+    """
+    Lists all freckelize adapters that are available in the requested execution context.
+    """
 
     config = ctx.obj["config"]
 
@@ -393,6 +460,9 @@ def output_adapter_help(adapter_name, adapter_file, details=False, help=False):
 @click.argument("adapter-name", nargs=1)
 @click.pass_context
 def print_adapter_help(ctx, adapter_name):
+    """
+    Prints detailed information about the specified freckelize adapter.
+    """
 
     config = ctx.obj["config"]
 
@@ -439,6 +509,9 @@ def get_blueprint_metadata(blueprint_file):
 @click.option('--details', '-r', help="print alias details", required=False, default=False, is_flag=True)
 @click.pass_context
 def list_aliases_cli(ctx, filter, details):
+    """
+    Lists aliases that are defined in the 'task-aliases.yml' files in the requested execution context.
+    """
 
     config = ctx.obj["config"]
     role_repos = tasks.get_local_repos(config.trusted_repos, "roles", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
