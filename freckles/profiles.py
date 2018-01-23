@@ -196,7 +196,7 @@ def assemble_freckle_run(*args, **kwargs):
                 freckles = list(pvars.pop("freckle", []))
                 include = set(pvars.pop("include", []))
                 exclude = set(pvars.pop("exclude", []))
-                target = pvars.pop("target_folder", None)
+                target = pvars.pop("target-folder", None)
                 ask_become_pass = pvars.pop("ask_become_pass", "auto")
 
                 if ask_become_pass == "auto" and default_ask_become_pass != "auto":
