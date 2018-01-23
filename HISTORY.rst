@@ -2,8 +2,8 @@
 History
 =======
 
-0.4.6
------
+0.4.6 (2018-01-23)
+------------------
 
 * blueprint feature, freckelize can now use templates and doesn't need pre-existing data
 * improvements to `freckelize`, can take extra variables via commandline now
