@@ -16,3 +16,6 @@
 [submodule "freckles/external/frecklecutables"]
 	path = freckles/external/frecklecutables
 	url = https://github.com/freckles-io/frecklecutables.git
+[submodule "freckles/external/blueprints"]
+	path = freckles/external/blueprints
+	url = https://github.com/freckles-io/blueprints.git
