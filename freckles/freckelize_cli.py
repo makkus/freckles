@@ -39,7 +39,7 @@ class FreckelizeCommand(click.MultiCommand):
         This class parses the folders in the paths provided by the config
         element for so-called 'freckle adapters'. A freckle adapter is a
         collection of files that describe commandline-arguments and tasks lists
-        to execute on a folder (more information: XXX)
+        to execute on a folder (more information: https://docs.freckles.io/en/latest/freckelize_command.html#adapters-profiles)
 
         Args:
           config (FrecklesConfig): the config wrapper object
