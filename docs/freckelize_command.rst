@@ -8,6 +8,7 @@
     - `Overview`_
     - `Adapter folders`_
     - `Available adapters`_
+    - `Blueprints`_
     - `Development`_
 
 Description
@@ -113,6 +114,12 @@ Which adapters are available to you locally depends on which additional reposito
      debug-freckle  helper adapter, for developing other adapter
      dotfiles       installs packages, stows dotfiles
      python-dev     prepares a python development environment
+
+
+Blueprints
+==========
+
+TBD
 
 
 Development
