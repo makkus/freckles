@@ -1,6 +1,6 @@
-#######################
-*devops your laptop!*
-#######################
+########
+freckles
+########
 
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
