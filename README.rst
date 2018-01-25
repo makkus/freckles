@@ -1,7 +1,6 @@
 #######################
-*freckelize your life!*
+*devops your laptop!*
 #######################
-... or maybe just your laptop...
 
 
 .. image:: https://img.shields.io/pypi/v/freckles.svg
