@@ -32,6 +32,18 @@ Or, if you don't have `curl`, but `wget` installed on your box:
 
    wget -O - https://freckles.io | bash -s -- freckles --help
 
+Alternatively, if you prefer or if the command you want to execute requires interactive input, you can use either of:
+
+.. code-block:: console
+
+   bash <(curl https://freckles.io) freckelize -f blueprint:static-website -t /var/lib/freckles
+
+or
+
+.. code-block:: console
+
+    bash <(wget -O- https://freckles.io) freckelize -f blueprint:static-website -t /var/lib/freckles
+
 Once you executed either one of the above commands successfully, you'll have *freckles* installed on your system. It'll have put a line in ``~/.profile`` to add it's path to the session PATH, so the next time you login (or do a ``source ~/.profile``) it'll be available. From then on all you need to type is:
 
 .. code-block:: console
