@@ -50,6 +50,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
   config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
   config.vm.synced_folder "../../../repos", "/repos", id: "repos"
+  config.vm.synced_folder "../../../roles", "/roles", id: "roles"
 #  config.vm.synced_folder "../../../extra", "/extra", id: "extra"
 #  config.vm.synced_folder "../../../adapters", "/adapters", id: "adapters"
 #  config.vm.synced_folder "../../../compositions", "/compositions", id: "compositions"
