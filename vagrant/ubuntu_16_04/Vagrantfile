@@ -15,13 +15,6 @@ Vagrant.configure("2") do |config|
 #    config.proxy.no_proxy = "localhost,127.0.0.1,.lan"
 #  end
 
-  Vagrant.configure('2') do |config|
-    config.cache.scope = :box
-    config.proxy.enabled = true
-    config.ca_certificates.enabled = true
-    # config.ca_certificates.certs = Dir.glob('/etc/pki/ca-trust/source/anchors/*.crt')
-    config.ca_certificates.certs = Dir.glob('/etc/ssl/certs/*.pem')
-  end
 
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -79,7 +72,6 @@ Vagrant.configure("2") do |config|
     # Customize the amount of memory on the VM:
     vb.memory = "2048"
     # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    config.proxy.enabled = false 
   end
   #
   # View the documentation for the provider you are using for more
