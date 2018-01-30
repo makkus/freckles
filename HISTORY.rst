@@ -2,6 +2,12 @@
 History
 =======
 
+0.5.1 (2018-01-30)
+------------------
+
+* added support for nodejs via nvm/npm
+* minor bug fixes
+
 0.5.0 (2018-01-23)
 ------------------
 
