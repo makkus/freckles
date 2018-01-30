@@ -28,7 +28,6 @@ Application interface
 
     .. click:: freckles.freckelize_cli:cli
        :prog: freckelize
-       :link-command-prefix: adapters
 
 
 Adapters (& profiles)
