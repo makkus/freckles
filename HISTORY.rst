@@ -6,7 +6,7 @@ History
 -----
 
 * added `get_url` and `unarchive` modules to the list of Ansible modules that can act as package managers
-
+* improved installation of Oracle Java via its role, can take vars now
 
 0.5.1 (2018-01-30)
 ------------------
