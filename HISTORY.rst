@@ -2,6 +2,12 @@
 History
 =======
 
+0.5.2
+-----
+
+* added `get_url` and `unarchive` modules to the list of Ansible modules that can act as package managers
+
+
 0.5.1 (2018-01-30)
 ------------------
 
