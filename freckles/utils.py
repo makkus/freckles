@@ -14,7 +14,7 @@ from ansible.plugins.filter.core import FilterModule
 from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, LoadMoreConfigsProcessor, FrklProcessor, MergeDictResultCallback, MergeResultCallback
 from jinja2 import Environment
 from jinja2.ext import Extension
-from nsbl import nsbl, tasks as nsbl_tasks
+from nsbl import nsbl, tasks as nsbl_tasks, inventory
 from six import string_types
 
 from .config import FrecklesConfig
@@ -115,6 +115,16 @@ class RepoType(click.ParamType):
         except:
             self.fail('%s is not a valid repo url' % value, param, ctx)
 
+class HostType(click.ParamType):
+    name = 'host_type'
+
+    def convert(self, value, param, ctx):
+
+        try:
+            details = inventory.parse_host_string(value)
+            return details
+        except:
+            self.fail('%s is not a valid host string' % value, param, ctx)
 
 class FreckleUrlType(click.ParamType):
     name = 'repo'
@@ -734,7 +744,7 @@ def extract_all_used_profiles(freckle_repos):
 
 
 def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
-                        output_format="default", additional_repo_paths=[]):
+                        output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
 
     # profiles = extract_all_used_profiles(freckle_repos)
 
@@ -745,10 +755,10 @@ def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_be
     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
 
     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths)
+                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
 
 
-def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default"):
+def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
 
 
     repos_list = [(k, v) for k, v in freckle_repos.items()]
@@ -756,7 +766,7 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
 
     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      no_run=no_run, run_box_basics=True)
+                                        no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
 
     if no_run:
         click.echo("'no-run' option specified, finished")
@@ -766,7 +776,7 @@ def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profil
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",
-                               pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False, additional_repo_paths=[]):
+                               pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False, additional_repo_paths=[], hosts_list=["localhost"]):
 
     if run_box_basics:
         result = execute_run_box_basics(output_format)
@@ -788,7 +798,7 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     task_descs = config.task_descs
 
-    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_localhost_env=True, pre_chain=[],
+    nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_hosts=hosts_list, pre_chain=[],
                                 additional_roles=additional_roles)
 
     runner = nsbl.NsblRunner(nsbl_obj)
@@ -816,7 +826,6 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
         raise Exception("Invalid output format: {}".format(output_format))
 
     force = True
-
     return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
                       extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True,
                       add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run,

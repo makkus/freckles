@@ -77,13 +77,13 @@ def get_freckelize_option_set():
     return params
 
 
-def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default", ask_become_pass="auto"):
+def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run=False, output_format="default", ask_become_pass="auto", hosts_list=["localhost"]):
     """Executes a freckles run using the provided run details.
 
     Args:
       repos (dict): dict with freckle urls as key, and details about (optional) include/excludes and target directory.
       profiles (list): list of adapters to use with these freckle repos
-
+      hosts_list (list): a list of hosts to run this run on
     """
 
     all_freckle_repos = []
@@ -93,7 +93,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
     repo_metadata_file = "repo_metadata"
 
-    result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format)
+    result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, hosts_list=hosts_list)
 
     playbook_dir = result_checkout["playbook_dir"]
     repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
@@ -127,14 +127,21 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     # TODO: maybe sort profile order also when specified manually?
 
     return create_freckles_run(sorted_profiles, repo_metadata_file_abs, extra_profile_vars, ask_become_pass=ask_become_pass,
-                               output_format=output_format, no_run=no_run, additional_repo_paths=add_paths)
+                               output_format=output_format, no_run=no_run, additional_repo_paths=add_paths, hosts_list=hosts_list)
 
 
 def assemble_freckle_run(*args, **kwargs):
 
+    import pprint, sys
+    pprint.pprint(args)
+    pprint.pprint(kwargs)
     try:
         result = []
         no_run = kwargs.get("no_run")
+
+        hosts = list(kwargs["host"])
+        if not hosts:
+            hosts = ["localhost"]
 
         default_target = kwargs.get("target_folder", None)
         if not default_target:
@@ -232,7 +239,7 @@ def assemble_freckle_run(*args, **kwargs):
 
         if (repos):
             click.echo("\n# starting ansible run(s)...")
-            temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass)
+            temp = execute_freckle_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass, hosts_list=hosts)
             result.append(temp)
             click.echo("")
         return result

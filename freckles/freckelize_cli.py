@@ -9,7 +9,7 @@ import click
 from . import print_version
 from .freckles_defaults import *
 from .profiles import ProfileRepo, assemble_freckle_run, get_freckelize_option_set, BREAK_COMMAND_NAME
-from .utils import DEFAULT_FRECKLES_CONFIG, RepoType, download_extra_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, RepoType, download_extra_repos, HostType
 
 try:
     set
@@ -50,6 +50,7 @@ class FreckelizeCommand(click.MultiCommand):
         click.MultiCommand.__init__(self, "freckles", result_callback=assemble_freckle_run, invoke_without_command=True,
                                     **kwargs)
 
+        host_option = click.Option(param_decls=["--host"], required=False, multiple=True, help="host(s) to freckelize (defaults to 'localhost')", is_eager=False, type=HostType())
         use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos)
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
                                      metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS), is_eager=True,
@@ -62,7 +63,7 @@ class FreckelizeCommand(click.MultiCommand):
 
 
         self.params = get_freckelize_option_set()
-        self.params.extend([ use_repo_option, output_option,  no_run_option, version_option])
+        self.params.extend([ host_option, use_repo_option, output_option,  no_run_option, version_option])
         self.config = config
 
         self.profile_repo = ProfileRepo(self.config)
