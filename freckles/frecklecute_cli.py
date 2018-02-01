@@ -12,7 +12,7 @@ from frkl import frkl
 from . import print_version
 from .commands import CommandRepo
 from .freckles_defaults import *
-from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType
 
 log = logging.getLogger("freckles")
 
@@ -90,6 +90,7 @@ class FrecklecuteCommand(click.MultiCommand):
 
         click.MultiCommand.__init__(self, "freckles", **kwargs)
 
+        host_option = click.Option(param_decls=["--host"], required=False, multiple=True, help="host(s) to freckelize (defaults to 'localhost')", is_eager=False, type=HostType())
         output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default",
                                      metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
                                      help="format of the output", is_eager=True)
@@ -103,7 +104,7 @@ class FrecklecuteCommand(click.MultiCommand):
                                      type=bool, is_flag=True, default=False, required=False)
         use_repo_option = click.Option(param_decls=["--use-repo", "-r"], required=False, multiple=True, help="extra context repos to use", is_eager=True, callback=download_extra_repos, expose_value=True)
 
-        self.params = [use_repo_option, output_option, ask_become_pass_option, no_run_option, version_option]
+        self.params = [use_repo_option, host_option, output_option, ask_become_pass_option, no_run_option, version_option]
 
         self.config = config
         # .trusted_repos = DEFAULT_FRECKLES_CONFIG.trusted_repos

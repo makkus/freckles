@@ -132,9 +132,6 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
 def assemble_freckle_run(*args, **kwargs):
 
-    import pprint, sys
-    pprint.pprint(args)
-    pprint.pprint(kwargs)
     try:
         result = []
         no_run = kwargs.get("no_run")

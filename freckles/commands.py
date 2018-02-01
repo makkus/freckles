@@ -167,23 +167,29 @@ class CommandRepo(object):
             log.debug("Final task config: {}".format(task_config))
 
             if ctx:
+                hosts = list(ctx.params.get("host", ()))
                 output = ctx.params.get("output", "default")
                 ask_become_pass = ctx.params.get("ask_become_pass", "auto")
                 no_run = ctx.params.get("no_run", False)
+
+                if not hosts:
+                    hosts = ["localhost"]
+
             else:
                 output = "default"
                 ask_become_pass = "auto"
                 no_run = False
+                hosts = ["localhost"]
 
             if no_run:
                 parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                                        ask_become_pass=ask_become_pass, no_run=True, config=self.config)
-                print_task_list_details(task_config, task_metadata=metadata, output_format=output,
+                                                        ask_become_pass=ask_become_pass, no_run=True, config=self.config, host_list=hosts)
+                print_task_list_detaizls(task_config, task_metadata=metadata, output_format=output,
                                         ask_become_pass=ask_become_pass, run_parameters=parameters)
                 result = None
             else:
                 result = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                                    ask_become_pass=ask_become_pass, config=self.config, run_box_basics=True)
+                                                    ask_become_pass=ask_become_pass, config=self.config, run_box_basics=True, hosts_list=hosts)
                 # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
 
             return result
