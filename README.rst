@@ -22,12 +22,12 @@ freckles
 ########
 
 
-*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time doing it.
+*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time while doing it.
 
 Currently, *freckles* consists of two main applications:
 
 `freckelize <https://docs.freckles.io/en/latest/freckelize_command.html>`_
-   a tool to support `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, processes it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question)
+   a tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question)
 
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
    an interpreter for `declarative command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, which can make use of `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_
@@ -54,10 +54,13 @@ Quick links
 Examples
 ********
 
-*freckles* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a few default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+``freckelize``
+==============
+
+*freckelize* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a few default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
-==============
+--------------
 
 The following command can setup a development environment around any Python project. This here sets up one for the *freckles* project itself. *freckles* is written in Python and uses a fairly standard project structure. This command will checkout the *freckles* source code, install Python (version 2) as well as a few required system dependencies (if not already installed), then create a `virtualenv <http://www.pythonforbeginners.com/basics/how-to-use-python-virtualenv>`_ for the project, and install all the Python project dependencies into it using ``pip``:
 
@@ -76,7 +79,7 @@ The following command can setup a development environment around any Python proj
 
 
 Wordpress
-=========
+---------
 
 Here we setup a new `Wordpress <https://wordpress.com>`_ instance, using a so called `blueprint <http://localhost:8000/freckelize_command.html#blueprints>`_, which is basically a prepared, generic template describing an empty project structure.
 
@@ -97,8 +100,8 @@ You'll end up with a folder under ``/var/lib/freckles`` which contains everythin
    - `screencast of running this example: <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
 
 
-Dotfiles
-========
+dotfiles
+--------
 
 If you use a curated repository of dotfiles to manage your application configuration, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable):
 
@@ -115,6 +118,11 @@ If you use a curated repository of dotfiles to manage your application configura
    - https://freckles.io/blog/how-to-manage-your-dotfiles-with-freckles
    - https://freckles.io/blog/how-to-manage-my-dotfiles-with-freckles
 
+
+``frecklecute``
+===============
+
+TBD
 
 Project goals
 *************
