@@ -1,8 +1,3 @@
-########
-freckles
-########
-
-
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
 
@@ -21,6 +16,10 @@ freckles
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+########
+freckles
+########
+
 Quick links
 ===========
 
@@ -29,18 +28,93 @@ Quick links
 - code: https://github.com/makkus/freckles
 
 
-Introduction
-============
+Description
+===========
 
-*freckles* is a set of management tools for your working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development projects. The main goals, among others, are:
+*freckles* is a collection of tools to manage your working environment(s) (workstation, remote server, virtual machine, container, ...). It supports you and your team applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development projects.
 
-- recording and version controlling of important project metadata (including the type of project, all project requirements: system- as well as environment specific)
+
+Examples
+========
+
+Here are a few examples of what *freckles* can do, what command to do it looks like, and links to the appropriate configurations and runtime context (if applicable):
+
+Python project
+--------------
+
+The following command can setup a development environment for the *freckles* project itself. *freckles* is written in Python and uses a fairly standard project structure.
+
+.. code-block:: console
+
+    $ freckelize -f gh:makkus/freckles
+
+- project repository used in this example: https://github.com/makkus/freckles
+- metadata used in this example: https://github.com/makkus/freckles/blob/master/.freckle
+- relevant blog posts:
+   - https://freckles.io/blog/data-centric-environment-management
+
+Wordpress
+---------
+
+Here we setup a new `Wordpress <https://wordpress.com>` instance, using a so called `blueprint <http://localhost:8000/freckelize_command.html#blueprints>`_, which is basically a prepared, generic template describing an empty project structure:
+
+.. code-block:: console
+
+    $ freckelize -r frkl:wordpress -f blueprint:wordpress -t /var/lib/freckles
+
+- context repository used in this example: https://github.com/freckles-io/wordpress (expanded from: ``frkl:wordpress``)
+- blueprint used: https://github.com/freckles-io/wordpress/tree/master/blueprints/wordpress
+- relevant blog posts:
+   - https://freckles.io/blog/example-wordpress
+
+
+Dotfiles
+--------
+
+This command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses a repository of your `dotfiles <https://freckles.io/blog/managing-dotfiles>`_ to determine which applications to install, and how to configure them (if applicable).
+
+.. code-block:: console
+
+    $ freckelize -f gh:makkus/dotfiles-test-simple
+
+- project repository used in this example: https://github.com/makkus/dotfiles-test-simple
+- metadata used in this example: https://github.com/makkus/dotfiles-test-simple/blob/master/.freckle
+- relevant blog posts:
+   - https://freckles.io/blog/managing-dotfiles
+   - https://freckles.io/blog/how-to-manage-your-dotfiles-with-freckles
+   - https://freckles.io/blog/how-to-manage-my-dotfiles-with-freckles
+
+
+
+
+Relevant links
+^^^^^^^^^^^^^^
+
+- **metadata used in this example**: `https://github.com/makkus/dotfiles-test-simple/blob/master/.freckle <https://github.com/makkus/dotfiles-test-simple/blob/master/.freckle>`_
+- **repository/project used in this example**: `https://github.com/makkus/dotfiles-test-simple <https://github.com/makkus/dotfiles-test-simple>`_ (expanded from: ``gh:makkus/dotfiles-test-simple``)
+- **accompanying blog posts**:
+   - https://freckles.io/blog/managing-dotfiles
+   - https://freckles.io/blog/how-to-manage-your-dotfiles-with-freckles
+   - https://freckles.io/blog/how-to-manage-my-dotfiles-with-freckles
+
+
+Wordpress
+---------
+
+    freckelize -r frkl:wordpress -f blueprint:wordpress -t /var/lib/freckles
+
+
+Project goals
+=============
+
+**freckles** main goals are:
+
+- encouraging users to record and version control important project metadata (e.g.: type of project, all project requirements: system- as well as framework/language specific)
 - quick (re-)provisioning of project development environments (on both physical as well as virtual machines)
 - replicated, identical development environments for all members of a development team (even if they use different platforms for development)
 - provide best-practice blueprints for a wide range of project profiles, in order quickly get started with a well thought-out project structure, developed and agreed upon by the community
-- enable the rapid creation of small idempotent scripts to execute certain (state-related) configuration management tasks
-
-
+- support for as many platforms, OS's, distributions as possible
+- enable the rapid development of small, idempotent scripts to execute certain (state-related) configuration management tasks
 
 
 
