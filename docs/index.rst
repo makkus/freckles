@@ -8,6 +8,7 @@ Welcome to the *freckles* documentation! *freckles* is a project to help you do 
 .. toctree::
    :maxdepth: 2
 
+   overview
    readme
    bootstrap
    usage

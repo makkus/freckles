@@ -21,19 +21,45 @@ freckles
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-Introduction
-************
-
-*freckles* is configuration management for your working environment (workstation, remote server, virtual machine, container, ...), it removes (or hides) advanced features often offered by other configuration management frameworks, for the sake of simplicity and a quick turnaround.
-
-*freckles* helps you bring your system from a useless -- for your intent and purpose -- state, into a useful one. With one line in a terminal (and a bit of preparation).
-
 Quick links
 ===========
 
 - homepage: https://freckles.io
 - documentation: https://docs.freckles.io
 - code: https://github.com/makkus/freckles
+
+
+Introduction
+============
+
+*freckles* is a set of management tools for your working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development projects. The main goals, among others, are:
+
+- recording and version controlling of important project metadata (including the type of project, all project requirements: system- as well as environment specific)
+- quick (re-)provisioning of project development environments (on both physical as well as virtual machines)
+- replicated, identical development environments for all members of a development team (even if they use different platforms for development)
+- provide best-practice blueprints for a wide range of project profiles, in order quickly get started with a well thought-out project structure, developed and agreed upon by the community
+- enable the rapid creation of small idempotent scripts to execute certain (state-related) configuration management tasks
+
+
+
+
+
+
+
+
+
+
+How does it work?
+=================
+
+The way it works is that every one of your projects is augmented with some minimal metadata, containing:
+
+- the type of project it is (static website, Java, Python, LaTEX, etc.)
+- the project-specific requirements (e.g. what type of system- and language specific libraries need to be installed)
+- and, if necessary, some project-specific default configuration (what port to use for the webserver for development, production, etc.)
+
+With that information, *freckles* can
+
 
 For now, the *freckles* project provides three (command-line) interfaces, which deal with slightly different scenarios and workflows:
 
