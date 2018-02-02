@@ -9,6 +9,7 @@ Welcome to the *freckles* documentation! *freckles* is a project to help you do 
    :maxdepth: 2
 
    overview
+   readme
    bootstrap
    usage
    trust
