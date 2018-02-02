@@ -78,7 +78,7 @@ The following command can setup a development environment around any Python proj
 Wordpress
 =========
 
-Here we setup a new `Wordpress <https://wordpress.com>` instance, using a so called `blueprint <http://localhost:8000/freckelize_command.html#blueprints>`_, which is basically a prepared, generic template describing an empty project structure.
+Here we setup a new `Wordpress <https://wordpress.com>`_ instance, using a so called `blueprint <http://localhost:8000/freckelize_command.html#blueprints>`_, which is basically a prepared, generic template describing an empty project structure.
 
 The following will ask the user a few basic answers about the install. Then it'll install and configure a *MySQL* server, *PHP* and *PHP packages* necessary for *Wordpress*, as well as the *Nginx* web-server. If so specified by the user, it'll also request a "Let's encrpyt" https certificate for the domain running this *Wordpress* instance, and it'll setup a cronjob to renew that certificate before it expires.
 
@@ -94,7 +94,7 @@ You'll end up with a folder under ``/var/lib/freckles`` which contains everythin
 - more info:
 
    - https://freckles.io/blog/example-wordpress
-   - screencast of running this example: `here <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
+   - `screencast of running this example: <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
 
 
 Dotfiles
