@@ -22,7 +22,9 @@ freckles
 ########
 
 
-*freckles* is a collection of tools (using Ansible_ under the hood) to manage your local working environment(s) (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time doing it.
+*freckles* is a collection of tools designed to manage your local working environment(s) (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time doing it.
+
+*freckles* is written in Python, and uses Ansible_ to do the heavy (system-management) lifting.
 
 
 - `Quick links`_
