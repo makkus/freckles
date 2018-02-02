@@ -46,7 +46,7 @@ Quick links
 Examples
 ********
 
-*freckles* is designed in a way so it is possible to easily and quickly create plug-ins for all sorts of project-types and -data. It comes with a few default ones though, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+*freckles* is written in a way so it is possible to easily and quickly create plug-ins for all sorts of project-types and -data. It comes with a few default ones though, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
 ==============
