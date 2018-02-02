@@ -54,7 +54,7 @@ Quick links
 Examples
 ********
 
-*freckles* is written in a way so it is possible to easily and quickly create plug-ins for all sorts of project-types and -data. It comes with a few default ones though, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+*freckles* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a few default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
 ==============
@@ -73,9 +73,7 @@ The following command can setup a development environment around any Python proj
    - adapter doc: https://docs.freckles.io/en/latest/adapters/python-dev.html
    - adapter source: https://github.com/freckles-io/adapters/tree/master/languages/python/python-dev
    - role source: https://github.com/freckles-io/freckles-io.python-dev
-- more info:
 
-   - https://freckles.io/blog/data-centric-environment-management
 
 Wordpress
 =========
@@ -96,6 +94,7 @@ You'll end up with a folder under ``/var/lib/freckles`` which contains everythin
 - more info:
 
    - https://freckles.io/blog/example-wordpress
+   - screencast of running this example: `here <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
 
 
 Dotfiles
