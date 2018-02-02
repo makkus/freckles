@@ -32,7 +32,7 @@ Currently, *freckles* consists of two main applications:
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
    an interpreter for `declarative command-line scripts` <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, which can make use of `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_
 
-*freckles* is written in Python, and uses Ansible_ to do the heavy (system-management) lifting.
+*freckles* is written in Python, and uses Ansible_ to do the heavy (system- and state-management) lifting.
 
 
 - `Quick links`_
