@@ -1,3 +1,7 @@
+########
+freckles
+########
+
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
 
@@ -16,9 +20,6 @@
            :alt: Join the chat at https://gitter.im/freckles-io/Lobby
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-########
-freckles
-########
 
 Quick links
 ===========
