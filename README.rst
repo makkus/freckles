@@ -132,6 +132,7 @@ If you use a curated repository of dotfiles to manage your application configura
 
 TBD
 
+
 Project goals
 *************
 
@@ -139,10 +140,10 @@ Project goals
 
 - encouraging users to record and version control important project metadata (e.g.: type of project, all project requirements: system- as well as framework/language specific)
 - quick (re-)provisioning of project development environments (on both physical as well as virtual machines)
-- replicated, identical development environments for all members of a development team (even if they use different platforms for development)
-- provide best-practice blueprints for a wide range of project profiles, in order quickly get started with a well thought-out project structure, developed and agreed upon by the community
-- support for as many platforms, OS's, distributions as possible
-- enable the rapid development of small, idempotent scripts to execute certain (state-related) configuration management tasks
+- replicated, identical development environments for all members of a development team (even if they use different platforms for development) -- including the installation and configuration of system-level dependencies
+- provide best-practice blueprints for a wide range of project profiles, in order quickly get started with a well thought-out project structure, developed and agreed upon by the community as best practice
+- allowing the re-use of all existing Ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
+
 
 Project features
 ****************
@@ -153,14 +154,13 @@ Project features
 * can use the same configuration for your Linux and MacOS workstation as well as Vagrant machines, containers, etc.
 * support for systems where you don't have root/sudo access via the conda_ package manager (or nix_, with some limitations)
 * extensible via *adapters*
-* declarative, idempotent scripting, sorta
-* allows the use of all ansible `modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles <https://galaxy.ansible.com/>`_
+* declarative, idempotent scripting
 
 
 Install/bootstrap
 *****************
 
-The examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using 'inaugurate_' (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you actually do, you might want to read `this <https://docs.freckles.io/en/latest/trust.html>`_, `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run ``freckelize`` straight away to display it's help, issue:
+The examples above assume you have *freckles* already installed. If that's not the case, *freckles* can be bootstrapped using the 'inaugurate_' bootstrap script (yes, yes, I know, downloading and executing scripts from random websites is often considered a bad idea -- so before you actually do, you might want to read `this <https://docs.freckles.io/en/latest/trust.html>`_, `this <https://github.com/makkus/inaugurate#how-does-this-work-what-does-it-do>`_, `this <https://github.com/makkus/inaugurate#is-this-secure>`_, and `this <https://docs.freckles.io/en/latest/bootstrap.html>`_ ). To install *freckles* and run ``freckelize`` straight away to display it's help, issue:
 
 .. code-block:: console
 
