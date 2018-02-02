@@ -1,8 +1,3 @@
-########
-freckles
-########
-
-
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
 
@@ -22,8 +17,15 @@ freckles
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
+########
+freckles
+########
+
+
+*freckles* is a collection of tools to manage your working environment(s) (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time doing it.
+
+
 - `Quick links`_
-- Description_
 - Examples_
 - `Project goals`_
 - `Project features`_
@@ -37,12 +39,6 @@ Quick links
 - homepage: https://freckles.io
 - documentation: https://docs.freckles.io
 - code: https://github.com/makkus/freckles
-
-
-Description
-***********
-
-*freckles* is a collection of tools to manage your working environment(s) (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development projects. And hopefully saving you time doing it.
 
 
 Examples
