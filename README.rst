@@ -22,7 +22,7 @@ freckles
 ########
 
 
-*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space -- on all of your development (and other) projects. And hopefully saving you time while doing it.
+*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space, but with a slight twist -- on all of your development (and other) projects. And hopefully saving you time while doing it.
 
 Currently, *freckles* consists of two main applications:
 
