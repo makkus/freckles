@@ -30,7 +30,7 @@ Currently, *freckles* consists of two main applications:
    a tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question)
 
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
-   an interpreter for `declarative command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, which can make use of `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_
+   an interpreter for `declarative, idempotent command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, which can make use of `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_
 
 *freckles* is written in Python, and uses Ansible_ to do the heavy (system- and state-management) lifting.
 
@@ -57,7 +57,7 @@ Examples
 ``freckelize``
 ==============
 
-*freckelize* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a few default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+*freckelize* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a a number of default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
 --------------
@@ -94,10 +94,12 @@ You'll end up with a folder under ``/var/lib/freckles`` which contains everythin
 
 - context repository used in this example: https://github.com/freckles-io/wordpress (expanded from: ``frkl:wordpress``)
 - blueprint used: https://github.com/freckles-io/wordpress/tree/master/blueprints/wordpress
+- ``wordpress`` adapter source: https://github.com/freckles-io/wordpress/tree/master/adapters/wordpress
 - more info:
 
    - https://freckles.io/blog/example-wordpress
-   - `screencast of running this example: <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
+   - `screencast for this example <https://freckles.io/blog/example-wordpress/wordpress-install.ogv>`_
+   - `run log for this example <https://pastebin.com/raw/EVrzyrMS>`_
 
 
 dotfiles
@@ -112,6 +114,12 @@ If you use a curated repository of dotfiles to manage your application configura
 
 - dotfiles repository used in this example: https://github.com/makkus/dotfiles-test-simple
 - metadata used in this example: https://github.com/makkus/dotfiles-test-simple/blob/master/.freckle
+- ``dotfiles`` adapter and (Ansible) role used:
+
+   - adapter doc: https://docs.freckles.io/en/latest/adapters/dotfiles.html
+   - adapter source: https://github.com/freckles-io/adapters/tree/master/configuration-management/dotfiles
+   - role source: https://github.com/freckles-io/freckles-io.dotfiles
+
 - more info:
 
    - https://freckles.io/blog/managing-dotfiles
