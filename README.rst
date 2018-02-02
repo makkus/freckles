@@ -27,10 +27,10 @@ freckles
 Currently, *freckles* consists of two main applications:
 
 `freckelize <https://docs.freckles.io/en/latest/freckelize_command.html>`_
-   a tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question)
+   A tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question). Imagine *Maven*, *Gradle*, *Rake*, but much more generic. Using any of those build systems internally if necessary.
 
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
-   an interpreter for `declarative, idempotent command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, which can make use of `all Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ as well as `all roles on Ansible galaxy <https://galaxy.ansible.com>`_
+   An interpreter for `declarative, idempotent command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, using `any of the existing Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles on Ansible galaxy <https://galaxy.ansible.com>`_ as building-blocks.
 
 *freckles* is written in Python, and uses Ansible_ to do the heavy (system- and state-management) lifting.
 
