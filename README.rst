@@ -136,7 +136,7 @@ TBD
 Project goals
 *************
 
-Ok, to be perfectly honest, this is not one of those projects where I had a set of things I wanted to achieve in mind, and then go about achieving those in a structured way. This is one of those projects where I had the very strong feeling it *should* exist, in some form or other, but I had no idea how it would end up looking, and what exactly it'd be able to do. And where I let the ongoing development lead the way where it's going. Don't go about telling any of my future employers I do that sort of thing though. It doesn't seem to be considered professional, or something. I'd disagree, but can't really be bothered.
+Ok, to be perfectly honest, this is not one of those projects where I had a set of things I wanted to achive, and then go about achieving those things in a structured way. Nope. This is one of those projects where I had the very strong feeling it *should* exist, in some form or other, but I had no idea how it would end up looking, and what exactly it'd be able to do. One of those where I let the ongoing development lead the way. Don't go about telling any of my future employers I do that sort of thing though. It doesn't seem to be considered professional, or something. I'd disagree, but can't really be bothered.
 
 So, if you really need a list, here's one. Let's all pretend that was what I wanted all along, ok? And I hit the nail on the head! The list:
 
