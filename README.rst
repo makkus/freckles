@@ -22,12 +22,12 @@ freckles
 ########
 
 
-*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space, but with a slight twist -- on all of your development (and other) projects. And hopefully saving you time while doing it.
+*freckles* is a collection of tools designed to manage your local working environment (workstation, remote server, virtual machine, container, ...). It supports you and your team in applying best practices -- similar to those used in the configuration management and DevOps space, but with a slight twist -- in all of your development (and other) projects. And hopefully saving you time while doing it.
 
 Currently, *freckles* consists of two main applications:
 
 `freckelize <https://docs.freckles.io/en/latest/freckelize_command.html>`_
-   A tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question). Imagine *Maven*, *Gradle*, *Rake*, but much more generic. Using any of those build systems internally if necessary.
+   A tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means it'll look at a project folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question). Imagine *Maven*, *Gradle*, *Rake*, etc., but much more generic. Using any of those build systems internally if necessary.
 
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
    An interpreter for `declarative, idempotent command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, using `any of the existing Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles on Ansible galaxy <https://galaxy.ansible.com>`_ as building-blocks.
@@ -105,7 +105,7 @@ You'll end up with a folder under ``/var/lib/freckles`` which contains everythin
 dotfiles
 --------
 
-If you use a curated repository of dotfiles to manage your application configuration, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable):
+If you use a curated repository of dotfiles to manage your application configurations, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable):
 
 .. code-block:: console
 
