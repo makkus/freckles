@@ -2,11 +2,12 @@
 History
 =======
 
-0.5.2
------
+0.5.2 (2018-02-02)
+------------------
 
 * added `get_url` and `unarchive` modules to the list of Ansible modules that can act as package managers
 * improved installation of Oracle Java via its role, can take vars now
+* adding '--host' option to freckelize and frecklecute, enabling remote execution without having to have freckles install on the target host
 
 0.5.1 (2018-01-30)
 ------------------
