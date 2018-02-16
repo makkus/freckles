@@ -57,17 +57,35 @@ Examples
 ``freckelize``
 ==============
 
-*freckelize* supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a a number of default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+*freckelize* is project-centric configuration management. It supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a a number of default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
 --------------
 
-The following command can setup a development environment around any Python project. This here sets up one for the *freckles* project itself. *freckles* is written in Python and uses a fairly standard project structure. This command will checkout the *freckles* source code, install Python (version 2) as well as a few required system dependencies (if not already installed), then create a `virtualenv <http://www.pythonforbeginners.com/basics/how-to-use-python-virtualenv>`_ for the project, and install all the Python project dependencies into it using ``pip``:
+The following command can setup a development environment around any Python project. This here sets up one for the *freckles* project itself. *freckles* is written in Python and uses a fairly standard project structure.
+
+Command
+^^^^^^^
 
 .. code-block:: console
 
     $ freckelize python-dev -f gh:makkus/freckles
 
+What it does
+^^^^^^^^^^^^
+
+- install all necessary package manager if necessary (for example ``homebrew`` on Mac OS X)
+- expand ``gh:makkus/freckles`` to ``https://github.com/makkus/freckles.git``
+- (git) check-out this repository to ``$HOME/freckles/freckles``
+- install Python (version 2) -- using your distributions python2 package as well as any potential dependencies
+- install the ``virtualenv`` and ``pip`` packages
+- create a `virtualenv <http://www.pythonforbeginners.com/basics/how-to-use-python-virtualenv>`_ for the project (called ``freckles-dev``
+- install all project dependencies (from ``requirements_dev.txt``) into the new virtualenv
+- set-up the python project into the virtualenv (using ``pip install -e <project_folder>``)
+- to activate the virtualenv, one only has to issue ``source $HOME/.virtualenvs/freckles-dev/bin/activate`` (or use virtualenv-wrapper)
+
+Further information
+^^^^^^^^^^^^^^^^^^^
 
 - project repository used in this example: https://github.com/makkus/freckles (expanded from ``gh:makkus/freckles``)
 - metadata used in this example: https://github.com/makkus/freckles/blob/master/.freckle
@@ -83,14 +101,25 @@ Wordpress
 
 Here we setup a new `Wordpress <https://wordpress.com>`_ instance, using a so called `blueprint <http://localhost:8000/freckelize_command.html#blueprints>`_, which is basically a prepared, generic (and in most cases empty) project template with some defaults set, that can optionally ask for user input for some of those defaults and change the project template accordingly.
 
-The following will ask the user a few basic questions about the install. Then it'll install and configure a *MySQL* server, *PHP* and *PHP packages* necessary for *Wordpress*, as well as the *Nginx* web-server. If so specified by the user, it'll also request a "Let's encrpyt" https certificate for the domain running this *Wordpress* instance, and it'll setup a cronjob to renew that certificate before it expires.
-
-You'll end up with a folder under ``/var/lib/freckles`` which contains everything relevant to your Wordpress install (both database and Wordpress-site files), which can be easily backed-up. And which can be used to quickly restore your instance on a different, newly installed machine (again, using *freckles*).
+Command
+^^^^^^^
 
 .. code-block:: console
 
     $ freckelize -r frkl:wordpress -f blueprint:wordpress -t /var/lib/freckles
 
+What it does
+^^^^^^^^^^^^
+- expand the context repo url ``frkl:wordpress`` to ``https://github.com/freckles-io/wordpress.git`` and looks for a `blueprint <https://docs.freckles.io/en/latest/freckelize_command.html#blueprints>`_ called ``wordpress`` (`wordpress blueprint source <https://github.com/freckles-io/wordpress/tree/master/blueprints/wordpress>`_)
+- ask the user a few basic questions about the install (according to the `configuration of the blueprint <https://github.com/freckles-io/wordpress/blob/master/blueprints/wordpress/cookiecutter.json>`_)
+- install and configure a *MySQL* (or MariaDB) server and the *PHP* and *PHP packages* necessary for *Wordpress*
+- download and put into place the *Wordpress* application
+- install and configure the *Nginx* web-server for the downloaded *Wordpress* application
+- if so specified by the user earlier, it'll also request a "Let's encrypt" https certificate for the domain running this *Wordpress* instance, as well as a cronjob to renew that certificate before it expires
+- you'll end up with a folder under ``/var/lib/freckles`` which contains everything relevant to your Wordpress install (both database and Wordpress-site files), which can be easily backed-up, and which can be used to quickly restore your instance on a different, newly installed machine (again, using *freckles*).
+
+Further information
+^^^^^^^^^^^^^^^^^^^
 
 - context repository used in this example: https://github.com/freckles-io/wordpress (expanded from: ``frkl:wordpress``)
 - blueprint used: https://github.com/freckles-io/wordpress/tree/master/blueprints/wordpress
@@ -107,10 +136,26 @@ dotfiles
 
 If you use a curated repository of dotfiles to manage your application configurations, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable):
 
+Command
+^^^^^^^
+
 .. code-block:: console
 
     $ freckelize -f gh:makkus/dotfiles-test-simple
 
+What it does
+^^^^^^^^^^^^
+
+- expands ``gh:makkus/dotfiles-test-simple`` to ``https://github.com/makkus/dotfiles-test-simple.git``
+- (git) clones that repository to ``$HOME/freckles/dotfiles-test-simple``
+- parse the downloaded repo and make a list of all applications that need to be installed, as well as the package manager(s) to install them
+- install all necessary package managers
+- install all necessary packages (and their dependencies)
+- install the ``stow`` package
+- using ``stow``, symbolically link all configuration files under ``$HOME/freckles/dotfiles-test-simple`` to their appropriate place somewhere under ``$HOME`` (or ``$HOME/.config``)
+
+Further information
+^^^^^^^^^^^^^^^^^^^
 
 - dotfiles repository used in this example: https://github.com/makkus/dotfiles-test-simple
 - metadata used in this example: https://github.com/makkus/dotfiles-test-simple/blob/master/.freckle
@@ -130,7 +175,7 @@ If you use a curated repository of dotfiles to manage your application configura
 ``frecklecute``
 ===============
 
-TBD
+To be done. For now, check out: https://freckles.io/blog/writing-declarative-commandline-scripts
 
 
 Project goals
