@@ -27,7 +27,7 @@ freckles
 Currently, *freckles* consists of two main applications:
 
 `freckelize <https://docs.freckles.io/en/latest/freckelize_command.html>`_
-   A tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means: it'll look at a (project) folder, process it's structure and metadata, then it'll setup a hospitable environment for that project on the host system, according to a set of pre-written recipes (which ideally follow best practices for the type of project in question). Imagine *Maven*, *Gradle*, *Rake*, etc., but much more generic. Using any of those build systems internally if necessary.
+   A tool to facilitate `data-centric environment management <https://freckles.io/blog/data-centric-environment-management>`_, which means: it'll look at a (project) folder, process it's structure and metadata, then setup a hospitable environment for that project on the host system according to a set of pre-written recipes (which ideally follow best practices for the type of project in question). Imagine *Maven*, *Gradle*, *Rake*, etc., but much more generic. Using any of those build systems internally if necessary.
 
 `frecklecute <https://docs.freckles.io/en/latest/frecklecute_command.html>`_
    An interpreter for `declarative, idempotent command-line scripts <https://freckles.io/blog/writing-declarative-commandline-scripts>`_, using `any of the existing Ansible modules <http://docs.ansible.com/ansible/latest/list_of_all_modules.html>`_ and `roles on Ansible galaxy <https://galaxy.ansible.com>`_ as building-blocks.
@@ -57,7 +57,7 @@ Examples
 ``freckelize``
 ==============
 
-*freckelize* is project-centric configuration management. It supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a a number of default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
+*freckelize* is data-centric (or 'project-centric', if you will) configuration management. It supports the quick and easy creation of plug-ins for all sorts of project-types and -data. It comes with a a number of default ones, as well as examples to illustrate it's workings and capabilities. Here are a few of those:
 
 Python project
 --------------
