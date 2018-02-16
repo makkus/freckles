@@ -134,7 +134,7 @@ Further information
 dotfiles
 --------
 
-If you use a curated repository of dotfiles to manage your application configurations, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable):
+If you use a curated repository of dotfiles to manage your application configurations, the following command can setup your usual development environment on a newly provisioned machine (physical or virtual), without any manual interaction. It uses the structure of the dotfiles repository as well as potentially added metadata to determine which applications to install, and how to configure them (if applicable).
 
 Command
 ^^^^^^^
