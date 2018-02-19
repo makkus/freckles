@@ -2,6 +2,13 @@
 History
 =======
 
+0.5.3 (2018-02-19)
+------------------
+
+* added 'freckle_profile_active' to 'global' keywords, to disable auto-execution of a profile in freckelize
+* updated development dependencies
+* added a few more default roles (esp. freckles-io.webserver)
+
 0.5.2 (2018-02-02)
 ------------------
 
