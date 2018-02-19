@@ -16,5 +16,6 @@
             other: omit
 
 - vagrant-dev:
+    freckle_profile_active: false
     vagrant_dev_providers:
       - virtualbox
