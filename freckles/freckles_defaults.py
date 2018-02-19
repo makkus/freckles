@@ -57,6 +57,7 @@ BLUEPRINT_MARKER_EXTENSION = "blueprint.freckle"
 DEFAULT_FRECKLE_TARGET_MARKER = "__auto__"
 
 DEFAULT_FRECKELIZE_PROFILE_PRIORITY = 100
+FRECKELIZE_PROFILE_ACTIVE_KEY = "freckle_profile_active"
 
 DEFAULT_REPOS = {
     "default": {"roles": [(None, defaults.DEFAULT_ROLES_PATH)],

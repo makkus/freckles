@@ -115,6 +115,8 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
             for vars in metadata["vars"]:
                 profile_temp = vars["profile"]["name"]
+                if not vars.get("vars", {}).get(FRECKELIZE_PROFILE_ACTIVE_KEY, True):
+                    continue
                 if profile_temp not in profiles:
                     profiles.append(profile_temp)
 
