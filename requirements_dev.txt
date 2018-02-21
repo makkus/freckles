@@ -7,7 +7,7 @@ tox==2.9.1
 coverage==4.5.1
 Sphinx==1.7.0
 PyYAML==3.12
-pytest==3.4.0
+pytest==3.4.1
 nsbl # pyup: ignore
 sphinx-autobuild==0.7.1
 docutils==0.14
