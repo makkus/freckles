@@ -2,6 +2,11 @@
 History
 =======
 
+0.5.4
+-----
+
+* fixed freckelize execution when run in 'docker build ...'
+
 0.5.3 (2018-02-19)
 ------------------
 
