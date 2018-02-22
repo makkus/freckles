@@ -21,10 +21,10 @@ test_requirements = [
 setup(
     name='freckles',
     version='0.5.3',
-    description="a dotfile manager, and more; quite cute",
+    description="DevOps your laptop!",
     long_description=readme + '\n\n' + history,
     author="Markus Binsteiner",
-    author_email='makkus@posteo.net',
+    author_email='makkus@posteo.de',
     url='https://github.com/makkus/freckles',
     packages=[
         'freckles',
