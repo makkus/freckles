@@ -19,3 +19,7 @@
     freckle_profile_active: false
     vagrant_dev_providers:
       - virtualbox
+
+# not implemented yet
+- docker-dev:
+    freckle_profile_active: false
