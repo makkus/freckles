@@ -93,6 +93,8 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
 
     repo_metadata_file = "repo_metadata"
 
+    extra_profile_vars.setdefault("freckle", {})["no_run"] = bool(no_run)
+
     result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, hosts_list=hosts_list)
 
     playbook_dir = result_checkout["playbook_dir"]

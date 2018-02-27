@@ -140,4 +140,6 @@ def create_freckle_descs(repos, config=None):
         else:
             raise Exception("freckle url format unknown, don't know how to handle that: {}".format(url))
 
+        repo_desc["blueprint"] = temp_url.startswith(BLUEPRINT_URL_PREFIX)
+
         frkl.dict_merge(metadata, repo_desc, copy_dct=False)
