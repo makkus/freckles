@@ -46,6 +46,7 @@ ASK_PW_HELP = 'whether to force ask for a password, force ask not to, or let fre
 ASK_PW_CHOICES = click.Choice(["auto", "true", "false"])
 EXTRA_VARS_ARG_HELP = "extra vars, overlayed on top of potential folder/adapter variables"
 EXTRA_VARS_METAVAR = "EXTRA_VARS_FILE"
+NON_RECURSIVE_HELP = "whether to exclude all freckle child folders, default: false"
 
 def get_freckelize_option_set():
     """Helper method to create some common cli options."""
@@ -70,9 +71,16 @@ def get_freckelize_option_set():
                                      type=VarsType(),
                                      metavar=EXTRA_VARS_METAVAR,
                                      required=False)
+    parent_only_option = click.Option(param_decls=["--non-recursive"],
+                                      help=NON_RECURSIVE_HELP,
+                                      is_flag=True,
+                                      default=False,
+                                      required=False,
+                                      type=bool
+    )
 
     params = [freckle_option, extra_vars_option, target_option, include_option, exclude_option,
-                       ask_become_pass_option]
+                       ask_become_pass_option, parent_only_option]
 
     return params
 
@@ -158,6 +166,10 @@ def assemble_freckle_run(*args, **kwargs):
 
         default_extra_vars_raw = list(kwargs.get("extra_vars", []))
 
+        default_non_recursive = kwargs.get("non_recursive", False)
+        if not default_non_recursive:
+            default_non_recursive = False
+
         default_extra_vars = {}
 
         for ev in default_extra_vars_raw:
@@ -178,7 +190,8 @@ def assemble_freckle_run(*args, **kwargs):
                 "target_folder": default_target,
                 "includes": default_include,
                 "excludes": default_exclude,
-                "password": default_ask_become_pass
+                "password": default_ask_become_pass,
+                "non-recursive": default_non_recursive
                 }
 
             for f in default_freckle_urls:
@@ -206,6 +219,10 @@ def assemble_freckle_run(*args, **kwargs):
                 exclude = set(pvars.pop("exclude", []))
                 target = pvars.pop("target-folder", None)
                 ask_become_pass = pvars.pop("ask_become_pass", "auto")
+                non_recursive = pvars.pop("non_recursive", False)
+
+                if non_recursive == None:
+                    non_recursive = default_non_recursive
 
                 if ask_become_pass == "auto" and default_ask_become_pass != "auto":
                     ask_become_pass = default_ask_become_pass
@@ -233,7 +250,8 @@ def assemble_freckle_run(*args, **kwargs):
                         "target_folder": t,
                         "includes": list(include),
                         "excludes": list(exclude),
-                        "password": ask_become_pass
+                        "password": ask_become_pass,
+                        "non_recursive": non_recursive
                     }
                     repos.setdefault(freckle_url, fr)
                     repos[freckle_url].setdefault("profiles", []).append(pn)
@@ -359,6 +377,15 @@ class ProfileRepo(object):
             "extra_arg_names": ["-pw"],
             "type": ASK_PW_CHOICES,
             "default": "auto"
+        }
+
+        extra_options["non_recursive"] = {
+            "arg_name": "non-recursive",
+            "help": NON_RECURSIVE_HELP,
+            "type": bool,
+            "required": False,
+            "default": False,
+            "is_flag": True
         }
 
         cli_command = create_cli_command(md, command_name=command_name, command_path=command_path,
