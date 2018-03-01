@@ -191,7 +191,7 @@ def assemble_freckle_run(*args, **kwargs):
                 "includes": default_include,
                 "excludes": default_exclude,
                 "password": default_ask_become_pass,
-                "non-recursive": default_non_recursive
+                "non_recursive": default_non_recursive
                 }
 
             for f in default_freckle_urls:
