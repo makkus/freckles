@@ -19,3 +19,6 @@
 [submodule "freckles/external/blueprints"]
 	path = freckles/external/blueprints
 	url = https://github.com/freckles-io/blueprints.git
+[submodule "freckles/external/scripts/frocker"]
+	path = freckles/external/scripts/frocker
+	url = https://github.com/makkus/frocker.git
