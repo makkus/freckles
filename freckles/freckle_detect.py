@@ -64,12 +64,14 @@ def create_freckle_descs(repos, config=None):
                 raise Exception("No target directory specified when using blueprint.")
 
             cookiecutter_file = os.path.join(match, "cookiecutter.json")
+
             if os.path.exists(cookiecutter_file):
 
                 click.secho("\nFound interactive blueprint, please enter approriate values below:\n", bold=True)
 
                 temp_path = tempfile.mkdtemp(prefix='frkl.')
                 cookiecutter(match, output_dir=temp_path)
+
 
                 subdirs = [os.path.join(temp_path, f) for f in listdir(temp_path) if isdir(join(temp_path, f))]
 
@@ -78,6 +80,7 @@ def create_freckle_descs(repos, config=None):
 
                 url = subdirs[0]
                 source_delete = True
+
 
             else:
 
