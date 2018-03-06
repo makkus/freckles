@@ -6,6 +6,8 @@ from __future__ import (absolute_import, division, print_function)
 import logging
 
 import click
+import yaml
+from six import string_types
 from frkl.frkl import (EnsurePythonObjectProcessor,
                        EnsureUrlProcessor, Frkl, MergeDictResultCallback,
                        UrlAbbrevProcessor)
@@ -158,6 +160,9 @@ class CommandRepo(object):
                                                            value_vars)
             rendered_tasks = render_dict(tasks, new_args)
 
+            if isinstance(rendered_tasks, string_types):
+                rendered_tasks = yaml.safe_load(rendered_tasks)
+
             # log.debug("Args: {}".format(new_args))
             log.debug("Vars: {}".format(final_vars))
             log.debug("Tasks to execute, with arguments replaced: {}".format(rendered_tasks))
@@ -212,14 +217,23 @@ class CommandRepo(object):
         try:
             frkl_obj = Frkl(yaml_file, chain)
             config_content = frkl_obj.process(MergeDictResultCallback())
-        except:
-            log.debug("Can't parse command file '{}'.".format(yaml_file))
+        except (Exception) as e:
+            log.debug("Can't parse command file '{}'".format(yaml_file))
+            click.echo("- can't parse command file '{}'".format(yaml_file))
             return None
 
         tasks = config_content.get("tasks", None)
 
         if not tasks:
             return None
+
+        # extra_options = {'jack': 4098, 'sape': 4139}
+        freck_defaults = {
+                "path": os.path.abspath(yaml_file),
+                "dir": os.path.abspath(os.path.dirname(yaml_file))
+        }
+
+        config_content.setdefault("defaults", {})["frecklecutable"] = freck_defaults
 
         cli_command = create_cli_command(config_content, command_name=command_name, command_path=yaml_file)
         return cli_command
