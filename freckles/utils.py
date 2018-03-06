@@ -15,6 +15,7 @@ from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge, EnsureU
 from jinja2 import Environment
 from jinja2.ext import Extension
 from nsbl import nsbl, tasks as nsbl_tasks, inventory
+from nsbl import ansible_extensions
 from six import string_types
 
 from .config import FrecklesConfig
@@ -192,7 +193,8 @@ def replace_string(template_string, replacement_dict):
     variable_start_string = '{{::'
     variable_end_string = '::}}'
 
-    result = Environment(extensions=[freckles_jinja_utils], trim_blocks=trim_blocks, block_start_string=block_start_string, block_end_string=block_end_string, variable_start_string=variable_start_string, variable_end_string=variable_end_string).from_string(template_string).render(replacement_dict)
+    result = Environment(extensions=[freckles_jinja_utils, ansible_extensions.utils], trim_blocks=trim_blocks, block_start_string=block_start_string, block_end_string=block_end_string, variable_start_string=variable_start_string, variable_end_string=variable_end_string).from_string(template_string).render(replacement_dict)
+
     return result
 
 
@@ -335,7 +337,6 @@ def create_cli_command(config, command_name=None, command_path=None, extra_optio
 def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
     # exchange arg_name with var name
     new_args = {}
-
 
     for key, value in key_map.items():
         temp = input_args.pop(key.replace('-', '_'))
