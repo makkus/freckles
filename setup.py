@@ -42,6 +42,7 @@ setup(
     scripts=[
         'freckles/external/scripts/inaugurate/inaugurate',
         'freckles/external/scripts/frankentree/frankentree',
+        'freckles/external/scripts/frocker/frocker'
     ],
     include_package_data=True,
     install_requires=requirements,
