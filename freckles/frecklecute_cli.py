@@ -37,8 +37,7 @@ current_command_path = None
 # temp_repo = CommandRepo(paths=[], additional_commands=[], no_run=True)
 # command_list = temp_repo.get_commands().keys()
 
-VALID_CLI_OPTIONS = ["-r", "--use-repo", "-o", "--output", "-pw", "--ask-become-pass"]
-
+VALID_CLI_OPTIONS = ["-r", "--use-repo", "-o", "--output", "-pw", "--ask-become-pass", "--host"]
 
 
 if sys.argv[0].endswith("frecklecute"):
