@@ -2,10 +2,13 @@
 History
 =======
 
-0.5.4
------
+0.5.4 (2018-03-07)
+------------------
 
-* fixed freckelize execution when run in 'docker build ...'
+* fixes and improvements for running freckles inside a Docker container (including a helper script, 'frocker')
+* added more templating options for frecklecutables (ansible default filters, and 'tasks' can now be templated as string)
+* added more roles to default repo, fixes for current ones
+
 
 0.5.3 (2018-02-19)
 ------------------
