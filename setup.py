@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name='freckles',
-    version='0.5.3',
+    version='0.5.4',
     description="DevOps your laptop!",
     long_description=readme + '\n\n' + history,
     author="Markus Binsteiner",
