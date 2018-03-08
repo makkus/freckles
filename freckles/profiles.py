@@ -262,7 +262,7 @@ def assemble_freckle_run(*args, **kwargs):
             result.append(temp)
             click.echo("")
         return result
-    except (Exception, Error) as e:
+    except (Exception) as e:
         click.echo("\nError assembling configuration.\nMessage:  {}\nExiting...".format(e.message))
         sys.exit(1)
 
