@@ -67,7 +67,6 @@ class FreckelizeCommand(click.MultiCommand):
         self.config = config
 
         self.profile_repo = ProfileRepo(self.config)
-
         # self.command_names.append(BREAK_COMMAND_NAME)
 
 

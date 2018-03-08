@@ -559,6 +559,7 @@ def get_adapters_from_repo(adapter_repo):
 
     An adapter consists of 3 files: XXX
     """
+
     if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
         return {}
 
@@ -566,19 +567,24 @@ def get_adapters_from_repo(adapter_repo):
         return ADAPTER_CACHE[adapter_repo]
 
     result = {}
-    for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
+    try:
 
-        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+        # need to force 'str', otherwise there might be
+        for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
 
-        for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
+            dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
 
-            adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
-            adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
+            for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
+                adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
+                adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
-            # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
-            profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
+                # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
+                profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
 
-            result[profile_name] = adapter_folder
+                result[profile_name] = adapter_folder
+
+    except (UnicodeDecodeError) as e:
+        click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
 
     ADAPTER_CACHE[adapter_repo] = result
     return result
@@ -614,17 +620,23 @@ def get_blueprints_from_repo(blueprint_repo):
         return BLUEPRINT_CACHE[blueprint_repo]
 
     result = {}
-    for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
 
-        dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
-        for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
-            blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
-            blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
+    try:
 
-            #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
-            profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
+        for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
 
-            result[profile_name] = blueprint_folder
+            dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+            for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
+                blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
+                blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
+
+                #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+                profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
+
+                result[profile_name] = blueprint_folder
+
+    except (UnicodeDecodeError) as e:
+        click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
 
     BLUEPRINT_CACHE[blueprint_repo] = result
 
@@ -634,7 +646,6 @@ def get_blueprints_from_repo(blueprint_repo):
 def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
 
     profiles = find_supported_profiles(config, additional_context_repos)
-
     task_files_to_copy = {}
 
     for profile_name, profile_path in profiles.items():
@@ -704,6 +715,7 @@ def get_adapter_dependency_roles(profiles, additional_context_repos=[]):
     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
 
     all_deps = set()
+
     for profile_name, dep_file in dep_files.items():
 
         with open(dep_file, 'r') as f:

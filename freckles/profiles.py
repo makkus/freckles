@@ -106,8 +106,8 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
     result_checkout = create_freckles_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, hosts_list=hosts_list)
 
     playbook_dir = result_checkout["playbook_dir"]
-    repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
 
+    repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
     return_code = result_checkout["return_code"]
 
     if return_code != 0:
@@ -115,6 +115,7 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
         sys.exit(1)
 
     all_repo_metadata = json.load(open(repo_metadata_file_abs))
+
     add_paths = list(all_repo_metadata.keys())
 
     if not profiles:
@@ -130,7 +131,9 @@ def execute_freckle_run(repos, profiles, metadata, extra_profile_vars={}, no_run
                 if profile_temp not in profiles:
                     profiles.append(profile_temp)
 
+
         sorted_profiles = get_adapter_profile_priorities(profiles, additional_context_repos=add_paths)
+
         click.echo("\n# no adapters specified, using defaults from .freckle file:\n")
     else:
         sorted_profiles = profiles
@@ -262,8 +265,16 @@ def assemble_freckle_run(*args, **kwargs):
             result.append(temp)
             click.echo("")
         return result
+
     except (Exception) as e:
-        click.echo("\nError assembling configuration.\nMessage:  {}\nExiting...".format(e.message))
+
+        message = e.message
+        if not message:
+            if not e.reason:
+                message = "n/a"
+            else:
+                message = "Reason: {}".format(e.reason)
+        click.echo("\nError assembling configuration.\nMessage:  {}\nExiting...".format(message))
         sys.exit(1)
 
 
