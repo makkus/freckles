@@ -7,6 +7,9 @@ import pprint
 import os
 import re
 import shutil
+import sys
+import yaml
+from collections import OrderedDict
 from pydoc import locate
 
 import click
@@ -25,9 +28,36 @@ try:
 except NameError:
     from sets import Set as set
 
-import yaml
 from .freckles_defaults import *
 
+# from: https://gist.github.com/miracle2k/3184458
+def represent_odict(dump, tag, mapping, flow_style=None):
+    """Like BaseRepresenter.represent_mapping, but does not issue the sort().
+    """
+    value = []
+    node = yaml.MappingNode(tag, value, flow_style=flow_style)
+    if dump.alias_key is not None:
+        dump.represented_objects[dump.alias_key] = node
+    best_style = True
+    if hasattr(mapping, 'items'):
+        mapping = mapping.items()
+    for item_key, item_value in mapping:
+        node_key = dump.represent_data(item_key)
+        node_value = dump.represent_data(item_value)
+        if not (isinstance(node_key, yaml.ScalarNode) and not node_key.style):
+            best_style = False
+        if not (isinstance(node_value, yaml.ScalarNode) and not node_value.style):
+            best_style = False
+        value.append((node_key, node_value))
+    if flow_style is None:
+        if dump.default_flow_style is not None:
+            node.flow_style = dump.default_flow_style
+        else:
+            node.flow_style = best_style
+    return node
+
+yaml.SafeDumper.add_representer(OrderedDict,
+lambda dumper, value: represent_odict(dumper, u'tag:yaml.org,2002:map', value))
 
 def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
@@ -187,13 +217,20 @@ def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[],
 
 def replace_string(template_string, replacement_dict):
 
+    use_environment_vars = True
+    if use_environment_vars:
+        sub_dict = copy.deepcopy({"LOCAL_ENV": os.environ})
+        dict_merge(sub_dict, replacement_dict, copy_dct=False)
+    else:
+        sub_dict = replacement_dict
+
     trim_blocks = True
     block_start_string = '{%::'
     block_end_string = '::%}'
     variable_start_string = '{{::'
     variable_end_string = '::}}'
 
-    result = Environment(extensions=[freckles_jinja_utils, ansible_extensions.utils], trim_blocks=trim_blocks, block_start_string=block_start_string, block_end_string=block_end_string, variable_start_string=variable_start_string, variable_end_string=variable_end_string).from_string(template_string).render(replacement_dict)
+    result = Environment(extensions=[freckles_jinja_utils, ansible_extensions.utils], trim_blocks=trim_blocks, block_start_string=block_start_string, block_end_string=block_end_string, variable_start_string=variable_start_string, variable_end_string=variable_end_string).from_string(template_string).render(sub_dict)
 
     return result
 
@@ -260,13 +297,32 @@ def find_supported_blueprints(config=None):
 def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
                             run_parameters={}):
     click.echo("")
-    click.echo("frecklecutable: {}".format(task_metadata.get("command_name", "n/a")))
-    click.echo("path: {}".format(task_metadata.get("command_path", "n/a")))
-    click.echo("generated ansible environment: {}".format(run_parameters.get("env_dir", "n/a")))
-    click.echo("config:")
-    click.echo(pprint.pformat(task_config))
+    click.secho("frecklecutable:", bold=True, nl=False)
+    click.echo(" {}".format(task_metadata.get("command_name", "n/a")))
     click.echo("")
+    click.secho("Path:", bold=True, nl=False)
+    click.echo(" {}".format(task_metadata.get("command_path", "n/a")))
+    click.secho("Generated ansible environment:", bold=True, nl=False)
+    click.echo(" {}".format(run_parameters.get("env_dir", "n/a")))
+    # click.echo("config:")
+    # output = yaml.safe_dump(task_config, default_flow_style=False, allow_unicode=True)
+    # click.echo()
+    # click.echo(output)
+    #click.echo(pprint.pformat(task_config))
+    # click.echo("")
 
+    # pprint.pprint(run_parameters)
+    click.echo("")
+    click.secho("Tasks:", bold=True)
+    for task in run_parameters["task_details"]:
+        details = task.pretty_details()
+
+        # pprint.pprint(details)
+        output = yaml.safe_dump(details, default_flow_style=False)
+
+        click.echo("")
+        click.echo(output)
+        click.echo("")
 
 def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
     doc = config.get("doc", {})
@@ -357,11 +413,6 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
 
     final_vars = {}
     sub_dict = copy.deepcopy(new_args)
-    use_environment_vars = True
-    if use_environment_vars:
-        envs_dict = copy.deepcopy({"LOCAL_ENV": os.environ})
-        dict_merge(envs_dict, sub_dict, copy_dct=False)
-        sub_dict = envs_dict
 
     # inject subdict (args and envs) in vars
     for key, template in task_vars.items():

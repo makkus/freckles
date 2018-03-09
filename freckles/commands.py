@@ -188,8 +188,8 @@ class CommandRepo(object):
 
             if no_run:
                 parameters = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output,
-                                                        ask_become_pass=ask_become_pass, no_run=True, config=self.config, host_list=hosts)
-                print_task_list_detaizls(task_config, task_metadata=metadata, output_format=output,
+                                                        ask_become_pass=ask_become_pass, no_run=True, config=self.config, hosts_list=hosts)
+                print_task_list_details(task_config, task_metadata=metadata, output_format=output,
                                         ask_become_pass=ask_become_pass, run_parameters=parameters)
                 result = None
             else:
