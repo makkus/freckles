@@ -1,28 +1,40 @@
+args:
+  hostname:
+     help: the hostname of the server
+     required: true
+     is_var: false
+  email:
+     help: the email of the server admin
+     required: true
+     is_var: false
+  project:
+     help: the project name on readthedocs
+     is_var: false
+     required: true
 tasks:
   - install: fail2ban
   - thefinn93.letsencrypt:
       letsencrypt_webroot_path: /var/www/html
-      letsencrypt_email: makkus@posteo.de
+      letsencrypt_email: "{{:: email ::}}"
       letsencrypt_cert_domains:
-        - docs.freckles.io
+        - "{{:: hostname ::}}"
       letsencrypt_renewal_command_args: '--renew-hook "systemctl restart nginx"'
-
   - geerlingguy.nginx:
       nginx_remove_default_vhost: true
       nginx_vhosts:
        - listen: "80"
-         server_name: "docs.freckles.io"
-         return: "301 https://docs.freckles.io$request_uri"
+         server_name: "{{:: hostname ::}}"
+         return: "301 https://{{:: hostname ::}}$request_uri"
+         filename: "{{:: hostname ::}}.80.conf"
        - listen: "443 ssl http2"
-         server_name: "docs.freckles.io"
+         server_name: "{{:: hostname ::}}"
          state: "present"
          extra_parameters: |
-             location /.well-known {
+            location /.well-known {
                alias /var/www/html/.well-known;
             }
-
             location / {
-               proxy_pass https://freckles.readthedocs.io:443;
+               proxy_pass https://{{:: project ::}}.readthedocs.io:443;
                proxy_set_header Host $http_host;
                proxy_set_header X-Forwarded-Proto https;
                proxy_set_header X-Real-IP $remote_addr;
@@ -31,7 +43,7 @@ tasks:
                proxy_connect_timeout 10s;
                proxy_read_timeout 20s;
             }
-            ssl_certificate      /etc/letsencrypt/live/docs.freckles.io/fullchain.pem;
-            ssl_certificate_key  /etc/letsencrypt/live/docs.freckles.io/privkey.pem;
+            ssl_certificate      /etc/letsencrypt/live/{{:: hostname ::}}/fullchain.pem;
+            ssl_certificate_key  /etc/letsencrypt/live/{{:: hostname ::}}/privkey.pem;
             ssl_protocols        TLSv1.1 TLSv1.2;
             ssl_ciphers          HIGH:!aNULL:!MD5;
