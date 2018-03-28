@@ -29,6 +29,7 @@ tasks:
        - listen: "443 ssl http2"
          server_name: "{{:: hostname ::}}"
          state: "present"
+         filename: "{{:: hostname ::}}.443.conf"
          extra_parameters: |
             location /.well-known {
                alias /var/www/html/.well-known;
