@@ -157,7 +157,7 @@ or, using ``wget`` instead of ``curl``, and executing ``frecklecute`` instead of
 
    wget -O - https://freckles.io | bash -s -- frecklecute --help
 
-This bootstraps ('inaugurates') ``freckelize``, ``frecklecute`` or ``freckles`` and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/inaugurate/``, which can be deleted without affecting anything else.
+This bootstraps ('inaugurates') ``freckelize``, ``frecklecute`` or ``freckles`` and displays its help message (instead of actually doing something useful). All files are installed under ``$HOME/.local/share/inaugurate/``, which can be deleted without affecting anything else.
 
 This command also adds a line to your ``$HOME/.profile`` file in order to add *freckles* to your path (once you re-login, or do a ``source $HOME/.profile``). Set an environment var ``NO_ADD_PATH=true`` if you want to prevent that behaviour.
 

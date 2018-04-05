@@ -53,7 +53,7 @@ To not unnecessarily ask for a *sudo* password on systems where *passwordless su
 
 This is mostly for debugging purposes, but it could potentially also be used to automatically create an Ansible playbook environment that can be copied to different systems and be executed there, without needing *freckles* installed (*Ansible* would still have to be installed of course).
 
-The (last) created environment can be found in `$HOME/.local/freckles/runs/current`.
+The (last) created environment can be found in `$HOME/.local/share/freckles/runs/current`.
 
 
 Abbreviations
@@ -68,4 +68,3 @@ Abbreviations
 - *github repo file*: ``gh:<github_user>/<repo_name>/path/to/file``
 - *bitbucket_repo*: ``bb:<bitbucket_user>/<repo_name>``
 - *bitbucket_repo_file*: ``bb:<bitbucket_user/<repo_name>/path/to/file``
-

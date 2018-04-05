@@ -91,7 +91,7 @@ def log_current(ctx, follow):
     Instead of manually tailing that particular log-file, this commands lets you do that a tad quicker.
     """
 
-    last_run_folder = os.path.expanduser("~/.local/freckles/runs/current")
+    last_run_folder = os.path.expanduser("~/.local/share/freckles/runs/current")
     last_run_log_folder = os.path.join(last_run_folder, "logs")
 
     ansible_log_file = os.path.join(last_run_log_folder, "ansible_run_log")
@@ -127,7 +127,7 @@ def log_current(ctx, follow):
 def debug_last(ctx):
     """Re-runs the last freckle run directly using ansible-playbook and verbose output."""
 
-    last_run_folder = os.path.expanduser("~/.local/freckles/runs/current")
+    last_run_folder = os.path.expanduser("~/.local/share/freckles/runs/current")
 
     last_run_debug_folder = os.path.join(last_run_folder, "debug")
     last_run_debug_script = os.path.join(last_run_debug_folder, "debug_all_plays.sh")

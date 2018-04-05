@@ -62,7 +62,7 @@ By default ``freckelize`` comes with a (small) set of 'officially supported' ada
 
    frecklecute enable-repo gh:makkus/freckles_roles_and_adapters
 
-This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where ``freckelize`` will find it in subsequent runs.
+This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/share/freckles/repos/https/github/com/makkus/freckles/roles/and/adapters/git in this case``) where ``freckelize`` will find it in subsequent runs.
 
 ``freckelize`` will look at all files in the configured folders and check if any of them contains a file that ends with the string ``.adapter.freckle``. If one (or several) is found, it'll assume the name of the adapter is the first part of the file-name (everything before ``.adapter.freckle``). Then it'll look for two other files in the same folder, starting with the (same) adapter name and ending with either ``.init.freckle`` or ``tasks.freckle`` (see above).
 
@@ -89,7 +89,7 @@ There is a repository of community created and maintained *freckle adapters*, wh
 
    frecklecutable enable-repo freckles-io
 
-This will check out the `freckelize adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
+This will check out the `freckelize adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/share/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
 
 Locally available adapters
 --------------------------

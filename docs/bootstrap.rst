@@ -55,7 +55,7 @@ Below a few more details on the two ways of bootstrapping *freckles* using *inau
 inaugurate (without elevated permissions)
 -----------------------------------------
 
-This is the default way of bootstrapping *freckles*. It will create a self-contained installation (under ``$HOME/.local/inaugurate/``), using conda_ to install requirements and create its working environment.
+This is the default way of bootstrapping *freckles*. It will create a self-contained installation (under ``$HOME/.local/share/inaugurate/``), using conda_ to install requirements and create its working environment.
 
 Commands
 --------
@@ -79,7 +79,7 @@ What does this do?
 
 This installs the conda_ package manager (miniconda_ actually). Then it creates a `conda environment`_ called 'inaugurate', into which *freckles* along with its dependencies is installed.
 
-Everything that is installed (about 450mb of stuff) is put into the ``$HOME/.local/inaugurate/conda/envs/inaugurate`` folder, which can be deleted without affecting anything else (except you did install some other applications using `conda`, those might be deleted too).
+Everything that is installed (about 450mb of stuff) is put into the ``$HOME/.local/share/inaugurate/conda/envs/inaugurate`` folder, which can be deleted without affecting anything else (except you did install some other applications using `conda`, those might be deleted too).
 
 A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the users ``$PATH`` environment variable.
 
@@ -87,7 +87,7 @@ A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the us
 Inaugurate (with elevated permissions)
 --------------------------------------
 
-This is a quicker (and leaner) way to bootstrap *freckles*, as 'normal' distribution packages are used to install dependencies. The size of the ``$HOME/.local/inaugurate`` folder will be smaller, ~70mb -- systems packages are adding to that in other parts of the system though. The *freckles* install itself is done in a *virtualenv* using `pip`. Root permissions are required.
+This is a quicker (and leaner) way to bootstrap *freckles*, as 'normal' distribution packages are used to install dependencies. The size of the ``$HOME/.local/share/inaugurate`` folder will be smaller, ~70mb -- systems packages are adding to that in other parts of the system though. The *freckles* install itself is done in a *virtualenv* using `pip`. Root permissions are required.
 
 Commands
 ^^^^^^^^
@@ -109,7 +109,7 @@ The install process can be influenced with environment variables, more details c
 What does this do?
 ^^^^^^^^^^^^^^^^^^
 
-This installs all the requirements that are needed to create a Python virtualenv for *freckles*. What exactly those requirements are differs depending on the OS/Distribution that is used (check the :ref:`Install manually via pip` section for details). Then a Python virtual environment is created in ``$HOME/.local/inaugurate/virtualenvs/inaugurate`` into which *freckles* and all its requirements are installed (~70mb).
+This installs all the requirements that are needed to create a Python virtualenv for *freckles*. What exactly those requirements are differs depending on the OS/Distribution that is used (check the :ref:`Install manually via pip` section for details). Then a Python virtual environment is created in ``$HOME/.local/share/inaugurate/virtualenvs/inaugurate`` into which *freckles* and all its requirements are installed (~70mb).
 
 A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the users ``$PATH`` environment variable.
 

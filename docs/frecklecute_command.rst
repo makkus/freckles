@@ -65,7 +65,7 @@ In addition, by default *frecklecute* checks one other folder for more available
 
    frecklecute enable-repo gh:makkus/my-frecklecutables
 
-This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/freckles/repos/https/github/com/makkus/my/frecklecutables/git in this case``) where *freckles* will find it in subsequent runs.
+This will add the git repo url to the ``trusted-repos`` key in  ``$HOME/.freckles/config.yml``, and check out the repository into a location using a unique path (``$HOME/.local/share/freckles/repos/https/github/com/makkus/my/frecklecutables/git in this case``) where *freckles* will find it in subsequent runs.
 
 *frecklecute* will look at all files in the roots of the configured folders and check if it can find any (usable -- which means their content is yaml and contains a ``tasks`` key) files. Also, those files are not allowed to have a '.' (dot) in their name. In addition, *frecklecute* will look for any child-folders of all of the configured folders, and look into the roots of all of those child-folders that are named (exactly) ``frecklecutables``. It'll also check the roots of those for useable text files that don't contain a '.' in their name.
 
@@ -93,7 +93,7 @@ There is a repository of community created and maintained *freckle adapters*, wh
 
    frecklecutable enable-repo freckles-io
 
-This will check out the `freckles adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
+This will check out the `freckles adapters <https://github.com/freckles-io/adapters>`_ git repo (into: ``~/.local/share/freckles/repos/freckles_io``), and mark it as trusted in the ``~/.freckles/config.yml`` config file.
 
 Locally available *frecklecutables*
 -----------------------------------

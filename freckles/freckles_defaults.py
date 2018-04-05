@@ -19,9 +19,9 @@ DEFAULT_USER_ROLE_REPO_PATH = os.path.join(os.path.expanduser("~"), ".freckles",
 DEFAULT_USER_FRECKLECUTABLES_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "frecklecutables")
 DEFAULT_USER_BLUEPRINTS_PATH = os.path.join(os.path.expanduser("~"), ".freckles", "blueprints")
 
-DEFAULT_LOCAL_FRECKLES_BASE = os.path.join(os.path.expanduser("~"), ".local", "freckles")
-DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER = os.path.join(os.path.expanduser("~"), ".local", "freckles", ".box_basics_run_successfully")
-DEFAULT_LOCAL_REPO_PATH_BASE = os.path.join(os.path.expanduser("~"), ".local", "freckles", "repos")
+DEFAULT_LOCAL_FRECKLES_BASE = os.path.join(os.path.expanduser("~"), ".local", "share", "freckles")
+DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER = os.path.join(os.path.expanduser("~"), ".local", "share", "freckles", ".box_basics_run_successfully")
+DEFAULT_LOCAL_REPO_PATH_BASE = os.path.join(os.path.expanduser("~"), ".local", "share", "freckles", "repos")
 DEFAULT_FRECKLES_IO_ROLES_REPO_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_extra")
 DEFAULT_FRECKLES_IO_ADAPTERS_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_adapters")
 DEFAULT_FRECKLES_IO_FRECKLECUTABLES_PATH = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, "freckles_io_frecklecutables")
@@ -42,7 +42,7 @@ EXTRA_FRECKLES_PLUGINS = os.path.abspath(os.path.join(os.path.dirname(__file__),
 # DEFAULT_IGNORE_STRINGS = ["pre-checking", "finding freckles", "processing freckles", "retrieving freckles", "calculating", "check required", "augmenting", "including ansible role", "checking for", "preparing profiles", "starting profile execution", "auto-detect package managers", "setting executable:"]
 DEFAULT_IGNORE_STRINGS = []
 
-DEFAULT_RUN_BASE_LOCATION = os.path.expanduser("~/.local/freckles/runs")
+DEFAULT_RUN_BASE_LOCATION = os.path.expanduser("~/.local/share/freckles/runs")
 DEFAULT_RUN_SYMLINK_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "current")
 DEFAULT_RUN_LOCATION = os.path.join(DEFAULT_RUN_BASE_LOCATION, "archive", "run")
 
