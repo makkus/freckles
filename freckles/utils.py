@@ -512,6 +512,8 @@ def execute_run_box_basics(output="default"):
 
 
 def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, default_local_path=True):
+    """Expands repo urls.
+    """
 
     expanded = expanded_repos_dict(repos)
 

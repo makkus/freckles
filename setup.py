@@ -11,6 +11,8 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.7',
+    'click-log==0.2.1',
+    'click-completion==0.2.1',
     'nsbl>=0.3.7',
     'luci>=0.1.1'
 ]
@@ -37,6 +39,7 @@ setup(
             'freckles=freckles.freckles_cli:cli',
             'freckelize=freckles.freckelize_cli:cli',
             'frecklecute=freckles.frecklecute_cli:cli',
+            'fx=freckles.frecklecute:cli',
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
