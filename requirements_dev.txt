@@ -9,6 +9,7 @@ Sphinx==1.7.1
 PyYAML==3.12
 pytest==3.4.2
 nsbl # pyup: ignore
+luci # pyup: ignore
 sphinx-autobuild==0.7.1
 tornado==4.5.3
 docutils==0.14
@@ -18,8 +19,3 @@ sphinx-click==1.0.4
 #sphinx-nameko-theme==0.0.3
 #jast==0.0.4
 sphinx_redactor_theme==0.0.1
-
-
-
-
-

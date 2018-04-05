@@ -20,11 +20,14 @@ Vagrant.configure("2") do |config|
   # `vagrant box outdated`. This is not recommended.
   # config.vm.box_check_update = false
 
+  # set private network, for deb proxy
+  config.vm.network "private_network", type: "dhcp"
+
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   config.vm.network "forwarded_port", guest: 8180, host: 8180
-  config.vm.network "forwarded_port", guest: 8000, host: 8000
+  #config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.network "forwarded_port", guest: 8082, host: 8082
   config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.network "forwarded_port", guest: 8090, host: 8090
@@ -49,7 +52,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../", "/freckles", id: "freckles"
   config.vm.synced_folder "../../../frkl", "/frkl", id: "frkl"
   config.vm.synced_folder "../../../nsbl", "/nsbl", id: "nsbl"
-  config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
+#  config.vm.synced_folder "../../../inaugurate", "/inaugurate", id: "inaugurate"
   config.vm.synced_folder "../../../repos", "/repos", id: "repos"
   config.vm.synced_folder "../../../roles", "/roles", id: "roles"
   config.vm.synced_folder "../../../examples", "/examples", id: "examples"
@@ -83,10 +86,12 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+#  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+#     sudo apt-get update
+#     sudo apt-get install -y netcat net-tools
+#     export DEB_PROXY_PORT=8000
+#     echo "HEAD /" | nc $(sudo route -n | awk '/^0.0.0.0/ {print $2}') ${DEB_PROXY_PORT} | grep squid-deb-proxy && (echo "Acquire::http::Proxy \"http://$(sudo route -n | awk '/^0.0.0.0/ {print $2}'):${DEB_PROXY_PORT}\";" | sudo tee /etc/apt/apt.conf.d/30proxy) && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" | sudo tee -a /etc/apt/apt.conf.d/30proxy) || echo "No squid-deb-proxy detected on VM host"
+#  SHELL
   # config.vm.provision :shell, path: "vagrant_bootstrap.sh", privileged: false
 
 end

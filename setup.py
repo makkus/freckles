@@ -11,7 +11,8 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.7',
-    'nsbl>=0.3.7'
+    'nsbl>=0.3.7',
+    'luci>=0.1.1'
 ]
 
 test_requirements = [

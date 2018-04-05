@@ -43,8 +43,6 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
         construct_mapping)
     return yaml.load(stream, OrderedLoader)
 
-
-
 def output(python_object, format="raw", pager=False):
     if format == 'yaml':
         output_string = yaml.safe_dump(python_object, default_flow_style=False, encoding='utf-8', allow_unicode=True)
@@ -61,7 +59,6 @@ def output(python_object, format="raw", pager=False):
         click.echo_via_pager(output_string)
     else:
         click.echo(output_string)
-
 
 @click.group(invoke_without_command=True)
 @click.option('--version', help='the version of frkl you are using', is_flag=True)
