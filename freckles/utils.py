@@ -459,10 +459,12 @@ def download_repos(repos_to_download, config, output):
     expanded_download = expand_repos(repos_to_download)
     expanded_trusted = expand_repos(config.trusted_urls)
 
+    no_url = True
     for ex_rep in expanded_download:
         url = ex_rep.get("url", None)
         if not url:
             continue
+        no_url = False
         trusted = False
         for ex_trust in expanded_trusted:
             url_trust = ex_trust.get("url", None)
@@ -488,6 +490,11 @@ def download_repos(repos_to_download, config, output):
 
     print_repos_expand(repos, repo_source="using runtime context repo(s)", warn=False)
 
+    config.add_repos(repos)
+
+    if no_url:
+        return repos
+
     click.echo("\n# processing extra repos...")
 
     task_config = [{'tasks':
@@ -501,8 +508,6 @@ def download_repos(repos_to_download, config, output):
 
 
     create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=False)
-
-    config.add_repos(repos)
 
     return repos
 
