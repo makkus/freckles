@@ -20,7 +20,6 @@ import plugin_formatter
 from collections import OrderedDict
 
 from . import __version__ as VERSION
-from .commands import CommandRepo
 from .freckles_defaults import *
 from nsbl import tasks
 from nsbl.defaults import *
