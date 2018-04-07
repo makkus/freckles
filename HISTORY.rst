@@ -2,6 +2,12 @@
 History
 =======
 
+0.6.0
+-----
+
+* moved inaugurate install & freckles directory from ~/.local/ to ~/.local/share which means a reinstall will be necessary
+* changed frecklecutable format for specifying args, so existing frecklecutables need to be adapted
+
 0.5.5 (2018-03-29)
 ------------------
 
