@@ -131,3 +131,12 @@ DEFAULT_FRECKLES_COMMAND_FORMAT = {"child_marker": "commands",
     # return repo
 
     # default = {"roles": (repo_name, repo_name), "adapters": (repo_name, repo_name), "frecklecutables": (repo_name_repo_name)}
+
+
+# FRECKLECUTABLE KEYS
+FX_FRECKLES_META_KEY_NAME = "__freckles__"
+FX_DEFAULTS_KEY_NAME = "defaults"
+FX_DOC_KEY_NAME = "doc"
+FX_ARGS_KEY_NAME = "args"
+FX_VARS_KEY_NAME = "vars"
+FX_TASKS_KEY_NAME = "tasks"
