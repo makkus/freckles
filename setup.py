@@ -38,8 +38,7 @@ setup(
         'console_scripts': [
             'freckles=freckles.freckles_cli:cli',
             'freckelize=freckles.freckelize_cli:cli',
-            'frecklecute=freckles.frecklecute_cli:cli',
-            'fx=freckles.frecklecute:cli',
+            'frecklecute=freckles.frecklecute:cli',
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
