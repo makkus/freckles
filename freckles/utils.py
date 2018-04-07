@@ -29,6 +29,9 @@ except NameError:
     from sets import Set as set
 
 from .freckles_defaults import *
+import logging
+
+log = logging.getLogger("freckles")
 
 # from: https://gist.github.com/miracle2k/3184458
 def represent_odict(dump, tag, mapping, flow_style=None):
@@ -73,6 +76,7 @@ class FrecklesUtilsExtension(Extension):
 
 
 freckles_jinja_utils = FrecklesUtilsExtension
+freckles_jinja_extensions = [freckles_jinja_utils, ansible_extensions.utils]
 
 DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
 
@@ -450,47 +454,73 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     return new_args, new_vars
 
 
+def download_repos(repos_to_download, config, output):
 
+    expanded_download = expand_repos(repos_to_download)
+    expanded_trusted = expand_repos(config.trusted_urls)
 
-def download_extra_repos(ctx, param, value):
-
-    output = ctx.find_root().params.get("output", "default")
-
-    if not value:
-        return
-    # repos = list(value)
+    for ex_rep in expanded_download:
+        url = ex_rep.get("url", None)
+        if not url:
+            continue
+        trusted = False
+        for ex_trust in expanded_trusted:
+            url_trust = ex_trust.get("url", None)
+            url_trust_temp = re.sub('//+', '/', url_trust)
+            if url_trust_temp.count('/') < 3:
+                log.debug("Ignoring trusted url '{}': not long enough, needs at least")
+                continue
+            if not url_trust:
+                continue
+            if url.startswith(url_trust):
+                trusted = True
+                break
+        if not trusted:
+            raise Exception("Context repository not trusted: '{}'. Check XXX for details.".format(url))
 
     repos = []
-    for repo in value:
+    for repo in repos_to_download:
         if os.path.exists(repo):
             temp = os.path.abspath(repo)
             repos.append(temp)
         else:
             repos.append(repo)
 
-    print_repos_expand(repos, repo_source="using runtime context repo(s)", warn=True)
+    print_repos_expand(repos, repo_source="using runtime context repo(s)", warn=False)
 
     click.echo("\n# processing extra repos...")
 
     task_config = [{'tasks':
-                    [
-                        # {'install-pkg-mgrs': {   #
-                        # 'pkg_mgr': 'auto',
-                        # 'pkg_mgrs': ['homebrew']}},
-                      {'freckles-io.freckles-config': {
-                          'freckles_extra_repos': repos,
-                          'freckles_config_update_repos': True
-                      }
-                     }]
+                    [{'freckles-io.freckles-config': {
+                        'freckles_extra_repos': repos,
+                        'freckles_config_update_repos': True,
+                        'freckles_checkout_config_file_repos': False
+                    }
+                    }]
     }]
 
 
     create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=False)
 
+    config.add_repos(repos)
+
+    return repos
+
+def download_extra_repos(ctx, param, value):
+
+    output = ctx.find_root().params.get("output", "default")
+
+    if not value:
+        return []
+    # repos = list(value)
+
     if hasattr(ctx.find_root().command, "config"):
-        ctx.find_root().command.config.add_repos(repos)
+        config = ctx.find_root().command.config
     elif hasattr(ctx.find_root(), "obj"):
-        ctx.find_root().obj["config"].add_repos(repos)
+        config = ctx.find_root().obj["config"]
+
+    result = download_repos(value, config, output)
+    return result
 
 def execute_run_box_basics(output="default"):
 
