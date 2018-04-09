@@ -15,6 +15,7 @@ import yaml
 
 DEFAULT_ROLE_REPOS = ['default', 'user']
 DEFAULT_TRUSTED_URLS = ['https://github.com/makkus/', 'https://github.com/freckles-io/']
+# DEFAULT_TRUSTED_URLS = ['https://github.com/freckles-io/']
 
 def parse_config_file(path):
 

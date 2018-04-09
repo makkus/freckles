@@ -33,10 +33,6 @@ nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "exte
 VARS_HELP = "variables to be used for templating, can be overridden by cli options if applicable"
 DEFAULTS_HELP = "default variables, can be used instead (or in addition) to user input via command-line parameters"
 KEEP_METADATA_HELP = "keep metadata in result directory, mostly useful for debugging"
-FRECKLECUTE_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formated) text file (called a 'frecklecutable').
-
-*frecklecute* comes with a few default frecklecutables that are used to manage itself (as well as its sister application *freckles*) as well as a few useful generic ones. Visit the online documentation for more details: https://docs.freckles.io/en/latest/frecklecute_command.html
-"""
 FRECKLECUTE_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
 
@@ -124,6 +120,10 @@ class FrecklecutableFinder(DictletFinder):
         self.path_cache = {}
 
     def get_all_dictlet_names(self):
+
+        return self.get_all_dictlets().keys()
+
+    def get_all_dictlets(self):
         """Find all frecklecutables."""
 
         if self.frecklecutable_cache is None:
@@ -143,7 +143,7 @@ class FrecklecutableFinder(DictletFinder):
 
             frkl.dict_merge(dictlet_names, self.path_cache[path], copy_dct=False)
 
-        return dictlet_names
+        return dictlet_names.keys()
 
     def get_dictlet(self, name):
 
@@ -245,8 +245,15 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 
         return FrecklecutableReader()
 
-    def freckles_process(self, all_vars, metadata, config, hosts, output, ask_become_pass, no_run):
+    def get_additional_args(self):
+        pass
 
+    def freckles_process(self, command_name, all_vars, metadata, dictlet_details, config, parent_params):
+
+        hosts = parent_params.get("hosts", None)
+        output = parent_params.get("output", "default")
+        ask_become_pass = parent_params.get("ask_become_pass", "auto")
+        no_run = parent_params.get("no_run", False)
         tasks_string = metadata.get(FX_TASKS_KEY_NAME, "")
 
         replaced_tasks = replace_string(tasks_string, all_vars, additional_jinja_extensions=freckles_jinja_extensions, **JINJA_DELIMITER_PROFILES["luci"])

@@ -28,7 +28,7 @@ except NameError:
 from .freckles_defaults import *
 from .utils import (RepoType,
                     create_freckle_desc,
-                    find_supported_profiles, ADAPTER_MARKER_EXTENSION, create_cli_command, create_freckles_run,
+                    ADAPTER_MARKER_EXTENSION, create_cli_command,
                     get_vars_from_cli_input, print_repos_expand, get_available_blueprints)
 
 log = logging.getLogger("freckles")

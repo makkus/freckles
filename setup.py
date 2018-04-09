@@ -37,7 +37,7 @@ setup(
     entry_points={
         'console_scripts': [
             'freckles=freckles.freckles_cli:cli',
-            'freckelize=freckles.freckelize_cli:cli',
+            'freckelize=freckles.freckelize:cli',
             'frecklecute=freckles.frecklecute:cli',
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]

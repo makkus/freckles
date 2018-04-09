@@ -266,23 +266,23 @@ def render_dict(obj, replacement_dict):
         return obj
 
 
-def find_supported_profiles(config=None, additional_context_repos=[]):
+# def find_supported_profiles(config=None, additional_context_repos=[]):
 
-    if not config:
-        config = DEFAULT_FRECKLES_CONFIG
+#     if not config:
+#         config = DEFAULT_FRECKLES_CONFIG
 
-    trusted_repos = copy.copy(config.trusted_repos)
-    if additional_context_repos:
-        trusted_repos.extend(additional_context_repos)
+#     trusted_repos = copy.copy(config.trusted_repos)
+#     if additional_context_repos:
+#         trusted_repos.extend(additional_context_repos)
 
-    repos = nsbl_tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+#     repos = nsbl_tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
-    result = {}
-    for r in repos:
-        p = get_adapters_from_repo(r)
-        result.update(p)
+#     result = {}
+#     for r in repos:
+#         p = get_adapters_from_repo(r)
+#         result.update(p)
 
-    return result
+#     return result
 
 def find_supported_blueprints(config=None):
 
@@ -640,42 +640,42 @@ def find_supported_profile_names(config=None, additional_context_repos=[]):
     return sorted(list(set(find_supported_profiles(config, additional_context_repos).keys())))
 
 
-ADAPTER_CACHE = {}
+# ADAPTER_CACHE = {}
 
-def get_adapters_from_repo(adapter_repo):
-    """Find all freckelize adapters under a folder.
+# def get_adapters_from_repo(adapter_repo):
+#     """Find all freckelize adapters under a folder.
 
-    An adapter consists of 3 files: XXX
-    """
+#     An adapter consists of 3 files: XXX
+#     """
 
-    if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
-        return {}
+#     if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
+#         return {}
 
-    if adapter_repo in ADAPTER_CACHE.keys():
-        return ADAPTER_CACHE[adapter_repo]
+#     if adapter_repo in ADAPTER_CACHE.keys():
+#         return ADAPTER_CACHE[adapter_repo]
 
-    result = {}
-    try:
+#     result = {}
+#     try:
 
-        # need to force 'str', otherwise there might be
-        for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
+#         # need to force 'str', otherwise there might be
+#         for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
 
-            dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+#             dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
 
-            for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
-                adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
-                adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
+#             for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
+#                 adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
+#                 adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
 
-                # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
-                profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
+#                 # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
+#                 profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
 
-                result[profile_name] = adapter_folder
+#                 result[profile_name] = adapter_folder
 
-    except (UnicodeDecodeError) as e:
-        click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
+#     except (UnicodeDecodeError) as e:
+#         click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
 
-    ADAPTER_CACHE[adapter_repo] = result
-    return result
+#     ADAPTER_CACHE[adapter_repo] = result
+#     return result
 
 BLUEPRINT_CACHE = {}
 def get_available_blueprints(config=None):
@@ -731,24 +731,24 @@ def get_blueprints_from_repo(blueprint_repo):
     return result
 
 
-def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
+# def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
 
-    profiles = find_supported_profiles(config, additional_context_repos)
-    task_files_to_copy = {}
+#     profiles = find_supported_profiles(config, additional_context_repos)
+#     task_files_to_copy = {}
 
-    for profile_name, profile_path in profiles.items():
+#     for profile_name, profile_path in profiles.items():
 
-        if valid_profiles and profile_name not in valid_profiles:
-            continue
+#         if valid_profiles and profile_name not in valid_profiles:
+#             continue
 
-        profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
+#         profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
 
-        if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
-            continue
+#         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
+#             continue
 
-        task_files_to_copy[profile_name] = profile_child_file
+#         task_files_to_copy[profile_name] = profile_child_file
 
-    return task_files_to_copy
+#     return task_files_to_copy
 
 
 def get_all_adapters_in_repos(repos):
@@ -761,80 +761,80 @@ def get_all_adapters_in_repos(repos):
     return result
 
 
-def find_adapter_files_callback(extensions, valid_profiles=None, additional_context_repos=[], print_used_adapter=True):
+# def find_adapter_files_callback(extensions, valid_profiles=None, additional_context_repos=[], print_used_adapter=True):
 
-    if isinstance(extensions, string_types):
-        extensions = [extensions]
+#     if isinstance(extensions, string_types):
+#         extensions = [extensions]
 
-    task_files_to_copy = {}
-    print_cache = {}
-    for extension in extensions:
-        files = find_adapter_files(extension, valid_profiles, additional_context_repos=additional_context_repos)
+#     task_files_to_copy = {}
+#     print_cache = {}
+#     for extension in extensions:
+#         files = find_adapter_files(extension, valid_profiles, additional_context_repos=additional_context_repos)
 
-        for key, value in files.items():
-            print_cache[key] = value
-            task_files_to_copy.setdefault(extension, {})[key] = value
+#         for key, value in files.items():
+#             print_cache[key] = value
+#             task_files_to_copy.setdefault(extension, {})[key] = value
 
-    if valid_profiles and print_used_adapter:
-        for p in valid_profiles:
-            if p in print_cache.keys():
-                click.echo("  - {}: {}".format(p, os.path.dirname(print_cache[p])))
+#     if valid_profiles and print_used_adapter:
+#         for p in valid_profiles:
+#             if p in print_cache.keys():
+#                 click.echo("  - {}: {}".format(p, os.path.dirname(print_cache[p])))
 
-    def copy_callback(ansible_environment_root):
+#     def copy_callback(ansible_environment_root):
 
-        for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
-                                       "init-{}.yml".format(name))
-            shutil.copyfile(path, target_path)
+#         for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
+#             target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
+#                                        "init-{}.yml".format(name))
+#             shutil.copyfile(path, target_path)
 
-        for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
-            target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
-                                       "items-{}.yml".format(name))
-            shutil.copyfile(path, target_path)
+#         for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
+#             target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
+#                                        "items-{}.yml".format(name))
+#             shutil.copyfile(path, target_path)
 
-    return copy_callback
+#     return copy_callback
 
 
-def get_adapter_dependency_roles(profiles, additional_context_repos=[]):
+# def get_adapter_dependency_roles(profiles, additional_context_repos=[]):
 
-    if not profiles:
-        return []
+#     if not profiles:
+#         return []
 
-    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
+#     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
 
-    all_deps = set()
+#     all_deps = set()
 
-    for profile_name, dep_file in dep_files.items():
+#     for profile_name, dep_file in dep_files.items():
 
-        with open(dep_file, 'r') as f:
-            deps = yaml.safe_load(f)
-            if not deps:
-                deps = {}
-            all_deps |= set(deps.get("role-dependencies", {}))
+#         with open(dep_file, 'r') as f:
+#             deps = yaml.safe_load(f)
+#             if not deps:
+#                 deps = {}
+#             all_deps |= set(deps.get("role-dependencies", {}))
 
-    return list(all_deps)
+#     return list(all_deps)
 
-def get_adapter_profile_priorities(profiles, additional_context_repos=[]):
+# def get_adapter_profile_priorities(profiles, additional_context_repos=[]):
 
-    if not profiles:
-        return []
+#     if not profiles:
+#         return []
 
-    dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
+#     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
 
-    prios = []
-    for profile_name, dep_file in dep_files.items():
+#     prios = []
+#     for profile_name, dep_file in dep_files.items():
 
-        with open(dep_file, 'r') as f:
-            deps = yaml.safe_load(f)
-            if not deps:
-                deps = {}
+#         with open(dep_file, 'r') as f:
+#             deps = yaml.safe_load(f)
+#             if not deps:
+#                 deps = {}
 
-        priority = deps.get("priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
-        prios.append([priority, profile_name])
+#         priority = deps.get("priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
+#         prios.append([priority, profile_name])
 
-    profiles_sorted = sorted(prios, key=lambda tup: tup[0])
+#     profiles_sorted = sorted(prios, key=lambda tup: tup[0])
 
-    return [item[1] for item in profiles_sorted]
+#     return [item[1] for item in profiles_sorted]
 
 def extract_all_used_profiles(freckle_repos):
     all_profiles = []
@@ -844,36 +844,36 @@ def extract_all_used_profiles(freckle_repos):
     return list(set(all_profiles))
 
 
-def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
-                        output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
+# def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
+#                         output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
 
-    # profiles = extract_all_used_profiles(freckle_repos)
+#     # profiles = extract_all_used_profiles(freckle_repos)
 
-    callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles, additional_context_repos=additional_repo_paths)
+#     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles, additional_context_repos=additional_repo_paths)
 
-    additional_roles = get_adapter_dependency_roles(profiles, additional_context_repos=additional_repo_paths)
+#     additional_roles = get_adapter_dependency_roles(profiles, additional_context_repos=additional_repo_paths)
 
-    task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
+#     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
 
-    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
-
-
-def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
+#     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+#                                       pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
 
 
-    repos_list = [(k, v) for k, v in freckle_repos.items()]
-
-    task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
-
-    result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                        no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
-
-    if no_run:
-        click.echo("'no-run' option specified, finished")
+# def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
 
 
-    return result
+#     repos_list = [(k, v) for k, v in freckle_repos.items()]
+
+#     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
+
+#     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+#                                         no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
+
+#     if no_run:
+#         click.echo("'no-run' option specified, finished")
+
+
+#     return result
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",
