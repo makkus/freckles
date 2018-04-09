@@ -12,11 +12,12 @@ import click_log
 import copy
 import fnmatch
 import nsbl
+from nsbl.output import print_title
 import shutil
 import yaml
 from collections import OrderedDict
 from six import string_types
-from pprint import pprint
+from pprint import pprint, pformat
 from frkl import frkl
 from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input
 from . import print_version
@@ -387,7 +388,6 @@ class FreckelizeCommand(FrecklesBaseCommand):
 
         return OrderedDict(FreckelizeCommand.FRECKELIZE_ARGS)
 
-
     def freckles_process(self, command_name, all_vars, metadata, dictlet_details, config, parent_params):
 
         return {"name": command_name, "vars": all_vars, "adapter_metadata": metadata, "adapter_details": dictlet_details}
@@ -469,7 +469,7 @@ def assemble_freckelize_run(*args, **kwargs):
                 freckles = list(pvars.pop("freckle", []))
                 include = set(pvars.pop("include", []))
                 exclude = set(pvars.pop("exclude", []))
-                target = pvars.pop("target-folder", None)
+                target = pvars.pop("target_folder", None)
                 ask_become_pass = pvars.pop("ask_become_pass", "auto")
                 non_recursive = pvars.pop("non_recursive", False)
 
@@ -509,19 +509,17 @@ def assemble_freckelize_run(*args, **kwargs):
                     repos[freckle_url].setdefault("profiles", []).append(pn)
 
         if (repos):
-            click.echo("\n# starting ansible run(s)...")
+            print_title("starting ansible run(s)...")
             temp = execute_freckelize_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass, hosts_list=hosts)
             result.append(temp)
             click.echo("")
 
-        if no_run:
-            click.echo("'no-run' option specified, not running anything.")
-            sys.exit(0)
+        else:
+            click.echo("\nNo repos specified. Doing nothing.")
 
         return result
 
     except (Exception) as e:
-        raise e
         message = e.message
         if not message:
             if not e.reason:
@@ -575,25 +573,40 @@ def execute_freckelize_run(repos, profiles, adapter_metadata, extra_profile_vars
 
             for vars in metadata["vars"]:
                 profile_temp = vars["profile"]["name"]
+                if profile_temp == "freckle":
+                    continue
                 if not vars.get("vars", {}).get(FRECKELIZE_PROFILE_ACTIVE_KEY, True):
                     continue
                 if profile_temp not in profiles:
                     profiles.append(profile_temp)
 
+        config = DEFAULT_FRECKLES_CONFIG
+        paths = [p['path'] for p in expand_repos(config.trusted_repos)]
+        finder = FreckelizeAdapterFinder(paths)
+        reader = FreckelizeAdapterReader()
 
+        all_dictlets = finder.get_all_dictlets()
+        adapter_metadata = {}
+        for profile in profiles:
+            dictlet_details = all_dictlets.get(profile, None)
+            if not dictlet_details:
+                adapter_metadata[profile] = {"metadata": {}}
+            else:
+                adapter_det = {"metadata": reader.read_dictlet(dictlet_details, {}, {})}
+                adapter_metadata[profile] = adapter_det
+            adapter_metadata[profile]["details"] = dictlet_details
         sorted_profiles = get_adapter_profile_priorities(profiles, adapter_metadata)
-
-        click.echo("\n# no adapters specified, using defaults from .freckle file:\n")
+        print_title("no adapters specified, using defaults from .freckle file:\n")
     else:
         sorted_profiles = profiles
-        click.echo("\n# using specified adapter(s):\n")
+        click.echo()
+        print_title("using specified adapter(s):\n")
 
     # TODO: maybe sort profile order also when specified manually?
-
-
-    return create_freckelize_run(sorted_profiles, repo_metadata_file_abs, adapter_metadata, extra_profile_vars, ask_become_pass=ask_become_pass,
+    result = create_freckelize_run(sorted_profiles, repo_metadata_file_abs, adapter_metadata, extra_profile_vars, ask_become_pass=ask_become_pass,
                                output_format=output_format, no_run=no_run, additional_repo_paths=add_paths, hosts_list=hosts_list)
 
+    return result
 
 def create_freckelize_run(profiles, repo_metadata_file, adapter_metadata, extra_profile_vars, ask_become_pass="true", no_run=False,
                         output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
@@ -607,12 +620,52 @@ def create_freckelize_run(profiles, repo_metadata_file, adapter_metadata, extra_
 
     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles, "adapters_files_map": adapters_files_map}, "tasks": ["freckles"]}]
 
-    return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+    result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                       pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
+
+    if no_run:
+
+        click.echo()
+        click.secho("========================================================", bold=True)
+        click.echo()
+        click.echo("'no-run' was specified, not executing freckelize run.")
+        click.echo()
+        click.echo("Variables that would have been used for an actual run:")
+        click.echo()
+        click.secho("Defaults/User input:", bold=True)
+        click.secho("--------------------", bold=True)
+        click.echo()
+        output(extra_profile_vars, output_type="yaml", indent=2)
+        click.echo()
+        with open(repo_metadata_file) as metadata_file:
+            metadata = json.load(metadata_file)
+
+        click.secho("Folders:", bold=True)
+        click.secho("--------", bold=True)
+        for folder, details in metadata.items():
+            click.echo()
+            click.secho("path: ", bold=True, nl=False)
+            click.echo("{}:".format(folder))
+            click.echo()
+            for p_vars in details["vars"]:
+                p_name = p_vars["profile"]["name"]
+                if p_name in profiles:
+                    click.secho("  profile: ", bold=True, nl=False)
+                    click.echo(p_name)
+                    output(p_vars["vars"], output_type="yaml", indent=4)
+            if details["extra_vars"]:
+                click.secho("  extra vars:", bold=True)
+                output(details["extra_vars"], output_type="yaml", indent=4)
+            else:
+                click.secho("  extra_vars: ", bold=True, nl=False)
+                click.echo("none")
+
+        click.echo()
+
+        sys.exit(0)
 
 
 def create_freckelize_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
-
 
     repos_list = [(k, v) for k, v in freckle_repos.items()]
 
@@ -621,6 +674,7 @@ def create_freckelize_checkout_run(freckle_repos, repo_metadata_file, extra_prof
     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
                                         no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
 
+    # this isn't really used, as we want to run at least the checkout run to be able to parse .freckle files
     if no_run:
         click.echo("'no-run' option specified, finished")
         sys.exit()
@@ -631,7 +685,6 @@ def get_adapter_profile_priorities(profiles, adapter_metadata):
 
     if not profiles:
         return []
-
     prios = []
 
     for adapter in profiles:
@@ -639,7 +692,7 @@ def get_adapter_profile_priorities(profiles, adapter_metadata):
         metadata = adapter_metadata[adapter]["metadata"]
         priority = metadata.get("__freckles__", {}).get("adapter_priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
 
-        prios.append([priority, profile_name])
+        prios.append([priority, adapter])
 
     profiles_sorted = sorted(prios, key=lambda tup: tup[0])
 
@@ -729,7 +782,9 @@ def add_adapter_files_callback(profiles, adapter_metadata, files_map, additional
     if profiles and print_used_adapter:
         for p in profiles:
             if p in print_cache.keys():
-                click.echo("  - {}: {}".format(p, print_cache[p]))
+                click.echo("  - ", nl=False)
+                click.secho(p, bold=True, nl=False)
+                click.echo(": {}".format(print_cache[p]))
 
     def copy_callback(ansible_environment_root):
         target_path = os.path.join(ansible_environment_root, "plays", "task_lists")
@@ -794,8 +849,7 @@ def cli(ctx, **kwargs):
 
     For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckelize_command.html
     """
-
-    pass
+    return {"markus": "markus_value"}
 
 if __name__ == "__main__":
     sys.exit(cli())  # pragma: no cover

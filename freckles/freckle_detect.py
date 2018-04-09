@@ -141,7 +141,7 @@ def create_freckle_descs(repos, config=None):
             repo_desc["checkout_skip"] = False
 
         else:
-            raise Exception("freckle url format unknown, don't know how to handle that: {}".format(url))
+            raise Exception("freckle url format unknown, and no valid local path, don't know how to handle that: {}".format(url))
 
         repo_desc["blueprint"] = temp_url.startswith(BLUEPRINT_URL_PREFIX)
 

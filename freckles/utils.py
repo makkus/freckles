@@ -17,8 +17,9 @@ from ansible.plugins.filter.core import FilterModule
 from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, LoadMoreConfigsProcessor, FrklProcessor, MergeDictResultCallback, MergeResultCallback
 from jinja2 import Environment
 from jinja2.ext import Extension
-from nsbl import nsbl, tasks as nsbl_tasks, inventory
-from nsbl import ansible_extensions
+from nsbl import tasks as nsbl_tasks
+from nsbl import nsbl, ansible_extensions, inventory, output
+
 from six import string_types
 
 from .config import FrecklesConfig
@@ -495,7 +496,7 @@ def download_repos(repos_to_download, config, output):
     if no_url:
         return repos
 
-    click.echo("\n# processing extra repos...")
+    output.print_title("processing extra repos...")
 
     task_config = [{'tasks':
                     [{'freckles-io.freckles-config': {
@@ -560,9 +561,9 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, defaul
     click.echo("")
 
     if repo_source:
-        click.echo("# {}:".format(repo_source))
+        output.print_title("{}:".format(repo_source))
     else:
-        click.echo("# using freckle repo/folder(s):")
+        output.print_title("using freckle repo/folder(s):")
 
     click.echo("")
 
@@ -578,6 +579,7 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, defaul
                 if r != v["path"]:
                     exp = True
                     click.echo("     -> local: '{}'".format(v["path"]))
+        click.echo()
 
     if warn and exp:
         click.echo(" * NOTE: don't rely on abbreviated urls for anything important as that feature might change in a future release, use full urls if in doubt\n")

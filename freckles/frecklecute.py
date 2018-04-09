@@ -128,7 +128,7 @@ class FrecklecutableFinder(DictletFinder):
 
         if self.frecklecutable_cache is None:
             self.frecklecutable_cache = {}
-        dictlet_names = OrderedDict()
+        all_frecklecutables = OrderedDict()
         for path in self.paths:
             if path not in self.path_cache.keys():
                 commands = OrderedDict()
@@ -141,9 +141,9 @@ class FrecklecutableFinder(DictletFinder):
                 self.path_cache[path] = commands
                 frkl.dict_merge(self.frecklecutable_cache, commands, copy_dct=False)
 
-            frkl.dict_merge(dictlet_names, self.path_cache[path], copy_dct=False)
+            frkl.dict_merge(all_frecklecutables, self.path_cache[path], copy_dct=False)
 
-        return dictlet_names.keys()
+        return all_frecklecutables
 
     def get_dictlet(self, name):
 
@@ -246,11 +246,11 @@ class FrecklecuteCommand(FrecklesBaseCommand):
         return FrecklecutableReader()
 
     def get_additional_args(self):
-        pass
+        return {}
 
     def freckles_process(self, command_name, all_vars, metadata, dictlet_details, config, parent_params):
 
-        hosts = parent_params.get("hosts", None)
+        hosts = parent_params.get("hosts", ["localhost"])
         output = parent_params.get("output", "default")
         ask_become_pass = parent_params.get("ask_become_pass", "auto")
         no_run = parent_params.get("no_run", False)

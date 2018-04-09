@@ -143,10 +143,11 @@ class FrecklesLucifier(Lucifier):
         c_vars_dictlet = metadata.get(FX_ARGS_KEY_NAME, {})
         c_vars_command = self.command.get_additional_args()
         # adapter args take precedence
-        c_vars = frkl.dict_merge(c_vars_dictlet, c_vars_command, copy_dct=True)
-
+        if c_vars_command:
+            c_vars = frkl.dict_merge(c_vars_dictlet, c_vars_command, copy_dct=True)
+        else:
+            c_vars = c_vars_dictlet
         params = parse_args_dict(c_vars)
-
         @click.command(cls=FrecklesCliFormatter, name=self.name)
         @click.pass_context
         def command(ctx, *args, **kwargs):
@@ -164,7 +165,6 @@ class FrecklesLucifier(Lucifier):
             frkl.dict_merge(all_vars, user_input, copy_dct=False)
 
             result = self.command.freckles_process(self.name, all_vars, metadata, dictlet_details, config=self.command.get_config(), parent_params=self.parent_params)
-
             return result
 
         command.params = params
