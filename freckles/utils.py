@@ -929,8 +929,10 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
         raise Exception("Invalid output format: {}".format(output_format))
 
     force = True
+
+    extra_paths = "$HOME/.local/share/inaugurate/virtualenvs/freckles/bin:$HOME/.local/share/inaugurate/conda/envs/freckles/bin"
     return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
                       extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True,
                       add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run,
                       display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks,
-                      display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback)
+                      display_ignore_tasks=ignore_task_strings, pre_run_callback=pre_run_callback, extra_paths=extra_paths)
