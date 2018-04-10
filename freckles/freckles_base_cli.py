@@ -17,7 +17,7 @@ import yaml
 from collections import OrderedDict
 from pprint import pprint
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input
+from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, convert_args_to_dict
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos
@@ -147,6 +147,10 @@ class FrecklesLucifier(Lucifier):
             c_vars = frkl.dict_merge(c_vars_dictlet, c_vars_command, copy_dct=True)
         else:
             c_vars = c_vars_dictlet
+
+        if not isinstance(c_vars, dict):
+            c_vars = convert_args_to_dict(c_vars)
+
         params = parse_args_dict(c_vars)
         @click.command(cls=FrecklesCliFormatter, name=self.name)
         @click.pass_context
@@ -157,14 +161,9 @@ class FrecklesLucifier(Lucifier):
                 output = ctx.parent.params.get("output", "default")
                 download_repos(context_repos, self.command.get_config(), output)
 
-            all_vars = OrderedDict()
-            frkl.dict_merge(all_vars, defaults, copy_dct=False)
-            for ev in self.extra_vars:
-                frkl.dict_merge(all_vars, ev, copy_dct=False)
             user_input = clean_user_input(kwargs, c_vars)
-            frkl.dict_merge(all_vars, user_input, copy_dct=False)
 
-            result = self.command.freckles_process(self.name, all_vars, metadata, dictlet_details, config=self.command.get_config(), parent_params=self.parent_params)
+            result = self.command.freckles_process(self.name, defaults, self.extra_vars, user_input, metadata, dictlet_details, config=self.command.get_config(), parent_params=self.parent_params)
             return result
 
         command.params = params
@@ -213,7 +212,7 @@ class FrecklesBaseCommand(click.MultiCommand):
         pass
 
     @abc.abstractmethod
-    def freckles_process(self, command_name, all_vars, metadata, dictlet_details, config, parent_params):
+    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
         pass
 
     def init_command_cache(self, ctx, name=None):
@@ -265,6 +264,3 @@ class FrecklesBaseCommand(click.MultiCommand):
             raise Exception("Need exactly 1 command to continue, got {}: {}".format(len(commands), commands))
 
         return commands[0]
-
-
-
