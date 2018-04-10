@@ -251,7 +251,7 @@ class FreckelizeCommand(FrecklesBaseCommand):
         ("target_folder", {
             "alias": "target-folder",
             "required": False,
-            "default": "~/freckles",
+            # "default": "~/freckles",
             "type": str,
             "doc": {
                 "help": TARGET_ARG_HELP
@@ -388,9 +388,9 @@ class FreckelizeCommand(FrecklesBaseCommand):
 
         return OrderedDict(FreckelizeCommand.FRECKELIZE_ARGS)
 
-    def freckles_process(self, command_name, all_vars, metadata, dictlet_details, config, parent_params):
+    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
 
-        return {"name": command_name, "vars": all_vars, "adapter_metadata": metadata, "adapter_details": dictlet_details}
+        return {"name": command_name, "default_vars": default_vars, "extra_vars": extra_vars, "user_input": user_input, "adapter_metadata": metadata, "adapter_details": dictlet_details}
 
 def assemble_freckelize_run(*args, **kwargs):
 
@@ -403,8 +403,6 @@ def assemble_freckelize_run(*args, **kwargs):
             hosts = ["localhost"]
 
         default_target = kwargs.get("target_folder", None)
-        if not default_target:
-            default_target = DEFAULT_FRECKLE_TARGET_MARKER
 
         default_target_name = kwargs.get("target_name", None)
 
@@ -414,13 +412,12 @@ def assemble_freckelize_run(*args, **kwargs):
         default_include = list(kwargs.get("include", []))
         default_exclude = list(kwargs.get("exclude", []))
 
-        default_ask_become_pass = kwargs.get("ask_become_pass", True)
+        default_ask_become_pass = kwargs.get("ask_become_pass", None)
 
         # default_extra_vars_raw = list(kwargs.get("extra_vars", []))
 
-        default_non_recursive = kwargs.get("non_recursive", False)
-        if not default_non_recursive:
-            default_non_recursive = False
+        default_non_recursive = kwargs.get("non_recursive", None)
+
 
         default_extra_vars = {}
         # for ev in default_extra_vars_raw:
@@ -431,22 +428,40 @@ def assemble_freckelize_run(*args, **kwargs):
         profiles = []
 
         metadata = {}
+        parent_command_vars = {}
+
+        if default_target:
+            parent_command_vars["target_folder"] = default_target
+        if default_target_name:
+            parent_command_vars["target_folder_name"] = default_target_name
+        if default_include:
+            parent_command_vars["includes"] = default_include
+        if default_exclude:
+            parent_command_vars["includes"] = default_include
+        if default_ask_become_pass is not None:
+            parent_command_vars["password"] = default_ask_become_pass
+        if default_non_recursive is not None:
+            parent_command_vars["non_recursive"] = default_non_recursive
 
         if not args[0]:
-            # auto-detect
+            # fill missing keys with default values
+            if "target_folder" not in parent_command_vars.keys():
+                parent_command_vars["target_folder"] = DEFAULT_FRECKLE_TARGET_MARKER
+            if "target_folder_name" not in parent_command_vars.keys():
+                parent_command_vars["target_folder_name"] = None
+            if "include" not in parent_command_vars.keys():
+                parent_command_vars["include"] = []
+            if "exclude" not in parent_command_vars.keys():
+                parent_command_vars["exclude"] = []
+            if "password" not in parent_command_vars.keys():
+                parent_command_vars["password"] = "auto"
+            if "non_recursive" not in parent_command_vars.keys():
+                parent_command_vars["non_recursive"] = False
 
             metadata["__auto__"] = {}
 
-            fr = {
-                "target_folder": default_target,
-                "includes": default_include,
-                "excludes": default_exclude,
-                "password": default_ask_become_pass,
-                "non_recursive": default_non_recursive
-                }
-
             for f in default_freckle_urls:
-                repos[f] = copy.deepcopy(fr)
+                repos[f] = copy.deepcopy(parent_command_vars)
                 repos[f]["profiles"] = ["__auto__"]
 
             extra_profile_vars = default_extra_vars
@@ -454,7 +469,6 @@ def assemble_freckelize_run(*args, **kwargs):
         else:
 
             for p in args[0]:
-
                 pn = p["name"]
                 if pn in profiles:
                     raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
@@ -465,7 +479,17 @@ def assemble_freckelize_run(*args, **kwargs):
                 metadata[pn]["metadata"] = p["adapter_metadata"]
                 metadata[pn]["details"] = p["adapter_details"]
 
-                pvars = p["vars"]
+                pvars_defaults = p["default_vars"]
+                pvars_extra_vars = p["extra_vars"]
+                pvars_user_input = p["user_input"]
+
+                pvars = OrderedDict()
+                frkl.dict_merge(pvars, pvars_defaults, copy_dct=False)
+                for ev in pvars_extra_vars:
+                    frkl.dict_merge(pvars, ev, copy_dct=False)
+                frkl.dict_merge(pvars, parent_command_vars, copy_dct=False)
+                frkl.dict_merge(pvars, pvars_user_input, copy_dct=False)
+
                 freckles = list(pvars.pop("freckle", []))
                 include = set(pvars.pop("include", []))
                 exclude = set(pvars.pop("exclude", []))
@@ -473,7 +497,7 @@ def assemble_freckelize_run(*args, **kwargs):
                 ask_become_pass = pvars.pop("ask_become_pass", "auto")
                 non_recursive = pvars.pop("non_recursive", False)
 
-                if non_recursive == None:
+                if non_recursive is None:
                     non_recursive = default_non_recursive
 
                 if ask_become_pass == "auto" and default_ask_become_pass != "auto":
@@ -487,6 +511,7 @@ def assemble_freckelize_run(*args, **kwargs):
 
                 all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
                 for freckle_url in all_freckles_for_this_profile:
+
                     if target:
                         t = target
                     else:
@@ -509,7 +534,7 @@ def assemble_freckelize_run(*args, **kwargs):
                     repos[freckle_url].setdefault("profiles", []).append(pn)
 
         if (repos):
-            print_title("starting ansible run(s)...")
+            print_title("starting freckelize run(s)...")
             temp = execute_freckelize_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass, hosts_list=hosts)
             result.append(temp)
             click.echo("")
@@ -596,11 +621,12 @@ def execute_freckelize_run(repos, profiles, adapter_metadata, extra_profile_vars
                 adapter_metadata[profile] = adapter_det
             adapter_metadata[profile]["details"] = dictlet_details
         sorted_profiles = get_adapter_profile_priorities(profiles, adapter_metadata)
-        print_title("no adapters specified, using defaults from .freckle file:\n")
+        click.echo()
+        print_title("no adapters selected, using folder defaults:\n", title_char="-")
     else:
         sorted_profiles = profiles
         click.echo()
-        print_title("using specified adapter(s):\n")
+        print_title("using user-selected adapter(s):\n", title_char="-")
 
     # TODO: maybe sort profile order also when specified manually?
     result = create_freckelize_run(sorted_profiles, repo_metadata_file_abs, adapter_metadata, extra_profile_vars, ask_become_pass=ask_become_pass,
@@ -787,7 +813,7 @@ def add_adapter_files_callback(profiles, adapter_metadata, files_map, additional
                 click.echo(": {}".format(print_cache[p]))
 
     def copy_callback(ansible_environment_root):
-        target_path = os.path.join(ansible_environment_root, "plays", "task_lists")
+        target_path = os.path.join(ansible_environment_root, "task_lists")
         for adapter, files in files_map.items():
             for f in files["init"]:
                 source_file = f["source"]
@@ -849,7 +875,7 @@ def cli(ctx, **kwargs):
 
     For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckelize_command.html
     """
-    return {"markus": "markus_value"}
+    pass
 
 if __name__ == "__main__":
     sys.exit(cli())  # pragma: no cover
