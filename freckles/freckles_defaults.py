@@ -4,7 +4,7 @@ from nsbl import defaults
 from frkl.frkl import PLACEHOLDER
 
 FRECKLE_MARKER_FILE_NAME = ".freckle"
-SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "skippy", "verbose", "default_full"]
+SUPPORTED_OUTPUT_FORMATS = ["default", "ansible", "yaml", "skippy", "verbose", "default_full"]
 
 FRECKLES_DEFAULT_CONFIG_FOLDER = click.get_app_dir('freckles', force_posix=True)
 FRECKLES_DEFAULT_CONFIG_FILE = os.path.join(FRECKLES_DEFAULT_CONFIG_FOLDER, FRECKLE_MARKER_FILE_NAME)
