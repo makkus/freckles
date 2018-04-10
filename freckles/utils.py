@@ -299,35 +299,6 @@ def find_supported_blueprints(config=None):
         result.update(p)
     return result
 
-def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
-                            run_parameters={}):
-    click.echo("")
-    click.secho("frecklecutable:", bold=True, nl=False)
-    click.echo(" {}".format(task_metadata.get("command_name", "n/a")))
-    click.echo("")
-    click.secho("Path:", bold=True, nl=False)
-    click.echo(" {}".format(task_metadata.get("command_path", "n/a")))
-    click.secho("Generated ansible environment:", bold=True, nl=False)
-    click.echo(" {}".format(run_parameters.get("env_dir", "n/a")))
-    # click.echo("config:")
-    # output = yaml.safe_dump(task_config, default_flow_style=False, allow_unicode=True)
-    # click.echo()
-    # click.echo(output)
-    #click.echo(pprint.pformat(task_config))
-    # click.echo("")
-
-    # pprint.pprint(run_parameters)
-    click.echo("")
-    click.secho("Tasks:", bold=True)
-    for task in run_parameters["task_details"]:
-        details = task.pretty_details()
-
-        # pprint.pprint(details)
-        output = yaml.safe_dump(details, default_flow_style=False)
-
-        click.echo("")
-        click.echo(output)
-        click.echo("")
 
 def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
     doc = config.get("doc", {})
@@ -455,7 +426,7 @@ def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_t
     return new_args, new_vars
 
 
-def download_repos(repos_to_download, config, output):
+def download_repos(repos_to_download, config, output_value):
 
     expanded_download = expand_repos(repos_to_download)
     expanded_trusted = expand_repos(config.trusted_urls)
@@ -508,7 +479,7 @@ def download_repos(repos_to_download, config, output):
     }]
 
 
-    create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=False)
+    create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output_value, ask_become_pass=False)
 
     return repos
 
@@ -561,9 +532,9 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, defaul
     click.echo("")
 
     if repo_source:
-        output.print_title("{}:".format(repo_source))
+        output.print_title("{}:".format(repo_source), title_char="-")
     else:
-        output.print_title("using freckle repo/folder(s):")
+        output.print_title("using freckle repo/folder(s):", title_char="-")
 
     click.echo("")
 
@@ -901,6 +872,12 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     task_descs = config.task_descs
 
+    global_vars = {}
+    for tc in task_config:
+        v = tc.get("vars", {})
+        if v:
+            dict_merge(global_vars, v, copy_dct=False)
+
     nsbl_obj = nsbl.Nsbl.create(task_config, role_repos, task_descs, wrap_into_hosts=hosts_list, pre_chain=[],
                                 additional_roles=additional_roles)
 
@@ -925,13 +902,15 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
     elif output_format == "default":
         ignore_task_strings = DEFAULT_IGNORE_STRINGS
         stdout_callback = "nsbl_internal"
+    elif output_format == "yaml":
+        stdout_callback = "yaml"
     else:
         raise Exception("Invalid output format: {}".format(output_format))
 
     force = True
 
     extra_paths = "$HOME/.local/share/inaugurate/virtualenvs/freckles/bin:$HOME/.local/share/inaugurate/conda/envs/freckles/bin"
-    return runner.run(run_target, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
+    return runner.run(run_target, global_vars=global_vars, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
                       extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True,
                       add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run,
                       display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks,
