@@ -19,7 +19,7 @@ from collections import OrderedDict
 from six import string_types
 from pprint import pprint, pformat
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input
+from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, readable_json, readable_yaml
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos, RepoType
@@ -58,12 +58,15 @@ ADAPTER_CACHE = {}
 def find_freckelize_adapters(path):
     """Helper method to find freckelize adapters.
 
+    Adapter files are named in the format: <adapter_name>.adapter.freckle
+
     Args:
       path (str): the root path (usually the path to a 'trusted repo').
     Returns:
       list: a list of valid freckelize adapters under this path
     """
 
+    log.debug("Finding adapters in: {}".format(path))
     if not os.path.exists(path) or not os.path.isdir(os.path.realpath(path)):
         return {}
 
@@ -92,32 +95,6 @@ def find_freckelize_adapters(path):
 
     return result
 
-# def is_freckelize_adapter(file_path, allow_dots_in_filename=False):
-
-#     if not allow_dots_in_filename and "." in os.path.basename(file_path):
-#         log.debug("Not using '{}' as frecklecutable: filename contains '.'".format(file_path))
-#         return False
-
-#     if not os.path.isfile(file_path):
-#         return False
-
-#     return True
-
-
-# def find_freckelize_adapters_in_folder(path, allow_dots_in_filename=False):
-
-#     result = OrderedDict()
-#     for child in os.listdir(path):
-
-#         file_path = os.path.realpath(os.path.join(path, child))
-
-#         if not is_frecklecutable(file_path):
-#             continue
-
-#         result[child] = {"path": file_path, "type": "file"}
-
-#     return result
-
 class FreckelizeAdapterFinder(DictletFinder):
     """Finder class for freckelize adapters.
 
@@ -138,6 +115,8 @@ class FreckelizeAdapterFinder(DictletFinder):
     def get_all_dictlets(self):
         """Find all freckelize adapters."""
 
+        log.debug("Retrieving all dictlets")
+
         if self.adapter_cache is None:
             self.adapter_cache = {}
         dictlet_names = OrderedDict()
@@ -149,18 +128,13 @@ class FreckelizeAdapterFinder(DictletFinder):
                 adapters = find_freckelize_adapters(path)
                 self.path_cache[path] = adapters
                 frkl.dict_merge(all_adapters, adapters, copy_dct=False)
-
-                # for f_dir in dirs:
-                #     fx = find_frecklecutables_in_folder(f_dir)
-                #     frkl.dict_merge(commands, fx, copy_dct=False)
-
-                # self.path_cache[path] = commands
                 frkl.dict_merge(self.adapter_cache, adapters, copy_dct=False)
 
         return all_adapters
 
     def get_dictlet(self, name):
 
+        log.debug("Retrieving adapter: {}".format(name))
         if self.adapter_cache is None:
             self.get_all_dictlet_names()
 
@@ -177,6 +151,12 @@ class FreckelizeAdapterReader(TextFileDictletReader):
     The file needs to be in yaml format, if it contains a key 'args' the value of
     that is used to generate the freckelize command-line interface.
     The key 'defaults' is used for, well, default values.
+
+    Read more about how the adapter file format: XXX
+
+    Args:
+      delimiter_profile (dict): a map describing the delimiter used for templating.
+      **kwargs (dict): n/a
     """
 
     def __init__(self, delimiter_profile=JINJA_DELIMITER_PROFILES["luci"], **kwargs):
@@ -187,7 +167,7 @@ class FreckelizeAdapterReader(TextFileDictletReader):
 
     def process_lines(self, content, current_vars):
 
-        log.debug("Processing: {}".format(content))
+        log.debug("Processing content: {}".format(content))
 
         # now, I know this isn't really the most
         # optimal way of doing this,
@@ -224,8 +204,8 @@ class FreckelizeAdapterReader(TextFileDictletReader):
             temp_vars = frkl.dict_merge(temp_vars, temp_dict, copy_dct=False)
 
         frkl.dict_merge(current_vars, temp_vars, copy_dct=False)
+        log.debug("Vars after processing:\n{}".format(readable_json(current_vars, indent=2)))
 
-        log.debug("Vars after processing: {}".format(current_vars))
         return current_vars
 
 
@@ -460,9 +440,11 @@ def assemble_freckelize_run(*args, **kwargs):
 
             metadata["__auto__"] = {}
 
-            for f in default_freckle_urls:
+            for details in default_freckle_urls:
+                f = details["url"]
                 repos[f] = copy.deepcopy(parent_command_vars)
                 repos[f]["profiles"] = ["__auto__"]
+                repos[f]["repo_details"] = details
 
             extra_profile_vars = default_extra_vars
 
@@ -509,13 +491,19 @@ def assemble_freckelize_run(*args, **kwargs):
                         if pv != None:
                             extra_profile_vars[pn][pk] = pv
 
-                all_freckles_for_this_profile = list(set(default_freckle_urls + freckles))
-                for freckle_url in all_freckles_for_this_profile:
+                # TODO: could check whether there are duplicates, but can't be bothered at the moment
 
+                all_freckles_for_this_profile = default_freckle_urls + freckles
+
+                for freckle_details in all_freckles_for_this_profile:
+                    freckle_url = freckle_details["url"]
                     if target:
                         t = target
                     else:
                         t = default_target
+
+                    if t is None:
+                        t = DEFAULT_FRECKLE_TARGET_MARKER
 
                     for i in default_include:
                         if i not in include:
@@ -532,6 +520,7 @@ def assemble_freckelize_run(*args, **kwargs):
                     }
                     repos.setdefault(freckle_url, fr)
                     repos[freckle_url].setdefault("profiles", []).append(pn)
+                    repos[freckle_url]["repo_details"] = freckle_details
 
         if (repos):
             print_title("starting freckelize run(s)...")
@@ -545,6 +534,8 @@ def assemble_freckelize_run(*args, **kwargs):
         return result
 
     except (Exception) as e:
+        log.debug("Error assembling configuration:")
+        log.debug(e, exc_info=True)
         message = e.message
         if not message:
             if not e.reason:
@@ -564,6 +555,7 @@ def execute_freckelize_run(repos, profiles, adapter_metadata, extra_profile_vars
       hosts_list (list): a list of hosts to run this run on
     """
 
+    log.debug("Starting freckelize run")
     all_freckle_repos = []
 
     # augment repo data
@@ -617,6 +609,7 @@ def execute_freckelize_run(repos, profiles, adapter_metadata, extra_profile_vars
             if not dictlet_details:
                 adapter_metadata[profile] = {"metadata": {}}
             else:
+                log.debug("Reading adapter: {}".format(dictlet_details["path"]))
                 adapter_det = {"metadata": reader.read_dictlet(dictlet_details, {}, {})}
                 adapter_metadata[profile] = adapter_det
             adapter_metadata[profile]["details"] = dictlet_details
@@ -752,8 +745,8 @@ def create_adapters_files_map(adapters, adapters_metadata):
         adapter_metadata = adapters_metadata[adapter]
         adapter_path = adapter_metadata["details"]["path"]
         tasks_init = adapter_metadata["metadata"].get("tasks_init", [])
-        tasks_freckle = adapter_metadata["metadata"].get("tasks_freckle", [])
-        files_map[adapter] = create_adapter_files_list(adapter, adapter_path, tasks_init, tasks_freckle)
+        tasks_folder = adapter_metadata["metadata"].get("tasks_folder", [])
+        files_map[adapter] = create_adapter_files_list(adapter, adapter_path, tasks_init, tasks_folder)
 
     return files_map
 
@@ -799,18 +792,22 @@ def add_adapter_files_callback(profiles, adapter_metadata, files_map, additional
 
 
     # check for 'active' adapters, i.e. ones that have at least one tasks file
+    no_valid_profiles = True
     for profile in profiles:
-
         if files_map.get(profile, {}).get("init", None) or files_map.get(profile, {}).get("freckle", None):
             path = adapter_metadata[profile]["details"]["path"]
             print_cache[profile] = path
+            no_valid_profiles = False
 
-    if profiles and print_used_adapter:
-        for p in profiles:
-            if p in print_cache.keys():
-                click.echo("  - ", nl=False)
-                click.secho(p, bold=True, nl=False)
-                click.echo(": {}".format(print_cache[p]))
+    if no_valid_profiles:
+        click.echo("  - no adapters with any task files found, only executing basic folder tasks")
+    else:
+        if profiles and print_used_adapter:
+            for p in profiles:
+                if p in print_cache.keys():
+                    click.echo("  - ", nl=False)
+                    click.secho(p, bold=True, nl=False)
+                    click.echo(": {}".format(print_cache[p]))
 
     def copy_callback(ansible_environment_root):
         target_path = os.path.join(ansible_environment_root, "task_lists")
@@ -875,7 +872,6 @@ def cli(ctx, **kwargs):
 
     For more details, visit the online documentation: https://docs.freckles.io/en/latest/freckelize_command.html
     """
-    pass
 
 if __name__ == "__main__":
     sys.exit(cli())  # pragma: no cover
