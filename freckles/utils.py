@@ -141,15 +141,33 @@ class RepoType(click.ParamType):
     name = 'repo'
 
     def convert(self, value, param, ctx):
+        fail_msg = None
+        print(value)
+        branch = None
+        opt_split_string = '::'
+        if opt_split_string in value:
+            tokens = value.split(opt_split_string)
+            opt = tokens[1:-1]
+            if not opt:
+                self.fail("Not a valid url, needs at least 2 split strings ('{}')".format(opt_split_string))
+            if len(opt) != 1:
+                self.fail("Not a valid url, can only have 1 branch: {}".format(value))
+            branch = opt[0]
 
         try:
-
             print_repos_expand(value, warn=True, default_local_path=False)
             result = nsbl_tasks.expand_string_to_git_repo(value, DEFAULT_ABBREVIATIONS)
+            result = {"url": result}
+
+            if branch:
+                result["branch"] = branch
 
             return result
-        except:
-            self.fail('%s is not a valid repo url' % value, param, ctx)
+        except (Exception) as e:
+            self.fail("{}: {}".format(value, e.message))
+
+
+
 
 class HostType(click.ParamType):
     name = 'host_type'
