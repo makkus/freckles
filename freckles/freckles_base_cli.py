@@ -253,12 +253,19 @@ class FrecklesBaseCommand(click.MultiCommand):
             self.reader = self.get_dictlet_reader()
 
         lucifier = FrecklesLucifier(name, self, extra_vars=extra_defaults, parent_params=ctx.params)
-        lucifier.overlay_dictlet(name, details, add_dictlet=True)
+        log.debug("Processing command '{}' from: {}".format(name, details.get("path", "n/a")))
+        try:
+            lucifier.overlay_dictlet(name, details, add_dictlet=True)
+        except (Exception) as e:
+            log.debug("Processing failed:")
+            log.debug(e, exc_info=True)
+            log.warn("Can't parse adapter '{}', ignoring...".format(name))
+            return None
 
         commands = lucifier.process()
 
         if len(commands) == 0:
-            print("Can't parse command: {}".format(name))
+            log.warn("Can't parse command: {}".format(name))
             return None
         elif len(commands) > 1:
             raise Exception("Need exactly 1 command to continue, got {}: {}".format(len(commands), commands))
