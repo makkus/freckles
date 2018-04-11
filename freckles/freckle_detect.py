@@ -19,7 +19,7 @@ from os.path import isdir, join
 from frkl import frkl
 from nsbl import tasks as nsbl_tasks
 from .freckles_defaults import *
-
+from luci import readable_json
 try:
     set
 except NameError:
@@ -37,6 +37,9 @@ log = logging.getLogger("freckles")
 def create_freckle_descs(repos, config=None):
     """Augments freckle urls provided by the user via cli (if necessary).
     """
+
+    log.debug("Processing repo information..")
+    log.debug("Repos:\n{}".format(readable_json(repos, indent=2)))
 
     for temp_url, metadata in repos.items():
 
@@ -80,7 +83,6 @@ def create_freckle_descs(repos, config=None):
 
                 url = subdirs[0]
                 source_delete = True
-
 
             else:
 
