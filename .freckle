@@ -22,4 +22,5 @@
 
 # not implemented yet
 - docker-dev:
-    freckle_profile_active: false
+    __auto_run__: false
+
