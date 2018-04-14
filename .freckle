@@ -3,7 +3,7 @@
    python_dev_setup_type: "pip"
    python_dev_requirements_files:
       - requirements_dev.txt
-   packages:
+   install:
       - pycrypto-related:
           pkgs:
             debian:
