@@ -23,7 +23,7 @@ from . import __version__ as VERSION
 from .freckles_defaults import *
 from nsbl import tasks
 from nsbl.defaults import *
-from .utils import get_blueprints_from_repo, get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
+from .utils import get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
 
 def reindent(s, numSpaces):
     s = string.split(s, '\n')

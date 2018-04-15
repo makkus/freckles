@@ -62,10 +62,15 @@ class FrecklesConfig(object):
 
     additional options: use_freckle_as_repo
     """
-    def __init__(self):
+    def __init__(self, config_file="default"):
 
-        self.config_file = FRECKLES_DEFAULT_CONFIG_FILE
-        if os.path.exists(self.config_file):
+        if config_file is None:
+            config_file = False
+        elif config_file == "default":
+            config_file = FRECKLES_DEFAULT_CONFIG_FILE
+
+        self.config_file = config_file
+        if self.config_file and os.path.exists(self.config_file):
             self.config = parse_config_file(self.config_file)
         else:
             self.config = {}
@@ -74,6 +79,7 @@ class FrecklesConfig(object):
         self.trusted_urls = self.config.get("trusted-urls", DEFAULT_TRUSTED_URLS)
         self.task_descs = self.config.get("task-aliases", [])
         self.use_freckle_as_repo = self.config.get("use_freckle_as_repo", True)
+        self.default_freckelize_target = DEFAULT_FRECKELIZE_TARGET_FOLDER
 
     def __repr__(self):
 
@@ -82,4 +88,3 @@ class FrecklesConfig(object):
     def add_repos(self, repos):
 
         self.trusted_repos.extend(repos)
-

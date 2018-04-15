@@ -668,58 +668,58 @@ def find_supported_profile_names(config=None, additional_context_repos=[]):
 #     ADAPTER_CACHE[adapter_repo] = result
 #     return result
 
-BLUEPRINT_CACHE = {}
-def get_available_blueprints(config=None):
-    """Find all available blueprints."""
+# BLUEPRINT_CACHE = {}
+# def get_available_blueprints(config=None):
+#     """Find all available blueprints."""
 
-    if not config:
-        config = DEFAULT_FRECKLES_CONFIG
+#     if not config:
+#         config = DEFAULT_FRECKLES_CONFIG
 
-    repos = nsbl_tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+#     repos = nsbl_tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
-    result = {}
-    for repo in repos:
+#     result = {}
+#     for repo in repos:
 
-        blueprints = get_blueprints_from_repo(repo)
-        for name, path in blueprints.items():
-            result[name] = path
+#         blueprints = get_blueprints_from_repo(repo)
+#         for name, path in blueprints.items():
+#             result[name] = path
 
-    return result
+#     return result
 
 
-def get_blueprints_from_repo(blueprint_repo):
-    """Find all blueprints under a folder.
+# def get_blueprints_from_repo(blueprint_repo):
+#     """Find all blueprints under a folder.
 
-    A blueprint is a folder that has a .blueprint.freckle marker file in it's root.
-    """
-    if not os.path.exists(blueprint_repo) or not os.path.isdir(os.path.realpath(blueprint_repo)):
-        return {}
+#     A blueprint is a folder that has a .blueprint.freckle marker file in it's root.
+#     """
+#     if not os.path.exists(blueprint_repo) or not os.path.isdir(os.path.realpath(blueprint_repo)):
+#         return {}
 
-    if blueprint_repo in BLUEPRINT_CACHE.keys():
-        return BLUEPRINT_CACHE[blueprint_repo]
+#     if blueprint_repo in BLUEPRINT_CACHE.keys():
+#         return BLUEPRINT_CACHE[blueprint_repo]
 
-    result = {}
+#     result = {}
 
-    try:
+#     try:
 
-        for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
+#         for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
 
-            dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
-            for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
-                blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
-                blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
+#             dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+#             for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
+#                 blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
+#                 blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
 
-                #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
-                profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
+#                 #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+#                 profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
 
-                result[profile_name] = blueprint_folder
+#                 result[profile_name] = blueprint_folder
 
-    except (UnicodeDecodeError) as e:
-        click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
+#     except (UnicodeDecodeError) as e:
+#         click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
 
-    BLUEPRINT_CACHE[blueprint_repo] = result
+#     BLUEPRINT_CACHE[blueprint_repo] = result
 
-    return result
+#     return result
 
 
 # def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):

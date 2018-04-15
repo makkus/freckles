@@ -10,7 +10,11 @@ import click
 import click_completion
 import click_log
 import copy
+import uuid
 import fnmatch
+import operator
+import tempfile
+from cookiecutter.main import cookiecutter
 import nsbl
 from nsbl.output import print_title
 import shutil
@@ -19,12 +23,12 @@ from collections import OrderedDict
 from six import string_types
 from pprint import pprint, pformat
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, readable_json, readable_yaml
+from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, readable_json, readable_yaml, readable_raw, add_key_to_dict
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos, RepoType
 from .freckles_base_cli import FrecklesBaseCommand, FrecklesLucifier
-from .freckle_detect import create_freckle_descs
+# from .freckle_detect import create_freckle_descs
 
 log = logging.getLogger("freckles")
 click_log.basic_config(log)
@@ -54,7 +58,68 @@ ASK_PW_HELP = 'whether to force ask for a password, force ask not to, or let fre
 ASK_PW_CHOICES = click.Choice(["auto", "true", "false"])
 NON_RECURSIVE_HELP = "whether to exclude all freckle child folders, default: false"
 
+ADD_FILES = False
+
 ADAPTER_CACHE = {}
+DEFAULT_REPO_TYPE = RepoType()
+DEFAULT_REPO_PRIORITY = 10000
+METADATA_CONTENT_KEY = "freckle_metadata_file_content"
+
+BLUEPRINT_CACHE = {}
+def get_available_blueprints(config=None):
+    """Find all available blueprints."""
+
+    log.debug("Looking for blueprints...")
+    if not config:
+        config = DEFAULT_FRECKLES_CONFIG
+
+    repos = nsbl.tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+
+    result = {}
+    for repo in repos:
+
+        blueprints = get_blueprints_from_repo(repo)
+        for name, path in blueprints.items():
+            result[name] = path
+
+    log.debug("Found blueprints:")
+    log.debug(readable_json(result, indent=2))
+
+    return result
+
+def get_blueprints_from_repo(blueprint_repo):
+    """Find all blueprints under a folder.
+
+    A blueprint is a folder that has a .blueprint.freckle marker file in it's root.
+    """
+    if not os.path.exists(blueprint_repo) or not os.path.isdir(os.path.realpath(blueprint_repo)):
+        return {}
+
+    if blueprint_repo in BLUEPRINT_CACHE.keys():
+        return BLUEPRINT_CACHE[blueprint_repo]
+
+    result = {}
+
+    try:
+
+        for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
+            dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
+            for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
+                blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
+                blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
+
+                #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
+                profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
+
+                result[profile_name] = blueprint_folder
+
+    except (UnicodeDecodeError) as e:
+        click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
+
+    BLUEPRINT_CACHE[blueprint_repo] = result
+
+    return result
+
 def find_freckelize_adapters(path):
     """Helper method to find freckelize adapters.
 
@@ -95,9 +160,696 @@ def find_freckelize_adapters(path):
 
     return result
 
+class FreckleRepo(object):
+    """Model class containing all relevant freckle repo paramters.
+
+    If providing a string as 'source' argument, it'll be converted into a dictionary using :meth:`freckles.utils.RepoType.convert`.
+
+    The format of the source dictionary is::
+
+        {"url": <freckle_repo_url_or_path>,
+         "branch": <optional branch if git repo>}
+
+    Args:
+      source (str, dict): the source repo/path
+      target_path (str): the local target path
+      target_name (str): the local target name
+      include (list): a list of strings that specify which sub-freckle folders to use (TODO: include link to relevant documetnation)
+      exclude (list): a list of strings that specify which sub-freckle folders to exclude from runs (TODO: include link to relevant documetnation)
+      branch (str): the source branch/version (or None, if default branch)
+      non_recursive (bool): whether to only use the source base folder, not any containing sub-folders that contain a '.freckle' marker file
+      priority (int): the priority of this repo (determines the order in which it gets processed)
+      default_vars (dict): default values to be used for this repo (key: profile_name, value: vars)
+      overlay_vars (dict): overlay values to be used for this repo (key: profile_name, value: vars), those will be overlayed after the checkout process
+    """
+    def __init__(self, source, target_folder=None, target_name=None, include=None, exclude=None, branch=None, non_recursive=False, priority=DEFAULT_REPO_PRIORITY, default_vars=None, overlay_vars=None):
+
+        self.id = str(uuid.uuid4())
+
+        if not source:
+            raise Exception("No source provided")
+
+        if isinstance(source, string_types):
+            temp_source = DEFAULT_REPO_TYPE.convert(source, None, None)
+        else:
+            temp_source = source
+
+        self.priority = DEFAULT_REPO_PRIORITY
+        self.source = temp_source
+        if target_folder is None:
+            target_folder = DEFAULT_FRECKLE_TARGET_MARKER
+        self.target_folder = target_folder
+        self.target_name = target_name
+        if include is None:
+            include = []
+        self.include = include
+        if exclude is None:
+            exculde = []
+        self.exclude = exclude
+        self.non_recursive = non_recursive
+
+        if default_vars is None:
+            default_vars = OrderedDict()
+        self.default_vars = default_vars
+        if overlay_vars is None:
+            overlay_vars = OrderedDict()
+        self.overlay_vars = overlay_vars
+
+        self.target_become = False
+        self.source_delete = False
+
+        self.repo_desc = None
+
+    def set_priority(self, priority):
+
+        self.priority = priority
+
+    def __repr__(self):
+
+        return("{}: {}".format("FreckleRepo", readable_raw(self.__dict__)))
+
+    def expand(self, config, default_target=None):
+        """Expands or fills in details using the provided configuration.
+
+        Args:
+          config (FrecklesConfig): the freckles configuration object
+        """
+        log.debug("Expanding repo: {}".format(self.source))
+
+        if default_target is None:
+            default_target = config.default_freckelize_target
+
+        if self.source["url"].startswith("{}:".format(BLUEPRINT_URL_PREFIX)) or self.source["url"].startswith("{}:".format(BLUEPRINT_DEFAULTS_URL_PREFIX)):
+
+            blueprint_type = self.source["url"].split(":")[0]
+            if blueprint_type == BLUEPRINT_DEFAULTS_URL_PREFIX:
+                blueprint_defaults = True
+            else:
+                blueprint_defaults = False
+
+            blueprint_name = ":".join(self.source["url"].split(":")[1:])
+            blueprints = get_available_blueprints(config)
+            match = blueprints.get(blueprint_name, False)
+
+            if not match:
+                raise Exception("No blueprint with name '{}' available.".format(blueprint_name))
+
+            cookiecutter_file = os.path.join(match, "cookiecutter.json")
+
+            if os.path.exists(cookiecutter_file):
+
+                temp_path = tempfile.mkdtemp(prefix='frkl.')
+
+                if blueprint_defaults:
+                    log.debug("Found interactive blueprints, but using defaults...")
+                    cookiecutter(match, output_dir=temp_path, no_input=True)
+                else:
+                    click.secho("\nFound interactive blueprint, please enter approriate values below:\n", bold=True)
+
+                    cookiecutter(match, output_dir=temp_path)
+
+
+                subdirs = [os.path.join(temp_path, f) for f in os.listdir(temp_path) if os.path.isdir(os.path.join(temp_path, f))]
+
+                if len(subdirs) != 1:
+                    raise Exception("More than one directories created by interactive template '{}'. Can't deal with that.".format(match))
+
+                url = subdirs[0]
+                self.source_delete = True
+
+            else:
+
+                url = match
+        else:
+            url = self.source["url"]
+
+        repo_desc = {}
+        repo_desc["blueprint"] = False
+
+        if os.path.exists(os.path.realpath(os.path.expanduser(url))):
+
+            p = os.path.realpath(os.path.expanduser(url))
+            if os.path.isfile(p):
+                # assuming archive
+                repo_desc["type"] = "local_archive"
+                repo_desc["remote_url"] = p
+                repo_desc["source_delete"] = False
+                if self.target_folder == DEFAULT_FRECKLE_TARGET_MARKER:
+                    repo_desc["local_parent"] = default_target
+                else:
+                    repo_desc["local_parent"] = self.target_folder
+                repo_desc["checkout_skip"] = False
+                if self.target_name is None:
+                    repo_desc["local_name"] = os.path.basename(p).split(".")[0]
+                else:
+                    repo_desc["local_name"] = self.target_name
+            else:
+                repo_desc["type"] = "local_folder"
+                repo_desc["remote_url"] = p
+                if self.target_folder == DEFAULT_FRECKLE_TARGET_MARKER:
+                    if self.target_name is None:
+                        repo_desc["local_parent"] = os.path.dirname(p)
+                        repo_desc["checkout_skip"] = True
+                    else:
+                        repo_desc["local_parent"] = default_target
+                        repo_desc["checkout_skip"] = False
+                else:
+                    repo_desc["local_parent"] = self.target_folder
+                    repo_desc["checkout_skip"] = False
+                if self.target_name is None:
+                    repo_desc["local_name"] = os.path.basename(p)
+                else:
+                    repo_desc["local_name"] = self.target_name
+                repo_desc["source_delete"] = self.source_delete
+
+        elif url.endswith(".git"):
+
+            repo_desc["type"] = "git"
+            repo_desc["remote_url"] = url
+            if self.target_name is None:
+                repo_desc["local_name"] = os.path.basename(repo_desc["remote_url"])[:-4]
+            else:
+                repo_desc["local_name"] = self.target_name
+            repo_desc["checkout_skip"] = False
+            if self.target_folder == DEFAULT_FRECKLE_TARGET_MARKER:
+                repo_desc["local_parent"] = DEFAULT_FRECKELIZE_TARGET_FOLDER
+            else:
+                repo_desc["local_parent"] = self.target_folder
+
+            if self.source.get("branch", False):
+                repo_desc["remote_branch"] = self.source["branch"]
+
+        elif url.startswith("http://") or url.startswith("https://"):
+            # TODO: check whether host is local
+            repo_desc["type"] = "remote_archive"
+            repo_desc["remote_url"] = url
+            if self.local_name is None:
+                repo_desc["local_name"] = os.path.basename(url).split('.')[0]
+            else:
+                repo_desc["local_name"] = self.local_name
+            repo_desc["source_delete"] = False
+            if self.target_folder == DEFAULT_FRECKLE_TARGET_MARKER:
+                repo_desc["local_parent"] = default_target
+            else:
+                repo_desc["local_parent"] = self.target_folder
+
+            repo_desc["checkout_skip"] = False
+
+        else:
+            raise Exception("freckle url format unknown, and no valid local path, don't know how to handle that: {}".format(url))
+
+
+        if repo_desc["local_parent"] == DEFAULT_FRECKLE_TARGET_MARKER:
+            raise Exception("default_target can't be set to '{}'".format(DEFAULT_FRECKLE_TARGET_MARKER))
+        if not os.path.isabs(repo_desc["local_parent"]) and not repo_desc["local_parent"].startswith("~"):
+            raise Exception("Relative path not supported for target folder option, please use an absolute one (or use '~' to indicate a home directory): {}".format(default_target))
+
+        if repo_desc["local_parent"].startswith("~") or repo_desc["local_parent"].startswith("/home"):
+            repo_desc["checkout_become"] = False
+        else:
+            repo_desc["checkout_become"] = True
+
+        repo_desc["include"] = self.include
+        repo_desc["exclude"] = self.exclude
+        repo_desc["non_recursive"] = self.non_recursive
+        repo_desc["id"] = self.id
+        repo_desc["priority"] = self.priority
+
+        repo_desc["add_file_list"] = ADD_FILES
+
+        self.repo_desc = repo_desc
+
+        return repo_desc
+
+
+class FreckleDetails(object):
+    """Model class containing all relevant freckle run parameters for a repo.
+
+    If 'freckle_repos' is not a list, it'll be converted into one with itsel as the only item.
+    If one of the itesm in the 'freckle_repos' list is a string, it'll be converted to a :class:`FreckleRepo` using default arguments.
+
+    Args:
+      freckle_repos (str, list): a list of :class:`FreckleRepo` objects
+      profiles_to_run (OrderedDict): an ordered dict with the profile names to run as keys, and potential overlay vars as value
+    """
+
+    def __init__(self, freckle_repos, profiles_to_run=None, detail_priority=DEFAULT_REPO_PRIORITY):
+
+        self.freckle_repos = []
+        if not isinstance(freckle_repos, (list, tuple)):
+            temp_freckle_repos = [freckle_repos]
+        else:
+            temp_freckle_repos = freckle_repos
+
+        for r in temp_freckle_repos:
+            if isinstance(r, string_types):
+                r = FreckleRepo(r)
+            self.freckle_repos.append(r)
+
+        self.profiles_to_run = profiles_to_run
+        self.set_priority(detail_priority)
+
+    def set_priority(self, priority):
+
+        self.priority = priority
+        p = 0
+        for fr in self.freckle_repos:
+            fr.set_priority(self.priority+p)
+            p = p + 1000
+
+    def expand_repos(self, config, default_target=None):
+
+        result = []
+        for repo in self.freckle_repos:
+            result.append(repo.expand(config, default_target))
+
+        return result
+
+
+class Freckelize(object):
+    """Class to configure and execute a freckelize run.
+
+    A freckelize run consists of two 'sub-runs': the checkout run, which (if necessary) checks-out/copies
+    the repo/folder in question and reads it's metadata, and the actual processing run, which
+    installs and configures the environment using that metadata as configuration.
+
+    If the provided 'freckle_details' value is a single item, it gets converted into a list. If one of
+    the items is a string, it gets converted into a :class:`FreckleDetails` object.
+
+    Args:
+      freckle_details (list): a list of :class:`FreckleDetails` objects
+
+    """
+    def __init__(self, freckle_details, config=None):
+
+        if isinstance(freckle_details, string_types):
+            temp_freckle_details = [FreckleDetails(freckle_details)]
+        elif isinstance(freckle_details, FreckleRepo):
+            temp_freckle_details = [FreckleDetails(freckle_details)]
+        elif isinstance(freckle_details, FreckleDetails):
+            temp_freckle_details = [freckle_details]
+        else:
+            temp_freckle_details = [FreckleDetails(freckle_details)]
+        self.freckle_details = []
+
+        # to be populated after checkout
+        self.freckles_metadata = None
+        self.profiles = None
+        self.freckle_profile = None
+
+        base_priority = 0
+        p = 0
+        for d in temp_freckle_details:
+            if isinstance(d, string_types):
+                d = FreckleDetails(d)
+
+            d.set_priority(base_priority+p)
+            self.freckle_details.append(d)
+            p = p + 10000
+
+        if config is None:
+            config = DEFAULT_FRECKLES_CONFIG
+        self.config = config
+
+        paths = [p['path'] for p in expand_repos(config.trusted_repos)]
+        self.finder = FreckelizeAdapterFinder(paths)
+        self.reader = FreckelizeAdapterReader()
+        self.all_repos = OrderedDict()
+
+        for f in self.freckle_details:
+            f.expand_repos(self.config)
+            for fr in f.freckle_repos:
+                self.all_repos[fr.id] = fr
+
+    def start_checkout_run(self, hosts=None, ask_become_pass="auto", no_run=False, output_format="default"):
+
+        if hosts is None:
+            hosts = ["localhost"]
+
+        if isinstance(hosts, (list, tuple)):
+            if len(hosts) > 1:
+                raise Exception("More than one host not supported (for now).")
+
+        log.debug("Starting checkout run, using those repos:")
+        for id, r in self.all_repos.items():
+            log.debug(readable_json(r.repo_desc, indent=2))
+
+        if not self.all_repos:
+            log.info("No freckle repositories specified, doing nothing...")
+            return
+
+        print_title("starting freckelize run(s)...")
+        extra_profile_vars = {}
+
+        repo_metadata_file = "repo_metadata"
+
+        extra_profile_vars = {}
+        # extra_profile_vars.setdefault("freckle", {})["no_run"] = bool(no_run)
+
+        repos = []
+        for id, r in self.all_repos.items():
+            repos.append(r.repo_desc)
+
+        task_config = [{"vars": {"freckles": repos, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
+
+        result_checkout = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+                                            no_run=no_run, run_box_basics=True, hosts_list=hosts)
+
+
+        playbook_dir = result_checkout["playbook_dir"]
+
+        repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
+
+        return_code = result_checkout["return_code"]
+
+        if return_code != 0:
+            click.echo("Checkout phase failed, not continuing...")
+            sys.exit(1)
+
+        all_repo_metadata = json.load(open(repo_metadata_file_abs))
+        # TODO: delete file?
+        folders_metadata = self.read_checkout_metadata(all_repo_metadata)
+        self.freckles_metadata = self.prepare_checkout_metadata(folders_metadata)
+
+        # allow for multiple hosts in the future
+        profiles_map = self.calculate_profiles_to_run()
+
+        for profile, folders in profiles_map.items():
+
+            for folder in folders:
+                repo = self.all_repos[folder["folder_metadata"]["parent_repo_id"]]
+                default_vars = repo.default_vars.get(profile, {})
+                overlay_vars = repo.overlay_vars.get(profile, {})
+                final_vars = self.process_folder_vars(folder["folder_vars"], default_vars, overlay_vars)
+                folder["default_vars"] = default_vars
+                folder["overlay_vars"] = overlay_vars
+                folder["vars"] = final_vars
+
+        freckle_profile_folders = profiles_map.pop("freckle")
+        freckle_profile = {}
+        for folder in freckle_profile_folders:
+            freckle_profile[folder["folder_metadata"]["full_path"]] = folder
+
+        # now merge the 'freckle' profile vars with the profile vars
+        for profile, folders in profiles_map.items():
+            for folder in folders:
+                path = folder["folder_metadata"]["full_path"]
+                base_vars = freckle_profile[path]["vars"]
+                temp = frkl.dict_merge(base_vars, folder["vars"], copy_dct=True)
+                folder["vars"] = temp
+
+        self.profiles = [(hosts[0], profiles_map)]
+        self.freckle_profile = [(hosts[0], freckle_profile)]
+
+        return (self.freckle_profile, self.profiles)
+
+    def process_folder_vars(self, folder_vars, default_vars, overlay_vars):
+
+
+        final_vars = frkl.dict_merge(default_vars, folder_vars, copy_dct=True)
+        frkl.dict_merge(final_vars, overlay_vars, copy_dct=False)
+
+        return final_vars
+
+    def start_freckelize_run(self, ask_become_pass="auto", no_run=False, output_format="default"):
+
+        if self.freckles_metadata is None:
+            raise Exception("Checkout not run yet, can't continue.")
+
+        log.debug("Starting freckelize run...")
+
+        host = self.profiles[0][0]
+        hosts_list = [host]
+        freckelize_metadata = self.profiles[0][1]
+        freckelize_freckle_metadata = self.freckle_profile[0][1]
+        valid_adapters, adapters_files_map = self.create_adapters_files_map(freckelize_metadata.keys())
+
+        if not valid_adapters:
+            click.echo("No valid adapters found, doing nothing...")
+            return None
+
+        callback = self.create_adapter_files_callback(valid_adapters.keys(), adapters_files_map)
+        additional_roles = self.get_adapter_dependency_roles(valid_adapters.keys())
+
+        sorted_adapters = self.sort_adapters_by_priority(valid_adapters.keys())
+
+        print_title("Using adapters:", title_char="-")
+        click.echo()
+        for a in sorted_adapters:
+            click.echo("  - ", nl=False)
+            click.secho(a, bold=True, nl=False)
+            click.echo(": {}".format(valid_adapters[a]))
+        click.echo()
+
+        task_config = [
+            {"vars": {},
+             "tasks": [{"freckles":
+                        {"user_vars": {},
+                         "freckelize_profiles_metadata": freckelize_metadata,
+                         "freckelize_freckle_metadata": freckelize_freckle_metadata,
+                         "profile_order": sorted_adapters,
+                         "adapters_files_map": adapters_files_map}}]}]
+
+        additional_repo_paths = []
+
+        result = create_and_run_nsbl_runner(
+            task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+            pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles,
+            run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
+
+
+    def sort_adapters_by_priority(self, adapters):
+
+        if not adapters:
+            return []
+
+        prios = []
+
+        for adapter in adapters:
+
+            metadata = self.get_adapter_metadata(adapter)
+            priority = metadata.get("__freckles__", {}).get("adapter_priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
+            prios.append([priority, adapter])
+
+        profiles_sorted = sorted(prios, key=lambda tup: tup[0])
+        return [item[1] for item in profiles_sorted]
+
+    def get_adapter_dependency_roles(self, adapters):
+
+        if not adapters:
+            return []
+
+        all_deps = set()
+        for adapter in adapters:
+
+            metadata = self.get_adapter_metadata(adapter)
+            roles = metadata.get("__freckles__", {}).get("roles", [])
+            all_deps |= set(roles)
+
+        return list(all_deps)
+
+    def get_adapter_details(self, adapter):
+
+        adapter_details = self.finder.get_dictlet(adapter)
+        return adapter_details
+
+    def get_adapter_metadata(self, adapter):
+
+        adapter_details = self.get_adapter_details(adapter)
+        if adapter_details is None:
+            return None
+        adapter_metadata = self.reader.read_dictlet(adapter_details, {}, {})
+
+        return adapter_metadata
+
+    def create_adapters_files_map(self, adapters):
+
+        files_map = {}
+        valid_adapters = OrderedDict()
+
+        for adapter in adapters:
+            adapter_metadata = self.get_adapter_metadata(adapter)
+            if adapter_metadata is None:
+                log.warn("No adapter '{}' found: skipping".format(adapter))
+                continue
+            adapter_path = self.get_adapter_details(adapter)["path"]
+            tasks_init = adapter_metadata.get("tasks_init", [])
+            tasks_folder = adapter_metadata.get("tasks_folder", [])
+            if not tasks_init and not tasks_folder:
+                log.warn("Adapter description for '{}' does not specify any tasks to execute, ignoring...".format(adapter))
+            else:
+                files_map[adapter] = create_adapter_files_list(adapter, adapter_path, tasks_init, tasks_folder)
+                valid_adapters[adapter] = adapter_path
+
+        return (valid_adapters, files_map)
+
+    def create_adapter_files_callback(self, profiles, files_map):
+
+        def copy_callback(ansible_environment_root):
+            target_path = os.path.join(ansible_environment_root, "task_lists")
+            for adapter, files in files_map.items():
+                for f in files["init"]:
+                    source_file = f["source"]
+                    target_file = os.path.join(target_path, f["target"])
+                    os.makedirs(os.path.dirname(target_file))
+                    shutil.copyfile(source_file, target_file)
+                for f in files["freckle"]:
+                    source_file = f["source"]
+                    target_file = os.path.join(target_path, f["target"])
+                    os.makedirs(os.path.dirname(target_file))
+                    shutil.copyfile(source_file, target_file)
+
+        return copy_callback
+
+
+    def calculate_profiles_to_run(self):
+
+        if self.freckles_metadata is None:
+            raise Exception("Checkout not run yet, can't calculate profiles to run.")
+
+        all_profiles = OrderedDict()
+        for fd in self.freckle_details:
+
+            if fd.profiles_to_run is None:
+                # run all __auto_run__ profiles
+                run_map = OrderedDict()
+
+                for repo in fd.freckle_repos:
+                    fd_folders = self.get_freckle_folders_for_repo(repo.id)
+                    for p, folders in fd_folders.items():
+                        for folder in folders:
+                            if not folder["folder_vars"].get("__auto_run__", True):
+                                log.info("auto-run disabled for profile '{}' in folder '{}', ignoring...".format(p, folder["folder_metadata"]["folder_name"]))
+                            else:
+                                all_profiles.setdefault(p, []).append(folder)
+
+            else:
+                for repo in fd.freckle_repos:
+                    fd_folders = self.get_freckle_folders_for_repo(repo.id)
+                    for profile, folders in fd_folders.items():
+                        for folder in folders:
+                            for p in fd.profiles_to_run:
+                                all_profiles.setdefault(p, []).append(folder)
+
+        return all_profiles
+
+    def get_freckle_folders_for_repo(self, repo_id):
+
+        if self.freckles_metadata is None:
+            raise Exception("Checkout not run yet, can't calculate freckle folders.")
+
+        repos = OrderedDict()
+
+        for profile, details_list in self.freckles_metadata.items():
+
+            for details in details_list:
+                if details["folder_metadata"]["parent_repo_id"] == repo_id:
+                    repos.setdefault(profile, []).append(details)
+
+        return repos
+
+    def prepare_checkout_metadata(self, folders_metadata):
+
+
+        profiles_available = OrderedDict()
+
+        for details in folders_metadata:
+            extra_vars = details["extra_vars"]
+            folder_metadata = details["folder_metadata"]
+            folder_vars = details["vars"]
+
+            profile_folder_vars = OrderedDict()
+            for v in folder_vars:
+                profile = v["profile"]["name"]
+                if profile in profile_folder_vars.keys():
+                    log.warn("Profile '{}' specified more than once in '{}', ignoring all but the last instance. Please check '{}' for details.".format(profile, os.path.join(folder_metadata["full_path"], ".freckle"), "https://XXX"))
+
+                p_vars = v.get("vars", {})
+                profile_folder_vars[profile] = p_vars
+
+
+            for key, value in profile_folder_vars.items():
+                profiles_available.setdefault(key, []).append({"folder_metadata": folder_metadata, "folder_vars": value, "extra_vars": extra_vars})
+
+            if not "freckle" in profile_folder_vars.keys():
+                profiles_available.setdefault("freckle", []).append({"folder_metadata": folder_metadata, "folder_vars": {}, "extra_vars": extra_vars})
+
+        return profiles_available
+
+    def read_checkout_metadata(self, folders_metadata):
+
+        temp_vars = OrderedDict()
+        extra_vars = OrderedDict()
+
+        for folder, metadata in folders_metadata.items():
+
+            raw_metadata = metadata.pop(METADATA_CONTENT_KEY, False)
+            if raw_metadata:
+                # md = yaml.safe_load(raw_metadata)
+                md = ordered_load(raw_metadata)
+                if not md:
+                    md = []
+                if isinstance(md, dict):
+                    md_temp = []
+                    for key, value in md.items():
+                        md_temp.append({key: value})
+                    md = md_temp
+                    # if isinstance(md, (list, tuple)):
+                    # md = {"vars": md}
+            else:
+                md = [{"profile": {"name": "freckle"}, "vars": {}}]
+
+            temp_vars.setdefault(folder, []).append(md)
+
+            extra_vars_raw = metadata.pop("extra_vars", False)
+            if extra_vars_raw:
+                for rel_path, extra_metadata_raw in extra_vars_raw.items():
+                    extra_metadata = ordered_load(extra_metadata_raw)
+                    if not extra_metadata:
+                        # this means there was an empty file. We interprete that as setting a flag to true
+                        extra_metadata = True
+
+                    #sub_path, filename = os.path.split(rel_path)
+                    tokens = rel_path.split(os.path.sep)
+                    last_token = tokens[-1]
+                    if last_token.startswith("."):
+                        last_token = last_token[1:]
+                    else:
+                        continue
+                    if last_token.endswith(".freckle"):
+                        last_token = last_token[0:-8]
+                    else:
+                        continue
+                    tokens[-1] = last_token
+                    add_key_to_dict(extra_vars.setdefault(folder, {}), ".".join(tokens), extra_metadata)
+                    # extra_vars.setdefault(folder, {}).setdefault(sub_path, {})[filename[1:-8]] = extra_metadata
+
+        result = []
+        for freckle_folder, metadata_list in temp_vars.items():
+
+            chain = [frkl.FrklProcessor(DEFAULT_PROFILE_VAR_FORMAT)]
+            try:
+                frkl_obj = frkl.Frkl(metadata_list, chain)
+                # mdrc_init = {"append_keys": "vars/packages"}
+                # frkl_callback = frkl.MergeDictResultCallback(mdrc_init)
+                frkl_callback = frkl.MergeResultCallback()
+                profile_vars_new = frkl_obj.process(frkl_callback)
+                item = {}
+                item["vars"] = profile_vars_new
+                item["extra_vars"] = extra_vars.get(freckle_folder, {})
+                item["folder_metadata"] = folders_metadata[freckle_folder]
+                result.append(item)
+            except (frkl.FrklConfigException) as e:
+                raise Exception(
+                    "Can't read freckle metadata file '{}/.freckle': {}".format(freckle_folder, e.message))
+
+        result.sort(key=lambda k: operator.itemgetter(k["folder_metadata"]["repo_priority"]))
+
+        return result
+
+
 class FreckelizeAdapterFinder(DictletFinder):
     """Finder class for freckelize adapters.
-
 
     """
 
@@ -700,22 +1452,6 @@ def create_freckelize_checkout_run(freckle_repos, repo_metadata_file, extra_prof
 
     return result
 
-def get_adapter_profile_priorities(profiles, adapter_metadata):
-
-    if not profiles:
-        return []
-    prios = []
-
-    for adapter in profiles:
-
-        metadata = adapter_metadata[adapter]["metadata"]
-        priority = metadata.get("__freckles__", {}).get("adapter_priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
-
-        prios.append([priority, adapter])
-
-    profiles_sorted = sorted(prios, key=lambda tup: tup[0])
-
-    return [item[1] for item in profiles_sorted]
 
 # def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
 
@@ -737,18 +1473,6 @@ def get_adapter_profile_priorities(profiles, adapter_metadata):
 
 #     return task_files_to_copy
 
-def create_adapters_files_map(adapters, adapters_metadata):
-
-    files_map = {}
-
-    for adapter in adapters:
-        adapter_metadata = adapters_metadata[adapter]
-        adapter_path = adapter_metadata["details"]["path"]
-        tasks_init = adapter_metadata["metadata"].get("tasks_init", [])
-        tasks_folder = adapter_metadata["metadata"].get("tasks_folder", [])
-        files_map[adapter] = create_adapter_files_list(adapter, adapter_path, tasks_init, tasks_folder)
-
-    return files_map
 
 def create_adapter_files_list(adapter_name, adapter_path, init_task_files, freckle_task_files):
 
@@ -786,44 +1510,6 @@ def create_adapter_files_list(adapter_name, adapter_path, init_task_files, freck
     return result
 
 
-def add_adapter_files_callback(profiles, adapter_metadata, files_map, additional_context_repos=[], print_used_adapter=True):
-
-    print_cache = {}
-
-
-    # check for 'active' adapters, i.e. ones that have at least one tasks file
-    no_valid_profiles = True
-    for profile in profiles:
-        if files_map.get(profile, {}).get("init", None) or files_map.get(profile, {}).get("freckle", None):
-            path = adapter_metadata[profile]["details"]["path"]
-            print_cache[profile] = path
-            no_valid_profiles = False
-
-    if no_valid_profiles:
-        click.echo("  - no adapters with any task files found, only executing basic folder tasks")
-    else:
-        if profiles and print_used_adapter:
-            for p in profiles:
-                if p in print_cache.keys():
-                    click.echo("  - ", nl=False)
-                    click.secho(p, bold=True, nl=False)
-                    click.echo(": {}".format(print_cache[p]))
-
-    def copy_callback(ansible_environment_root):
-        target_path = os.path.join(ansible_environment_root, "task_lists")
-        for adapter, files in files_map.items():
-            for f in files["init"]:
-                source_file = f["source"]
-                target_file = os.path.join(target_path, f["target"])
-                os.makedirs(os.path.dirname(target_file))
-                shutil.copyfile(source_file, target_file)
-            for f in files["freckle"]:
-                source_file = f["source"]
-                target_file = os.path.join(target_path, f["target"])
-                os.makedirs(os.path.dirname(target_file))
-                shutil.copyfile(source_file, target_file)
-
-    return copy_callback
 
 def find_supported_profiles(config=None, additional_context_repos=[]):
 
@@ -843,22 +1529,6 @@ def find_supported_profiles(config=None, additional_context_repos=[]):
 
     return result
 
-def get_adapter_dependency_roles(profiles, adapter_metadata):
-
-    if not profiles:
-        return []
-
-    # dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
-
-    all_deps = set()
-
-    for adapter in profiles:
-
-        metadata = adapter_metadata[adapter]["metadata"]
-        roles = metadata.get("__freckles__", {}).get("roles", [])
-        all_deps |= set(roles)
-
-    return list(all_deps)
 
 @click.command(name="freckelize", cls=FreckelizeCommand, epilog=FRECKELIZE_EPILOG_TEXT, subcommand_metavar="ADAPTER", invoke_without_command=True, result_callback=assemble_freckelize_run, chain=True)
 @click_log.simple_verbosity_option(log, "--verbosity")

@@ -25,14 +25,11 @@ import sphinx_redactor_theme
 # absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-# Get the project root dir, which is the parent dir of this
-cwd = os.getcwd()
-project_root = os.path.dirname(cwd)
-
 # Insert the project root dir as the first element in the PYTHONPATH.
 # This lets us ensure that the source package is imported, and that its
 # version is used.
-sys.path.insert(0, project_root)
+
+sys.path.insert(0, os.path.abspath('../'))
 
 import freckles
 
@@ -43,7 +40,15 @@ import freckles
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinxcontrib.napoleon', 'sphinx.ext.autosectionlabel', 'sphinx_click.ext']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinxcontrib.napoleon', 'sphinx.ext.autosectionlabel',
+              'sphinx_click.ext', 'sphinx.ext.intersphinx']
+
+intersphinx_mapping = {
+    'urllib3': ('http://urllib3.readthedocs.org/en/latest', None),
+    'python': ('http://docs.python.org/2', None),
+    'click': ('http://click.pocoo.org/6/', None)
+}
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
