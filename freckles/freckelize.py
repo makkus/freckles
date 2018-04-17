@@ -39,7 +39,8 @@ click_completion.init()
 # TODO: this is a bit ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 
-VARS_HELP = "variables to be used for templating, can be overridden by cli options if applicable"
+VARS_ARG_HELP = "extra variables for this adapter, can be overridden by cli options if applicable"
+VARS_ARG_METAVAR = "VARS"
 DEFAULTS_HELP = "default variables, can be used instead (or in addition) to user input via command-line parameters"
 KEEP_METADATA_HELP = "keep metadata in result directory, mostly useful for debugging"
 FRECKELIZE_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
@@ -58,7 +59,8 @@ ASK_PW_HELP = 'whether to force ask for a password, force ask not to, or let fre
 ASK_PW_CHOICES = click.Choice(["auto", "true", "false"])
 NON_RECURSIVE_HELP = "whether to exclude all freckle child folders, default: false"
 
-ADD_FILES = False
+# for debug purposes, sometimes it's easier to read the output if list of files is not present in folder metadata. This will make some adapters not work though.
+ADD_FILES = True
 
 ADAPTER_CACHE = {}
 DEFAULT_REPO_TYPE = RepoType()
@@ -120,6 +122,43 @@ def get_blueprints_from_repo(blueprint_repo):
 
     return result
 
+
+def create_adapter_files_list(adapter_name, adapter_path, init_task_files, freckle_task_files):
+
+    base_dir = os.path.dirname(adapter_path)
+    result = {}
+    result["init"] = []
+    for f in init_task_files:
+        if not os.path.isabs(f):
+            f = os.path.join(base_dir, f)
+
+        if not os.path.exists(f):
+            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
+
+        file_details = {}
+        file_details["source"] = os.path.join(base_dir, f)
+        file_details["target"] = os.path.join(adapter_name, "init", os.path.basename(f))
+        # file_details["target"] = "{}/{}/{}".format(adapter_name, "init", os.path.basename(f))
+
+        result["init"].append(file_details)
+
+    result["freckle"] = []
+    for f in freckle_task_files:
+        if not os.path.isabs(f):
+            f = os.path.join(base_dir, f)
+
+        if not os.path.exists(f):
+            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
+
+        file_details = {}
+        file_details["source"] = os.path.join(base_dir, f)
+        # file_details["target"] = "{}/{}/{}".format(adapter_name, "freckle", os.path.basename(f))
+        file_details["target"] = os.path.join(adapter_name, "freckle", os.path.basename(f))
+        result["freckle"].append(file_details)
+
+    return result
+
+
 def find_freckelize_adapters(path):
     """Helper method to find freckelize adapters.
 
@@ -176,15 +215,12 @@ class FreckleRepo(object):
       target_name (str): the local target name
       include (list): a list of strings that specify which sub-freckle folders to use (TODO: include link to relevant documetnation)
       exclude (list): a list of strings that specify which sub-freckle folders to exclude from runs (TODO: include link to relevant documetnation)
-      branch (str): the source branch/version (or None, if default branch)
       non_recursive (bool): whether to only use the source base folder, not any containing sub-folders that contain a '.freckle' marker file
       priority (int): the priority of this repo (determines the order in which it gets processed)
       default_vars (dict): default values to be used for this repo (key: profile_name, value: vars)
       overlay_vars (dict): overlay values to be used for this repo (key: profile_name, value: vars), those will be overlayed after the checkout process
     """
-    def __init__(self, source, target_folder=None, target_name=None, include=None, exclude=None, branch=None, non_recursive=False, priority=DEFAULT_REPO_PRIORITY, default_vars=None, overlay_vars=None):
-
-        self.id = str(uuid.uuid4())
+    def __init__(self, source, target_folder=None, target_name=None, include=None, exclude=None, non_recursive=False, priority=DEFAULT_REPO_PRIORITY, default_vars=None, overlay_vars=None):
 
         if not source:
             raise Exception("No source provided")
@@ -193,6 +229,10 @@ class FreckleRepo(object):
             temp_source = DEFAULT_REPO_TYPE.convert(source, None, None)
         else:
             temp_source = source
+
+        self.id = str(uuid.uuid4())
+
+        # self.id = temp_source["url"]
 
         self.priority = DEFAULT_REPO_PRIORITY
         self.source = temp_source
@@ -219,6 +259,14 @@ class FreckleRepo(object):
         self.source_delete = False
 
         self.repo_desc = None
+
+    def add_default_vars(self, vars_dict):
+
+        frkl.dict_merge(self.default_vars, vars_dict, copy_dct=False)
+
+    def add_overlay_vars(self, vars_dict):
+
+        frkl.dict_merge(self.overlay_vars, vars_dict, copy_dct=False)
 
     def set_priority(self, priority):
 
@@ -267,6 +315,7 @@ class FreckleRepo(object):
                     click.secho("\nFound interactive blueprint, please enter approriate values below:\n", bold=True)
 
                     cookiecutter(match, output_dir=temp_path)
+                    click.echo()
 
 
                 subdirs = [os.path.join(temp_path, f) for f in os.listdir(temp_path) if os.path.isdir(os.path.join(temp_path, f))]
@@ -278,10 +327,14 @@ class FreckleRepo(object):
                 self.source_delete = True
 
             else:
-
                 url = match
+
+            if self.target_folder == DEFAULT_FRECKLE_TARGET_MARKER:
+                self.target_folder = default_target
+
         else:
             url = self.source["url"]
+
 
         repo_desc = {}
         repo_desc["blueprint"] = False
@@ -404,8 +457,13 @@ class FreckleDetails(object):
         for r in temp_freckle_repos:
             if isinstance(r, string_types):
                 r = FreckleRepo(r)
-            self.freckle_repos.append(r)
+            elif isinstance(r, FreckleRepo):
+                self.freckle_repos.append(r)
+            else:
+                raise Exception("Can't add object of type '{}' to FreckleDetails.".format(type(r)))
 
+        if isinstance(profiles_to_run, string_types):
+            profiles_to_run = [profiles_to_run]
         self.profiles_to_run = profiles_to_run
         self.set_priority(detail_priority)
 
@@ -425,6 +483,9 @@ class FreckleDetails(object):
 
         return result
 
+    def __repr__(self):
+
+        return("{}: {}".format("FreckleDetails", readable_raw(self.__dict__)))
 
 class Freckelize(object):
     """Class to configure and execute a freckelize run.
@@ -438,9 +499,11 @@ class Freckelize(object):
 
     Args:
       freckle_details (list): a list of :class:`FreckleDetails` objects
-
+      config (FreckleConfig): the configuration to use for this run
+      ask_become_pass (bool): whether Ansible should ask the user for a password if necessary
+      password (str): the password to use
     """
-    def __init__(self, freckle_details, config=None):
+    def __init__(self, freckle_details, config=None, ask_become_pass=False, password=None):
 
         if isinstance(freckle_details, string_types):
             temp_freckle_details = [FreckleDetails(freckle_details)]
@@ -449,13 +512,18 @@ class Freckelize(object):
         elif isinstance(freckle_details, FreckleDetails):
             temp_freckle_details = [freckle_details]
         else:
-            temp_freckle_details = [FreckleDetails(freckle_details)]
+            temp_freckle_details = freckle_details
+
+        self.ask_become_pass = ask_become_pass
+        self.password = password
+
         self.freckle_details = []
 
         # to be populated after checkout
         self.freckles_metadata = None
         self.profiles = None
         self.freckle_profile = None
+        self.repo_lookup = None
 
         base_priority = 0
         p = 0
@@ -481,7 +549,7 @@ class Freckelize(object):
             for fr in f.freckle_repos:
                 self.all_repos[fr.id] = fr
 
-    def start_checkout_run(self, hosts=None, ask_become_pass="auto", no_run=False, output_format="default"):
+    def start_checkout_run(self, hosts=None, no_run=False, output_format="default"):
 
         if hosts is None:
             hosts = ["localhost"]
@@ -491,6 +559,7 @@ class Freckelize(object):
                 raise Exception("More than one host not supported (for now).")
 
         log.debug("Starting checkout run, using those repos:")
+
         for id, r in self.all_repos.items():
             log.debug(readable_json(r.repo_desc, indent=2))
 
@@ -512,9 +581,8 @@ class Freckelize(object):
 
         task_config = [{"vars": {"freckles": repos, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
 
-        result_checkout = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+        result_checkout = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=self.ask_become_pass, password=self.password,
                                             no_run=no_run, run_box_basics=True, hosts_list=hosts)
-
 
         playbook_dir = result_checkout["playbook_dir"]
 
@@ -526,52 +594,64 @@ class Freckelize(object):
             click.echo("Checkout phase failed, not continuing...")
             sys.exit(1)
 
+        click.echo()
+
         all_repo_metadata = json.load(open(repo_metadata_file_abs))
         # TODO: delete file?
         folders_metadata = self.read_checkout_metadata(all_repo_metadata)
-        self.freckles_metadata = self.prepare_checkout_metadata(folders_metadata)
+        (self.freckles_metadata, self.repo_lookup) = self.prepare_checkout_metadata(folders_metadata)
 
         # allow for multiple hosts in the future
-        profiles_map = self.calculate_profiles_to_run()
 
+        freckle_profile_folders = self.freckles_metadata.get("freckle")
+
+        freckle_profile = {}  # this is just for easy lookup by path
+        for folder in freckle_profile_folders:
+            freckle_profile[folder["folder_metadata"]["full_path"]] = folder
+            repo = self.all_repos[folder["folder_metadata"]["parent_repo_id"]]
+            default_vars = repo.default_vars.get("freckle", {})
+            overlay_vars = repo.overlay_vars.get("freckle", {})
+            final_vars = self.process_folder_vars(folder["folder_vars"], default_vars, overlay_vars)
+            folder["default_vars"] = default_vars
+            folder["overlay_vars"] = overlay_vars
+            folder["vars"] = final_vars
+
+        profiles_map = self.calculate_profiles_to_run()
         for profile, folders in profiles_map.items():
 
             for folder in folders:
                 repo = self.all_repos[folder["folder_metadata"]["parent_repo_id"]]
                 default_vars = repo.default_vars.get(profile, {})
                 overlay_vars = repo.overlay_vars.get(profile, {})
-                final_vars = self.process_folder_vars(folder["folder_vars"], default_vars, overlay_vars)
-                folder["default_vars"] = default_vars
-                folder["overlay_vars"] = overlay_vars
-                folder["vars"] = final_vars
-
-        freckle_profile_folders = profiles_map.pop("freckle")
-        freckle_profile = {}
-        for folder in freckle_profile_folders:
-            freckle_profile[folder["folder_metadata"]["full_path"]] = folder
-
-        # now merge the 'freckle' profile vars with the profile vars
-        for profile, folders in profiles_map.items():
-            for folder in folders:
                 path = folder["folder_metadata"]["full_path"]
                 base_vars = freckle_profile[path]["vars"]
-                temp = frkl.dict_merge(base_vars, folder["vars"], copy_dct=True)
-                folder["vars"] = temp
+                folder["base_vars"] = base_vars
+                folder["default_vars"] = default_vars
+                folder["overlay_vars"] = overlay_vars
+
+                final_vars = self.process_folder_vars(folder["folder_vars"], default_vars, overlay_vars, base_vars)
+                folder["vars"] = final_vars
 
         self.profiles = [(hosts[0], profiles_map)]
         self.freckle_profile = [(hosts[0], freckle_profile)]
 
+        log.debug("Using freckle details:")
+        log.debug(readable_json(self.freckle_profile, indent=2))
+        log.debug("Using profile details:")
+        log.debug(readable_json(self.profiles, indent=2))
+
         return (self.freckle_profile, self.profiles)
 
-    def process_folder_vars(self, folder_vars, default_vars, overlay_vars):
-
+    def process_folder_vars(self, folder_vars, default_vars, overlay_vars, base_vars={}):
 
         final_vars = frkl.dict_merge(default_vars, folder_vars, copy_dct=True)
+        if base_vars:
+            frkl.dict_merge(final_vars, base_vars, copy_dct=False)
         frkl.dict_merge(final_vars, overlay_vars, copy_dct=False)
 
         return final_vars
 
-    def start_freckelize_run(self, ask_become_pass="auto", no_run=False, output_format="default"):
+    def start_freckelize_run(self, no_run=False, output_format="default"):
 
         if self.freckles_metadata is None:
             raise Exception("Checkout not run yet, can't continue.")
@@ -588,24 +668,45 @@ class Freckelize(object):
             click.echo("No valid adapters found, doing nothing...")
             return None
 
+        # special case for 'ansible-tasks'
+        if "ansible-tasks" in valid_adapters:
+            # it's still possible to add the confirmation via an extra var file,
+            # but I think that's ok. Happy to hear suggestions if you think this is
+            # too risky though.
+            p_md = freckelize_metadata["ansible-tasks"]
+            confirmation = False
+            for md in p_md:
+                if md["overlay_vars"].get("ansible_tasks_user_confirmation", False):
+                    confirmation = True
+                    break;
+            if not confirmation:
+                raise click.ClickException("As the ansible-tasks adapter can execute arbitrary code, user confirmation is necessary to  use this adatper. Consult the output of 'freckelize ansible-tasks --help' or XXX for more information.")
+
         callback = self.create_adapter_files_callback(valid_adapters.keys(), adapters_files_map)
         additional_roles = self.get_adapter_dependency_roles(valid_adapters.keys())
 
         sorted_adapters = self.sort_adapters_by_priority(valid_adapters.keys())
 
-        print_title("Using adapters:", title_char="-")
         click.echo()
+        print_title("using adapters:", title_char="-")
         for a in sorted_adapters:
+            click.echo()
             click.echo("  - ", nl=False)
             click.secho(a, bold=True, nl=False)
+            click.echo(":")
+            click.secho("      path", bold=True, nl=False)
             click.echo(": {}".format(valid_adapters[a]))
-        click.echo()
+            click.secho("      folders", bold=True, nl=False)
+            click.echo(":")
+            for folder in freckelize_metadata[a]:
+                full_path = folder["folder_metadata"]["full_path"]
+                click.echo("         - {}".format(full_path))
 
         task_config = [
             {"vars": {},
              "tasks": [{"freckles":
-                        {"user_vars": {},
-                         "freckelize_profiles_metadata": freckelize_metadata,
+                        # {"user_vars": {},
+                         {"freckelize_profiles_metadata": freckelize_metadata,
                          "freckelize_freckle_metadata": freckelize_freckle_metadata,
                          "profile_order": sorted_adapters,
                          "adapters_files_map": adapters_files_map}}]}]
@@ -613,9 +714,47 @@ class Freckelize(object):
         additional_repo_paths = []
 
         result = create_and_run_nsbl_runner(
-            task_config, output_format=output_format, ask_become_pass=ask_become_pass,
+            task_config, output_format=output_format, ask_become_pass=self.ask_become_pass, password=self.password,
             pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles,
             run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
+
+        click.echo()
+        if no_run:
+
+            click.secho("========================================================", bold=True)
+            click.echo()
+            click.echo("'no-run' was specified, not executing freckelize run.")
+            click.echo()
+            click.echo("Variables that would have been used for an actual run:")
+            click.echo()
+
+            click.secho("Profiles:", bold=True)
+            click.secho("--------", bold=True)
+            for profile, folders in freckelize_metadata.items():
+                click.echo()
+                click.secho("profile: ", bold=True, nl=False)
+                click.echo("{}".format(profile))
+                click.echo()
+                for folder in folders:
+                    folder_metadata = folder["folder_metadata"]
+                    click.secho("  path: ", bold=True, nl=False)
+                    click.echo(folder_metadata["full_path"])
+                    if folder["vars"]:
+                        click.secho("  vars: ", bold=True, nl=True)
+                        output(folder["vars"], output_type="yaml", indent=4, nl=False)
+                        click.echo(u"\u001b[2K\r", nl=False)
+                    else:
+                        click.secho("  vars: ", bold=True, nl=False)
+                        click.echo("none")
+                    if folder["extra_vars"]:
+                        click.secho("  extra vars:", bold=True)
+                        output(folder["extra_vars"], output_type="yaml", indent=4)
+                    else:
+                        click.secho("  extra_vars: ", bold=True, nl=False)
+                        click.echo("none")
+            click.echo()
+
+        sys.exit(0)
 
 
     def sort_adapters_by_priority(self, adapters):
@@ -709,7 +848,6 @@ class Freckelize(object):
 
         all_profiles = OrderedDict()
         for fd in self.freckle_details:
-
             if fd.profiles_to_run is None:
                 # run all __auto_run__ profiles
                 run_map = OrderedDict()
@@ -717,19 +855,37 @@ class Freckelize(object):
                 for repo in fd.freckle_repos:
                     fd_folders = self.get_freckle_folders_for_repo(repo.id)
                     for p, folders in fd_folders.items():
+                        if p == "freckle":
+                            continue
                         for folder in folders:
                             if not folder["folder_vars"].get("__auto_run__", True):
-                                log.info("auto-run disabled for profile '{}' in folder '{}', ignoring...".format(p, folder["folder_metadata"]["folder_name"]))
+                                click.echo("  - auto-run disabled for profile '{}' in folder '{}', ignoring...".format(p, folder["folder_metadata"]["folder_name"]))
                             else:
                                 all_profiles.setdefault(p, []).append(folder)
-
             else:
-                for repo in fd.freckle_repos:
-                    fd_folders = self.get_freckle_folders_for_repo(repo.id)
-                    for profile, folders in fd_folders.items():
-                        for folder in folders:
-                            for p in fd.profiles_to_run:
-                                all_profiles.setdefault(p, []).append(folder)
+                for profile in fd.profiles_to_run:
+                    for repo in fd.freckle_repos:
+                        paths_to_get = copy.deepcopy(self.repo_lookup[repo.id])
+                        profile_folders = self.get_freckle_folders_for_repo(repo.id)
+                        # first check if there is a folder that has profile-specific vars
+                        for f in profile_folders.get(profile, []):
+                            full_path = f["folder_metadata"]["full_path"]
+                            if full_path in paths_to_get:
+                                log.debug("Using '{}' profile folder for path: {}".format(profile, full_path))
+                                all_profiles.setdefault(profile, []).append(f)
+                                paths_to_get.remove(full_path)
+
+                        # if there are still folders left, we use the 'freckle' ones
+                        if paths_to_get:
+                            for f in profile_folders.get("freckle", []):
+                                full_path = f["folder_metadata"]["full_path"]
+                                if full_path in paths_to_get:
+                                    log.debug("Using 'freckle' profile folder for path: {}".format(full_path))
+                                    all_profiles.setdefault(profile, []).append(f)
+                                    paths_to_get.remove(full_path)
+
+                        if paths_to_get:
+                            raise Exception("Could not find all folders for profile '{}'. Leftover: {}".format(profile, paths_to_get))
 
         return all_profiles
 
@@ -752,11 +908,19 @@ class Freckelize(object):
 
 
         profiles_available = OrderedDict()
+        all_folders = []
+
+        repo_lookup = OrderedDict()
 
         for details in folders_metadata:
             extra_vars = details["extra_vars"]
             folder_metadata = details["folder_metadata"]
             folder_vars = details["vars"]
+
+            repo_id = folder_metadata["parent_repo_id"]
+            full_path = folder_metadata["full_path"]
+            if full_path not in repo_lookup.setdefault(repo_id, []):
+                repo_lookup[repo_id].append(full_path)
 
             profile_folder_vars = OrderedDict()
             for v in folder_vars:
@@ -774,14 +938,20 @@ class Freckelize(object):
             if not "freckle" in profile_folder_vars.keys():
                 profiles_available.setdefault("freckle", []).append({"folder_metadata": folder_metadata, "folder_vars": {}, "extra_vars": extra_vars})
 
-        return profiles_available
+        return (profiles_available, repo_lookup)
 
     def read_checkout_metadata(self, folders_metadata):
 
         temp_vars = OrderedDict()
         extra_vars = OrderedDict()
+        folder_metadata_lookup = {}
 
-        for folder, metadata in folders_metadata.items():
+        for metadata in folders_metadata:
+
+            repo_id = metadata["parent_repo_id"]
+            folder = metadata["full_path"]
+
+            folder_metadata_lookup.setdefault(repo_id, {})[folder] = metadata
 
             raw_metadata = metadata.pop(METADATA_CONTENT_KEY, False)
             if raw_metadata:
@@ -799,7 +969,7 @@ class Freckelize(object):
             else:
                 md = [{"profile": {"name": "freckle"}, "vars": {}}]
 
-            temp_vars.setdefault(folder, []).append(md)
+            temp_vars.setdefault(repo_id, {}).setdefault(folder, []).append(md)
 
             extra_vars_raw = metadata.pop("extra_vars", False)
             if extra_vars_raw:
@@ -821,27 +991,27 @@ class Freckelize(object):
                     else:
                         continue
                     tokens[-1] = last_token
-                    add_key_to_dict(extra_vars.setdefault(folder, {}), ".".join(tokens), extra_metadata)
+                    add_key_to_dict(extra_vars.setdefault(repo_id, {}).setdefault(folder, {}), ".".join(tokens), extra_metadata)
                     # extra_vars.setdefault(folder, {}).setdefault(sub_path, {})[filename[1:-8]] = extra_metadata
 
         result = []
-        for freckle_folder, metadata_list in temp_vars.items():
-
-            chain = [frkl.FrklProcessor(DEFAULT_PROFILE_VAR_FORMAT)]
-            try:
-                frkl_obj = frkl.Frkl(metadata_list, chain)
-                # mdrc_init = {"append_keys": "vars/packages"}
-                # frkl_callback = frkl.MergeDictResultCallback(mdrc_init)
-                frkl_callback = frkl.MergeResultCallback()
-                profile_vars_new = frkl_obj.process(frkl_callback)
-                item = {}
-                item["vars"] = profile_vars_new
-                item["extra_vars"] = extra_vars.get(freckle_folder, {})
-                item["folder_metadata"] = folders_metadata[freckle_folder]
-                result.append(item)
-            except (frkl.FrklConfigException) as e:
-                raise Exception(
-                    "Can't read freckle metadata file '{}/.freckle': {}".format(freckle_folder, e.message))
+        for repo_id, folder_map in temp_vars.items():
+            for freckle_folder, metadata_list in folder_map.items():
+                chain = [frkl.FrklProcessor(DEFAULT_PROFILE_VAR_FORMAT)]
+                try:
+                    frkl_obj = frkl.Frkl(metadata_list, chain)
+                    # mdrc_init = {"append_keys": "vars/packages"}
+                    # frkl_callback = frkl.MergeDictResultCallback(mdrc_init)
+                    frkl_callback = frkl.MergeResultCallback()
+                    profile_vars_new = frkl_obj.process(frkl_callback)
+                    item = {}
+                    item["vars"] = profile_vars_new
+                    item["extra_vars"] = extra_vars.get(repo_id, {}).get(freckle_folder, {})
+                    item["folder_metadata"] = folder_metadata_lookup[repo_id][freckle_folder]
+                    result.append(item)
+                except (frkl.FrklConfigException) as e:
+                    raise Exception(
+                        "Can't read freckle metadata file '{}/.freckle': {}".format(freckle_folder, e.message))
 
         result.sort(key=lambda k: operator.itemgetter(k["folder_metadata"]["repo_priority"]))
 
@@ -980,6 +1150,21 @@ class FreckelizeCommand(FrecklesBaseCommand):
                 }
             }
         }),
+        ("profile_extra_vars", {
+            "alias": "vars",
+            "required": False,
+            "type": list,
+            "doc": {
+                "help": VARS_ARG_HELP
+            },
+            "click": {
+                "option": {
+                    "metavar": VARS_ARG_METAVAR,
+                    "multiple": True,
+                    "type": vars_file
+                }
+            }
+        }),
         ("target_folder", {
             "alias": "target-folder",
             "required": False,
@@ -1036,19 +1221,18 @@ class FreckelizeCommand(FrecklesBaseCommand):
                 }
             }
         }),
-        ("ask_become_pass", {
-            "alias": "ask-become-pass",
-            "default": "auto",
-            "doc": {
-                "help": ASK_PW_HELP
-            },
-            "click": {
-                "option": {
-                    "param_decls": ["--ask-become-pass", "-pw"],
-                    "type": ASK_PW_CHOICES
-                }
-            }
-        }),
+        # ("ask_become_pass", {
+        #     "alias": "ask-become-pass",
+        #     "doc": {
+        #         "help": ASK_PW_HELP
+        #     },
+        #     "click": {
+        #         "option": {
+        #             "param_decls": ["--ask-become-pass", "-pw"],
+        #             "type": ASK_PW_CHOICES
+        #         }
+        #     }
+        # }),
         ("non_recursive", {
             "alias": "non-recursive",
             "type": bool,
@@ -1122,412 +1306,156 @@ class FreckelizeCommand(FrecklesBaseCommand):
 
     def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
 
-        return {"name": command_name, "default_vars": default_vars, "extra_vars": extra_vars, "user_input": user_input, "adapter_metadata": metadata, "adapter_details": dictlet_details}
-
-def assemble_freckelize_run(*args, **kwargs):
-
-    try:
-        result = []
-        no_run = kwargs.get("no_run")
-
-        hosts = list(kwargs["host"])
-        if not hosts:
-            hosts = ["localhost"]
-
-        default_target = kwargs.get("target_folder", None)
-
-        default_target_name = kwargs.get("target_name", None)
-
-        default_freckle_urls = list(kwargs.get("freckle", []))
-        default_output_format = kwargs.get("output", "default")
-
-        default_include = list(kwargs.get("include", []))
-        default_exclude = list(kwargs.get("exclude", []))
-
-        default_ask_become_pass = kwargs.get("ask_become_pass", None)
-
-        # default_extra_vars_raw = list(kwargs.get("extra_vars", []))
-
-        default_non_recursive = kwargs.get("non_recursive", None)
-
-
-        default_extra_vars = {}
-        # for ev in default_extra_vars_raw:
-            # dict_merge(default_extra_vars, ev, copy_dct=False)
-
-        extra_profile_vars = {}
-        repos = OrderedDict()
-        profiles = []
-
-        metadata = {}
-        parent_command_vars = {}
-
-        if default_target:
-            parent_command_vars["target_folder"] = default_target
-        if default_target_name:
-            parent_command_vars["target_folder_name"] = default_target_name
-        if default_include:
-            parent_command_vars["includes"] = default_include
-        if default_exclude:
-            parent_command_vars["includes"] = default_include
-        if default_ask_become_pass is not None:
-            parent_command_vars["password"] = default_ask_become_pass
-        if default_non_recursive is not None:
-            parent_command_vars["non_recursive"] = default_non_recursive
-
-        if not args[0]:
-            # fill missing keys with default values
-            if "target_folder" not in parent_command_vars.keys():
-                parent_command_vars["target_folder"] = DEFAULT_FRECKLE_TARGET_MARKER
-            if "target_folder_name" not in parent_command_vars.keys():
-                parent_command_vars["target_folder_name"] = None
-            if "include" not in parent_command_vars.keys():
-                parent_command_vars["include"] = []
-            if "exclude" not in parent_command_vars.keys():
-                parent_command_vars["exclude"] = []
-            if "password" not in parent_command_vars.keys():
-                parent_command_vars["password"] = "auto"
-            if "non_recursive" not in parent_command_vars.keys():
-                parent_command_vars["non_recursive"] = False
-
-            metadata["__auto__"] = {}
-
-            for details in default_freckle_urls:
-                f = details["url"]
-                repos[f] = copy.deepcopy(parent_command_vars)
-                repos[f]["profiles"] = ["__auto__"]
-                repos[f]["repo_details"] = details
-
-            extra_profile_vars = default_extra_vars
-
-        else:
-
-            for p in args[0]:
-                pn = p["name"]
-                if pn in profiles:
-                    raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
-                else:
-                    profiles.append(pn)
-
-                metadata[pn] = {}
-                metadata[pn]["metadata"] = p["adapter_metadata"]
-                metadata[pn]["details"] = p["adapter_details"]
-
-                pvars_defaults = p["default_vars"]
-                pvars_extra_vars = p["extra_vars"]
-                pvars_user_input = p["user_input"]
-
-                pvars = OrderedDict()
-                frkl.dict_merge(pvars, pvars_defaults, copy_dct=False)
-                for ev in pvars_extra_vars:
-                    frkl.dict_merge(pvars, ev, copy_dct=False)
-                frkl.dict_merge(pvars, parent_command_vars, copy_dct=False)
-                frkl.dict_merge(pvars, pvars_user_input, copy_dct=False)
-
-                freckles = list(pvars.pop("freckle", []))
-                include = set(pvars.pop("include", []))
-                exclude = set(pvars.pop("exclude", []))
-                target = pvars.pop("target_folder", None)
-                ask_become_pass = pvars.pop("ask_become_pass", "auto")
-                non_recursive = pvars.pop("non_recursive", False)
-
-                if non_recursive is None:
-                    non_recursive = default_non_recursive
-
-                if ask_become_pass == "auto" and default_ask_become_pass != "auto":
-                    ask_become_pass = default_ask_become_pass
-
-                extra_profile_vars[pn] = copy.deepcopy(default_extra_vars.get(pn, {}))
-                if pvars:
-                    for pk, pv in pvars.items():
-                        if pv != None:
-                            extra_profile_vars[pn][pk] = pv
-
-                # TODO: could check whether there are duplicates, but can't be bothered at the moment
-
-                all_freckles_for_this_profile = default_freckle_urls + freckles
-
-                for freckle_details in all_freckles_for_this_profile:
-                    freckle_url = freckle_details["url"]
-                    if target:
-                        t = target
-                    else:
-                        t = default_target
-
-                    if t is None:
-                        t = DEFAULT_FRECKLE_TARGET_MARKER
-
-                    for i in default_include:
-                        if i not in include:
-                            include.add(i)
-                    for e in default_exclude:
-                        if e not in exclude:
-                            exclude.add(e)
-                    fr = {
-                        "target_folder": t,
-                        "includes": list(include),
-                        "excludes": list(exclude),
-                        "password": ask_become_pass,
-                        "non_recursive": non_recursive
-                    }
-                    repos.setdefault(freckle_url, fr)
-                    repos[freckle_url].setdefault("profiles", []).append(pn)
-                    repos[freckle_url]["repo_details"] = freckle_details
-
-        if (repos):
-            print_title("starting freckelize run(s)...")
-            temp = execute_freckelize_run(repos, profiles, metadata, extra_profile_vars=extra_profile_vars, no_run=no_run, output_format=default_output_format, ask_become_pass=default_ask_become_pass, hosts_list=hosts)
-            result.append(temp)
-            click.echo("")
-
-        else:
-            click.echo("\nNo repos specified. Doing nothing.")
+        result = {"name": command_name, "default_vars": default_vars, "extra_vars": extra_vars, "user_input": user_input, "adapter_metadata": metadata, "adapter_details": dictlet_details}
 
         return result
 
-    except (Exception) as e:
-        log.debug("Error assembling configuration:")
-        log.debug(e, exc_info=True)
-        message = e.message
-        if not message:
-            if not e.reason:
-                message = "n/a"
-            else:
-                message = "Reason: {}".format(e.reason)
-        click.echo("\nError assembling configuration.\nMessage:  {}\nExiting...".format(message))
-        sys.exit(1)
+def assemble_freckelize_run(*args, **kwargs):
 
+    no_run = kwargs.get("no_run")
+    hosts = list(kwargs["host"])
+    if not hosts:
+        hosts = ["localhost"]
 
-def execute_freckelize_run(repos, profiles, adapter_metadata, extra_profile_vars={}, no_run=False, output_format="default", ask_become_pass="auto", hosts_list=["localhost"]):
-    """Executes a freckles run using the provided run details.
+    default_target = kwargs.get("target_folder", None)
+    default_target_name = kwargs.get("target_name", None)
 
-    Args:
-      repos (dict): dict with freckle urls as key, and details about (optional) include/excludes and target directory.
-      profiles (list): list of adapters to use with these freckle repos
-      hosts_list (list): a list of hosts to run this run on
-    """
+    default_freckle_urls = list(kwargs.get("freckle", []))
+    default_output_format = kwargs.get("output", "default")
 
-    log.debug("Starting freckelize run")
-    all_freckle_repos = []
+    default_include = list(kwargs.get("include", []))
+    default_exclude = list(kwargs.get("exclude", []))
 
-    # augment repo data
-    create_freckle_descs(repos)
+    default_password = kwargs.get("password", None)
+    default_non_recursive = kwargs.get("non_recursive", None)
 
-    repo_metadata_file = "repo_metadata"
+    default_extra_vars_list = list(kwargs.get("vars", []))
+    default_extra_vars = OrderedDict()
+    for ev in default_extra_vars_list:
+        frkl.dict_merge(default_extra_vars, ev, copy_dct=False)
 
-    extra_profile_vars.setdefault("freckle", {})["no_run"] = bool(no_run)
+    parent_command_vars = {}
+    if default_target:
+        parent_command_vars["target_folder"] = default_target
+    if default_target_name:
+        parent_command_vars["target_folder_name"] = default_target_name
+    if default_include:
+        parent_command_vars["includes"] = default_include
+    if default_exclude:
+        parent_command_vars["includes"] = default_include
+    if default_non_recursive is not None:
+        parent_command_vars["non_recursive"] = default_non_recursive
 
-    result_checkout = create_freckelize_checkout_run(repos, repo_metadata_file, extra_profile_vars, ask_become_pass=ask_become_pass, output_format=output_format, hosts_list=hosts_list)
+    freckle_details = []
+    if not args[0]:
 
-    playbook_dir = result_checkout["playbook_dir"]
+        # fill missing keys with default values
+        if "target_folder" not in parent_command_vars.keys():
+            parent_command_vars["target_folder"] = DEFAULT_FRECKLE_TARGET_MARKER
+        if "target_folder_name" not in parent_command_vars.keys():
+            parent_command_vars["target_folder_name"] = None
+        if "include" not in parent_command_vars.keys():
+            parent_command_vars["include"] = []
+        if "exclude" not in parent_command_vars.keys():
+            parent_command_vars["exclude"] = []
+        if "non_recursive" not in parent_command_vars.keys():
+            parent_command_vars["non_recursive"] = False
 
-    repo_metadata_file_abs = os.path.join(playbook_dir, os.pardir, "logs", repo_metadata_file)
+        prio = 1000
+        freckle_repos = []
+        # TODO: pre-fill with adapter-defaults?
+        for freckle in default_freckle_urls:
+            repo = FreckleRepo(freckle, target_folder=parent_command_vars["target_folder"], target_name=parent_command_vars["target_folder_name"], include=parent_command_vars["include"], exclude=parent_command_vars["exclude"], non_recursive=parent_command_vars["non_recursive"], priority=prio, default_vars={}, overlay_vars={"freckle": default_extra_vars})
+            prio = prio + 100
+            freckle_repos.append(repo)
 
-    return_code = result_checkout["return_code"]
-
-    if return_code != 0:
-        click.echo("Checkout phase failed, not continuing...")
-        sys.exit(1)
-
-    all_repo_metadata = json.load(open(repo_metadata_file_abs))
-
-    #TODO: config option to allow freckle folders to contain context
-    # add_paths = list(all_repo_metadata.keys())
-    add_paths = []
-    if not profiles:
-
-        profiles = []
-
-        for repo, metadata in all_repo_metadata.items():
-
-            for vars in metadata["vars"]:
-                profile_temp = vars["profile"]["name"]
-                if profile_temp == "freckle":
-                    continue
-                if not vars.get("vars", {}).get(FRECKELIZE_PROFILE_ACTIVE_KEY, True):
-                    continue
-                if profile_temp not in profiles:
-                    profiles.append(profile_temp)
-
-        config = DEFAULT_FRECKLES_CONFIG
-        paths = [p['path'] for p in expand_repos(config.trusted_repos)]
-        finder = FreckelizeAdapterFinder(paths)
-        reader = FreckelizeAdapterReader()
-
-        all_dictlets = finder.get_all_dictlets()
-        adapter_metadata = {}
-        for profile in profiles:
-            dictlet_details = all_dictlets.get(profile, None)
-            if not dictlet_details:
-                adapter_metadata[profile] = {"metadata": {}}
-            else:
-                log.debug("Reading adapter: {}".format(dictlet_details["path"]))
-                adapter_det = {"metadata": reader.read_dictlet(dictlet_details, {}, {})}
-                adapter_metadata[profile] = adapter_det
-            adapter_metadata[profile]["details"] = dictlet_details
-        sorted_profiles = get_adapter_profile_priorities(profiles, adapter_metadata)
-        click.echo()
-        print_title("no adapters selected, using folder defaults:\n", title_char="-")
+        details = FreckleDetails(freckle_repos, profiles_to_run=None)
+        freckle_details.append(details)
     else:
-        sorted_profiles = profiles
+
+        multi_freckle_repos = OrderedDict()
+        det_prio = 10000
+        for p in args[0]:
+            pn = p["name"]
+            # if pn in profiles.keys():
+                # raise Exception("Profile '{}' specified twice. I don't think that makes sense. Exiting...".format(pn))
+            metadata = {}
+            metadata = {}
+            metadata["metadata"] = p["adapter_metadata"]
+            metadata["details"] = p["adapter_details"]
+
+            pvars_adapter_defaults = p["default_vars"]
+
+            pvars_extra_vars = p["extra_vars"]
+            pvars_user_input = p["user_input"]
+
+            pvars_profile_extra_vars = pvars_user_input.pop("profile_extra_vars", ())
+
+            freckle_default_vars = OrderedDict()
+            for ev in pvars_extra_vars:
+                frkl.dict_merge(freckle_default_vars, ev, copy_dct=False)
+
+            pvars = OrderedDict()
+            for ev in pvars_profile_extra_vars:
+                frkl.dict_merge(pvars, ev, copy_dct=False)
+            frkl.dict_merge(pvars, pvars_user_input, copy_dct=False)
+
+            freckles = list(pvars.pop("freckle", []))
+            include = list(set(pvars.pop("include", [])))
+            exclude = list(set(pvars.pop("exclude", [])))
+            target_folder = pvars.pop("target_folder", None)
+            target_name = pvars.pop("target_name", None)
+
+            # ask_become_pass = pvars.pop("ask_become_pass", None)
+            # if ask_become_pass is None:
+                # ask_become_pass = default_ask_become_pass
+
+            non_recursive = pvars.pop("non_recursive", False)
+
+            if non_recursive is None:
+                non_recursive = default_non_recursive
+
+            log.debug("Merged vars for profile: freckle".format(pn))
+            log.debug(readable_json(freckle_default_vars, indent=2))
+            log.debug("Merged vars for profile: {}".format(pn))
+            log.debug(readable_json(pvars, indent=2))
+
+            all_freckles_for_this_profile = freckles + default_freckle_urls
+            if len(all_freckles_for_this_profile) > 1 and target_name is not None:
+                raise Exception("Can't use 'target_name' if more than one folders are specified")
+
+            prio = 1000
+            freckle_repos = []
+            for freckle in all_freckles_for_this_profile:
+
+                repo = FreckleRepo(freckle, target_folder=target_folder, target_name=target_name, include=include, exclude=exclude, non_recursive=non_recursive, priority=prio, default_vars={pn: pvars_adapter_defaults}, overlay_vars={pn: pvars, "freckle": freckle_default_vars})
+                prio = prio + 100
+                freckle_repos.append(repo)
+
+            details = FreckleDetails(freckle_repos, profiles_to_run=pn, detail_priority=det_prio)
+            freckle_details.append(details)
+            det_prio = det_prio + 1000
+
+    if default_password is None:
+        default_password = "no"
+
+    if default_password == "ask":
+        password = click.prompt("Please enter sudo password for this run", hide_input=True)
         click.echo()
-        print_title("using user-selected adapter(s):\n", title_char="-")
+        default_password = False
+        # TODO: check password valid
+    elif default_password == "ansible":
+        default_password = True
+        password = None
+    elif defaut_password == "no":
+        default_password = False
+        password = False
+    else:
+        raise Exception("Can't process password: {}".format(default_password))
 
-    # TODO: maybe sort profile order also when specified manually?
-    result = create_freckelize_run(sorted_profiles, repo_metadata_file_abs, adapter_metadata, extra_profile_vars, ask_become_pass=ask_become_pass,
-                               output_format=output_format, no_run=no_run, additional_repo_paths=add_paths, hosts_list=hosts_list)
-
-    return result
-
-def create_freckelize_run(profiles, repo_metadata_file, adapter_metadata, extra_profile_vars, ask_become_pass="true", no_run=False,
-                        output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
-
-    # profiles = extract_all_used_profiles(freckle_repos)
-
-    adapters_files_map = create_adapters_files_map(profiles, adapter_metadata)
-    callback = add_adapter_files_callback(profiles, adapter_metadata, adapters_files_map, additional_context_repos=additional_repo_paths)
-
-    additional_roles = get_adapter_dependency_roles(profiles, adapter_metadata)
-
-    task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles, "adapters_files_map": adapters_files_map}, "tasks": ["freckles"]}]
-
-    result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                      pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
-
-    if no_run:
-
-        click.echo()
-        click.secho("========================================================", bold=True)
-        click.echo()
-        click.echo("'no-run' was specified, not executing freckelize run.")
-        click.echo()
-        click.echo("Variables that would have been used for an actual run:")
-        click.echo()
-        click.secho("Defaults/User input:", bold=True)
-        click.secho("--------------------", bold=True)
-        click.echo()
-        output(extra_profile_vars, output_type="yaml", indent=2)
-        click.echo()
-        with open(repo_metadata_file) as metadata_file:
-            metadata = json.load(metadata_file)
-
-        click.secho("Folders:", bold=True)
-        click.secho("--------", bold=True)
-        for folder, details in metadata.items():
-            click.echo()
-            click.secho("path: ", bold=True, nl=False)
-            click.echo("{}:".format(folder))
-            click.echo()
-            for p_vars in details["vars"]:
-                p_name = p_vars["profile"]["name"]
-                if p_name in profiles:
-                    click.secho("  profile: ", bold=True, nl=False)
-                    click.echo(p_name)
-                    output(p_vars["vars"], output_type="yaml", indent=4)
-            if details["extra_vars"]:
-                click.secho("  extra vars:", bold=True)
-                output(details["extra_vars"], output_type="yaml", indent=4)
-            else:
-                click.secho("  extra_vars: ", bold=True, nl=False)
-                click.echo("none")
-
-        click.echo()
-
-        sys.exit(0)
-
-
-def create_freckelize_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
-
-    repos_list = [(k, v) for k, v in freckle_repos.items()]
-
-    task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
-
-    result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-                                        no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
-
-    # this isn't really used, as we want to run at least the checkout run to be able to parse .freckle files
-    if no_run:
-        click.echo("'no-run' option specified, finished")
-        sys.exit()
-
-    return result
-
-
-# def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
-
-#     profiles = find_supported_profiles(config, additional_context_repos)
-#     task_files_to_copy = {}
-
-#     for profile_name, profile_details in profiles.items():
-
-#         if valid_profiles and profile_name not in valid_profiles:
-#             continue
-
-#         profile_path = profile_details["path"]
-#         profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
-
-#         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
-#             continue
-
-#         task_files_to_copy[profile_name] = profile_child_file
-
-#     return task_files_to_copy
-
-
-def create_adapter_files_list(adapter_name, adapter_path, init_task_files, freckle_task_files):
-
-    base_dir = os.path.dirname(adapter_path)
-    result = {}
-    result["init"] = []
-    for f in init_task_files:
-        if not os.path.isabs(f):
-            f = os.path.join(base_dir, f)
-
-        if not os.path.exists(f):
-            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
-
-        file_details = {}
-        file_details["source"] = os.path.join(base_dir, f)
-        file_details["target"] = os.path.join(adapter_name, "init", os.path.basename(f))
-        # file_details["target"] = "{}/{}/{}".format(adapter_name, "init", os.path.basename(f))
-
-        result["init"].append(file_details)
-
-    result["freckle"] = []
-    for f in freckle_task_files:
-        if not os.path.isabs(f):
-            f = os.path.join(base_dir, f)
-
-        if not os.path.exists(f):
-            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
-
-        file_details = {}
-        file_details["source"] = os.path.join(base_dir, f)
-        # file_details["target"] = "{}/{}/{}".format(adapter_name, "freckle", os.path.basename(f))
-        file_details["target"] = os.path.join(adapter_name, "freckle", os.path.basename(f))
-        result["freckle"].append(file_details)
-
-    return result
-
-
-
-def find_supported_profiles(config=None, additional_context_repos=[]):
-
-    if not config:
-        config = DEFAULT_FRECKLES_CONFIG
-
-    trusted_repos = copy.copy(config.trusted_repos)
-    if additional_context_repos:
-        trusted_repos.extend(additional_context_repos)
-
-    repos = nsbl.tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
-
-    result = {}
-    for r in repos:
-        p = find_freckelize_adapters(r)
-        result.update(p)
-
-    return result
+    f = Freckelize(freckle_details, ask_become_pass=default_password, password=password)
+    metadata = f.start_checkout_run(hosts=hosts, no_run=False, output_format=default_output_format)
+    f.start_freckelize_run(no_run=no_run, output_format=default_output_format)
 
 
 @click.command(name="freckelize", cls=FreckelizeCommand, epilog=FRECKELIZE_EPILOG_TEXT, subcommand_metavar="ADAPTER", invoke_without_command=True, result_callback=assemble_freckelize_run, chain=True)

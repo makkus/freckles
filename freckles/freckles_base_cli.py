@@ -31,8 +31,7 @@ click_completion.init()
 # TODO: this is a bit ugly, probably have refactor how role repos are used
 nsbl.defaults.DEFAULT_ROLES_PATH = os.path.join(os.path.dirname(__file__), "external", "default_role_repo")
 
-VARS_HELP = "variables to be used for templating, can be overridden by cli options if applicable"
-DEFAULTS_HELP = "default variables, can be used instead (or in addition) to user input via command-line parameters"
+VARS_HELP = "extra variables, can be used instead (or in addition) to user input via command-line parameters"
 KEEP_METADATA_HELP = "keep metadata in result directory, mostly useful for debugging"
 FRECKLECUTE_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formated) text file (called a 'frecklecutable').
 
@@ -94,14 +93,14 @@ def get_common_options():
     """Returns a list of options that are shared between all of the freckles command-line applications.
     """
 
-    defaults_option = click.Option(param_decls=["--defaults", "-d"], required=False, multiple=True, help=DEFAULTS_HELP, type=vars_file, metavar="VARS")
+    defaults_option = click.Option(param_decls=["--vars", "-v"], required=False, multiple=True, help=VARS_HELP, type=vars_file, metavar="VARS")
     host_option = click.Option(param_decls=["--host"], required=False, multiple=True, help="host(s) to freckelize (defaults to 'localhost')", is_eager=False, type=HostType(), default=["localhost"])
     output_option = click.Option(param_decls=["--output", "-o"], required=False, default="default", show_default=True,
                                  metavar="FORMAT", type=click.Choice(SUPPORTED_OUTPUT_FORMATS),
                                  help="format of the output", is_eager=True)
-    ask_become_pass_option = click.Option(param_decls=["--ask-become-pass", "-pw"], show_default=True,
+    ask_become_pass_option = click.Option(param_decls=["--password", "-pw"],
                                           help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)',
-                                          type=click.Choice(["auto", "true", "false"]), default="auto")
+                                           show_default=True, type=click.Choice(["no", "ask", "ansible"]), default="no")
     version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool,
                                   is_flag=True, is_eager=True, expose_value=False, callback=print_version)
     no_run_option = click.Option(param_decls=["--no-run"],
@@ -188,9 +187,9 @@ class FrecklesBaseCommand(click.MultiCommand):
     def __init__(self, extra_params=None,**kwargs):
 
         super(FrecklesBaseCommand, self).__init__(**kwargs)
+        self.params[:0] = get_common_options()
         if extra_params:
             self.params[:0] = extra_params
-        self.params[:0] = get_common_options()
         self.config = DEFAULT_FRECKLES_CONFIG
         self.finder = None
         self.reader = None
@@ -247,7 +246,7 @@ class FrecklesBaseCommand(click.MultiCommand):
         if not details:
             return None
 
-        extra_defaults = ctx.params.get("defaults", {})
+        extra_defaults = ctx.params.get("vars", {})
 
         if self.reader is None:
             self.reader = self.get_dictlet_reader()

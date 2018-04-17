@@ -142,7 +142,6 @@ class RepoType(click.ParamType):
 
     def convert(self, value, param, ctx):
         fail_msg = None
-        print(value)
         branch = None
         opt_split_string = '::'
         if opt_split_string in value:
@@ -517,7 +516,7 @@ def download_extra_repos(ctx, param, value):
     result = download_repos(value, config, output)
     return result
 
-def execute_run_box_basics(output="default"):
+def execute_run_box_basics(output="default", ask_become_pass=None, password=None):
 
     if os.path.exists(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER):
         return {"return_code": -1}
@@ -526,7 +525,14 @@ def execute_run_box_basics(output="default"):
                     ['freckles-io.box-basics']
     }]
 
-    result = create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=True, run_box_basics=False)
+    if password is not None:
+        ask_become_pass = False
+    else:
+        if not ask_become_pass:
+            log.debug("Changing ask_become_pass for box basics to: True")
+            ask_become_pass = True
+
+    result = create_and_run_nsbl_runner(task_config, task_metadata={}, output_format=output, ask_become_pass=ask_become_pass, password=password, run_box_basics=False)
 
     if result["return_code"] == 0:
         with open(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER, 'a'):
@@ -867,11 +873,11 @@ def extract_all_used_profiles(freckle_repos):
 #     return result
 
 
-def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass="true",
+def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass=False, password=None,
                                pre_run_callback=None, no_run=False, additional_roles=[], config=None, run_box_basics=False, additional_repo_paths=[], hosts_list=["localhost"]):
 
     if run_box_basics:
-        result = execute_run_box_basics(output_format)
+        result = execute_run_box_basics(output_format, ask_become_pass, password)
 
         if result["return_code"] > 0:
             return result
@@ -928,7 +934,7 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
     force = True
 
     extra_paths = "$HOME/.local/share/inaugurate/virtualenvs/freckles/bin:$HOME/.local/share/inaugurate/conda/envs/freckles/bin"
-    return runner.run(run_target, global_vars=global_vars, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass,
+    return runner.run(run_target, global_vars=global_vars, force=force, ansible_verbose=ansible_verbose, ask_become_pass=ask_become_pass, password=password,
                       extra_plugins=EXTRA_FRECKLES_PLUGINS, callback=stdout_callback, add_timestamp_to_env=True,
                       add_symlink_to_env=DEFAULT_RUN_SYMLINK_LOCATION, no_run=no_run,
                       display_sub_tasks=display_sub_tasks, display_skipped_tasks=display_skipped_tasks,

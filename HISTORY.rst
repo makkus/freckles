@@ -8,6 +8,7 @@ History
 * moved inaugurate install & freckles directory from ~/.local/ to ~/.local/share which means a reinstall will be necessary
 * changed keyword to install packages in freckelize metadata from 'packages' to 'install'
 * changed frecklecutable format for specifying args, so existing frecklecutables need to be adapted
+* added confirmation requirement if 'ansible-tasks' adapter is run
 
 0.5.5 (2018-03-29)
 ------------------
