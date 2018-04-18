@@ -27,7 +27,7 @@ from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDict
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos, RepoType
-from .freckles_base_cli import FrecklesBaseCommand, FrecklesLucifier
+from .freckles_base_cli import FrecklesBaseCommand, FrecklesLucifier, process_extra_task_lists, create_external_task_list_callback, get_task_list_format, parse_tasks_dictlet
 # from .freckle_detect import create_freckle_descs
 
 log = logging.getLogger("freckles")
@@ -119,42 +119,6 @@ def get_blueprints_from_repo(blueprint_repo):
         click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
 
     BLUEPRINT_CACHE[blueprint_repo] = result
-
-    return result
-
-
-def create_adapter_files_list(adapter_name, adapter_path, init_task_files, freckle_task_files):
-
-    base_dir = os.path.dirname(adapter_path)
-    result = {}
-    result["init"] = []
-    for f in init_task_files:
-        if not os.path.isabs(f):
-            f = os.path.join(base_dir, f)
-
-        if not os.path.exists(f):
-            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
-
-        file_details = {}
-        file_details["source"] = os.path.join(base_dir, f)
-        file_details["target"] = os.path.join(adapter_name, "init", os.path.basename(f))
-        # file_details["target"] = "{}/{}/{}".format(adapter_name, "init", os.path.basename(f))
-
-        result["init"].append(file_details)
-
-    result["freckle"] = []
-    for f in freckle_task_files:
-        if not os.path.isabs(f):
-            f = os.path.join(base_dir, f)
-
-        if not os.path.exists(f):
-            raise Exception("Invalid adapter '{}', can't find file: {}".format(adapter_name, f))
-
-        file_details = {}
-        file_details["source"] = os.path.join(base_dir, f)
-        # file_details["target"] = "{}/{}/{}".format(adapter_name, "freckle", os.path.basename(f))
-        file_details["target"] = os.path.join(adapter_name, "freckle", os.path.basename(f))
-        result["freckle"].append(file_details)
 
     return result
 
@@ -568,6 +532,7 @@ class Freckelize(object):
             return
 
         print_title("starting freckelize run(s)...")
+        click.echo()
         extra_profile_vars = {}
 
         repo_metadata_file = "repo_metadata"
@@ -651,6 +616,11 @@ class Freckelize(object):
 
         return final_vars
 
+    def execute(self, hosts=["localhost"], no_run=False, output_format="default"):
+
+        metadata = self.start_checkout_run(hosts=hosts, no_run=False, output_format=output_format)
+        self.start_freckelize_run(no_run=no_run, output_format=output_format)
+
     def start_freckelize_run(self, no_run=False, output_format="default"):
 
         if self.freckles_metadata is None:
@@ -664,12 +634,16 @@ class Freckelize(object):
         freckelize_freckle_metadata = self.freckle_profile[0][1]
         valid_adapters, adapters_files_map = self.create_adapters_files_map(freckelize_metadata.keys())
 
+        task_list_aliases = {}
+        for name, details in adapters_files_map.items():
+            task_list_aliases[name] = details["play_target"]
+
         if not valid_adapters:
             click.echo("No valid adapters found, doing nothing...")
             return None
 
         # special case for 'ansible-tasks'
-        if "ansible-tasks" in valid_adapters:
+        if "ansible-tasks" in valid_adapters.keys():
             # it's still possible to add the confirmation via an extra var file,
             # but I think that's ok. Happy to hear suggestions if you think this is
             # too risky though.
@@ -682,7 +656,11 @@ class Freckelize(object):
             if not confirmation:
                 raise click.ClickException("As the ansible-tasks adapter can execute arbitrary code, user confirmation is necessary to  use this adatper. Consult the output of 'freckelize ansible-tasks --help' or XXX for more information.")
 
-        callback = self.create_adapter_files_callback(valid_adapters.keys(), adapters_files_map)
+        tasks_for_callback = []
+        for ad, details in valid_adapters.items():
+            tasks_for_callback.append(details)
+
+        callback = create_external_task_list_callback(adapters_files_map, tasks_for_callback)
         additional_roles = self.get_adapter_dependency_roles(valid_adapters.keys())
 
         sorted_adapters = self.sort_adapters_by_priority(valid_adapters.keys())
@@ -695,12 +673,14 @@ class Freckelize(object):
             click.secho(a, bold=True, nl=False)
             click.echo(":")
             click.secho("      path", bold=True, nl=False)
-            click.echo(": {}".format(valid_adapters[a]))
+            click.echo(": {}".format(valid_adapters[a]["path"]))
             click.secho("      folders", bold=True, nl=False)
             click.echo(":")
             for folder in freckelize_metadata[a]:
                 full_path = folder["folder_metadata"]["full_path"]
                 click.echo("         - {}".format(full_path))
+
+        click.echo()
 
         task_config = [
             {"vars": {},
@@ -709,7 +689,7 @@ class Freckelize(object):
                          {"freckelize_profiles_metadata": freckelize_metadata,
                          "freckelize_freckle_metadata": freckelize_freckle_metadata,
                          "profile_order": sorted_adapters,
-                         "adapters_files_map": adapters_files_map}}]}]
+                          "task_list_aliases": task_list_aliases}}]}]
 
         additional_repo_paths = []
 
@@ -753,8 +733,6 @@ class Freckelize(object):
                         click.secho("  extra_vars: ", bold=True, nl=False)
                         click.echo("none")
             click.echo()
-
-        sys.exit(0)
 
 
     def sort_adapters_by_priority(self, adapters):
@@ -811,35 +789,34 @@ class Freckelize(object):
             if adapter_metadata is None:
                 log.warn("No adapter '{}' found: skipping".format(adapter))
                 continue
+
             adapter_path = self.get_adapter_details(adapter)["path"]
-            tasks_init = adapter_metadata.get("tasks_init", [])
-            tasks_folder = adapter_metadata.get("tasks_folder", [])
-            if not tasks_init and not tasks_folder:
-                log.warn("Adapter description for '{}' does not specify any tasks to execute, ignoring...".format(adapter))
-            else:
-                files_map[adapter] = create_adapter_files_list(adapter, adapter_path, tasks_init, tasks_folder)
-                valid_adapters[adapter] = adapter_path
+            extra_task_lists_map = process_extra_task_lists(adapter_metadata, adapter_path)
+
+            tasks = adapter_metadata.get("tasks", [])
+            try:
+                tasks_dict = yaml.safe_load(tasks)
+            except (Exception) as e:
+                raise Exception("Could not parse tasks string: {}".format(tasks))
+
+            if not tasks_dict:
+                log.warn("Adapter '{}' doesn't specify any tasks: skipping".format(adapter))
+                continue
+
+            task_list_format = get_task_list_format(tasks_dict)
+            if task_list_format == "freckles":
+                log.warning("Task list for adapter '{}' is 'freckles' format, this is not supported (for now). Ignoring...".format(adapter))
+                continue
+
+            intersection = set(files_map.keys()) & set(extra_task_lists_map.keys())
+            if intersection:
+                raise Exception("Can't execute frecklecute run, adapters {} share the same task_list keys: {}".format(adapters, intersection))
+
+            files_map.update(extra_task_lists_map)
+
+            valid_adapters[adapter] = {"path": adapter_path, "tasks": tasks_dict, "tasks_string": tasks, "tasks_format": "ansible", "target_name": "task_list_{}.yml".format(adapter)}
 
         return (valid_adapters, files_map)
-
-    def create_adapter_files_callback(self, profiles, files_map):
-
-        def copy_callback(ansible_environment_root):
-            target_path = os.path.join(ansible_environment_root, "task_lists")
-            for adapter, files in files_map.items():
-                for f in files["init"]:
-                    source_file = f["source"]
-                    target_file = os.path.join(target_path, f["target"])
-                    os.makedirs(os.path.dirname(target_file))
-                    shutil.copyfile(source_file, target_file)
-                for f in files["freckle"]:
-                    source_file = f["source"]
-                    target_file = os.path.join(target_path, f["target"])
-                    os.makedirs(os.path.dirname(target_file))
-                    shutil.copyfile(source_file, target_file)
-
-        return copy_callback
-
 
     def calculate_profiles_to_run(self):
 
@@ -1091,6 +1068,14 @@ class FreckelizeAdapterReader(TextFileDictletReader):
 
         log.debug("Processing content: {}".format(content))
 
+        result = parse_tasks_dictlet(content, current_vars)
+        return result
+
+
+    def process_lines_old(self, content, current_vars):
+
+        log.debug("Processing content: {}".format(content))
+
         # now, I know this isn't really the most
         # optimal way of doing this,
         # but I don't really care that much about execution speed yet,
@@ -1304,7 +1289,7 @@ class FreckelizeCommand(FrecklesBaseCommand):
 
         return OrderedDict(FreckelizeCommand.FRECKELIZE_ARGS)
 
-    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
+    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params, command_var_spec):
 
         result = {"name": command_name, "default_vars": default_vars, "extra_vars": extra_vars, "user_input": user_input, "adapter_metadata": metadata, "adapter_details": dictlet_details}
 
@@ -1447,16 +1432,19 @@ def assemble_freckelize_run(*args, **kwargs):
     elif default_password == "ansible":
         default_password = True
         password = None
-    elif defaut_password == "no":
+    elif default_password == "no":
         default_password = False
-        password = False
+        password = None
     else:
-        raise Exception("Can't process password: {}".format(default_password))
+        raise click.ClickException("Can't process password: {}".format(default_password))
 
-    f = Freckelize(freckle_details, ask_become_pass=default_password, password=password)
-    metadata = f.start_checkout_run(hosts=hosts, no_run=False, output_format=default_output_format)
-    f.start_freckelize_run(no_run=no_run, output_format=default_output_format)
+    try:
+        f = Freckelize(freckle_details, ask_become_pass=default_password, password=password)
+        f.execute(hosts=hosts, no_run=no_run, output_format=default_output_format)
+    except (Exception) as e:
+        raise click.ClickException(str(e))
 
+    sys.exit(0)
 
 @click.command(name="freckelize", cls=FreckelizeCommand, epilog=FRECKELIZE_EPILOG_TEXT, subcommand_metavar="ADAPTER", invoke_without_command=True, result_callback=assemble_freckelize_run, chain=True)
 @click_log.simple_verbosity_option(log, "--verbosity")

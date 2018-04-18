@@ -17,11 +17,11 @@ from collections import OrderedDict
 from six import string_types
 from pprint import pprint
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input
+from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, readable_json
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos
-from .freckles_base_cli import FrecklesBaseCommand, FrecklesLucifier
+from .freckles_base_cli import FrecklesBaseCommand, FrecklesLucifier, process_extra_task_lists, create_external_task_list_callback, get_task_list_format, parse_tasks_dictlet
 
 log = logging.getLogger("freckles")
 click_log.basic_config(log)
@@ -37,33 +37,7 @@ DEFAULTS_HELP = "default variables, can be used instead (or in addition) to user
 KEEP_METADATA_HELP = "keep metadata in result directory, mostly useful for debugging"
 FRECKLECUTE_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
-DEFAULT_TASK_LIST_FORMAT = "ansible"
-
-ANSIBLE_FORMAT_MARKER_KEYS = set(["when", "become", "name", "register", "with_items", "with_dict", "loop", "with_list", "until", "retries", "delay", "changed_when", "loop_control", "block", "become_user", "rescue", "always", "notify", "ignore_errors", "failed_when", "changed_when"])
-
-def get_task_list_format(task_list):
-    """This is a not quite 100% method to check whether a task list is in ansbile format, or freckle.
-    """
-
-    for item in task_list:
-
-        if isinstance(item, string_types):
-            return "freckles"
-        elif isinstance(item, dict):
-            keys = set(item.keys())
-            if (keys & ANSIBLE_FORMAT_MARKER_KEYS):
-                return "ansible"
-        else:
-            raise Exception("Not a valid task-list item: {}".format(item))
-
-    # TODO: log outupt
-    # could check for 'meta' key above, but 'meta' can be a keyword in ansible too,
-    # so figured I check for everything else first
-    for item in task_list:
-        if "meta" in item.keys():
-            return "freckles"
-
-    return None
+DEFAULT_FRECKLECUTALBE_TASK_LIST_FORMAT = "ansible"
 
 def print_task_list_details(task_config, task_metadata={}, output_format="default", ask_become_pass="auto",
                             run_parameters={}):
@@ -168,6 +142,107 @@ def find_frecklecutables_in_folder(path, allow_dots_in_filename=False):
 
     return result
 
+class Frecklecutable(object):
+
+    def __init__(self, name, tasks, vars, tasks_format=None, external_task_list_map={}, additional_roles=[], tasks_string=None):
+
+        self.name = name
+        self.tasks = tasks
+        if tasks_string is None:
+            tasks_string = yaml.dump(tasks, default_flow_style=False)
+        self.tasks_string = tasks_string
+        self.vars = vars
+
+        self.metadata = {}  # not used at the moment
+
+        if tasks_format == None:
+            log.debug("Trying to guess task-list format...")
+            tasks_format = get_task_list_format(self.tasks)
+
+            if tasks_format == None:
+                log.info("Could not determine task list format for sure, falling back to '{}'.".format(DEFAULT_FRECKLECUTALBE_TASK_LIST_FORMAT))
+                tasks_format = DEFAULT_FRECKLECUTALBE_TASK_LIST_FORMAT
+        self.tasks_format=tasks_format
+        if self.tasks_format not in ["freckles", "ansible"]:
+            raise Exception("Invalid task-list format: {}".format(self.tasks_format))
+
+        self.external_task_list_map = external_task_list_map
+        # getting ansible roles, this is not necessary for the 'freckles' configuration format
+        self.additional_roles = additional_roles
+
+        self.task_list_aliases = {}
+        for name, details in self.external_task_list_map.items():
+            self.task_list_aliases[name] = details["play_target"]
+
+        # generating rendered tasks depending on task-list format
+        if self.tasks_format == "ansible":
+            relative_target_file = os.path.join("{{ playbook_dir }}", "..", "task_lists", "frecklecutable_default_tasks.yml")
+            self.final_tasks = [
+                {"meta": {
+                    "name": "include_tasks",
+                    "task-desc": "[including tasks]",
+                    "var-keys": ["free_form"],
+                },
+                 "vars": {
+                     "free_form": relative_target_file
+                 }}]
+
+
+        else:
+            self.final_tasks = self.tasks
+
+        self.all_vars = frkl.dict_merge(vars, self.task_list_aliases, copy_dct=True)
+        self.task_config = [{"tasks": self.final_tasks, "vars": self.all_vars}]
+
+
+class Frecklecute(object):
+    """Class to execute a list of tasks.
+
+    This basically wraps an Ansible playbook run, including the generationn of an Ansible
+    environment folder structure, auto-download/use of required roles, etc.
+    """
+    def __init__(self, frecklecutables, config=None, ask_become_pass=False, password=None):
+
+        if not isinstance(frecklecutables, (list, tuple)):
+            frecklecutables = [frecklecutables]
+
+        self.frecklecutables = OrderedDict()
+        for f in frecklecutables:
+            self.frecklecutables[f.name] = f
+        self.config = config
+        self.ask_become_pass = ask_become_pass
+        self.password = password
+
+
+    def execute(self, hosts=["localhost"], no_run=False, output_format="default"):
+
+        results = []
+        for f in self.frecklecutables.keys():
+            r = self.start_frecklecute_run(f, hosts=hosts, no_run=no_run, output_format=output_format)
+
+    def start_frecklecute_run(self, frecklecutable, hosts=["localhost"], no_run=False, output_format="default"):
+
+        f = self.frecklecutables.get(frecklecutable, False)
+        if not f:
+            raise Exception("No frecklecutable '{}' found".format(frecklecutable))
+
+        tasks_callback_map = [{"tasks": f.tasks, "tasks_string": f.tasks_string, "tasks_format": f.tasks_format, "target_name": "frecklecutable_default_tasks.yml"}]
+
+        callback = create_external_task_list_callback(f.external_task_list_map, tasks_callback_map)
+
+        if no_run:
+            parameters = create_and_run_nsbl_runner(f.task_config, task_metadata=f.task_metadata, output_format=output_format, pre_run_callback=callback, ask_become_pass=self.ask_become_pass, password=self.password, no_run=True, config=self.config, hosts_list=hosts, additional_roles=f.additional_roles)
+            print_task_list_details(f.task_config, task_metadata=f.metadata, output_format=output_format,
+                        ask_become_pass=self.ask_become_pass, run_parameters=parameters)
+            result = None
+        else:
+            result = create_and_run_nsbl_runner(f.task_config, task_metadata=f.metadata, output_format=output_format, pre_run_callback=callback, ask_become_pass=self.ask_become_pass, password=self.password, config=self.config, run_box_basics=True, hosts_list=hosts, additional_roles=f.additional_roles)
+
+            click.echo()
+
+        return result
+
+
 class FrecklecutableFinder(DictletFinder):
     """Finder class for frecklecutables.
 
@@ -250,6 +325,14 @@ class FrecklecutableReader(TextFileDictletReader):
         self.vars_keyword = FX_VARS_KEY_NAME
 
     def process_lines(self, content, current_vars):
+
+        log.debug("Processing: {}".format(content))
+
+        result = parse_tasks_dictlet(content, current_vars, self.tasks_keyword, self.vars_keyword, self.delimiter_profile)
+
+        return result
+
+    def process_lines_old(self, content, current_vars):
         """Process a frecklecutable line-by-line.
 
         The main purpose of this is to extract a task list and vars, as well as
@@ -265,6 +348,8 @@ class FrecklecutableReader(TextFileDictletReader):
         """
 
         log.debug("Processing: {}".format(content))
+
+
 
         # now, I know this isn't really the most
         # optimal way of doing this,
@@ -305,6 +390,8 @@ class FrecklecutableReader(TextFileDictletReader):
                         ignore_prefix = line.partition("defaults:")[0]
                     elif "__freckles__:" in line:
                         ignore_prefix = line.partition("__freckles__:")[0]
+                    elif "doc:" in line:
+                        ignore_prefix = line.partition("doc:")[0]
                     elif "args:" in line:
                         ignore_prefix = line.partition("args:")[0]
                     elif "{}:".format(self.vars_keyword) in line:
@@ -398,7 +485,8 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     def get_additional_args(self):
         return {}
 
-    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
+    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params, command_var_spec):
+
 
         all_vars = OrderedDict()
         frkl.dict_merge(all_vars, default_vars, copy_dct=False)
@@ -408,8 +496,9 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 
         hosts = parent_params.get("hosts", ["localhost"])
         output_format = parent_params.get("output", "default")
-        ask_become_pass = parent_params.get("ask_become_pass", "auto")
+        password_type = parent_params.get("password", None)
         no_run = parent_params.get("no_run", False)
+
         tasks_string = metadata.get(FX_TASKS_KEY_NAME, "")
         vars_string = metadata.get(FX_VARS_KEY_NAME, "")
 
@@ -428,125 +517,44 @@ class FrecklecuteCommand(FrecklesBaseCommand):
         try:
             tasks_list = ordered_load(replaced_tasks)
         except (Exception) as e:
+            raise click.ClickException("Could not parse frecklecutable '{}': {}".format(command_name, e))
 
-            raise click.ClickException("Could not parse frecklecutable '{}': {}".format(comamnd_name, e))
-
-        # assuming this is an ansible task list
-        # pprint(replaced_tasks)
-        # TODO: confirm this is ansible task list
-        # getting additional task lists
-
-        task_lists = metadata.get("__freckles__", {}).get("task_lists", [])
-        if isinstance(task_lists, string_types):
-            task_lists = [task_lists]
-        elif isinstance(task_lists, dict):
-            task_lists_temp = []
-            for name, path in task_lists.items():
-                task_lists_temp.append({name: path})
-            task_lists = task_lists_temp
-
-        dictlet_path = dictlet_details["path"]
-        dictlet_parent = os.path.dirname(dictlet_path)
-
-        result_task_list = {}
-        for task_list in task_lists:
-            if isinstance(task_list, string_types):
-                raise Exception("Invalid specification of task list, need key/value: {}".format(task_list))
-            elif isinstance(task_list, dict):
-                for name, path in task_list.items():
-                    if os.path.isabs(path):
-                        file_path = path
-                    else:
-                        file_path = os.path.join(dictlet_parent, path)
-
-                    if not os.path.exists(file_path) or not os.path.isfile(file_path):
-                        raise Exception("Can't load task list: {}".format(file_path))
-
-                    filename = os.path.basename(path)
-                    play_target = os.path.join("{{ playbook_dir}}", "..", "task_lists", filename)
-                    result_task_list[name] = {"source": file_path, "play_target": play_target, "filename": filename}
-            else:
-                raise Exception("Can't parse task list: {}".format(task_lists))
+        extra_task_lists_map = process_extra_task_lists(metadata, dictlet_details["path"])
 
         # check for hardcoded task_list_format:
         task_list_format = metadata.get("__freckles__", {}).get("task_list_format", None)
-        if task_list_format is None:
-            # check whether task list is freckles or ansible style
-            task_list_format = get_task_list_format(tasks_list)
-            if task_list_format == None:
-                log.info("Could not determine task list format for sure, falling back to 'ansible'.")
-                task_list_format = DEFAULT_TASK_LIST_FORMAT
 
-        if task_list_format == "freckles":
-            ansible = False
-        elif task_list_format == "ansible":
-            ansible = True
-        else:
-            raise Exception("Invalid task list format: {}".format(task_list_format))
+        additional_roles = metadata.get("__freckles__", {}).get("roles", [])
 
-        def copy_task_list_callback(ansible_environment_root):
+        result_vars = {}
+        for name, details in command_var_spec.items():
+            if name in temp_new_all_vars and details.get("is_var", False) == True:
+                result_vars[name] = temp_new_all_vars[name]
 
-            target_path = os.path.join(ansible_environment_root, "task_lists")
-            os.makedirs(target_path)
-
-            for name, details in result_task_list.items():
-                source_name = details["filename"]
-                source = details["source"]
-                target_file = os.path.join(target_path, source_name)
-                log.debug("Copying: {} -> {}".format(source, target_file))
-                shutil.copyfile(source, target_file)
-
-            if ansible:
-                target_file = os.path.join(target_path, "frecklecutable_default_tasks.yml")
-                with open(target_file, 'w') as f:
-                    yaml.safe_dump(tasks_list, f, default_flow_style=False, allow_unicode=True, encoding="utf-8")
-
-        callback = copy_task_list_callback
-
-        task_list_aliases = {}
-        for name, details in result_task_list.items():
-            task_list_aliases[name] = details["play_target"]
-
-        if ansible:
-            relative_target_file = os.path.join("{{ playbook_dir }}", "..", "task_lists", "frecklecutable_default_tasks.yml")
-            tasks = [
-                {"meta": {
-                    "name": "include_tasks",
-                    "var-keys": ["free_form"],
-                },
-                 "vars": {
-                     "free_form": relative_target_file
-                 }}]
-
-
-            # getting ansible roles, this is not necessary for the minimal configuration format
-            additional_roles = metadata.get("__freckles__", {}).get("roles", [])
-        else:
-            tasks = tasks_list
-            additional_roles = []
-
-
-        frkl.dict_merge(temp_new_all_vars, task_list_aliases, copy_dct=False)
-        task_config = [{"tasks": tasks, "vars": temp_new_all_vars}]
+        f = Frecklecutable(command_name, tasks_list, result_vars, tasks_format=task_list_format, external_task_list_map=extra_task_lists_map, additional_roles=additional_roles, tasks_string=tasks_string)
 
         # placeholder, for maybe later
         task_metadata = {}
 
-        if no_run:
-            parameters = create_and_run_nsbl_runner(task_config, task_metadata=task_metadata, output_format=output_format, pre_run_callback=callback,
-                                                    ask_become_pass=ask_become_pass, no_run=True, config=config, hosts_list=hosts, additional_roles=additional_roles)
-            print_task_list_details(task_config, task_metadata=metadata, output_format=output_format,
-                        ask_become_pass=ask_become_pass, run_parameters=parameters)
-            result = None
-        else:
-            result = create_and_run_nsbl_runner(task_config, task_metadata=metadata, output_format=output_format, pre_run_callback=callback,
-                                                ask_become_pass=ask_become_pass, config=config, run_box_basics=True, hosts_list=hosts, additional_roles=additional_roles)
-            # create_and_run_nsbl_runner(task_config, output, ask_become_pass)
+        if password_type is None:
+            password_type = "no"
 
+        if password_type == "ask":
+            password = click.prompt("Please enter sudo password for this run", hide_input=True)
             click.echo()
+            password_type = False
+            # TODO: check password valid
+        elif password_type == "ansible":
+            password_type = True
+            password = None
+        elif password_type == "no":
+            password_type = False
+            password = None
+        else:
+            raise Exception("Can't process password: {}".format(password_type))
 
-        return result
-
+        run = Frecklecute(f, config=self.config, ask_become_pass=password_type, password=password)
+        run.execute(hosts=hosts, no_run=no_run, output_format=output_format)
 
 @click.command(name="frecklecute", cls=FrecklecuteCommand, epilog=FRECKLECUTE_EPILOG_TEXT, subcommand_metavar="FRECKLECUTEABLE")
 @click_log.simple_verbosity_option(log, "--verbosity")

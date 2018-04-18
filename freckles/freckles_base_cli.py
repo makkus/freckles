@@ -6,6 +6,7 @@ import abc
 import logging
 import os
 import six
+import shutil
 import sys
 
 import click
@@ -14,10 +15,11 @@ import click_log
 import copy
 import nsbl
 import yaml
+from six import string_types
 from collections import OrderedDict
 from pprint import pprint
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, convert_args_to_dict
+from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, convert_args_to_dict, readable_json
 from . import print_version
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos
@@ -38,6 +40,9 @@ FRECKLECUTE_HELP_TEXT = """Executes a list of tasks specified in a (yaml-formate
 *frecklecute* comes with a few default frecklecutables that are used to manage itself (as well as its sister application *freckles*) as well as a few useful generic ones. Visit the online documentation for more details: https://docs.freckles.io/en/latest/frecklecute_command.html
 """
 FRECKLECUTE_EPILOG_TEXT = "frecklecute is free and open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
+
+ANSIBLE_FORMAT_MARKER_KEYS = set(["when", "become", "name", "register", "with_items", "with_dict", "loop", "with_list", "until", "retries", "delay", "changed_when", "loop_control", "block", "become_user", "rescue", "always", "notify", "ignore_errors", "failed_when", "changed_when"])
+
 
 class FrecklesCliFormatter(click.Command):
 
@@ -73,6 +78,245 @@ class FrecklesCliFormatter(click.Command):
             with formatter.section("Details"):
                 formatter.write_dl(details)
 
+def parse_tasks_dictlet(content, current_vars, tasks_keyword = FX_TASKS_KEY_NAME, vars_keyword = None, delimiter_profile=JINJA_DELIMITER_PROFILES["luci"]):
+
+    """Process a frecklecutable line-by-line.
+
+    The main purpose of this is to extract a task list and vars, as well as
+    potential other metadata ('defaults', '__freckle__').
+
+    The parsing is a bit convoluted, as the metadata as well as 'vars' can be in a commented section,
+    so 'valid' ansible tasks lists can be used here.
+
+    The 'vars' and 'tasks' keys need to be at the lasts ones (in this order, preferrably).
+    The 'vars' key can either be in a commented section, or not.
+
+    If using comments, all the keys in commented section need to have the same comment prefix.
+    """
+
+    log.debug("Processing: {}".format(content))
+
+    # now, I know this isn't really the most
+    # optimal way of doing this,
+    # but I don't really care that much about execution speed yet,
+    # plus I really want to be able to use variables used in previous
+    # lines of the content
+    last_whitespaces = 0
+    current_lines = ""
+    temp_vars = copy.deepcopy(current_vars)
+
+    meta_started = False
+
+    tasks_started = False
+    tasks_finished = False
+
+    vars_started = False
+    vars_finished = False
+    vars_meta_started = False
+    vars_meta_finished = False
+    tasks_string = ""
+    vars_string = ""
+
+    for line in content:
+
+        # print("LINE: "+line)
+
+        if not tasks_started and not vars_started:
+
+            if line.startswith("{}:".format(tasks_keyword)):
+                tasks_started = True
+                continue
+            elif vars_keyword and line.startswith("{}:".format(vars_keyword)):
+                vars_started = True
+                continue
+
+            if not meta_started:
+                if "defaults:" in line:
+                    ignore_prefix = line.partition("defaults:")[0]
+                elif "__freckles__:" in line:
+                    ignore_prefix = line.partition("__freckles__:")[0]
+                elif "doc:" in line:
+                    ignore_prefix = line.partition("doc:")[0]
+                elif "args:" in line:
+                    ignore_prefix = line.partition("args:")[0]
+                elif vars_keyword and "{}:".format(vars_keyword) in line:
+                    ignore_prefix = line.partition("vars:")[0]
+                    vars_meta_started = True
+                    meta_started = True
+                    continue
+                else:
+                    continue
+
+                meta_started = True
+            else:
+                if ignore_prefix and not line.startswith(ignore_prefix) and not (ignore_prefix.strip() and line.startswith(ignore_prefix.strip())):
+                    meta_started = False
+                    continue
+
+            line_new = line[len(ignore_prefix):]
+
+            if vars_keyword and line_new.startswith("{}:".format(vars_keyword)):
+                vars_meta_started = True
+                continue
+
+            if vars_meta_started:
+                vars_string = "{}\n{}".format(vars_string, line_new)
+                continue
+
+            whitespaces = len(line_new) - len(line_new.lstrip(' '))
+            current_lines = "{}{}\n".format(current_lines, line_new)
+            if whitespaces <= last_whitespaces:
+
+                if delimiter_profile:
+                    temp = replace_string(current_lines, temp_vars, **delimiter_profile)
+                else:
+                    temp = current_lines
+
+                if not temp.strip():
+                    continue
+
+                temp_dict = ordered_load(temp)
+                temp_vars = frkl.dict_merge(temp_vars, temp_dict, copy_dct=False)
+
+            last_whitespaces = whitespaces
+        else:
+            if vars_keyword and line.startswith("{}:".format(vars_keyword)):
+                if tasks_started:
+                    tasks_finished = True
+
+                tasks_started = False
+                if vars_finished:
+                    raise Exception("Can't have two segments starting with '{}' in frecklecutable.".format(self.vars_keyword))
+                vars_started = True
+
+            elif line.startswith("{}:".format(tasks_keyword)):
+                if vars_started:
+                    vars_finished = True
+
+                vars_started = False
+                if tasks_finished:
+                    raise Exception("Can't have two segments starting with '{}' in frecklecutable".format(self.tasks_keyword))
+
+                tasks_started = True
+            else:
+                if vars_started:
+                    vars_string = "{}\n{}".format(vars_string, line)
+                elif tasks_started:
+                    tasks_string = "{}\n{}".format(tasks_string, line)
+                else:
+                    raise Exception("Internal error in frecklecutable reader. Please report an issue.")
+
+    if current_lines:
+        if delimiter_profile:
+            temp = replace_string(current_lines, temp_vars, additional_jinja_extensions=freckles_jinja_extensions, **delimiter_profile)
+        else:
+            temp = current_lines
+
+        if temp.strip():
+            temp_dict = ordered_load(temp)
+            temp_vars = frkl.dict_merge(temp_vars, temp_dict, copy_dct=False)
+
+    frkl.dict_merge(current_vars, temp_vars, copy_dct=False)
+    current_vars[tasks_keyword] = tasks_string
+    current_vars[vars_keyword] = vars_string
+
+    log.debug("Vars after processing: {}".format(current_vars))
+    return current_vars
+
+
+def get_task_list_format(task_list):
+    """This is a not quite 100% method to check whether a task list is in ansbile format, or freckle.
+    """
+
+    for item in task_list:
+
+        if isinstance(item, string_types):
+            log.debug("task item '{}' is string, determining this is a 'freckles' task list".format(item))
+            return "freckles"
+        elif isinstance(item, dict):
+            keys = set(item.keys())
+            if (keys & ANSIBLE_FORMAT_MARKER_KEYS):
+                log.debug("task item keys ({}) contain at least one known Ansible keyword , determining this is 'ansible' task list format".format(keys))
+                return "ansible"
+        else:
+            raise Exception("Not a valid task-list item: {}".format(item))
+
+    # TODO: log outupt
+    # could check for 'meta' key above, but 'meta' can be a keyword in ansible too,
+    # so figured I check for everything else first
+    for item in task_list:
+        if "meta" in item.keys():
+            log.debug("task item '{}' has 'meta' key, determining this is a 'freckles' task list".format(item["meta"].get("name", item)))
+            return "freckles"
+        for key  in item.keys():
+            if key.isupper():
+                log.debug("task item key '{}' is all uppercase, determining this is a 'freckles' task list".format(key))
+                return "freckles"
+    return None
+
+def create_external_task_list_callback(external_task_list_map, tasks_callback_map):
+
+    def copy_task_list_callback(ansible_environment_root):
+
+        target_path = os.path.join(ansible_environment_root, "task_lists")
+        os.makedirs(target_path)
+
+        for name, details in external_task_list_map.items():
+            source_name = details["filename"]
+            source = details["source"]
+            target_file = os.path.join(target_path, source_name)
+            log.debug("Copying: {} -> {}".format(source, target_file))
+            shutil.copyfile(source, target_file)
+
+        for task_details in tasks_callback_map:
+            task_list_format = task_details["tasks_format"]
+
+            if task_list_format == "ansible":
+                tasks_filename = task_details["target_name"]
+                target_file = os.path.join(target_path, tasks_filename)
+                tasks_string = task_details["tasks_string"]
+                with open(target_file, 'w') as f:
+                    f.write("{}\n".format(tasks_string))
+                    # yaml.safe_dump(tasks, f, default_flow_style=False, allow_unicode=True, encoding="utf-8")
+
+    callback = copy_task_list_callback
+
+    return callback
+
+
+def process_extra_task_lists(dictlet_metadata, dictlet_path):
+
+    extra_task_lists = dictlet_metadata.get("__freckles__", {}).get("task_lists", [])
+    if isinstance(extra_task_lists, string_types):
+        extra_task_lists = [extra_task_lists]
+    elif isinstance(extra_task_lists, dict):
+        task_lists_temp = []
+        for name, path in extra_task_lists.items():
+            task_lists_temp.append({name: path})
+        extra_task_lists = task_lists_temp
+    dictlet_parent = os.path.dirname(dictlet_path)
+
+    result_task_list = {}
+    for task_list in extra_task_lists:
+        if isinstance(task_list, string_types):
+            raise Exception("Invalid specification of task list, need key/value: {}".format(task_list))
+        elif isinstance(task_list, dict):
+            for name, path in task_list.items():
+                if os.path.isabs(path):
+                    file_path = path
+                else:
+                    file_path = os.path.join(dictlet_parent, path)
+
+                if not os.path.exists(file_path) or not os.path.isfile(file_path):
+                    raise Exception("Can't load task list: {}".format(file_path))
+
+                filename = os.path.basename(path)
+                play_target = os.path.join("{{ playbook_dir}}", "..", "task_lists", filename)
+                result_task_list[name] = {"source": file_path, "play_target": play_target, "filename": filename}
+        else:
+            raise Exception("Can't parse task list: {}".format(extra_task_lists))
+
+    return result_task_list
 
 def generate_details(metadata, dictlet_details):
 
@@ -162,7 +406,7 @@ class FrecklesLucifier(Lucifier):
 
             user_input = clean_user_input(kwargs, c_vars)
 
-            result = self.command.freckles_process(self.name, defaults, self.extra_vars, user_input, metadata, dictlet_details, config=self.command.get_config(), parent_params=self.parent_params)
+            result = self.command.freckles_process(self.name, defaults, self.extra_vars, user_input, metadata, dictlet_details, config=self.command.get_config(), parent_params=self.parent_params, command_var_spec=c_vars)
             return result
 
         command.params = params
@@ -171,6 +415,7 @@ class FrecklesLucifier(Lucifier):
             command.help = help_string
         help_details = generate_details(metadata, dictlet_details)
         command.freckles_cli_details = help_details
+
         if "short_help" in doc.keys():
             command.short_help = doc.get("short_help")
         if "epilog" in doc.keys():
@@ -211,7 +456,7 @@ class FrecklesBaseCommand(click.MultiCommand):
         pass
 
     @abc.abstractmethod
-    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params):
+    def freckles_process(self, command_name, default_vars, extra_vars, user_input, metadata, dictlet_details, config, parent_params, command_var_spec):
         pass
 
     def init_command_cache(self, ctx, name=None):

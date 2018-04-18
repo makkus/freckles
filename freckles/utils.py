@@ -141,31 +141,12 @@ class RepoType(click.ParamType):
     name = 'repo'
 
     def convert(self, value, param, ctx):
-        fail_msg = None
-        branch = None
-        opt_split_string = '::'
-        if opt_split_string in value:
-            tokens = value.split(opt_split_string)
-            opt = tokens[1:-1]
-            if not opt:
-                self.fail("Not a valid url, needs at least 2 split strings ('{}')".format(opt_split_string))
-            if len(opt) != 1:
-                self.fail("Not a valid url, can only have 1 branch: {}".format(value))
-            branch = opt[0]
-
         try:
+            result = nsbl_tasks.expand_string_to_git_details(value, DEFAULT_ABBREVIATIONS)
             print_repos_expand(value, warn=True, default_local_path=False)
-            result = nsbl_tasks.expand_string_to_git_repo(value, DEFAULT_ABBREVIATIONS)
-            result = {"url": result}
-
-            if branch:
-                result["branch"] = branch
-
             return result
         except (Exception) as e:
             self.fail("{}: {}".format(value, e.message))
-
-
 
 
 class HostType(click.ParamType):
@@ -605,14 +586,17 @@ def expand_repos(repos):
         r = nsbl_tasks.get_default_repo(repo, DEFAULT_REPOS)
 
         if not r:
-
             if os.path.exists(repo):
                 temp = {"url": None, "path": repo}
             else:
-                repo_url = nsbl_tasks.expand_string_to_git_repo(repo, DEFAULT_ABBREVIATIONS)
-                relative_repo_path = nsbl_tasks.calculate_local_repo_path(repo_url)
+                repo_details = nsbl_tasks.expand_string_to_git_details(repo, DEFAULT_ABBREVIATIONS)
+                repo_url = repo_details["url"]
+                repo_branch = repo_details.get("branch", None)
+                relative_repo_path = nsbl_tasks.calculate_local_repo_path(repo_url, repo_branch)
                 repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
-                temp = {"url": repo_url, "path": repo_path}
+                # temp = {"url": repo_url, "path": repo_path}
+                repo_details["path"] = repo_path
+                temp = repo_details
             result.append(temp)
         else:
             role_tuples = r.get("roles", [])
