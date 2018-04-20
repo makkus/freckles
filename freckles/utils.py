@@ -67,17 +67,17 @@ def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exc
     return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
 
 
-class FrecklesUtilsExtension(Extension):
-    def __init__(self, environment):
-        super(Extension, self).__init__()
-        fm = FilterModule()
-        filters = fm.filters()
-        filters["to_freckle_desc"] = to_freckle_desc_filter
-        environment.filters.update(filters)
+# class FrecklesUtilsExtension(Extension):
+#     def __init__(self, environment):
+#         super(Extension, self).__init__()
+#         fm = FilterModule()
+#         filters = fm.filters()
+#         filters["to_freckle_desc"] = to_freckle_desc_filter
+#         environment.filters.update(filters)
 
-
-freckles_jinja_utils = FrecklesUtilsExtension
-freckles_jinja_extensions = [freckles_jinja_utils, ansible_extensions.utils]
+# freckles_jinja_utils = FrecklesUtilsExtension
+# freckles_jinja_extensions = [freckles_jinja_utils, ansible_extensions.utils]
+freckles_jinja_extensions = [ansible_extensions.utils]
 
 DEFAULT_FRECKLES_CONFIG = FrecklesConfig()
 
@@ -160,6 +160,7 @@ class HostType(click.ParamType):
         except:
             self.fail('%s is not a valid host string' % value, param, ctx)
 
+
 class FreckleUrlType(click.ParamType):
     name = 'repo'
 
@@ -179,43 +180,44 @@ class FreckleUrlType(click.ParamType):
 FRECKLES_REPO = RepoType()
 FRECKLES_URL = FreckleUrlType()
 
+
 def url_is_local(url):
     if url.startswith("~") or url.startswith(os.sep):
         return True
     return os.path.exists(os.path.expanduser(url))
 
 
-def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[], includes=[], excludes=[]):
-    freckle_repo = {}
+# def create_freckle_desc(freckle_url, target, target_is_parent=True, profiles=[], includes=[], excludes=[]):
+#     freckle_repo = {}
 
-    if isinstance(profiles, string_types):
-        profiles = [profiles]
-    if isinstance(includes, string_types):
-        includes = [includes]
-    if isinstance(excludes, string_types):
-        excludes = [excludes]
+#     if isinstance(profiles, string_types):
+#         profiles = [profiles]
+#     if isinstance(includes, string_types):
+#         includes = [includes]
+#     if isinstance(excludes, string_types):
+#         excludes = [excludes]
 
-    if not freckle_url:
-        if not target:
-            raise Exception("Need either url or target for freckle")
-        freckle_url = target
-        is_local = True
-    else:
-        is_local = url_is_local(freckle_url)
+#     if not freckle_url:
+#         if not target:
+#             raise Exception("Need either url or target for freckle")
+#         freckle_url = target
+#         is_local = True
+#     else:
+#         is_local = url_is_local(freckle_url)
 
-    if is_local:
-        freckle_repo["path"] = os.path.abspath(os.path.expanduser(freckle_url))
-        freckle_repo["url"] = None
-    else:
-        repo = nsbl.ensure_git_repo_format(freckle_url, target, target_is_parent)
-        freckle_repo["path"] = repo["dest"]
-        freckle_repo["url"] = repo["repo"]
+#     if is_local:
+#         freckle_repo["path"] = os.path.abspath(os.path.expanduser(freckle_url))
+#         freckle_repo["url"] = None
+#     else:
+#         repo = nsbl.ensure_git_repo_format(freckle_url, target, target_is_parent)
+#         freckle_repo["path"] = repo["dest"]
+#         freckle_repo["url"] = repo["repo"]
 
-    freckle_repo["profiles"] = profiles
-    freckle_repo["include"] = includes
-    freckle_repo["exclude"] = excludes
+#     freckle_repo["profiles"] = profiles
+#     freckle_repo["include"] = includes
+#     freckle_repo["exclude"] = excludes
 
-    return freckle_repo
+#     return freckle_repo
 
 
 def replace_string(template_string, replacement_dict):
@@ -237,14 +239,8 @@ def replace_string(template_string, replacement_dict):
 
     return result
 
-
 def render_dict(obj, replacement_dict):
-    # print("OBJ")
-    # pprint.pprint(obj)
-    # print("REPLACEMNT")
-    # pprint.pprint(replacement_dict)
-    # print("")
-    # print("")
+
     if isinstance(obj, dict):
         # dictionary
         ret = {}
@@ -265,163 +261,145 @@ def render_dict(obj, replacement_dict):
         return obj
 
 
-# def find_supported_profiles(config=None, additional_context_repos=[]):
+# def find_supported_blueprints(config=None):
 
 #     if not config:
 #         config = DEFAULT_FRECKLES_CONFIG
 
-#     trusted_repos = copy.copy(config.trusted_repos)
-#     if additional_context_repos:
-#         trusted_repos.extend(additional_context_repos)
-
-#     repos = nsbl_tasks.get_local_repos(trusted_repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+#     trusted_repos = config.trusted_repos
+#     repos = nsbl_tasks.get_local_repos(trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
 #     result = {}
 #     for r in repos:
-#         p = get_adapters_from_repo(r)
+#         p = get_blueprints_from_repo(r)
 #         result.update(p)
-
 #     return result
 
-def find_supported_blueprints(config=None):
 
-    if not config:
-        config = DEFAULT_FRECKLES_CONFIG
+# def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
+#     doc = config.get("doc", {})
+#     # TODO: check format of config
+#     options = config.get("args", {})
+#     vars = config.get("vars", {})
+#     tasks = config.get("tasks", None)
+#     default_vars = config.get("defaults", {})
 
-    trusted_repos = config.trusted_repos
-    repos = nsbl_tasks.get_local_repos(trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
+#     key_map = {}
+#     argument_key = None
 
-    result = {}
-    for r in repos:
-        p = get_blueprints_from_repo(r)
-        result.update(p)
-    return result
+#     options_list = []
+#     args_that_are_vars = []
+#     value_vars = []  # vars where we add all values seperately to the 'vars' instead of as a single value
 
+#     options_all = copy.deepcopy(extra_options)
+#     options_all.update(options)
 
-def create_cli_command(config, command_name=None, command_path=None, extra_options={}):
-    doc = config.get("doc", {})
-    # TODO: check format of config
-    options = config.get("args", {})
-    vars = config.get("vars", {})
-    tasks = config.get("tasks", None)
-    default_vars = config.get("defaults", {})
+#     for opt, opt_details in options_all.items():
 
-    key_map = {}
-    argument_key = None
+#         opt_type = opt_details.get("type", None)
+#         if isinstance(opt_type, string_types):
+#             opt_type_converted = locate(opt_type)
+#             if not opt_type_converted:
+#                 raise Exception("No type found for: {}".format(opt_type))
+#             if issubclass(opt_type_converted, click.ParamType):
+#                 opt_details['type'] = opt_type_converted()
+#             else:
+#                 opt_details['type'] = opt_type_converted
 
-    options_list = []
-    args_that_are_vars = []
-    value_vars = []  # vars where we add all values seperately to the 'vars' instead of as a single value
+#         key = opt_details.pop('arg_name', opt)
+#         extra_arg_names = opt_details.pop('extra_arg_names', [])
+#         if isinstance(extra_arg_names, string_types):
+#             extra_arg_names = [extra_arg_names]
+#         key_map[key] = opt
 
-    options_all = copy.deepcopy(extra_options)
-    options_all.update(options)
+#         is_var = opt_details.pop('is_var', True)
+#         if is_var:
+#             args_that_are_vars.append(key)
 
-    for opt, opt_details in options_all.items():
+#         use_value = opt_details.pop('use_value', False)
+#         if use_value:
+#             value_vars.append(key)
 
-        opt_type = opt_details.get("type", None)
-        if isinstance(opt_type, string_types):
-            opt_type_converted = locate(opt_type)
-            if not opt_type_converted:
-                raise Exception("No type found for: {}".format(opt_type))
-            if issubclass(opt_type_converted, click.ParamType):
-                opt_details['type'] = opt_type_converted()
-            else:
-                opt_details['type'] = opt_type_converted
+#         # cli arguments
+#         is_argument = opt_details.pop('is_argument', False)
+#         if is_argument:
+#             if argument_key:
+#                 raise Exception("Multiple arguments are not supported (yet): {}".format(config["vars"]))
+#             argument_key = key
+#             required = opt_details.pop("required", None)
 
-        key = opt_details.pop('arg_name', opt)
-        extra_arg_names = opt_details.pop('extra_arg_names', [])
-        if isinstance(extra_arg_names, string_types):
-            extra_arg_names = [extra_arg_names]
-        key_map[key] = opt
+#             o = click.Argument(param_decls=[key], required=required, **opt_details)
+#         else:
 
-        is_var = opt_details.pop('is_var', True)
-        if is_var:
-            args_that_are_vars.append(key)
+#             arg_names_for_option = ["--{}".format(key)] + extra_arg_names
+#             o = click.Option(param_decls=arg_names_for_option, **opt_details)
+#         options_list.append(o)
 
-        use_value = opt_details.pop('use_value', False)
-        if use_value:
-            value_vars.append(key)
-
-        # cli arguments
-        is_argument = opt_details.pop('is_argument', False)
-        if is_argument:
-            if argument_key:
-                raise Exception("Multiple arguments are not supported (yet): {}".format(config["vars"]))
-            argument_key = key
-            required = opt_details.pop("required", None)
-
-            o = click.Argument(param_decls=[key], required=required, **opt_details)
-        else:
-
-            arg_names_for_option = ["--{}".format(key)] + extra_arg_names
-            o = click.Option(param_decls=arg_names_for_option, **opt_details)
-        options_list.append(o)
-
-    return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars,
-            "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars,
-            "value_vars": value_vars,
-            "metadata": {"extra_options": extra_options, "command_path": command_path, "command_name": command_name,
-                         "config": config}}
+#     return {"options": options_list, "key_map": key_map, "command_path": command_path, "tasks": tasks, "vars": vars,
+#             "default_vars": default_vars, "doc": doc, "args_that_are_vars": args_that_are_vars,
+#             "value_vars": value_vars,
+#             "metadata": {"extra_options": extra_options, "command_path": command_path, "command_name": command_name,
+#                          "config": config}}
 
 
-def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
-    # exchange arg_name with var name
-    new_args = {}
+# def get_vars_from_cli_input(input_args, key_map, task_vars, default_vars, args_that_are_vars, value_vars):
+#     # exchange arg_name with var name
+#     new_args = {}
 
-    for key, value in key_map.items():
-        temp = input_args.pop(key.replace('-', '_'))
-        if key not in args_that_are_vars:
-            if isinstance(temp, tuple):
-                temp = list(temp)
-            new_args[value] = temp
-        else:
-            task_vars[value] = temp
+#     for key, value in key_map.items():
+#         temp = input_args.pop(key.replace('-', '_'))
+#         if key not in args_that_are_vars:
+#             if isinstance(temp, tuple):
+#                 temp = list(temp)
+#             new_args[value] = temp
+#         else:
+#             task_vars[value] = temp
 
-        # replace all matching strings in value_vars
-        for i, var_name in enumerate(value_vars):
-            if var_name == key:
-                value_vars[i] = value
+#         # replace all matching strings in value_vars
+#         for i, var_name in enumerate(value_vars):
+#             if var_name == key:
+#                 value_vars[i] = value
 
-    # now overimpose the new_args over template_vars
-    new_args = dict_merge(default_vars, new_args)
+#     # now overimpose the new_args over template_vars
+#     new_args = dict_merge(default_vars, new_args)
 
-    final_vars = {}
-    sub_dict = copy.deepcopy(new_args)
+#     final_vars = {}
+#     sub_dict = copy.deepcopy(new_args)
 
-    # inject subdict (args and envs) in vars
-    for key, template in task_vars.items():
-        if isinstance(template, string_types):
-            template_var_string = replace_string(template, sub_dict)
-            if template_var_string.startswith('{') and not \
-               template_var_string.startswith('{{') and not \
-               template_var_string.startswith('{%'):
-                # if template_var_string is json, load value
-                # (but do not handle {{ ansible-side substitution)
-                try:
-                    template_var_new = yaml.safe_load(template_var_string)
-                    final_vars[key] = template_var_new
-                except (Exception) as e:
-                    raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
-            else:
-                # else push value
-                final_vars[key] = template_var_string
-        else:
-            final_vars[key] = template
+#     # inject subdict (args and envs) in vars
+#     for key, template in task_vars.items():
+#         if isinstance(template, string_types):
+#             template_var_string = replace_string(template, sub_dict)
+#             if template_var_string.startswith('{') and not \
+#                template_var_string.startswith('{{') and not \
+#                template_var_string.startswith('{%'):
+#                 # if template_var_string is json, load value
+#                 # (but do not handle {{ ansible-side substitution)
+#                 try:
+#                     template_var_new = yaml.safe_load(template_var_string)
+#                     final_vars[key] = template_var_new
+#                 except (Exception) as e:
+#                     raise Exception("Could not convert template '{}': {}".format(template_var_string, e.message))
+#             else:
+#                 # else push value
+#                 final_vars[key] = template_var_string
+#         else:
+#             final_vars[key] = template
 
-    new_vars = {}
+#     new_vars = {}
 
-    for key in value_vars:
+#     for key in value_vars:
 
-        values = final_vars.pop(key, {})
+#         values = final_vars.pop(key, {})
 
-        if values and not isinstance(values, dict):
-            raise Exception("value for '{}' not a dict: {}".format(key, values))
-        if values:
-            dict_merge(new_vars, values, copy_dct=False)
+#         if values and not isinstance(values, dict):
+#             raise Exception("value for '{}' not a dict: {}".format(key, values))
+#         if values:
+#             dict_merge(new_vars, values, copy_dct=False)
 
-    dict_merge(new_vars, final_vars, copy_dct=False)
+#     dict_merge(new_vars, final_vars, copy_dct=False)
 
-    return new_args, new_vars
+#     return new_args, new_vars
 
 
 def download_repos(repos_to_download, config, output_value):
@@ -497,6 +475,7 @@ def download_extra_repos(ctx, param, value):
     result = download_repos(value, config, output)
     return result
 
+
 def execute_run_box_basics(output="default", ask_become_pass=None, password=None):
 
     if os.path.exists(DEFAULT_LOCAL_FRECKLES_BOX_BASICS_MARKER):
@@ -560,7 +539,7 @@ def print_repos_expand(repos, repo_source=None, verbose=True, warn=False, defaul
     if warn and exp:
         click.echo(" * NOTE: don't rely on abbreviated urls for anything important as that feature might change in a future release, use full urls if in doubt\n")
 
-def expanded_repos_dict(repos):
+def expanded_repos_dict(repos, alias_dict=DEFAULT_ROLE_REPOS):
 
     if isinstance(repos, string_types):
         repos = [repos]
@@ -568,12 +547,12 @@ def expanded_repos_dict(repos):
     result = {}
     for p in repos:
         expanded = expand_repos(p)
-        if p not in DEFAULT_REPOS.keys() and p != expanded[0]:
+        if p not in alias_dict.keys() and p != expanded[0]:
             result[p] = expanded
 
     return result
 
-def expand_repos(repos):
+def expand_repos(repos, alias_dict=DEFAULT_ROLE_REPOS):
     """Expands a list of stings to a list of tuples (repo_url, repo_path).
     """
 
@@ -583,8 +562,8 @@ def expand_repos(repos):
     result = []
     for repo in repos:
         fields = ["url", "path"]
-        r = nsbl_tasks.get_default_repo(repo, DEFAULT_REPOS)
 
+        r = alias_dict.get(repo, None)
         if not r:
             if os.path.exists(repo):
                 temp = {"url": None, "path": repo}
@@ -599,262 +578,32 @@ def expand_repos(repos):
                 temp = repo_details
             result.append(temp)
         else:
-            role_tuples = r.get("roles", [])
-
-            if role_tuples:
-                temp = [dict(zip(fields, t)) for t in role_tuples]
-                result.extend(temp)
-
-            adapter_tuples = r.get("adapters", [])
-            if adapter_tuples:
-                temp = [dict(zip(fields, t)) for t in adapter_tuples]
-                result.extend(temp)
-            frecklecutable_tuples = r.get("frecklecutables", [])
-            if frecklecutable_tuples:
-                temp = [dict(zip(fields, t)) for t in frecklecutable_tuples]
-                result.extend(temp)
+            result.append(r)
 
     return result
 
 
-def find_supported_profile_names(config=None, additional_context_repos=[]):
-    return sorted(list(set(find_supported_profiles(config, additional_context_repos).keys())))
+# def find_supported_profile_names(config=None, additional_context_repos=[]):
+    # return sorted(list(set(find_supported_profiles(config, additional_context_repos).keys())))
 
 
-# ADAPTER_CACHE = {}
+# def get_all_adapters_in_repos(repos):
 
-# def get_adapters_from_repo(adapter_repo):
-#     """Find all freckelize adapters under a folder.
-
-#     An adapter consists of 3 files: XXX
-#     """
-
-#     if not os.path.exists(adapter_repo) or not os.path.isdir(os.path.realpath(adapter_repo)):
-#         return {}
-
-#     if adapter_repo in ADAPTER_CACHE.keys():
-#         return ADAPTER_CACHE[adapter_repo]
-
-#     result = {}
-#     try:
-
-#         # need to force 'str', otherwise there might be
-#         for root, dirnames, filenames in os.walk(os.path.realpath(adapter_repo), topdown=True, followlinks=True):
-
-#             dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
-
-#             for filename in fnmatch.filter(filenames, "*.{}".format(ADAPTER_MARKER_EXTENSION)):
-#                 adapter_metadata_file = os.path.realpath(os.path.join(root, filename))
-#                 adapter_folder = os.path.abspath(os.path.dirname(adapter_metadata_file))
-
-#                 # profile_name = ".".join(os.path.basename(adapter_metadata_file).split(".")[1:2])
-#                 profile_name = os.path.basename(adapter_metadata_file).split(".")[0]
-
-#                 result[profile_name] = adapter_folder
-
-#     except (UnicodeDecodeError) as e:
-#         click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
-
-#     ADAPTER_CACHE[adapter_repo] = result
-#     return result
-
-# BLUEPRINT_CACHE = {}
-# def get_available_blueprints(config=None):
-#     """Find all available blueprints."""
-
-#     if not config:
-#         config = DEFAULT_FRECKLES_CONFIG
-
-#     repos = nsbl_tasks.get_local_repos(config.trusted_repos, "blueprints", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
-
-#     result = {}
+#     result = []
+#     repos = nsbl_tasks.get_local_repos(repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 #     for repo in repos:
-
-#         blueprints = get_blueprints_from_repo(repo)
-#         for name, path in blueprints.items():
-#             result[name] = path
+#         adapters = get_adapters_from_repo(repo)
+#         result.extend(adapters)
 
 #     return result
 
 
-# def get_blueprints_from_repo(blueprint_repo):
-#     """Find all blueprints under a folder.
-
-#     A blueprint is a folder that has a .blueprint.freckle marker file in it's root.
-#     """
-#     if not os.path.exists(blueprint_repo) or not os.path.isdir(os.path.realpath(blueprint_repo)):
-#         return {}
-
-#     if blueprint_repo in BLUEPRINT_CACHE.keys():
-#         return BLUEPRINT_CACHE[blueprint_repo]
-
-#     result = {}
-
-#     try:
-
-#         for root, dirnames, filenames in os.walk(os.path.realpath(blueprint_repo), topdown=True, followlinks=True):
-
-#             dirnames[:] = [d for d in dirnames if d not in DEFAULT_EXCLUDE_DIRS]
-#             for filename in fnmatch.filter(filenames, "*.{}".format(BLUEPRINT_MARKER_EXTENSION)):
-#                 blueprint_metadata_file = os.path.realpath(os.path.join(root, filename))
-#                 blueprint_folder = os.path.abspath(os.path.dirname(blueprint_metadata_file))
-
-#                 #profile_name = ".".join(os.path.basename(blueprint_metadata_file).split(".")[1:2])
-#                 profile_name = os.path.basename(blueprint_metadata_file).split(".")[0]
-
-#                 result[profile_name] = blueprint_folder
-
-#     except (UnicodeDecodeError) as e:
-#         click.echo(" X one or more filenames in '{}' can't be decoded, ignoring. This can cause problems later. ".format(root))
-
-#     BLUEPRINT_CACHE[blueprint_repo] = result
-
-#     return result
-
-
-# def find_adapter_files(extension, valid_profiles=None, config=None, additional_context_repos=[]):
-
-#     profiles = find_supported_profiles(config, additional_context_repos)
-#     task_files_to_copy = {}
-
-#     for profile_name, profile_path in profiles.items():
-
-#         if valid_profiles and profile_name not in valid_profiles:
-#             continue
-
-#         profile_child_file = os.path.join(profile_path, "{}.{}".format(profile_name, extension))
-
-#         if not os.path.exists(profile_child_file) or not os.path.isfile(profile_child_file):
-#             continue
-
-#         task_files_to_copy[profile_name] = profile_child_file
-
-#     return task_files_to_copy
-
-
-def get_all_adapters_in_repos(repos):
-    result = []
-    repos = nsbl_tasks.get_local_repos(repos, "adapters", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
-    for repo in repos:
-        adapters = get_adapters_from_repo(repo)
-        result.extend(adapters)
-
-    return result
-
-
-# def find_adapter_files_callback(extensions, valid_profiles=None, additional_context_repos=[], print_used_adapter=True):
-
-#     if isinstance(extensions, string_types):
-#         extensions = [extensions]
-
-#     task_files_to_copy = {}
-#     print_cache = {}
-#     for extension in extensions:
-#         files = find_adapter_files(extension, valid_profiles, additional_context_repos=additional_context_repos)
-
-#         for key, value in files.items():
-#             print_cache[key] = value
-#             task_files_to_copy.setdefault(extension, {})[key] = value
-
-#     if valid_profiles and print_used_adapter:
-#         for p in valid_profiles:
-#             if p in print_cache.keys():
-#                 click.echo("  - {}: {}".format(p, os.path.dirname(print_cache[p])))
-
-#     def copy_callback(ansible_environment_root):
-
-#         for name, path in task_files_to_copy.get(ADAPTER_INIT_EXTENSION, {}).items():
-#             target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
-#                                        "init-{}.yml".format(name))
-#             shutil.copyfile(path, target_path)
-
-#         for name, path in task_files_to_copy.get(ADAPTER_TASKS_EXTENSION, {}).items():
-#             target_path = os.path.join(ansible_environment_root, "roles", "internal", "freckles-io.freckelize", "tasks",
-#                                        "items-{}.yml".format(name))
-#             shutil.copyfile(path, target_path)
-
-#     return copy_callback
-
-
-# def get_adapter_dependency_roles(profiles, additional_context_repos=[]):
-
-#     if not profiles:
-#         return []
-
-#     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
-
-#     all_deps = set()
-
-#     for profile_name, dep_file in dep_files.items():
-
-#         with open(dep_file, 'r') as f:
-#             deps = yaml.safe_load(f)
-#             if not deps:
-#                 deps = {}
-#             all_deps |= set(deps.get("role-dependencies", {}))
-
-#     return list(all_deps)
-
-# def get_adapter_profile_priorities(profiles, additional_context_repos=[]):
-
-#     if not profiles:
-#         return []
-
-#     dep_files = find_adapter_files(ADAPTER_MARKER_EXTENSION, profiles, additional_context_repos=additional_context_repos)
-
-#     prios = []
-#     for profile_name, dep_file in dep_files.items():
-
-#         with open(dep_file, 'r') as f:
-#             deps = yaml.safe_load(f)
-#             if not deps:
-#                 deps = {}
-
-#         priority = deps.get("priority", DEFAULT_FRECKELIZE_PROFILE_PRIORITY)
-#         prios.append([priority, profile_name])
-
-#     profiles_sorted = sorted(prios, key=lambda tup: tup[0])
-
-#     return [item[1] for item in profiles_sorted]
-
-def extract_all_used_profiles(freckle_repos):
-    all_profiles = []
-    for fr in freckle_repos:
-        all_profiles.extend(fr.get("profiles", []))
-
-    return list(set(all_profiles))
-
-
-# def create_freckles_run(profiles, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False,
-#                         output_format="default", additional_repo_paths=[], hosts_list=["localhost"]):
-
-#     # profiles = extract_all_used_profiles(freckle_repos)
-
-#     callback = find_adapter_files_callback([ADAPTER_INIT_EXTENSION, ADAPTER_TASKS_EXTENSION], profiles, additional_context_repos=additional_repo_paths)
-
-#     additional_roles = get_adapter_dependency_roles(profiles, additional_context_repos=additional_repo_paths)
-
-#     task_config = [{"vars": {"user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file, "profile_order": profiles}, "tasks": ["freckles"]}]
-
-#     return create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-#                                       pre_run_callback=callback, no_run=no_run, additional_roles=additional_roles, run_box_basics=True, additional_repo_paths=additional_repo_paths, hosts_list=hosts_list)
-
-
-# def create_freckles_checkout_run(freckle_repos, repo_metadata_file, extra_profile_vars, ask_become_pass="true", no_run=False, output_format="default", hosts_list=["localhost"]):
-
-
-#     repos_list = [(k, v) for k, v in freckle_repos.items()]
-
-#     task_config = [{"vars": {"freckles": repos_list, "user_vars": extra_profile_vars, "repo_metadata_file": repo_metadata_file}, "tasks": ["freckles_checkout"]}]
-
-#     result = create_and_run_nsbl_runner(task_config, output_format=output_format, ask_become_pass=ask_become_pass,
-#                                         no_run=no_run, run_box_basics=True, hosts_list=hosts_list)
-
-#     if no_run:
-#         click.echo("'no-run' option specified, finished")
-
-
-#     return result
+# def extract_all_used_profiles(freckle_repos):
+#     all_profiles = []
+#     for fr in freckle_repos:
+#         all_profiles.extend(fr.get("profiles", []))
+
+#     return list(set(all_profiles))
 
 
 def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="default", ask_become_pass=False, password=None,
@@ -874,9 +623,25 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
             config.add_repos(additional_repo_paths)
 
     config_trusted_repos = config.trusted_repos
-    local_role_repos = nsbl_tasks.get_local_repos(config_trusted_repos, "roles", DEFAULT_LOCAL_REPO_PATH_BASE, DEFAULT_REPOS, DEFAULT_ABBREVIATIONS)
 
-    role_repos = defaults.calculate_role_repos(local_role_repos, use_default_roles=False)
+    local_role_repos = []
+    for repo_name in config_trusted_repos:
+
+        repo = DEFAULT_ROLE_REPOS.get(repo_name)
+        if not repo:
+            if not os.path.exists(repo_name):
+                repo_details = nsbl_tasks.expand_string_to_git_details(repo_name, DEFAULT_ABBREVIATIONS)
+                repo_url = repo_details["url"]
+                repo_branch = repo_details.get('branch', None)
+                relative_repo_path = nsbl_tasks.calculate_local_repo_path(repo_url, repo_branch)
+                repo_path = os.path.join(DEFAULT_LOCAL_REPO_PATH_BASE, relative_repo_path)
+            else:
+                local_role_repos.append(repo_name)
+        else:
+            repo_path = repo["path"]
+            local_role_repos.append(repo_path)
+
+    role_repos = defaults.calculate_role_repos(local_role_repos)
 
     task_descs = config.task_descs
 

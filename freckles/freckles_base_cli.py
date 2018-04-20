@@ -333,7 +333,7 @@ def generate_details(metadata, dictlet_details):
 
     return result
 
-def get_common_options():
+def get_common_options(print_version_callback=print_version):
     """Returns a list of options that are shared between all of the freckles command-line applications.
     """
 
@@ -346,7 +346,7 @@ def get_common_options():
                                           help='whether to force ask for a password, force ask not to, or let try freckles decide (which might not always work)',
                                            show_default=True, type=click.Choice(["no", "ask", "ansible"]), default="no")
     version_option = click.Option(param_decls=["--version"], help='prints the version of freckles', type=bool,
-                                  is_flag=True, is_eager=True, expose_value=False, callback=print_version)
+                                  is_flag=True, is_eager=True, expose_value=False, callback=print_version_callback)
     no_run_option = click.Option(param_decls=["--no-run"],
                                  help='don\'t execute frecklecute, only prepare environment and print task list',
                                  type=bool, is_flag=True, flag_value=True, required=False)
@@ -429,13 +429,17 @@ class FrecklesBaseCommand(click.MultiCommand):
     """Base class to provide a command-based (similar to e.g. git) cli for frecklecute.
     """
 
-    def __init__(self, extra_params=None,**kwargs):
+    def __init__(self, config=None, extra_params=None, print_version_callback=print_version, **kwargs):
 
         super(FrecklesBaseCommand, self).__init__(**kwargs)
-        self.params[:0] = get_common_options()
+        self.print_version_callback = print_version_callback
+        self.params[:0] = get_common_options(print_version_callback=self.print_version_callback)
         if extra_params:
             self.params[:0] = extra_params
-        self.config = DEFAULT_FRECKLES_CONFIG
+        if config is None:
+            self.config = DEFAULT_FRECKLES_CONFIG
+        else:
+            self.config = config
         self.finder = None
         self.reader = None
         self.paths = None
@@ -467,6 +471,7 @@ class FrecklesBaseCommand(click.MultiCommand):
 
         if self.paths is None:
             self.paths = [p['path'] for p in expand_repos(self.config.trusted_repos)]
+
         if self.finder is None:
             self.finder = self.get_dictlet_finder()
 

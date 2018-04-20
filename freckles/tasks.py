@@ -6,7 +6,7 @@ class FrecklesTasks(object):
     def __init__(self, config, role_repos=None, task_descs=None, stdout_callback='nsbl_internal', target=None,
                  force=False):
 
-        role_repos = calculate_role_repos(role_repos, use_default_roles=True)
+        role_repos = calculate_role_repos(role_repos)
         task_descs = calculate_task_descs(task_descs, role_repos)
 
         if not target:

@@ -27,7 +27,7 @@ setup(
     description="DevOps your laptop!",
     long_description=readme + '\n\n' + history,
     author="Markus Binsteiner",
-    author_email='makkus@posteo.de',
+    author_email='makkus@frkl.io',
     url='https://github.com/makkus/freckles',
     packages=[
         'freckles',
@@ -37,8 +37,6 @@ setup(
     entry_points={
         'console_scripts': [
             'freckles=freckles.freckles_cli:cli',
-            'freckelize=freckles.freckelize:cli',
-            'frecklecute=freckles.frecklecute:cli',
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
         ]
     },
@@ -51,7 +49,7 @@ setup(
     install_requires=requirements,
     license="GNU General Public License v3",
     zip_safe=False,
-    keywords='freckles',
+    keywords='freckles ansible provisioning',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
