@@ -1,10 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-import click
-
+from six import string_types
 from .freckles_defaults import *
 from frkl import frkl
-
 
 try:
     set
@@ -85,6 +83,20 @@ class FrecklesConfig(object):
 
         return "FrecklesConfig(trusted_repos={}, trusted_urls={}, task_descs={})".format(self.trusted_repos, self.trusted_urls, self.task_descs)
 
-    def add_repos(self, repos):
+    def add_user_repo(self, repo):
+        """Adds a repo path (or list of paths) with hightest priority."""
 
-        self.trusted_repos.extend(repos)
+        if isinstance(repo, string_types):
+            repo = [repo]
+
+        for r in repo:
+            self.trusted_repos.append(r)
+
+    def add_repo(self, repo):
+        """Adds a repo path (or list of paths)."""
+
+        if isinstance(repo, string_types):
+            repo = [repo]
+
+        for r in repo:
+            self.trusted_repos.insert(-1, r)
