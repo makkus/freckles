@@ -3,33 +3,23 @@
 # python 3 compatibility
 from __future__ import (absolute_import, division, print_function)
 
-import collections
-from cookiecutter.main import cookiecutter
 import logging
-
-import click
 import tempfile
-import os
-import pprint
-import sys
-import yaml
 from os import listdir
 from os.path import isdir, join
 
+from cookiecutter.main import cookiecutter
+
 from frkl import frkl
-from nsbl import tasks as nsbl_tasks
-from .freckles_defaults import *
 from luci import readable_json
+
 try:
     set
 except NameError:
     from sets import Set as set
 
 from .freckles_defaults import *
-from .utils import (RepoType,
-                    create_freckle_desc,
-                    ADAPTER_MARKER_EXTENSION, create_cli_command,
-                    get_vars_from_cli_input, print_repos_expand, get_available_blueprints)
+from .utils import (get_available_blueprints)
 
 log = logging.getLogger("freckles")
 

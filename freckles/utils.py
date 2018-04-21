@@ -1,27 +1,19 @@
 from __future__ import (absolute_import, division, print_function)
 
 import copy
-import fnmatch
 import json
-import pprint
-import os
 import re
-import shutil
-import sys
-import yaml
 from collections import OrderedDict
-from pydoc import locate
 
-import click
-from ansible.plugins.filter.core import FilterModule
-from frkl.frkl import Frkl, PLACEHOLDER, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, LoadMoreConfigsProcessor, FrklProcessor, MergeDictResultCallback, MergeResultCallback
+import yaml
 from jinja2 import Environment
-from jinja2.ext import Extension
-from nsbl import tasks as nsbl_tasks
-from nsbl import nsbl, ansible_extensions, inventory, output
-
 from six import string_types
 
+from frkl.frkl import Frkl, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, \
+    LoadMoreConfigsProcessor
+from nsbl import nsbl, ansible_extensions, inventory, output
+from nsbl import tasks as nsbl_tasks
+from nsbl import defaults as nsbl_defaults
 from .config import FrecklesConfig
 
 try:
@@ -63,8 +55,7 @@ def represent_odict(dump, tag, mapping, flow_style=None):
 yaml.SafeDumper.add_representer(OrderedDict,
 lambda dumper, value: represent_odict(dumper, u'tag:yaml.org,2002:map', value))
 
-def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
-    return create_freckle_desc(url, target, target_is_parent, profiles, include, exclude)
+# def to_freckle_desc_filter(url, target, target_is_parent, profiles, include, exclude):
 
 
 # class FrecklesUtilsExtension(Extension):
@@ -438,7 +429,7 @@ def download_repos(repos_to_download, config, output_value):
 
     print_repos_expand(repos, repo_source="using runtime context repo(s)", warn=False)
 
-    config.add_repos(repos)
+    config.add_repo(repos)
 
     if no_url:
         return repos
@@ -620,7 +611,7 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
 
     if additional_repo_paths:
         if config.use_freckle_as_repo:
-            config.add_repos(additional_repo_paths)
+            config.add_repo(additional_repo_paths)
 
     config_trusted_repos = config.trusted_repos
 
@@ -641,8 +632,7 @@ def create_and_run_nsbl_runner(task_config, task_metadata={}, output_format="def
             repo_path = repo["path"]
             local_role_repos.append(repo_path)
 
-    role_repos = defaults.calculate_role_repos(local_role_repos)
-
+    role_repos = nsbl_defaults.calculate_role_repos(local_role_repos)
     task_descs = config.task_descs
 
     global_vars = {}

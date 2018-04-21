@@ -1,6 +1,7 @@
 import os
+
 import click
-from nsbl import defaults
+
 from frkl.frkl import PLACEHOLDER
 
 FRECKLE_MARKER_FILE_NAME = ".freckle"

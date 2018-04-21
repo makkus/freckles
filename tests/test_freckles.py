@@ -8,10 +8,8 @@ test_freckles
 Tests for `freckles` module.
 """
 
-from contextlib import contextmanager
-
 import pytest
-from click.testing import CliRunner
+
 
 # from freckles import cli, freckles
 

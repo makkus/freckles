@@ -1,15 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 from six import string_types
-from .freckles_defaults import *
+
 from frkl import frkl
+from .freckles_defaults import *
 
 try:
     set
 except NameError:
     from sets import Set as set
-
-import yaml
 
 DEFAULT_ROLE_REPOS = ['default', 'user']
 DEFAULT_TRUSTED_URLS = ['https://github.com/makkus/', 'https://github.com/freckles-io/']

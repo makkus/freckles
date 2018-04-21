@@ -1,29 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import json
 import importlib
 import inspect
+import json
 import pkgutil
 import pprint
-import subprocess
-import select
 import string
-import textwrap
-import time
-
-import click
+import subprocess
 import sys
+import time
+from collections import OrderedDict
+
 import yaml
 
 import plugin_formatter
-
-from collections import OrderedDict
-
-from . import __version__ as VERSION
-from .freckles_defaults import *
 from nsbl import tasks
 from nsbl.defaults import *
+from . import __version__ as VERSION
+from .freckles_defaults import *
 from .utils import get_all_adapters_in_repos, download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
+
 
 def reindent(s, numSpaces):
     s = string.split(s, '\n')

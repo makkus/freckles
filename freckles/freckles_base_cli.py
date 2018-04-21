@@ -3,26 +3,24 @@
 from __future__ import absolute_import, division, print_function
 
 import abc
+import copy
 import logging
-import os
-import six
 import shutil
-import sys
+from collections import OrderedDict
 
-import click
 import click_completion
 import click_log
-import copy
-import nsbl
-import yaml
+import six
 from six import string_types
-from collections import OrderedDict
-from pprint import pprint
+
+import nsbl
 from frkl import frkl
-from luci import Lucifier, DictletReader, DictletFinder, vars_file, TextFileDictletReader, parse_args_dict, output, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, clean_user_input, convert_args_to_dict, readable_json
+from luci import Lucifier, vars_file, parse_args_dict, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, \
+    clean_user_input, convert_args_to_dict
 from . import print_version
 from .freckles_defaults import *
-from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, print_repos_expand, expand_repos,  create_and_run_nsbl_runner, freckles_jinja_extensions, download_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, expand_repos, freckles_jinja_extensions, \
+    download_repos
 
 log = logging.getLogger("freckles")
 click_log.basic_config(log)
