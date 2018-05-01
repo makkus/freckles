@@ -70,3 +70,5 @@ target/
 
 .pytest_cache
 old
+
+**mypy_cache**
