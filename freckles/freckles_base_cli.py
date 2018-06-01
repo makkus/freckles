@@ -76,6 +76,7 @@ class FrecklesCliFormatter(click.Command):
             with formatter.section("Details"):
                 formatter.write_dl(details)
 
+
 def parse_tasks_dictlet(content, current_vars, tasks_keyword = FX_TASKS_KEY_NAME, vars_keyword = None, delimiter_profile=JINJA_DELIMITER_PROFILES["luci"]):
 
     """Process a frecklecutable line-by-line.

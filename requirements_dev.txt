@@ -20,6 +20,6 @@ sphinx-click==1.1.0
 #jast==0.0.4
 sphinx_redactor_theme==0.0.1
 ipython # pyup: ignore
-
+restview==2.8.1
 # freckelize>=0.1.0
 # frecklecute>=0.1.0
