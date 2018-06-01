@@ -27,9 +27,9 @@ freckles
 Under heavy development
 ***********************
 
-Please not, currently *freckles* is under heavy development, and the user/interface as well as install location will change until it reachers version 0.8. This means some things will break until that process is finished. I'm doing this as I don't think there are many users of *freckles* just yet. If you are one, and you have problems because of that change, contact me and I'll help you figure things out.
+Please notes, currently *freckles* is under heavy development, and the user/interface as well as install location will change until it reachers version 0.8. This means some things will break until that process is finished. I'm doing this as I don't think there are many users of *freckles* just yet. If you are one, and you have problems because of that change, contact me and I'll help you figure things out.
 
-For documentation of the last working stable version, please refer to:
+For the readme of the last working stable version, please refer to: https://github.com/makkus/freckles/blob/master/README_old.rst
 
 Quick links
 ***********
