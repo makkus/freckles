@@ -36,7 +36,7 @@ Click>=6.7
 jinja2>=2.10
 stevedore>=1.28.0
 future>=0.16.0
-ansible==2.5.3
+ansible==2.5.4
 pexpect>=4.5.0
 click-log>=0.2.1
 click-completion>=0.2.1
