@@ -14,3 +14,5 @@ def print_version(ctx, param, value):
         return
     click.echo(__version__)
     ctx.exit()
+
+from .freckles import FrecklesContext, FrecklesTasklist, FrecklesDefaultTasklist

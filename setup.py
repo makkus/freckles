@@ -10,11 +10,14 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.7',
-    'click-log==0.2.1',
-    'click-completion==0.2.1',
-    'nsbl>=0.3.7',
-    'luci>=0.1.1'
+    "Click>=6.7",
+    "click-log>=0.1.8",
+    "click-completion==0.2.1",
+    "cookiecutter==1.6.0",
+    "frkl>=0.1.0",
+    "lucify>=0.1.0",
+    "cursor>=1.2.0",
+    "six>=1.11.0",
 ]
 
 test_requirements = [
@@ -38,6 +41,9 @@ setup(
         'console_scripts': [
             'freckles=freckles.freckles_cli:cli',
             'freckfreckfreck=freckles.freckles_dev_cli:cli'
+        ],
+        "freckles.tasklists": [
+            "default=freckles:FrecklesDefaultTasklist"
         ]
     },
     scripts=[
