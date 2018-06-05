@@ -22,7 +22,7 @@ restview==2.8.1
 twine==1.11.0
 
 # testing & ci
-pytest==3.6.0
+pytest==3.6.1
 pytest-runner==4.2
 flake8==3.5.0
 tox==3.0.0
