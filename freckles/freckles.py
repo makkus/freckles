@@ -243,6 +243,8 @@ class FrecklesContext(object):
                 paths = []
             if isinstance(paths, string_types):
                 paths = [paths]
+            elif isinstance(paths, tuple):
+                paths = list(paths)
 
             paths[:] = [os.path.realpath(os.path.expanduser(p)) for p in paths]
 
