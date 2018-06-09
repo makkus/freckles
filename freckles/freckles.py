@@ -8,7 +8,6 @@ import logging
 import os
 import sys
 
-import yaml
 from ruamel.yaml.comments import CommentedSeq
 from six import string_types
 from stevedore import driver
