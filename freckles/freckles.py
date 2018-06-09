@@ -7,25 +7,20 @@ import copy
 import logging
 import os
 import sys
-from collections import OrderedDict
-from os.path import splitext
 
 import yaml
-from ruamel.yaml.comments import CommentedMap, CommentedSeq
+from ruamel.yaml.comments import CommentedSeq
 from six import string_types
+from stevedore import driver
 
-from frkl import load_object_from_url_or_path, Frkl, load_string_from_url_or_path, load_templated_string_from_url_chain
-from frkl.utils import get_url_parents
-from frkl.processors import ConfigProcessor
-from frutils import StringYAML, dict_merge, is_url_or_abbrev
-
-from .exceptions import FrecklesConfigException, FrecklesException
-from stevedore import driver, extension
+from frkl import load_string_from_url_or_path
+from frutils import StringYAML
 from frutils.defaults import (
     DEFAULT_URL_ABBREVIATIONS_FILE,
     DEFAULT_URL_ABBREVIATIONS_REPO,
     JINJA_DELIMITER_PROFILES
 )
+from .exceptions import FrecklesConfigException
 
 
 GLOBAL_ENV_ID_COUNTER = 1110

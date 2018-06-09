@@ -9,8 +9,8 @@ import sys
 import nsbl
 from frkl import frkl
 from . import print_version
-from .freckelize_cli import FreckelizeCommand, FRECKELIZE_HELP_TEXT, FRECKELIZE_EPILOG_TEXT
-from .frecklecute_cli import FrecklecuteCommand, FRECKLECUTE_HELP_TEXT, FRECKLECUTE_EPILOG_TEXT
+from .freckelize_cli import FRECKELIZE_EPILOG_TEXT, FRECKELIZE_HELP_TEXT, FreckelizeCommand
+from .frecklecute_cli import FRECKLECUTE_EPILOG_TEXT, FRECKLECUTE_HELP_TEXT, FrecklecuteCommand
 from .freckles_defaults import *
 from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos
 

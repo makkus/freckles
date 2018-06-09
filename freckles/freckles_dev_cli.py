@@ -18,7 +18,7 @@ from nsbl import tasks
 from nsbl.defaults import *
 from . import __version__ as VERSION
 from .freckles_defaults import *
-from .utils import download_extra_repos, DEFAULT_FRECKLES_CONFIG, DEFAULT_ABBREVIATIONS
+from .utils import DEFAULT_ABBREVIATIONS, DEFAULT_FRECKLES_CONFIG, download_extra_repos
 
 
 def reindent(s, numSpaces):

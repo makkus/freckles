@@ -9,11 +9,9 @@ import yaml
 from jinja2 import Environment
 from six import string_types
 
-from frkl.frkl import Frkl, UrlAbbrevProcessor, dict_merge, EnsureUrlProcessor, EnsurePythonObjectProcessor, \
-    LoadMoreConfigsProcessor
-from nsbl import nsbl, ansible_extensions, inventory, output
-from nsbl import tasks as nsbl_tasks
-from nsbl import defaults as nsbl_defaults
+from frkl.frkl import EnsurePythonObjectProcessor, EnsureUrlProcessor, Frkl, LoadMoreConfigsProcessor, \
+    UrlAbbrevProcessor, dict_merge
+from nsbl import ansible_extensions, defaults as nsbl_defaults, inventory, nsbl, output, tasks as nsbl_tasks
 from .config import FrecklesConfig
 
 try:

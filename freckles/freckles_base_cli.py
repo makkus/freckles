@@ -15,12 +15,12 @@ from six import string_types
 
 import nsbl
 from frkl import frkl
-from luci import Lucifier, vars_file, parse_args_dict, JINJA_DELIMITER_PROFILES, replace_string, ordered_load, \
-    clean_user_input, convert_args_to_dict
+from luci import JINJA_DELIMITER_PROFILES, Lucifier, clean_user_input, convert_args_to_dict, ordered_load, \
+    parse_args_dict, replace_string, vars_file
 from . import print_version
 from .freckles_defaults import *
-from .utils import DEFAULT_FRECKLES_CONFIG, download_extra_repos, HostType, expand_repos, freckles_jinja_extensions, \
-    download_repos
+from .utils import DEFAULT_FRECKLES_CONFIG, HostType, download_extra_repos, download_repos, expand_repos, \
+    freckles_jinja_extensions
 
 log = logging.getLogger("freckles")
 click_log.basic_config(log)
