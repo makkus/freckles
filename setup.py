@@ -11,11 +11,12 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     "Click>=6.7",
-    "click-log>=0.1.8",
-    "click-completion==0.2.1",
+    "click-log>=0.3.2",
+    "click-completion==0.3.1",
     "cookiecutter==1.6.0",
+    "frutils>=0.1.0",
     "frkl>=0.1.0",
-    "lucify>=0.1.0",
+    "luci>=0.1.0",
     "cursor>=1.2.0",
     "six>=1.11.0",
 ]
@@ -46,11 +47,11 @@ setup(
             "default=freckles:FrecklesDefaultTasklist"
         ]
     },
-    scripts=[
-        'freckles/external/scripts/inaugurate/inaugurate',
-        'freckles/external/scripts/frankentree/frankentree',
-        'freckles/external/scripts/frocker/frocker'
-    ],
+    # scripts=[
+    #     'freckles/external/scripts/inaugurate/inaugurate',
+    #     'freckles/external/scripts/frankentree/frankentree',
+    #     'freckles/external/scripts/frocker/frocker'
+    # ],
     include_package_data=True,
     install_requires=requirements,
     license="GNU General Public License v3",

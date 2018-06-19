@@ -42,7 +42,7 @@ click-log>=0.2.1
 click-completion>=0.2.1
 
 # dev dependencies
-git+https://github.com/makkus/frutils.git
-git+https://github.com/makkus/lucify.git
-git+https://github.com/makkus/frkl.git
-git+https://github.com/makkus/nsbl.git
+git+https://gitlab.com/makkus/frutils.git
+git+https://gitlab.com/makkus/luci.git
+git+https://gitlab.com/makkus/frkl.git
+git+https://gitlab.com/makkus/nsbl.git
