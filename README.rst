@@ -17,6 +17,9 @@
            :target: https://gitter.im/freckles-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
+Note: I'm in the process of completely rewriting freckles. The code on here won't receive any updates.
+
+
 ########
 freckles
 ########
