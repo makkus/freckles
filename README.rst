@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmakkus%2Ffreckles.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmakkus%2Ffreckles?ref=badge_shield)
+
 .. image:: https://img.shields.io/pypi/v/freckles.svg
            :target: https://pypi.python.org/pypi/freckles
 
@@ -292,3 +294,7 @@ mac_pkg_
 .. _mac_pkg: https://github.com/spencergibb/battleschool/blob/7f75c41077d73cceb19ea46a3185cb2419d7c3e9/share/library/mac_pkg
 .. _battleschool: https://github.com/spencergibb/battleschool
 .. _stow: https://www.gnu.org/software/stow/
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmakkus%2Ffreckles.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmakkus%2Ffreckles?ref=badge_large)
