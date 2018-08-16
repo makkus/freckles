@@ -10,7 +10,7 @@ PyYAML==3.12
 pytest==3.4.2
 nsbl # pyup: ignore
 sphinx-autobuild==0.7.1
-tornado==4.5.3
+tornado==5.1
 docutils==0.14
 sphinxcontrib-napoleon==0.6.1
 #sphinx-click-freckles==1.0.4.dev1
