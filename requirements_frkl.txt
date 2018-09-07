@@ -1,0 +1,10 @@
+--index-url https://pkgs.frkl.io/frkl/dev
+
+# extra dependencies
+Click>=6.7
+click-log>=0.3.2
+
+# dev dependencies
+git+https://gitlab.com/frkl/frutils.git
+git+https://gitlab.com/frkl/frkl.git
+git+https://gitlab.com/frkl/luci.git
