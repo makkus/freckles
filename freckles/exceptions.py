@@ -13,3 +13,9 @@ class FrecklesConfigException(FrecklesException):
     def __init__(self, message):
 
         super(FrecklesConfigException, self).__init__(message)
+
+
+class FrecklesPermissionException(FrecklesException):
+    def __init__(self, message):
+
+        super(FrecklesPermissionException, self).__init__(message)
