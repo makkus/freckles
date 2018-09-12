@@ -25,7 +25,7 @@ from .defaults import (
     REPO_MANAGER_CONFIG_SCHEMA,
     DEFAULT_FRECKLES_ALIASES,
 )
-from .exceptions import FrecklesConfigException
+from .exceptions import FrecklesConfigException, FrecklesPermissionException
 from .frecklet import Frecklet
 from .repo_management import RepoManager
 
@@ -166,9 +166,21 @@ class FrecklesContext(object):
     def __init__(self, config_profiles, freckles_repos=None, **kwargs):
 
         self.default_profile = load_profile_from_disk("default")
-
+        self.vanilla_profile = False
         if self.default_profile is None:
+            self.vanilla_profile = True
             self.default_profile = FRECKLES_CNF_PROFILES["default"]
+
+            for t_config in config_profiles:
+                if t_config != "default":
+                    raise FrecklesPermissionException(
+                        "No permission to change configuration. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                    )
+
+            if freckles_repos:
+                raise FrecklesPermissionException(
+                    "No permission to use custom repositories. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                )
 
         self.cnf = get_cnf(
             config_profiles=config_profiles,
@@ -309,6 +321,12 @@ class FrecklesContext(object):
                 ignore_invalid_repos=self.ignore_invalid_repos,
             )
 
+            # TODO: don't do this multiple time for the same repo
+            for r in repos:
+                path = self.repo_manager.get_repo(r)
+                if path is None:
+                    log.debug("Not a valid repo, or repo doesn't exist: {}".format(r))
+                    continue
             connector.set_content_repos(repos)
 
             indexes = connector.get_indexes()
