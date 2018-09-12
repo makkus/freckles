@@ -46,8 +46,12 @@ class FrecklesRepo(object):
             else:
                 abbrev = None
 
+            basename = os.path.basename(full)
+            if basename.endswith(".git"):
+                basename = basename[0:-4]
             branch = git_details.get("branch", "master")
-            cache_location = calculate_cache_location_for_url(full, postfix=branch)
+            postfix = os.path.join(branch, basename)
+            cache_location = calculate_cache_location_for_url(full, postfix=postfix)
             cache_location = os.path.join(FRECKLES_CACHE_BASE, cache_location)
 
             repo_desc["path"] = cache_location
