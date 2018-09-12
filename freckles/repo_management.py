@@ -3,12 +3,21 @@ import copy
 import logging
 import os
 
+import click
+from frutils import (
+    is_url_or_abbrev,
+    calculate_cache_location_for_url,
+    DEFAULT_URL_ABBREVIATIONS_REPO,
+)
+from plumbum import local
 from six import string_types
 
 from frkl import dict_from_url
 from frkl.helpers import content_from_url
+from frkl.utils import expand_string_to_git_details
+
 from .defaults import MODULE_FOLDER, FRECKLES_CACHE_BASE
-from .exceptions import FrecklesConfigException
+from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
 log = logging.getLogger("freckles")
 
@@ -26,7 +35,32 @@ class FrecklesRepo(object):
             content_type = MIXED_CONTENT_TYPE
 
         repo_desc = {}
-        repo_desc["path"] = name
+        if is_url_or_abbrev(name):
+            git_details = expand_string_to_git_details(
+                name, default_abbrevs=DEFAULT_URL_ABBREVIATIONS_REPO
+            )
+            # full = get_full_url(name, abbrevs=DEFAULT_URL_ABBREVIATIONS_REPO)
+            full = git_details["url"]
+            if full != git_details["url"]:
+                abbrev = git_details["url"]
+            else:
+                abbrev = None
+
+            branch = git_details.get("branch", "master")
+            cache_location = calculate_cache_location_for_url(full, postfix=branch)
+            cache_location = os.path.join(FRECKLES_CACHE_BASE, cache_location)
+
+            repo_desc["path"] = cache_location
+            repo_desc["url"] = full
+            if branch is not None:
+                repo_desc["branch"] = branch
+            repo_desc["remote"] = True
+            if abbrev is not None:
+                repo_desc["abbrev"] = abbrev
+        else:
+            repo_desc["path"] = name
+            repo_desc["remote"] = False
+
         repo_desc["content_type"] = content_type
         if alias is not None:
             repo_desc["alias"] = alias
@@ -35,9 +69,53 @@ class FrecklesRepo(object):
 
     def __init__(self, repo_desc):
 
-        self.id = repo_desc["id"]
-        self.url = repo_desc["url"]
+        self.alias = repo_desc.get("alias", None)
+        self.url = repo_desc.get("url", None)
+        self.path = repo_desc["path"]
         self.content_type = repo_desc["content_type"]
+        self.branch = repo_desc.get("branch", None)
+        self.remote = repo_desc["remote"]
+        self.abbrev = repo_desc.get("abbrev", None)
+
+    def ensure_local(self, force_update=False):
+
+        if not self.remote or not force_update:
+            if os.path.exists(self.path):
+                return
+
+            if not self.remote:
+                raise FrecklesConfigException(
+                    "Repo folder '{}' does not exist.", self.path
+                )
+
+        if os.path.exists(self.path) and not force_update:
+            return
+        elif not os.path.exists(self.path):
+
+            # TODO: figure out a way to do this with callbacks or something
+            click.echo("- cloning repo: {}...".format(self.url))
+            git = local["git"]
+            rc, stdout, stderr = git.run(["clone", self.url, self.path])
+
+            if rc != 0:
+                raise FrecklesConfigException(
+                    "Could not clone repository '{}': {}".format(self.url, stderr)
+                )
+
+        else:
+            # TODO: check if remote/branch is right?
+            click.echo("- pulling from remote: {}...".format(self.url))
+            git = local["git"]
+            cmd = ["pull", "origin"]
+            if self.branch is not None:
+                cmd.append(self.branch)
+            with local.cwd(self.path):
+                rc, stdout, stderr = git.run(cmd)
+
+                if rc != 0:
+                    raise FrecklesConfigException(
+                        "Could not pull repository '{}': {}".format(self.url, stderr)
+                    )
 
 
 class RepoManager(object):
@@ -69,7 +147,48 @@ class RepoManager(object):
 
         return name in self.aliases.keys()
 
-    def get_repos(self, only_content_types=None, ignore_invalid_repos=True):
+    def check_permission_for_url(self, url):
+
+        allow_remote = self.cnf_interpreter.get_cnf_value("allow_remote")
+
+        if is_url_or_abbrev(url) and not allow_remote:
+            return (False, "No remote files allowed.")
+
+        return (True, "External files allowed.")
+
+    def check_permission_for_repo(self, repo_desc):
+
+        allow_remote = self.cnf_interpreter.get_cnf_value("allow_remote")
+
+        if repo_desc["remote"] and not allow_remote:
+            return (False, "No remote repos allowed.")
+
+        return (True, "Remote repos allowed.")
+
+    def get_repo(self, repo_desc, force_update=True):
+
+        path = repo_desc["path"]
+        exists = False
+        allowed, msg = self.check_permission_for_repo(repo_desc)
+
+        if not allowed:
+            log.warn("Not using repo '{}': {}".format(repo_desc["url"], msg))
+            return None
+
+        if repo_desc["remote"]:
+            r = FrecklesRepo(repo_desc)
+            r.ensure_local(force_update=force_update)
+
+        if os.path.exists(repo_desc["path"]):
+            path = repo_desc["path"]
+            exists = True
+
+        if exists:
+            return path
+        else:
+            return None
+
+    def get_repo_descs(self, only_content_types=None, ignore_invalid_repos=True):
         """Returns the repo desc dictionary for the provided name or url.
 
         'only_content_types' should be a list of allowed content types. If that's the case,
@@ -83,7 +202,6 @@ class RepoManager(object):
         Returns:
             list: a list of repository descriptions
         """
-
         repo_urls = self.cnf_interpreter.get_cnf_value("context_repos")
 
         if isinstance(repo_urls, string_types):
@@ -101,10 +219,18 @@ class RepoManager(object):
         for name_or_url in repo_urls:
 
             try:
-
                 if "::" in name_or_url:
                     # just checking if it's an alias
-                    _content_type, _name = name_or_url.split("::", 1)
+                    _temp_content_type, _temp_name = name_or_url.split("::", 1)
+                    if is_url_or_abbrev(
+                        _temp_content_type, abbrevs=DEFAULT_URL_ABBREVIATIONS_REPO
+                    ):
+                        _name = name_or_url
+                        _content_type = MIXED_CONTENT_TYPE
+                    else:
+                        _content_type = _temp_content_type
+                        _name = _temp_name
+
                     is_alias = self.is_alias(_name)
                 else:
                     _name = name_or_url
@@ -165,6 +291,12 @@ class RepoManager(object):
         # now we transform the mixed content type to
         return result
 
+    # def download_frecklet_into_cache(self, frecklet_url, force_update=True):
+    #     """Downloads a frecklet to a local url.
+    #     """
+    #
+    #     path = download_cached_file(frecklet_url)
+
     def get_file_content(self, url, update=True):
         """Gets the content of the file sitting at the provided url.
 
@@ -188,6 +320,13 @@ class RepoManager(object):
         Returns:
             str: the content of the file
         """
+
+        allowed, msg = self.check_permission_for_url(url)
+
+        if not allowed:
+            raise FrecklesPermissionException(
+                "Can't use remote frecklet '{}': {}".format(url, msg)
+            )
 
         try:
             content = dict_from_url(url, update=update, cache_base=FRECKLES_CACHE_BASE)
