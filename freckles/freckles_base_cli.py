@@ -8,6 +8,7 @@ import click
 import click_completion
 import click_log
 import six
+from .exceptions import FrecklesPermissionException
 
 from frkl import VarsType
 from frutils import merge_list_of_dicts
@@ -22,13 +23,23 @@ click_log.basic_config()
 click_completion.init()
 
 
-def create_context(ctx):
+def create_context(ctx, force=False):
+
+    if ctx.obj is None:
+        ctx.obj = {}
 
     config = ctx.obj.get("config", None)
     repos = ctx.obj.get("repos", None)
 
-    if config is None or repos is None:
+    if (config is None or repos is None) and not force:
         return False
+
+    if config is None:
+        config = []
+        ctx.obj["config"] = config
+    if repos is None:
+        repos = []
+        ctx.obj["repos"] = repos
 
     log.debug("Creating context...")
     log.debug("  config: {}".format(config))
@@ -206,6 +217,10 @@ class FrecklesBaseCommand(click.MultiCommand):
         self.host = ctx.params.get("host")
         self.output_format = ctx.params.get("output")
         self.elevated = ctx.params.get("elevated", None)
+
+        if ctx.obj is None:
+            create_context(ctx, force=True)
+
         self.context = ctx.obj["context"]
         self.config = ctx.obj["config"]
         self.repos = ctx.obj["repos"]
@@ -244,6 +259,10 @@ class FrecklesBaseCommand(click.MultiCommand):
         return self.list_freckles_commands(ctx)
 
     def get_command(self, ctx, name):
-
-        self.init_parent_command(ctx)
-        return self.get_freckles_command(ctx, name)
+        try:
+            self.init_parent_command(ctx)
+            return self.get_freckles_command(ctx, name)
+        except (FrecklesPermissionException) as e:
+            click.echo()
+            click.echo(e)
+            sys.exit(2)
