@@ -8,7 +8,7 @@ import click
 import click_completion
 import click_log
 import six
-from .exceptions import FrecklesPermissionException
+from .exceptions import FrecklesPermissionException, FrecklesConfigException
 
 from frkl import VarsType
 from frutils import merge_list_of_dicts
@@ -45,7 +45,20 @@ def create_context(ctx, force=False):
     log.debug("  config: {}".format(config))
     log.debug("  repos: {}".format(repos))
 
-    ctx.obj["context"] = FrecklesContext(config, freckles_repos=repos)
+    try:
+        ctx.obj["context"] = FrecklesContext(config, freckles_repos=repos)
+    except (FrecklesPermissionException) as e:
+        click.echo()
+        click.echo(e)
+        sys.exit(2)
+    except (FrecklesConfigException) as e:
+        click.echo()
+        click.echo(e)
+        sys.exit(2)
+    except (Exception) as e:
+        click.echo()
+        click.echo(e)
+        sys.exit(2)
     return True
 
 
