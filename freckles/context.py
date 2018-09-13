@@ -25,7 +25,7 @@ from .defaults import (
     REPO_MANAGER_CONFIG_SCHEMA,
     DEFAULT_FRECKLES_ALIASES,
 )
-from .exceptions import FrecklesConfigException
+from .exceptions import FrecklesConfigException, FrecklesPermissionException
 from .frecklet import Frecklet
 from .repo_management import RepoManager
 
@@ -138,6 +138,23 @@ class FreckletConnectorIndex(LuItemIndex):
     #     return result
 
 
+def load_profile_from_disk(profile_name):
+
+    abs_path = os.path.abspath(
+        os.path.join(
+            FRECKLES_CONFIG_PROFILES_DIR, "{}.{}".format(profile_name, "profile")
+        )
+    )
+    if os.path.exists(abs_path) and os.path.isfile(abs_path):
+        log.debug("Loading profile from file: {}".format(abs_path))
+        with open(abs_path, "r") as f:
+            profile_dict = yaml.load(f)  # nosec
+    else:
+        profile_dict = None
+
+    return profile_dict
+
+
 class FrecklesContext(object):
     """Wrapper object to hold connectors as well as global & connector-specific configurations.
 
@@ -148,15 +165,32 @@ class FrecklesContext(object):
 
     def __init__(self, config_profiles, freckles_repos=None, **kwargs):
 
+        self.default_profile = load_profile_from_disk("default")
+        self.vanilla_profile = False
+        if self.default_profile is None:
+            self.vanilla_profile = True
+            self.default_profile = FRECKLES_CNF_PROFILES["default"]
+
+            for t_config in config_profiles:
+                if t_config != "default":
+                    raise FrecklesPermissionException(
+                        "No permission to change configuration. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                    )
+
+            if freckles_repos:
+                raise FrecklesPermissionException(
+                    "No permission to use custom repositories. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                )
+
         self.cnf = get_cnf(
             config_profiles=config_profiles,
             additional_values=kwargs,
-            available_profiles_dict=FRECKLES_CNF_PROFILES,
+            available_profiles_dict={"default": self.default_profile},
             profiles_dir=FRECKLES_CONFIG_PROFILES_DIR,
         )
         # self.current_control_vars = None
         self.cnf_interpreter = self.cnf.add_cnf_interpreter(
-            "freckles", FRECKLES_CONFIG_SCHEMA
+            "global", FRECKLES_CONFIG_SCHEMA
         )
 
         self.ignore_invalid_repos = self.cnf.config_dict.get(
@@ -244,36 +278,35 @@ class FrecklesContext(object):
             if not self.ignore_invalid_repos:
                 raise e
 
-        frecklet_repos = self.repo_manager.get_repos(
+        frecklet_repos = self.repo_manager.get_repo_descs(
             only_content_types=["frecklets"],
             ignore_invalid_repos=self.ignore_invalid_repos,
         )
 
         for repo in frecklet_repos:
-            path = repo["path"]
-            if os.path.exists(path):
-                try:
-                    index = LuItemFolderIndex(
-                        url=path,
-                        pkg_base_url=path,
-                        item_type="frecklet",
-                        reader_params={
-                            "reader_profile": "frecklets",
-                            "ignore_invalid_dictlets": True,
-                        },
-                        ignore_invalid_pkg_metadata=True,
-                    )
-                    self.indexes.append(index)
-                except (Exception) as e:
-                    log.debug(
-                        "Can't create index '{}': {}".format(path, e), exc_info=True
-                    )
-                    log.warn("Error parsing frecklet repo '{}': {}".format(path, e))
-                    if not self.ignore_invalid_repos:
-                        raise e
 
-            else:
-                log.debug("Index path '{}' does not exist. Ignoring...".format(path))
+            path = self.repo_manager.get_repo(repo)
+            if path is None:
+                log.debug("Not a valid repo, or repo doesn't exist: {}".format(repo))
+                continue
+
+            try:
+                index = LuItemFolderIndex(
+                    url=path,
+                    pkg_base_url=path,
+                    item_type="frecklet",
+                    reader_params={
+                        "reader_profile": "frecklets",
+                        "ignore_invalid_dictlets": True,
+                    },
+                    ignore_invalid_pkg_metadata=True,
+                )
+                self.indexes.append(index)
+            except (Exception) as e:
+                log.debug("Can't create index '{}': {}".format(path, e), exc_info=True)
+                log.warn("Error parsing frecklet repo '{}': {}".format(path, e))
+                if not self.ignore_invalid_repos:
+                    raise e
 
         for c_name, connector in self.connectors.items():
 
@@ -283,11 +316,17 @@ class FrecklesContext(object):
 
             if not supported_types:
                 continue
-            repos = self.repo_manager.get_repos(
+            repos = self.repo_manager.get_repo_descs(
                 only_content_types=supported_types,
                 ignore_invalid_repos=self.ignore_invalid_repos,
             )
 
+            # TODO: don't do this multiple time for the same repo
+            for r in repos:
+                path = self.repo_manager.get_repo(r)
+                if path is None:
+                    log.debug("Not a valid repo, or repo doesn't exist: {}".format(r))
+                    continue
             connector.set_content_repos(repos)
 
             indexes = connector.get_indexes()
@@ -324,10 +363,16 @@ class FrecklesContext(object):
     def get_interpreter_map(self):
 
         result = OrderedDict()
-        result["freckles"] = self.cnf_interpreter
-        result["repo_manager"] = self.repo_interpreter
+        result["global"] = {"interpreter": self.cnf_interpreter, "type": "global"}
+        result["repo_manager"] = {
+            "interpreter": self.repo_interpreter,
+            "type": "repo_manager",
+        }
         for key, connector in self.connectors.items():
-            result["connector: {}".format(key)] = connector.cnf_interpreter
+            result[key] = {
+                "interpreter": connector.cnf_interpreter,
+                "type": "connector",
+            }
 
         return result
 
@@ -345,6 +390,9 @@ class FrecklesContext(object):
 
         if isinstance(frecklet_path_or_name_or_metadata, string_types):
 
+            # if is_url_or_abbrev(frecklet_path_or_name_or_metadata):
+            #     self.repo_manager.get_remote_dict()
+
             if os.path.isfile(frecklet_path_or_name_or_metadata):
                 path = os.path.abspath(frecklet_path_or_name_or_metadata)
                 index = LuItemFolderIndex(
@@ -358,7 +406,6 @@ class FrecklesContext(object):
                 frecklet.set_index(self.index)
             else:
                 frecklet = self.index.get_pkg(frecklet_path_or_name_or_metadata)
-
             if frecklet is None:
                 try:
                     frecklet_metadata = self.repo_manager.get_remote_dict(

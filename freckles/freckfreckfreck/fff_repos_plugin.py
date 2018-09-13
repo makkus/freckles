@@ -29,7 +29,7 @@ def list_repos(ctx):
 
     click.echo()
 
-    for r in repo_manager.get_repos():
+    for r in repo_manager.get_repo_descs():
         c_type = r["content_type"]
         repos_per_type.setdefault(c_type, []).append(r)
 

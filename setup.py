@@ -18,7 +18,7 @@ requirements = [
     "colorama==0.3.9",
     "plumbum==1.6.6",
     "termcolor==1.1.0",
-    "yaspin==0.13.0"
+    "yaspin==0.13.0",
 ]
 
 setup_requirements = ["pytest-runner"]

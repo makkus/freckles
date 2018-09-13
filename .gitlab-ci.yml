@@ -1,0 +1,90 @@
+image: python
+
+stages:
+- test
+- build
+- release
+
+before_script:
+- curl -O https://bootstrap.pypa.io/get-pip.py
+- python get-pip.py
+
+python2:
+  image: python:2.7
+  stage: test
+  script:
+   - pip install tox
+   - tox -e py27
+
+python34:
+  image: python:3.4
+  stage: test
+  script:
+   - pip install tox
+   - tox -e py34
+
+python35:
+  image: python:3.5
+  stage: test
+  script:
+   - pip install tox
+   - tox -e py35
+
+python36:
+  image: python:3.6
+  stage: test
+  script:
+   - pip install tox
+   - tox -e py36
+
+flake8:
+  image: python
+  stage: test
+  script:
+   - pip install tox
+   - tox -e flake8
+
+#python37:
+#  image: python:3.7-rc
+#  stage: test
+#  script: tox -e py37
+
+#linters:
+#  image: python:3.5
+#  stage: test
+#  script: tox -e linters
+
+#docs:
+#  stage: test
+#  script: tox -e docs
+
+#dogfood:
+#  stage: test
+#  script: tox -e dogfood
+
+build:
+  stage: build
+  script:
+    - pip install devpi-client
+    - rm -rf dist build
+    - devpi use https://pkgs.frkl.io/
+    - devpi login frkl --password="${DEVPI_PASSWORD}"
+    - devpi use /frkl/dev
+    - devpi upload
+  artifacts:
+    paths:
+    - dist/
+    expire_in: 1 month
+
+release:
+  stage: release
+  script:
+    - pip install twine
+    - rm -rf dist
+    - python setup.py sdist bdist_wheel
+    - twine upload dist/*
+  artifacts:
+    paths:
+    - dist/
+  only:
+  - tags

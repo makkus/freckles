@@ -29,23 +29,22 @@ if os.path.exists(os.path.expanduser("~/.freckles")):
 else:
     FRECKLES_CONFIG_DIR = os.path.expanduser("~/.config/freckles")
 
-FRECKLES_USER_REPO_DIR = os.path.join(FRECKLES_CONFIG_DIR, "repos")
-FRECKLES_CONFIG_PROFILES_DIR = os.path.expanduser(
-    os.path.join(FRECKLES_CONFIG_DIR, "profiles")
+FRECKLES_SHARE_DIR = os.path.join(
+    os.path.expanduser("~"), ".local", "share", "freckles"
 )
+
+FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_CONFIG_PROFILES_DIR = os.path.expanduser(
     os.path.join(FRECKLES_CONFIG_DIR, "run-profiles")
 )
-USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_USER_REPO_DIR, "frecklets")
+USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "frecklets")
 
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
     "~/.local/share/freckles/runs/current"
 )
 
-FRECKLES_CACHE_BASE = os.path.join(
-    os.path.expanduser("~"), ".local", "share", "freckles", "cache"
-)
+FRECKLES_CACHE_BASE = os.path.join(FRECKLES_SHARE_DIR, "cache")
 
 DEFAULT_FRECKELIZE_DIR = os.path.expanduser("~/freckles")
 DEFAULT_FRECKELIZE_SYSTEM_DIR = "/var/lib/freckles"
@@ -141,21 +140,21 @@ REPO_MANAGER_CONFIG_SCHEMA = {
         "default": DEFAULT_FRECKLES_REPOS,
         "schema": {"type": "string"},
     },
-    "allow_external": {
+    "allow_remote": {
         "type": "boolean",
         "default": False,
         "__doc__": {
             "short_help": "allow external (remote) resources (frecklets, connector-specific resources, ...)"
         },
     },
-    "external_whitelist": {
+    "remote_whitelist": {
         "type": "list",
         "schema": {"type": "string"},
         "__doc__": {
             "short_help": "list of regular expressions of allowed external urls"
         },
     },
-    "external_blacklist": {
+    "remote_blacklist": {
         "type": "list",
         "schema": {"type": "string"},
         "__doc__": {
@@ -198,16 +197,17 @@ FRECKLET_PATH_DEFAULT_READER_PROFILE = {
 }
 FRECKLES_CNF_PROFILES = {
     "default": {
-        "convert_ansible_template_markers": False,
+        # "convert_ansible_template_markers": False,
         "context_repos": DEFAULT_FRECKLES_REPOS,
-        "allow_dynamic_frecklets": False,
-        "guess_args_for_roles": False,
-        "require_absolute_path": True,
+        # "allow_dynamic_frecklets": False,
+        # "guess_args_for_roles": False,
+        # "require_absolute_path": True,
         "allowed_connectors": ["freckles", "shell", "nsbl"],
-        "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
-        "run_folder": FRECKLES_RUN_DIR,
+        # "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
+        # "run_folder": FRECKLES_RUN_DIR,
         "ignore_invalid_repos": True,
-        "freckelize_target_dir": DEFAULT_FRECKELIZE_DIR,
+        "allow_remote": False
+        # "freckelize_target_dir": DEFAULT_FRECKELIZE_DIR,
     },
     "empty": {"context_repos": []},
 }
@@ -218,7 +218,6 @@ FRECKLES_RUN_CONTROL_PROFILES = {
         "no_run": False,
         "output": "freckles",
         "run_callback_config": {"profile": "default"},
-        "host": "localhost",
     }
 }
 

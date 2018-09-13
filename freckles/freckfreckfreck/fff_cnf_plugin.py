@@ -7,8 +7,8 @@ import click
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from freckles.defaults import FRECKLES_CONFIG_PROFILES_DIR
-from frutils import readable, unsorted_to_sorted_dict
+from freckles.defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLES_CNF_PROFILES
+from frutils import readable, unsorted_to_sorted_dict, dict_merge
 from frutils.frutils_cli import output
 
 yaml = YAML(typ="safe")
@@ -25,7 +25,7 @@ def cnf(ctx):
     # context.set_control_vars(control_vars=control_dict)
 
 
-@cnf.command("show-current", short_help="print current configuration")
+@cnf.command("show", short_help="print current configuration")
 @click.option(
     "--full", "-f", help="display all keys, including default values", is_flag=True
 )
@@ -71,18 +71,25 @@ def show_current(ctx, full, show_interpreters, limit_interpreters):
     click.secho("------------", bold=True)
     click.echo()
 
-    for c_name, interpreter in context.get_interpreter_map().items():
+    for c_name, interpreter_details in context.get_interpreter_map().items():
+
+        interpreter = interpreter_details["interpreter"]
+        i_type = interpreter_details["type"]
 
         if limit_interpreters and limit_interpreters not in c_name:
             continue
 
-        click.secho("  {}".format(c_name), bold=True)
+        if i_type == "connector":
+            title = "Connector: {}".format(c_name)
+        else:
+            title = c_name
+        click.secho("  {}".format(title), bold=True)
         click.echo()
 
         validated = interpreter.get_validated_cnf()
 
         if not validated:
-            click.echo("    No configuration data.")
+            click.echo("    No configuration schema.")
             click.echo()
             continue
 
@@ -113,30 +120,42 @@ def show_current(ctx, full, show_interpreters, limit_interpreters):
     # click.echo()
 
 
-@cnf.command("doc")
-@click.argument("key", required=False, nargs=1)
+@cnf.command("doc", short_help="display documentation for config keys")
+@click.option(
+    "--limit-interpreters",
+    "-l",
+    help="only display interpreter data for interpreters that contain this string",
+)
+@click.argument("key", required=False, nargs=-1)
 @click.pass_context
-def config_doc(ctx, key):
+def config_doc(ctx, key, limit_interpreters):
+    """
+    Displays documentation for configuration keys.
+    """
 
     # output_format = "yaml"
     context = ctx.obj["context"]
     cnf = context.cnf
 
     click.echo()
-    click.secho("Interpreters", bold=True)
-    click.echo("-------------")
-    click.echo()
 
-    for c_name, interpreter in context.get_interpreter_map().items():
+    for c_name, interpreter_details in context.get_interpreter_map().items():
+        if limit_interpreters and limit_interpreters not in c_name:
+            continue
+
+        interpreter = interpreter_details["interpreter"]
+        # interpreter_type = interpreter_details["type"]
 
         click.secho("{}".format(c_name), bold=True)
         click.echo()
         schema = interpreter.get_schema()
 
-        if not schema:
-            click.echo("  No config schema")
+        if not key:
 
-        elif key is None:
+            if not schema:
+                click.echo("  No config schema")
+                continue
+
             for c_key in sorted(interpreter.get_keys()):
                 doc = interpreter.get_doc_for_key(c_key)
                 click.secho(" {} ".format(c_key), bold=True, nl=False)
@@ -145,25 +164,40 @@ def config_doc(ctx, key):
                 click.echo("({})".format(value_type))
                 click.echo("    {}".format(doc.get_short_help()))
         else:
-            doc = interpreter.get_doc_for_key(key)
-            click.secho(" {} ".format(key), bold=True, nl=False)
-            key_schema = interpreter.get_schema_for_key(key)
-            value_type = key_schema.get("type", "unknown_type")
-            click.echo("({})".format(value_type))
-            click.echo()
-            click.secho("    desc: ", bold=True, nl=False)
-            click.echo("{}".format(doc.get_short_help()))
-            click.secho("    default: ", bold=True, nl=False)
-            default = key_schema.get("default", "n/a")
-            click.echo(default)
-            current = cnf.get_value(c_name, key, default="n/a")
-            click.secho("    current: ", bold=True, nl=False)
-            click.echo(current)
+            for doc_key in key:
+                doc = interpreter.get_doc_for_key(doc_key)
+                click.secho(" {} ".format(doc_key), bold=True, nl=False)
+                if not schema or doc is None:
+                    click.echo("not used")
+                else:
+
+                    if doc_key in interpreter.keymap.values():
+                        # temp = []
+                        # for k, v in interpreter.keymap.items():
+                        #     if v == key:
+                        #         temp.append(k)
+                        # click.echo("not used, but alias for: {}".format(", ".join(temp)))
+                        click.echo("not used")
+                        continue
+
+                    key_schema = interpreter.get_schema_for_key(doc_key)
+                    value_type = key_schema.get("type", "unknown_type")
+                    click.echo("({})".format(value_type))
+                    click.echo()
+                    click.secho("    desc: ", bold=True, nl=False)
+                    click.echo("{}".format(doc.get_short_help()))
+                    click.secho("    default: ", bold=True, nl=False)
+                    default = key_schema.get("default", "n/a")
+                    click.echo(default)
+                    current = cnf.get_value(c_name, doc_key, default="n/a")
+                    click.secho("    current: ", bold=True, nl=False)
+                    click.echo(current)
+                click.echo()
 
         click.echo()
 
 
-@cnf.command("copy")
+@cnf.command("copy", short_help="copy current configuration to new profile")
 @click.argument("profile_name", nargs=1)
 @click.option(
     "--edit",
@@ -181,6 +215,8 @@ def config_doc(ctx, key):
 )
 @click.pass_context
 def copy(ctx, profile_name, edit, force):
+    """Copies the current configuration into a new profile.
+    """
 
     cnf = ctx.obj["context"].cnf
 
@@ -197,41 +233,69 @@ def copy(ctx, profile_name, edit, force):
         click.edit(filename=target)
 
 
-@cnf.command("list-user-profiles")
+@cnf.command("list", short_help="list available configuration profiles")
 @click.option(
     "--details", "-d", help="print content of profiles", is_flag=True, default=False
 )
+@click.option(
+    "--no-merge",
+    "-n",
+    help="only display 'raw' profile data, don't merge with 'default' profile",
+    is_flag=True,
+)
 @click.pass_context
-def list_profiles(ctx, details):
-    """lists user profiles
+def list_profiles(ctx, details, no_merge):
+    """Lists configuration profiles.
 
-    Lists available user profiles in ~/.freckles/profiles"""
+    Lists default as well as user profiles (located in ~/.config/freckles/ or ~/.freckles).
+    """
 
     click.echo()
-
-    if not os.path.exists(FRECKLES_CONFIG_PROFILES_DIR):
-        return
 
     files = os.listdir(FRECKLES_CONFIG_PROFILES_DIR)
     profile_files = [x for x in files if x.endswith(".profile")]
 
-    for p in profile_files:
-        p_name = os.path.splitext(p)[0]
+    profiles = CommentedMap()
+    for pf in profile_files:
+        p_name = os.path.splitext(pf)[0]
+        pfile = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, pf)
+        with open(pfile, "r") as f:
+            content = yaml.load(f)
+            profiles[p_name] = content
+
+    default_profile = profiles.pop("default", FRECKLES_CNF_PROFILES["default"])
+    default_profile = CommentedMap(sorted(default_profile.items(), key=lambda x: x[0]))
+
+    if not details:
+        click.echo("default")
+    else:
+        click.secho("default", bold=True)
+        click.echo()
+        output(default_profile, output_type="yaml", indent=2)
+
+    for p_name in sorted(profiles.keys()):
+
         if not details:
             click.echo(p_name)
         else:
             click.secho(p_name, bold=True)
             click.echo()
-            pfile = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, p)
-            with open(pfile, "r") as f:
-                content = yaml.load(f)
+            if no_merge:
+                content = profiles[p_name]
+            else:
+                content = dict_merge(default_profile, profiles[p_name], copy_dct=True)
+            content = CommentedMap(sorted(content.items(), key=lambda x: x[0]))
             output(content, output_type="yaml", indent=2)
 
 
-@cnf.command("delete-user-profile")
+@cnf.command("delete", short_help="delete configuration profile")
 @click.argument("profile_name", metavar="PROFILE_NAME", nargs=1)
 @click.pass_context
 def delete_profile(ctx, profile_name):
+    """Deletes a configuration profile.
+
+    Deletes a configuration profile with the specified name in $HOME/.config/freckles (or $HOME/.freckles)
+    """
 
     file = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "{}.profile".format(profile_name))
 
@@ -239,10 +303,13 @@ def delete_profile(ctx, profile_name):
         os.remove(file)
 
 
-@cnf.command("edit-user-profile")
+@cnf.command("edit", short_help="edit a configuration profile")
 @click.argument("profile_name", metavar="PROFILE_NAME", nargs=1)
 @click.pass_context
 def edit_profile(ctx, profile_name):
+    """Edits a configuration profile with the default editor.
+
+    """
 
     path = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "{}.profile".format(profile_name))
     click.edit(filename=path)
