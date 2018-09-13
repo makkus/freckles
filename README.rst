@@ -15,10 +15,13 @@ freckles
            :target: https://gitlab.com/freckles-io/freckles/pipelines
            :alt: pipeline status
 
-
 .. image:: https://pyup.io/repos/github/makkus/freckles/shield.svg
            :target: https://pyup.io/repos/github/makkus/freckles/
            :alt: Updates
+
+.. image:: https://gitlab.com/freckles-io/freckles/badges/develop/coverage.svg
+           :target: https://gitlab.com/freckles-io/freckles/commits/develop
+           :alt: coverage
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
            :target: https://github.com/ambv/black
