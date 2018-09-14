@@ -180,6 +180,40 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
         return new_config
 
 
+FRECKLET_SCHEMA = {
+    "doc": {
+        "type": "dict",
+        "schema": {
+            "short_help": {
+                "type": "string"
+            }
+        }
+    },
+    "meta": {
+        "type": "dict",
+    },
+    "args": {
+        "type": "dict",
+        "schema": {
+            "type": "string",
+        }
+    },
+    "tasks": {
+        "type": "list",
+        "schema": {
+            "type": "dict",
+            "schema": {
+                "task": {
+                    "type": "dict",
+                },
+                "vars": {
+                    "type": "dict"
+                }
+            }
+        }
+    }
+}
+
 class AugmentingTaskProcessor(ConfigProcessor):
     """Processor to augment a basic task list.
 

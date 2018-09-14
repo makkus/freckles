@@ -59,7 +59,7 @@ Get Started!
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Before you submit your first contribution, fork this repository,
-create a folder with your GitLab username under the ``contributing``
+create a folder with your GitLab username under the ``contributing/contributors``
 folder, copy the ``doc_and_license.txt`` file that can be found in
 this folder into it, and create a pull request::
 
@@ -71,6 +71,9 @@ this folder into it, and create a pull request::
     $ git commit -m "Signed DCO <your_gitlab_username>"
     $ git push origin develop
 
+
+If you want, add a '<gitlab_username>.rst' document in the ``contributing/contributors/<gitlab_username>/``
+folder and introduce yourself, add contact information or anything else you think makes sense.
 
 2) Start contributing code
 ++++++++++++++++++++++++++

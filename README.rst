@@ -30,6 +30,7 @@ freckles
 
 DevOps for the rest of us!
 
+Hello {{ frecklet_schema }}
 
 License
 -------
