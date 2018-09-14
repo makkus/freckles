@@ -51,3 +51,5 @@ click-log>=0.2.1
 git+https://gitlab.com/frkl/frutils.git
 git+https://gitlab.com/frkl/frkl.git
 git+https://gitlab.com/frkl/luci.git
+git+https://gitlab.com/frkl/nsbl.git
+git+https://gitlab.com/frkl/freckles-connector-nsbl.git
