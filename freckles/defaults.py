@@ -33,6 +33,20 @@ FRECKLES_SHARE_DIR = os.path.join(
     os.path.expanduser("~"), ".local", "share", "freckles"
 )
 
+MIXED_CONTENT_TYPE = "hodgepodge"
+
+COMMUNITY_REPO_URL = "https://gitlab.com/freckles-io/freckles-community.git"
+COMMUNITY_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "community")
+COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, "frecklets")
+COMMUNITY_ROLES_FOLDER = os.path.join(COMMUNITY_FOLDER, "roles")
+COMMUNITY_REPO_DESC = {
+    "path": COMMUNITY_FOLDER,
+    "url": COMMUNITY_REPO_URL,
+    "alias": "community",
+    "remote": True,
+    "content_type": MIXED_CONTENT_TYPE
+}
+
 FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_CONFIG_PROFILES_DIR = os.path.expanduser(
     os.path.join(FRECKLES_CONFIG_DIR, "run-profiles")
@@ -67,6 +81,10 @@ DEFAULT_FRECKLES_REPOS = ["default", "user"]
 DEFAULT_FRECKLES_ALIASES = {
     "default": {"frecklets": [DEFAULT_FRECKLETS_FOLDER]},
     "user": {"frecklets": [USER_FRECKLETS_FOLDER]},
+    "community": {
+        "frecklets": [COMMUNITY_FRECKLETS_FOLDER],
+        "roles": [COMMUNITY_ROLES_FOLDER]
+    }
 }
 
 FRECKLES_CONFIG_SCHEMA = {
@@ -147,6 +165,13 @@ REPO_MANAGER_CONFIG_SCHEMA = {
             "short_help": "allow external (remote) resources (frecklets, connector-specific resources, ...)"
         },
     },
+    "allow_community": {
+        "type": "boolean",
+        "default": True,
+        "__doc__": {
+            "short_help": "allow resources from the community repo (https://gitlab.com/freckles-io/freckles-community)"
+        },
+    },
     "remote_whitelist": {
         "type": "list",
         "schema": {"type": "string"},
@@ -206,7 +231,8 @@ FRECKLES_CNF_PROFILES = {
         # "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
         # "run_folder": FRECKLES_RUN_DIR,
         "ignore_invalid_repos": True,
-        "allow_remote": False
+        "allow_remote": False,
+        "allow_community": True,
         # "freckelize_target_dir": DEFAULT_FRECKELIZE_DIR,
     },
     "empty": {"context_repos": []},

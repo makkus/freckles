@@ -16,15 +16,14 @@ from frkl import dict_from_url
 from frkl.helpers import content_from_url
 from frkl.utils import expand_string_to_git_details
 
-from .defaults import MODULE_FOLDER, FRECKLES_CACHE_BASE
+from .defaults import FRECKLES_CACHE_BASE, COMMUNITY_REPO_DESC, MIXED_CONTENT_TYPE
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
 log = logging.getLogger("freckles")
 
 
-MIXED_CONTENT_TYPE = "hodgepodge"
 
-DEFAULT_URLS = {"frecklets": [os.path.join(MODULE_FOLDER, "external", "frecklets")]}
+# DEFAULT_URLS = {"frecklets": [os.path.join(MODULE_FOLDER, "external", "frecklets")]}
 
 
 class FrecklesRepo(object):
@@ -162,6 +161,13 @@ class RepoManager(object):
 
     def check_permission_for_repo(self, repo_desc):
 
+        if repo_desc == COMMUNITY_REPO_DESC:
+            allow_community = self.cnf_interpreter.get_cnf_value("allow_community")
+            if allow_community:
+                return (True, "Community repo allowed.")
+            else:
+                return (False, "Community repo not allowed")
+
         allow_remote = self.cnf_interpreter.get_cnf_value("allow_remote")
 
         if repo_desc["remote"] and not allow_remote:
@@ -174,7 +180,6 @@ class RepoManager(object):
         path = repo_desc["path"]
         exists = False
         allowed, msg = self.check_permission_for_repo(repo_desc)
-
         if not allowed:
             log.warn("Not using repo '{}': {}".format(repo_desc["url"], msg))
             return None
@@ -183,8 +188,7 @@ class RepoManager(object):
             r = FrecklesRepo(repo_desc)
             r.ensure_local(force_update=force_update)
 
-        if os.path.exists(repo_desc["path"]):
-            path = repo_desc["path"]
+        if os.path.exists(path):
             exists = True
 
         if exists:

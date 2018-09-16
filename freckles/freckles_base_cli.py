@@ -30,8 +30,9 @@ def create_context(ctx, force=False):
 
     config = ctx.obj.get("config", None)
     repos = ctx.obj.get("repos", None)
+    allow_community = ctx.obj.get("allow_community", None)
 
-    if (config is None or repos is None) and not force:
+    if (config is None or repos is None or allow_community is None) and not force:
         return False
 
     if config is None:
@@ -40,10 +41,18 @@ def create_context(ctx, force=False):
     if repos is None:
         repos = []
         ctx.obj["repos"] = repos
+    if allow_community is None:
+        allow_community = False
 
     log.debug("Creating context...")
     log.debug("  config: {}".format(config))
     log.debug("  repos: {}".format(repos))
+    log.debug("  allow_community: {}".format(allow_community))
+
+    repos = list(repos)
+
+    if allow_community:
+        repos.append("community")
 
     try:
         ctx.obj["context"] = FrecklesContext(config, freckles_repos=repos)
@@ -92,6 +101,18 @@ def set_repos(ctx, param, value):
         click.echo("No such repo: {}".format(e.dictlet))
         sys.exit()
 
+def allow_community_repo(ctx, param, value):
+    if ctx.obj is None:
+        ctx.obj = {}
+    if value is None:
+        value = False
+    ctx.obj["allow_community"] = value
+    try:
+        create_context(ctx)
+    except (NoSuchDictletException) as e:
+        click.echo("No such repo: {}".format(e.dictlet))
+        sys.exit()
+
 
 def get_common_options(print_version_callback=print_version):
 
@@ -115,6 +136,15 @@ def get_common_options(print_version_callback=print_version):
         callback=set_vars,
         is_eager=True,
         expose_value=True,
+    )
+    community_option = click.Option(
+        param_decls=["--community"],
+        help="allow resources from the freckles community repo",
+        multiple=False,
+        callback=allow_community_repo,
+        is_eager=True,
+        expose_value=True,
+        is_flag=True
     )
     repo_option = click.Option(
         param_decls=["--repo", "-r"],
@@ -164,6 +194,7 @@ def get_common_options(print_version_callback=print_version):
 
     result = [
         config_option,
+        community_option,
         repo_option,
         host_option,
         output_option,
@@ -230,7 +261,6 @@ class FrecklesBaseCommand(click.MultiCommand):
         self.host = ctx.params.get("host")
         self.output_format = ctx.params.get("output")
         self.elevated = ctx.params.get("elevated", None)
-
         if ctx.obj is None:
             create_context(ctx, force=True)
 

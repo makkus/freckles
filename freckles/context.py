@@ -16,7 +16,7 @@ from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .connectors.connectors import get_connectors
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER
+from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER, COMMUNITY_FOLDER, COMMUNITY_REPO_DESC
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,
@@ -177,7 +177,7 @@ class FrecklesContext(object):
                         "No permission to change configuration. Create a custom default profile first. Check https://freckles.io/configuration for more details."
                     )
 
-            if freckles_repos:
+            if freckles_repos and freckles_repos != ["community"]:
                 raise FrecklesPermissionException(
                     "No permission to use custom repositories. Create a custom default profile first. Check https://freckles.io/configuration for more details."
                 )
@@ -212,6 +212,10 @@ class FrecklesContext(object):
 
         self.repo_manager = RepoManager(rm_cnf_interpreter)
         self.repo_manager.add_alias_map(DEFAULT_FRECKLES_ALIASES)
+
+        # special case for community
+        if "community" in freckles_repos:
+            self.repo_manager.get_repo(COMMUNITY_REPO_DESC)
 
         self.connectors = OrderedDict()
         self.indexes = []
