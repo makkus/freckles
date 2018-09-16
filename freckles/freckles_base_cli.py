@@ -101,6 +101,7 @@ def set_repos(ctx, param, value):
         click.echo("No such repo: {}".format(e.dictlet))
         sys.exit()
 
+
 def allow_community_repo(ctx, param, value):
     if ctx.obj is None:
         ctx.obj = {}
@@ -144,7 +145,7 @@ def get_common_options(print_version_callback=print_version):
         callback=allow_community_repo,
         is_eager=True,
         expose_value=True,
-        is_flag=True
+        is_flag=True,
     )
     repo_option = click.Option(
         param_decls=["--repo", "-r"],

@@ -16,7 +16,11 @@ from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .connectors.connectors import get_connectors
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER, COMMUNITY_FOLDER, COMMUNITY_REPO_DESC
+from .defaults import (
+    FRECKLES_CONFIG_PROFILES_DIR,
+    MODULE_FOLDER,
+    COMMUNITY_REPO_DESC,
+)
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,

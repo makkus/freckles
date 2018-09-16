@@ -22,7 +22,6 @@ from .exceptions import FrecklesConfigException, FrecklesPermissionException
 log = logging.getLogger("freckles")
 
 
-
 # DEFAULT_URLS = {"frecklets": [os.path.join(MODULE_FOLDER, "external", "frecklets")]}
 
 

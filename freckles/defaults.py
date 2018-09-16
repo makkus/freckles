@@ -44,7 +44,7 @@ COMMUNITY_REPO_DESC = {
     "url": COMMUNITY_REPO_URL,
     "alias": "community",
     "remote": True,
-    "content_type": MIXED_CONTENT_TYPE
+    "content_type": MIXED_CONTENT_TYPE,
 }
 
 FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
@@ -83,8 +83,8 @@ DEFAULT_FRECKLES_ALIASES = {
     "user": {"frecklets": [USER_FRECKLETS_FOLDER]},
     "community": {
         "frecklets": [COMMUNITY_FRECKLETS_FOLDER],
-        "roles": [COMMUNITY_ROLES_FOLDER]
-    }
+        "roles": [COMMUNITY_ROLES_FOLDER],
+    },
 }
 
 FRECKLES_CONFIG_SCHEMA = {
