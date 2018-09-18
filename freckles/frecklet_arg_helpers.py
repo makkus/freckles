@@ -16,6 +16,7 @@ log = logging.getLogger("freckles")
 
 ADD_NON_REQUIRED_ARGS = False
 
+
 def remove_omit_values(item):
     """Removes all key/value pairs that contain the the omit marker."""
     if not hasattr(item, "items"):

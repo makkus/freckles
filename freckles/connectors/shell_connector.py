@@ -25,7 +25,7 @@ SHELL_RUN_CONFIG_SCHEMA = {
         "coerce": bool,
         "__doc__": {
             "short_help": "only create the shell environment, don't execute anything"
-        }
+        },
     },
 }
 
@@ -68,14 +68,21 @@ class ShellConnector(FrecklesConnector):
         result = ["shell-command", "shell-pipe", "shell-script"]
         return result
 
-    def run(self, tasklist, context_config=None, run_config=None,
-            result_callback=None, output_callback=None,
-            sudo_password=None,
-            parent_task=None):
+    def run(
+        self,
+        tasklist,
+        context_config=None,
+        run_config=None,
+        result_callback=None,
+        output_callback=None,
+        sudo_password=None,
+        parent_task=None,
+    ):
 
         callback_adapter = ShellFrecklesCallbackAdapter(
             parent_task=parent_task,
-            result_callback=result_callback, output_callback=output_callback
+            result_callback=result_callback,
+            output_callback=output_callback,
         )
 
         no_run = self.get_cnf_value("no_run")
@@ -151,8 +158,8 @@ class ShellFrecklesCallbackAdapter(object):
     def add_command_started(self, task):
 
         td = TaskDetail(
-           task_name=task["task"]["name"],
-           task_type=task["task"]["type"],
+            task_name=task["task"]["name"],
+            task_type=task["task"]["type"],
             task_parent=self.parent_task,
         )
 
@@ -176,5 +183,7 @@ class ShellFrecklesCallbackAdapter(object):
         if stderr:
             msg = "{}\nstderr:\n{}".format(msg, stderr)
 
-        self.output_callback.task_finished(self.latest_task, success=success, msg=msg, skipped=skipped, changed=changed)
+        self.output_callback.task_finished(
+            self.latest_task, success=success, msg=msg, skipped=skipped, changed=changed
+        )
         self.latest_task = None
