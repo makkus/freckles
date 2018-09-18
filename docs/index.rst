@@ -6,7 +6,7 @@ Welcome to freckles's documentation!
    :caption: Contents:
 
    readme
-   usage
+   usage/
    frecklets
    contributing
    authors
