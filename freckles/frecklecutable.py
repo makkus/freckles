@@ -63,6 +63,9 @@ class Frecklecutable(object):
         if vars is None:
             vars = {}
 
+        for k, v in frecklet.args.items():
+            v.setdefault("__meta__", {})["root_frecklet"] = True
+
         self.frecklet = frecklet
 
     def generate_click_parameters(self, default_vars=None):

@@ -14,6 +14,7 @@ import logging
 
 log = logging.getLogger("freckles")
 
+ADD_NON_REQUIRED_ARGS = False
 
 def remove_omit_values(item):
     """Removes all key/value pairs that contain the the omit marker."""
@@ -91,10 +92,8 @@ def create_vars_for_task_item(task_item, arg_values):
 
     vars = {}
     for details in arg_tree:
-
         try:
             key, value = create_var_value(details, arg_values)
-
             if key is None:
                 continue
             vars[key] = value
@@ -224,6 +223,14 @@ def extract_base_args(tasklist):
         result.extend(args)
 
     args = remove_duplicate_args(result)
+    if not ADD_NON_REQUIRED_ARGS:
+        temp = CommentedMap()
+        for arg, details in args.items():
+            is_root_item = details.get("__meta__", {}).get("root_frecklet", False)
+            required = details.get("required", False)
+            if is_root_item or required:
+                temp[arg] = details
+        args = temp
 
     return args
 
@@ -245,6 +252,7 @@ def extract_base_args_from_task_item(task_item):
     for item in args_tree:
 
         args_list = parse_arg_tree_branch(item, base_arg_list=[])
+
         args.extend(args_list)
 
     return args
