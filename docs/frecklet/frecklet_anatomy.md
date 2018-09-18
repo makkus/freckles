@@ -25,7 +25,7 @@ Options:
   --help              Show this message and exit.
 ```
 
-Let's disect the, well ...sections... of this file:
+Let's have a look at the sections this file:
 
 ### documentation: ``doc``
 
