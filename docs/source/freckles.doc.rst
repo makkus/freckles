@@ -12,6 +12,14 @@ freckles.doc.sphinx\_templating module
     :undoc-members:
     :show-inheritance:
 
+freckles.doc.utils module
+-------------------------
+
+.. automodule:: freckles.doc.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
