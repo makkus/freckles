@@ -3,9 +3,15 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+
+from jinja2.nativetypes import NativeEnvironment
+
 from freckles.frecklet import FRECKLET_SCHEMA
-from frutils import readable, StringYAML
+from frutils import readable, StringYAML, JINJA_DELIMITER_PROFILES, replace_string
 from freckles_connector_nsbl.defaults import NSBL_INTERNAL_FRECKLET_REPO
+from .utils import get_frecklecute_help_text
+
+DOC_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["documentation"])
 
 ensure_user_example_path = os.path.join(
     NSBL_INTERNAL_FRECKLET_REPO, "system", "users", "ensure-user-exists.frecklet"
@@ -28,6 +34,8 @@ ensure_user_args_string = readable(
 )
 ensure_user_tasks_string = readable({"tasks": ensure_user_tasks_section}, out="yaml")
 
+frecklecute_help_text = get_frecklecute_help_text()
+
 FRECKLET_SCHEMA_STRING = readable(FRECKLET_SCHEMA, out="yaml", sort_keys=True)
 
 REPL_DICT = {
@@ -37,6 +45,7 @@ REPL_DICT = {
     "__ensure_user_doc_string__": ensure_user_doc_string,
     "__ensure_user_args_string__": ensure_user_args_string,
     "__ensure_user_tasks_string__": ensure_user_tasks_string,
+    "__frecklecute_help_text__": frecklecute_help_text
 }
 
 
@@ -49,7 +58,8 @@ def rstjinja(app, docname, source):
         return
     src = source[0]
     try:
-        rendered = app.builder.templates.render_string(src, REPL_DICT)
+        rendered = replace_string(src, REPL_DICT, DOC_JINJA_ENV)
+        # rendered = app.builder.templates.render_string(src, REPL_DICT)
     except (Exception) as e:
         print(e)
         rendered = src

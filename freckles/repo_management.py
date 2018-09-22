@@ -128,6 +128,7 @@ class RepoManager(object):
         self.all_content_types_so_far = []
 
     def add_alias_map(self, alias_map, content_types=None):
+
         for alias, repos in alias_map.items():
             for repo_type, repo_urls in repos.items():
                 if (
@@ -141,6 +142,7 @@ class RepoManager(object):
                         self.aliases.setdefault(alias, {}).setdefault(
                             repo_type, []
                         ).append(repo_url)
+
 
     def is_alias(self, name):
 

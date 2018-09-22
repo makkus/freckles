@@ -179,7 +179,6 @@ def create_var_value(arg_branch, arg_values):
             )
 
     else:
-
         if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
 
             if "value" in arg_branch.keys():
@@ -192,8 +191,13 @@ def create_var_value(arg_branch, arg_values):
                 else:
                     return (None, None)
 
+        if "__meta__" in schema:
+            temp_schema = copy.deepcopy(schema)
+            temp_schema.pop("__meta__")
+        else:
+            temp_schema = schema
         try:
-            validated = validate_var(var_key, value, schema)
+            validated = validate_var(var_key, value, temp_schema)
             return (var_key, validated)
         except (ParametersException) as e:
             raise FrecklesConfigException(
