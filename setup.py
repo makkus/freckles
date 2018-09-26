@@ -50,7 +50,6 @@ setup(
         ],
         "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
         "freckles.connectors": [
-            "shell=freckles.connectors.shell_connector:ShellConnector",
             "freckles=freckles.connectors.freckles_connector:FrecklesChildConnector",
         ],
         "freckfreckfreck.plugins": [
