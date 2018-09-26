@@ -33,7 +33,7 @@ def cnf(ctx):
 @click.option(
     "--limit-interpreters",
     "-l",
-    help="only display interpreter data for interpreters that contain this string",
+    help="only display interpreter data for interpreters that contain this string (implies '--show-interpreters')",
 )
 @click.pass_context
 def show_current(ctx, full, show_interpreters, limit_interpreters):
@@ -49,6 +49,8 @@ def show_current(ctx, full, show_interpreters, limit_interpreters):
 
     config_values = cnf.config_dict
     indent = 0
+    if limit_interpreters:
+        show_interpreters = True
     if show_interpreters:
         indent = 2
     config_values_string = readable(
