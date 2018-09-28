@@ -127,8 +127,6 @@ class MoveEmbeddedTaskKeysProcessor(ConfigProcessor):
 
         for k, v in vars_to_move.items():
             add_key_to_dict(new_config, k, v)
-        # import pp
-        # pp(new_config)
 
         return new_config
 
