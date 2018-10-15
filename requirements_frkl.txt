@@ -1,7 +1,7 @@
 --index-url https://pkgs.frkl.io/frkl/dev
 
 # extra dependencies
-Click>=6.7
+Click>=7.0
 click-log>=0.3.2
 
 # dev dependencies

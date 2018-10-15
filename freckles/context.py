@@ -442,9 +442,28 @@ class FrecklesContext(object):
 
         return copy.deepcopy(frecklet)
 
-    def get_frecklet_names(self):
+    def get_frecklet_names(self, allowed_tags=None):
 
-        return self.index.get_pkg_names()
+        if allowed_tags is None:
+            allowed_tags = ["__all__"]
+
+        names = self.index.get_pkg_names()
+
+        if "__all__" in allowed_tags:
+            return names
+        else:
+            result = []
+            for n in names:
+                frecklet = self.index.get_pkg(n)
+                tags = frecklet.meta.get("tags", [])
+                if not tags and "__empty__" in allowed_tags:
+                    result.append(n)
+                    continue
+
+                for at in allowed_tags:
+                    if at in tags:
+                        result.append(n)
+            return result
 
     def get_connector(self, name):
 

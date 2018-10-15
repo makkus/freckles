@@ -9,7 +9,7 @@ import click_log
 
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable
-from .freckles_base_cli import FrecklesBaseCommand
+from .freckles_base_cli import FrecklesBaseCommand, create_context
 from .freckles_runner import FrecklesRunner, FrecklesRunConfig, print_no_run_info
 
 log = logging.getLogger("freckles")
@@ -23,6 +23,47 @@ DEFAULTS_HELP = "default variables, can be used instead (or in addition) to user
 KEEP_METADATA_HELP = "keep metadata in result directory, mostly useful for debugging"
 FRECKLECUTE_EPILOG_TEXT = "frecklecute is free to use in combination with open source software and part of the 'freckles' project, for more information visit: https://docs.freckles.io"
 
+def help_all(ctx, param, value):
+
+    if ctx.obj is None:
+        ctx.obj = {}
+    if not value:
+        allowed_tags = ["frecklecutable", "__empty__"]
+    else:
+        allowed_tags = ["__all__"]
+    ctx.obj["allowed_frecklet_tags"] = allowed_tags
+
+    if value:
+        command = ctx.command
+
+        create_context(ctx, force=True)
+
+        help = command.get_help(ctx)
+        click.echo(help)
+
+        sys.exit(0)
+
+def help_with(ctx, param, value):
+
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    if not value:
+        allowed_tags = ["frecklecutable", "__empty__"]
+    else:
+        allowed_tags = ["__all__"]
+        
+    ctx.obj["allowed_frecklet_tags"] = allowed_tags
+
+    if value:
+        command = ctx.command
+
+        create_context(ctx, force=True)
+
+        help = command.get_help(ctx)
+        click.echo(help)
+
+        sys.exit(0)
 
 class FrecklecuteCommand(FrecklesBaseCommand):
     def __init__(self, *args, **kwargs):
@@ -30,7 +71,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 
     def list_freckles_commands(self, ctx):
 
-        return self.context.get_frecklet_names()
+        return self.context.get_frecklet_names(allowed_tags=ctx.obj["allowed_frecklet_tags"])
 
     def get_freckles_command(self, ctx, name):
 
@@ -100,6 +141,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     subcommand_metavar="FRECKLECUTEABLE",
 )
 # @click.option("--vars", "-v", help="additional vars", multiple=True, type=VarsType())
+@click.option("--help-all", help="Show this message, listing all possible commands.", is_flag="true", is_eager=True, callback=help_all)
 @click_log.simple_verbosity_option(logging.getLogger(), "--verbosity")
 @click.pass_context
 def cli(ctx, vars, **kwargs):
