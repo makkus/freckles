@@ -2,6 +2,7 @@
 
 from plumbum import local
 
+
 def get_frecklecute_help_text():
 
     command = "frecklecute"

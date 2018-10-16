@@ -45,7 +45,7 @@ REPL_DICT = {
     "__ensure_user_doc_string__": ensure_user_doc_string,
     "__ensure_user_args_string__": ensure_user_args_string,
     "__ensure_user_tasks_string__": ensure_user_tasks_string,
-    "__frecklecute_help_text__": frecklecute_help_text
+    "__frecklecute_help_text__": frecklecute_help_text,
 }
 
 
