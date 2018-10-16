@@ -55,6 +55,7 @@ function expand_path () {
   local result
   printf -v result '%s:' "${resultPathElements[@]}"
   printf '%s\n' "${result%:}"
+  echo
 }
 
 function can_passwordless_sudo () {
@@ -95,6 +96,7 @@ function check_executables () {
       fi
     done
     IFS=${OLD_IFS}
+    echo
 }
 
 function check_directories () {
@@ -126,6 +128,7 @@ function check_directories () {
       fi
     done
     IFS=${OLD_IFS}
+    echo
 }
 
 function read_freckle_files () {
@@ -160,6 +163,7 @@ function read_freckle_files () {
       fi
     done
     IFS=${OLD_IFS}
+    echo
 
 }
 
@@ -171,21 +175,25 @@ function read_freckle_file () {
 
 function get_home_directory () {
     echo "home: ${HOME}"
+    echo
 }
 
 function get_username () {
     echo "user: ${USER}"
+    echo
 }
 
 function check_git () {
     path=$(which -a git | tr '\n' ':')
     echo "git_exes: \"${path}\""
+    echo
 }
 
 function check_git_xcode () {
 
     git --help 2&>1 | grep -q "xcode-select"
     echo "git_xcode: $?"
+    echo
 }
 
 function check_python_modules_installed () {
@@ -215,6 +223,7 @@ function check_python_modules_installed () {
 
     done
     IFS=${OLD_IFS}
+    echo
 
 }
 
