@@ -1,0 +1,15 @@
+meta:
+  freckelize:
+    var_map:
+      var1: "{{:: vars['var'] ::}}"
+  tags:
+    - debug
+    - freckelize
+
+tasks:
+  - task:
+      command: debug
+      type: ansible-module
+      __msg__: "debugging freckelize var: {{:: var1 ::}}"
+    vars:
+      var: "{{:: var1 ::}}"
