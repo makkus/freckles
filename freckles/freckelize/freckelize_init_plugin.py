@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 import os
 import sys
+from collections import OrderedDict
 from copy import deepcopy
 
 import click
@@ -17,7 +18,14 @@ from freckles.freckles_runner import (
     FrecklesRunConfig,
     print_no_run_info,
 )
-from frutils import add_key_to_dict, dict_merge, replace_strings_in_obj
+from frutils import (
+    add_key_to_dict,
+    dict_merge,
+    replace_strings_in_obj,
+    is_url_or_abbrev,
+    DEFAULT_URL_ABBREVIATIONS_REPO,
+)
+from frkl.utils import expand_string_to_git_details
 
 yaml = YAML(typ="safe")
 
@@ -32,8 +40,37 @@ FRECKLE_PROFILE_FORMAT = {
 FRECKLE_PROFILE_CHAIN = [frkl.FrklProcessor(**FRECKLE_PROFILE_FORMAT)]
 
 
-def read_metadata(result_string):
+def process_copy_folders(copy_folders):
 
+    result = []
+
+    for cf in copy_folders:
+        f = process_copy_folder(cf[0], cf[1])
+        result.append(f)
+
+    return result
+
+
+def process_copy_folder(src, dest):
+
+    if is_url_or_abbrev(dest):
+        raise FrecklesConfigException("Destination is url or abbrev: {}".format(dest))
+
+    result = {"src": src, "dest": dest}
+
+    if is_url_or_abbrev(src):
+        git_details = expand_string_to_git_details(
+            src, default_abbrevs=DEFAULT_URL_ABBREVIATIONS_REPO
+        )
+        result["git"] = git_details
+        result["src_type"] = "git"
+    else:
+        result["src_type"] = "local"
+
+    return result
+
+
+def read_metadata(result_string):
     try:
         result = yaml.load(result_string["stdout"])
     except (Exception) as e:
@@ -77,6 +114,7 @@ def read_metadata(result_string):
                 c = yaml.load(content)
                 freckle_files[path] = c
             except (Exception) as e:
+                log.warn("Ignoring metadata file '{}': {}".format(path, e))
                 freckle_files_invalid[path] = {"content": content, "exception": e}
 
         dirs[parent_path] = {}
@@ -266,7 +304,7 @@ def init_freckle(
     control_dict = ctx.obj["control_dict"]
 
     control_dict_temp = deepcopy(control_dict)
-    control_dict_temp["output"] = "silent"
+    control_dict_temp["output"] = "minimal"
     control_dict_temp["no_run"] = False
     control_dict_temp["elevated"] = False
     control_dict_temp["minimal_facts_only"] = True
@@ -291,19 +329,25 @@ def init_freckle(
         click.echo()
         sys.exit()
 
-    all_freckle_folders = list(deepcopy(freckle))
-    for src, target in copy_freckle:
+    if freckle:
+        all_freckle_folders = list(deepcopy(freckle))
+    else:
+        all_freckle_folders = []
+        for src, target in copy_freckle:
 
-        if target not in all_freckle_folders:
-            all_freckle_folders.append(target)
+            if target not in all_freckle_folders:
+                all_freckle_folders.append(target)
 
     # TODO: remove duplicate childs
 
     click.echo("\nGetting folder information...\n")
     run_config = FrecklesRunConfig(context, control_dict_temp)
 
+    copy_folders = process_copy_folders(copy_freckle)
+
     results = runner.run(
-        run_config=run_config, user_input={"folders": all_freckle_folders}
+        run_config=run_config,
+        user_input={"folders": all_freckle_folders, "copy_folders": copy_folders},
     )
 
     folder_facts_raw = results[0]["result"]["freckle_folder_facts_raw"]
@@ -323,11 +367,12 @@ def init_freckle(
         )
         click.echo("Error: {}".format(e))
         sys.exit(1)
-
     profile_list, folder_list = assembly_profile_metadata(
         freckle_metadata, dir_metadata
     )
+
     if not profile_list:
+        click.echo("")
         click.echo("No freckle folders found, doing nothing...")
         sys.exit()
 
@@ -389,6 +434,7 @@ def init_freckle(
             "vars": folder.get("vars", {}),
             "extra_vars": folder.get("extra_vars", {}),
             "files": folder.get("files", []),
+            "action": "init",
         }
 
         replaced = replace_strings_in_obj(
@@ -397,18 +443,30 @@ def init_freckle(
             jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
         )
 
-        # import pp
-        # pp(replaced)
-        # sys.exit()
         tasklist.append({profile: replaced})
         # dict_merge(all_vars, replaced, copy_dct=False)
 
+    click.echo()
     if ignore_unsupported_profiles:
         click.echo("(Valid) profiles found:")
     else:
         click.echo("Profiles found:")
-    for p in profiles.keys():
-        click.echo("  - {}".format(p))
+
+    click.echo()
+
+    # getting folder profile dict
+    folder_map = OrderedDict()
+    for f in folder_list:
+        profile_name = f["profile"]["name"]
+        folder_path = f["profile"]["path"]
+        folder_map.setdefault(profile_name, []).append(folder_path)
+
+    for profile, paths in folder_map.items():
+        click.echo("  * {}:".format(profile))
+        for p in paths:
+            click.echo("     - {}".format(os.path.dirname(p)))
+    # for p in profiles.keys():
+    #     click.echo("  - {}".format(p))
 
     frecklet_metadata = {"tasks": tasklist}
     frecklet = context.create_frecklet(frecklet_metadata)

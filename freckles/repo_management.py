@@ -143,7 +143,6 @@ class RepoManager(object):
                             repo_type, []
                         ).append(repo_url)
 
-
     def is_alias(self, name):
 
         if ":" in name or os.sep in name:
