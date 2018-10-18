@@ -255,15 +255,9 @@ DEFAULT_FRECKLES_JINJA_ENV.filters["default_if_empty"] = default_if_empty_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["string_for_boolean"] = string_for_boolean_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["basename"] = basename_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["dirname"] = dirname_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_not_empty"] = true_if_string_exists_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_not_empty"] = false_if_string_exists_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_empty"] = true_if_string_doesnt_exist_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "true_if_string_exists"
-] = true_if_string_exists_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "false_if_string_exists"
-] = false_if_string_exists_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "true_if_string_doesnt_exist"
-] = true_if_string_doesnt_exist_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "false_if_string_doesnt_exist"
+    "false_if_empty"
 ] = false_if_string_doesnt_exist_filter

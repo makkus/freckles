@@ -62,6 +62,16 @@ def generate_tasks_format(frecklet_index):
 
 def fill_defaults(task_item):
 
+    if (
+        "name" not in task_item["task"].keys()
+        and "command" not in task_item["task"].keys()
+    ):
+        raise FrecklesConfigException(
+            "Neither 'command' nor 'name' key in task config: {}".format(
+                task_item["task"]
+            )
+        )
+
     if "name" not in task_item["task"].keys():
         task_item["task"]["name"] = task_item["task"]["command"]
     elif "command" not in task_item["task"].keys():

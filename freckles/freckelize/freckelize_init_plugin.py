@@ -65,7 +65,10 @@ def process_copy_folder(src, dest):
         result["git"] = git_details
         result["src_type"] = "git"
     else:
-        result["src_type"] = "local"
+        if not os.path.exists(src):
+            raise FrecklesConfigException("Local path '{}' does not exist.".format(src))
+        else:
+            result["src_type"] = "local"
 
     return result
 
@@ -347,8 +350,18 @@ def init_freckle(
 
     results = runner.run(
         run_config=run_config,
-        user_input={"folders": all_freckle_folders, "copy_folders": copy_folders},
+        user_input={
+            "force_copy": True,
+            "folders": all_freckle_folders,
+            "copy_folders": copy_folders,
+        },
     )
+
+    rc = results[0]["run_properties"]["return_code"]
+
+    if rc != 0:
+        click.echo("\nError: freckelize pre-processing step failed. Exiting...")
+        sys.exit(rc)
 
     folder_facts_raw = results[0]["result"]["freckle_folder_facts_raw"]
     try:
@@ -397,26 +410,32 @@ def init_freckle(
         frecklet = context.create_frecklet(profile)
 
         can_freckelize = frecklet.meta.get("freckelize", None)
-        if can_freckelize is None:
-            if ignore_unsupported_profiles:
-                continue
-            else:
-                raise FrecklesConfigException(
-                    "Frecklet found for profile '{}', but it isn't freckelize-enabled: {}".format(
-                        profile, frecklet.get_urls()
+        try:
+            if can_freckelize is None:
+                if ignore_unsupported_profiles:
+                    continue
+                else:
+                    raise FrecklesConfigException(
+                        "Frecklet found for profile '{}', but it isn't freckelize-enabled: {}".format(
+                            profile, frecklet.get_urls()
+                        )
                     )
+
+            handles_multiple_folders = frecklet.meta["freckelize"].get(
+                "handles_multiple_fodlers", False
+            )
+            if handles_multiple_folders:
+                raise FrecklesConfigException(
+                    "Multi-folder adapters not supported yet."
                 )
 
-        handles_multiple_folders = frecklet.meta["freckelize"].get(
-            "handles_multiple_fodlers", False
-        )
-        if handles_multiple_folders:
-            raise FrecklesConfigException("Multi-folder adapters not supported yet.")
-
-        var_map = frecklet.meta["freckelize"].get("var_map", {})
-        profiles[profile] = var_map
+            var_map = frecklet.meta["freckelize"].get("var_map", {})
+            profiles[profile] = var_map
+        except (FrecklesConfigException) as e:
+            click.echo()
+            click.echo(e)
+            sys.exit(1)
     #
-
     tasklist = []
     # all_vars = {}
     for folder in folder_list:
@@ -461,10 +480,27 @@ def init_freckle(
         folder_path = f["profile"]["path"]
         folder_map.setdefault(profile_name, []).append(folder_path)
 
+    no_profiles = True
     for profile, paths in folder_map.items():
+        if profile not in profiles.keys():
+            continue
+        no_profiles = False
         click.echo("  * {}:".format(profile))
         for p in paths:
             click.echo("     - {}".format(os.path.dirname(p)))
+
+    if no_profiles:
+        click.echo("  * none")
+        click.echo()
+        click.echo("Invalid profiles found:\n")
+        for profile, paths in folder_map.items():
+            click.echo("  * {}:".format(profile))
+            for p in paths:
+                click.echo("     - {}".format(os.path.dirname(p)))
+        click.echo()
+
+        click.echo("Nothing to do, exiting...")
+        sys.exit()
     # for p in profiles.keys():
     #     click.echo("  - {}".format(p))
 

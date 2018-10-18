@@ -93,6 +93,7 @@ def create_vars_for_task_item(task_item, arg_values):
 
     vars = {}
     for details in arg_tree:
+
         try:
             key, value = create_var_value(details, arg_values)
             if key is None:
@@ -168,6 +169,11 @@ def create_var_value(arg_branch, arg_values):
             return (None, None)
 
         try:
+            # import pp
+            # print("------")
+            # pp(var_key)
+            # pp(v)
+            # pp(schema)
             validated = validate_var(var_key, v, schema)
 
             return (var_key, validated)
