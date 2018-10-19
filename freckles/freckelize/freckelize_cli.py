@@ -68,6 +68,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     def get_freckles_command(self, ctx, name):
 
         ctx.obj["control_dict"] = self.control_dict
+        ctx.obj["freckelize_extra_vars"] = self.extra_vars
         command = self.commands[name]
 
         return command

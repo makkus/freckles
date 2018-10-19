@@ -305,6 +305,7 @@ def init_freckle(
 
     context = ctx.obj["context"]
     control_dict = ctx.obj["control_dict"]
+    freckelize_extra_vars = ctx.obj["freckelize_extra_vars"]
 
     control_dict_temp = deepcopy(control_dict)
     control_dict_temp["output"] = "minimal"
@@ -448,9 +449,12 @@ def init_freckle(
                 )
             )
             continue
+
+        folder_vars = folder.get("vars", {})
+
         repl_dict = {
             "path": os.path.dirname(folder["profile"]["path"]),
-            "vars": folder.get("vars", {}),
+            "vars": folder_vars,
             "extra_vars": folder.get("extra_vars", {}),
             "files": folder.get("files", []),
             "action": "init",
@@ -462,7 +466,10 @@ def init_freckle(
             jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
         )
 
-        tasklist.append({profile: replaced})
+        merged_folder_vars = dict_merge(folder_vars, freckelize_extra_vars, copy_dct=True)
+        final_vars = dict_merge(merged_folder_vars, replaced, copy_dct=True)
+
+        tasklist.append({profile: final_vars})
         # dict_merge(all_vars, replaced, copy_dct=False)
 
     click.echo()
