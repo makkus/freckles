@@ -89,6 +89,7 @@ def create_vars_for_task_item(task_item, arg_values):
     """Creates the high level vars for this task.
     """
 
+    # TODO: currently, this does not extract args that are only used in the 'task' key, but not 'vars'
     arg_tree = task_item["arg_tree"]
 
     vars = {}
@@ -105,7 +106,6 @@ def create_vars_for_task_item(task_item, arg_values):
                 log.debug("Invalid var, assuming this task will be skipped later on.")
             else:
                 raise e
-
     return vars
 
 
@@ -161,7 +161,7 @@ def create_var_value(arg_branch, arg_values):
         v = replace_strings_in_obj(
             value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
-        if not v:
+        if not isinstance(v, bool) and not v:
             v = None
 
         # TODO: test for other var types than string
@@ -174,8 +174,8 @@ def create_var_value(arg_branch, arg_values):
             # pp(var_key)
             # pp(v)
             # pp(schema)
-            validated = validate_var(var_key, v, schema)
 
+            validated = validate_var(var_key, v, schema)
             return (var_key, validated)
         except (ParametersException) as e:
             raise FrecklesConfigException(

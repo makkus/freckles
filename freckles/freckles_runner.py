@@ -416,7 +416,7 @@ class FrecklesRunner(object):
         #     vars=processed, context=self.context, run_config=self.run_config, is_sub_task=self.is_sub_task
         # )
 
-        log.debug("execute tasklist result:\n\n{}".format(pprintpp.pformat(result)))
+        # log.debug("execute tasklist result:\n\n{}".format(pprintpp.pformat(result)))
         return result
 
     def execute_tasklist(self, run_config, vars=None):
@@ -453,10 +453,19 @@ class FrecklesRunner(object):
                     input = task["input"]
                     input["omit"] = OMIT_VALUE
 
+                    # import pp
+                    # print("---------------")
+                    # print("TASK")
+                    # pp(task)
+                    # print("INPUT")
+                    # pp(input)
+
                     r = replace_strings_in_obj(
                         task, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                     )
                     r = remove_omit_values(r)
+                    # print("OUTPUT")
+                    # pp(r)
                     replaced.append(r)
 
                 connector_obj = self.context.get_connector(connector)
