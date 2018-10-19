@@ -1,4 +1,4 @@
---index-url https://pkgs.frkl.io/frkl/dev
+--extra-index-url https://pkgs.frkl.io/frkl/dev
 
 # extra dependencies
 Click>=7.0
