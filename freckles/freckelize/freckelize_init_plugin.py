@@ -56,7 +56,7 @@ def process_copy_folder(src, dest):
     if is_url_or_abbrev(dest):
         raise FrecklesConfigException("Destination is url or abbrev: {}".format(dest))
 
-    result = {"src": src, "dest": dest}
+    result = {"dest": dest}
 
     if is_url_or_abbrev(src):
         git_details = expand_string_to_git_details(
@@ -64,7 +64,10 @@ def process_copy_folder(src, dest):
         )
         result["git"] = git_details
         result["src_type"] = "git"
+        result["src"] = src
     else:
+        src = os.path.realpath(os.path.expanduser(src))
+        result["src"] = src
         if not os.path.exists(src):
             raise FrecklesConfigException("Local path '{}' does not exist.".format(src))
         else:
@@ -295,6 +298,9 @@ def init_freckle(
 ):
     """Setup a new project from a folder, repo or archive."""
 
+    # whether to not modify the target host when parsing/copying the folder
+    minimal = False
+
     if not freckle and not copy_freckle:
 
         if help:
@@ -311,7 +317,9 @@ def init_freckle(
     control_dict_temp["output"] = "minimal"
     control_dict_temp["no_run"] = False
     control_dict_temp["elevated"] = False
-    control_dict_temp["minimal_facts_only"] = True
+    if minimal:
+        control_dict_temp["minimal_facts_only"] = True
+
 
     frecklecutable = Frecklecutable.create_from_file_or_name(
         "freckelize-init", context=context
@@ -346,7 +354,6 @@ def init_freckle(
 
     click.echo("\nGetting folder information...\n")
     run_config = FrecklesRunConfig(context, control_dict_temp)
-
     copy_folders = process_copy_folders(copy_freckle)
 
     results = runner.run(
