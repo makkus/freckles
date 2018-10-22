@@ -320,7 +320,6 @@ def init_freckle(
     if minimal:
         control_dict_temp["minimal_facts_only"] = True
 
-
     frecklecutable = Frecklecutable.create_from_file_or_name(
         "freckelize-init", context=context
     )
@@ -473,7 +472,9 @@ def init_freckle(
             jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
         )
 
-        merged_folder_vars = dict_merge(folder_vars, freckelize_extra_vars, copy_dct=True)
+        merged_folder_vars = dict_merge(
+            folder_vars, freckelize_extra_vars, copy_dct=True
+        )
         final_vars = dict_merge(merged_folder_vars, replaced, copy_dct=True)
 
         tasklist.append({profile: final_vars})
