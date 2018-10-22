@@ -22,16 +22,16 @@ will install *Docker* on the local machine.
 In the example above we don't need any custom variables, as installing Docker is usually pretty straight-forward.
 
 Let's say we want to create a new user, which, as a minimum, requires us to provide a username. We'll use a
-readymade and available *frecklet* again (the ``ensure-user-exists`` one), only this time with some custom
+readymade and available *frecklet* again (the ``create-user`` one), only this time with some custom
 vars (we can investigate the available variable names with ``TODO``):
 
 ```yaml
-- ensure-user-exists:
+- create-user:
     name: markus
 ```
 or, if we also want to specify the users UID:
 ```yaml
-- ensure-user-exists:
+- create-user:
     name: markus
     uid: 1010
 ```
@@ -52,7 +52,7 @@ the thing it documents. If we want to add documentation to a *frecklet*, we need
 
 ```yaml
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: markus
       uid: 1010
 ```
@@ -62,7 +62,7 @@ This is equivalent to the list-version of the *frecklet* from the example above.
 doc:
   short_help: creates the user 'markus' with the uid 1010
   help: |
-    This uses the 'ensure-user-exists' frecklet to create a single user, named 'markus'.
+    This uses the 'create-user' frecklet to create a single user, named 'markus'.
 
     The UID of this user will be '1010'.
 ```
@@ -74,7 +74,7 @@ $ frecklecute my-create-user.frecklet --help
 Usage: frecklecute my-create-user.frecklet
            [OPTIONS]
 
-  This uses the 'ensure-user-exists' frecklet to create a
+  This uses the 'create-user' frecklet to create a
   single user, named 'markus'.
 
   The UID of this user will be '1010'.

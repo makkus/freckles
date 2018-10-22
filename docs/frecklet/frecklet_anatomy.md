@@ -2,7 +2,7 @@
 
 ## example: creating a user
 
-To understand the anatomy of a *frecklet*, let's have a look at a full-blown one that is actually used (and [included](https://gitlab.com/freckles-io/frecklets-nsbl/blob/develop/system/users/ensure-user-exists.frecklet) in the frecklet package). This one let's you ensures that user exists on a host machine (as well as their optional group). It also gives the option to specify the UID and whether the user is supposed to be a system user or not:
+To understand the anatomy of a *frecklet*, let's have a look at a full-blown one that is actually used (and [included](https://gitlab.com/freckles-io/frecklets-nsbl/blob/develop/system/users/create-user.frecklet) in the frecklet package). This one let's you ensures that user exists on a host machine (as well as their optional group). It also gives the option to specify the UID and whether the user is supposed to be a system user or not:
 
 ```yaml
 {{== __ensure_user_frecklet_string__ ==}}
@@ -11,8 +11,8 @@ To understand the anatomy of a *frecklet*, let's have a look at a full-blown one
 This is what *freckletcute* tells us about it:
 
 ```
-$ frecklecute ensure-user-exists --help
-Usage: frecklecute ensure-user-exists [OPTIONS] USER_NAME
+$ frecklecute create-user --help
+Usage: frecklecute create-user [OPTIONS] USER_NAME
 
   ensures a user exists on a system
 

@@ -20,14 +20,6 @@ freckles.connectors.freckles\_connector module
     :undoc-members:
     :show-inheritance:
 
-freckles.connectors.shell\_connector module
--------------------------------------------
-
-.. automodule:: freckles.connectors.shell_connector
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

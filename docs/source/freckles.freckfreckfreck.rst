@@ -20,6 +20,14 @@ freckles.freckfreckfreck.fff\_frecklet\_plugin module
     :undoc-members:
     :show-inheritance:
 
+freckles.freckfreckfreck.fff\_inaugurate\_plugin module
+-------------------------------------------------------
+
+.. automodule:: freckles.freckfreckfreck.fff_inaugurate_plugin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 freckles.freckfreckfreck.fff\_repos\_plugin module
 --------------------------------------------------
 

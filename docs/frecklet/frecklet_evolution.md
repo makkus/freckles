@@ -22,16 +22,16 @@ will install *Docker* on the local machine.
 In the example above we don't need any custom variables, as installing Docker is usually pretty straight-forward.
 
 Let's say we want to create a new user, which, as a minimum, requires us to provide a username. We'll use a
-readymade and available *frecklet* again (the [``ensure-user-exists``](https://gitlab.com/freckles-io/frecklets-nsbl/blob/develop/system/users/ensure-user-exists.frecklet) one), only this time with some custom
+readymade and available *frecklet* again (the [``create-user``](https://gitlab.com/freckles-io/frecklets-nsbl/blob/develop/system/users/create-user.frecklet) one), only this time with some custom
 vars (we can investigate the available variable names with ``TODO``):
 
 ```yaml
-- ensure-user-exists:
+- create-user:
     name: markus
 ```
 or, if we also want to specify the users UID:
 ```yaml
-- ensure-user-exists:
+- create-user:
     name: markus
     uid: 1010
 ```
@@ -52,7 +52,7 @@ the thing it documents. If we want to add documentation to a *frecklet*, we need
 
 ```yaml
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: markus
       uid: 1010
 ```
@@ -62,13 +62,13 @@ This is equivalent to the list-version of the *frecklet* from the example above.
 doc:
   short_help: creates the user 'markus' with the uid 1010
   help: |
-    This uses the 'ensure-user-exists' frecklet to create
+    This uses the 'create-user' frecklet to create
     a single user, named 'markus'.
 
     The UID of this user will be '1010'.
 
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: markus
       uid: 1010
 ```
@@ -80,7 +80,7 @@ $ frecklecute my-create-user.frecklet --help
 Usage: frecklecute my-create-user.frecklet
            [OPTIONS]
 
-  This uses the 'ensure-user-exists' frecklet to create a
+  This uses the 'create-user' frecklet to create a
   single user, named 'markus'.
 
   The UID of this user will be '1010'.
@@ -96,7 +96,7 @@ If you don't want to clutter your *frecklet* with metadata about its argument(s)
 
 ``` yaml
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: "{{:: username ::}}"
       uid: 1010
 ```
@@ -146,12 +146,12 @@ Also want to ask the user for the UID? Sure:
 
 ``` yaml
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: "{{:: username ::}}"
       uid: "{{:: uid ::}}"
 ```
 
-Unfortunately, that won't work, as the ``ensure-user-exists`` *frecklet* expects an integer, not a string:
+Unfortunately, that won't work, as the ``create-user`` *frecklet* expects an integer, not a string:
 
 ```
 ➜ frecklecute my-create-user.frecklet --username markus --uid 1011
@@ -163,7 +163,7 @@ Not to worry though, that's what [Jinja2 filters](http://jinja.pocoo.org/docs/2.
 
 ``` yaml
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: "{{:: username ::}}"
       uid: "{{:: uid | int ::}}"
 ```
@@ -191,7 +191,7 @@ args:
       short_help: the uid of the new user
 
 tasks:
-  - ensure-user-exists:
+  - create-user:
       name: "{{:: username ::}}"
       uid: "{{:: uid | default(omit) ::}}"
 ```
