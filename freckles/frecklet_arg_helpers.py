@@ -16,19 +16,19 @@ log = logging.getLogger("freckles")
 
 ADD_NON_REQUIRED_ARGS = False
 
-
-def remove_omit_values(item):
-    """Removes all key/value pairs that contain the the omit marker."""
-    if not hasattr(item, "items"):
-        return item
-    else:
-        # TODO: check for lists
-        return {
-            key: remove_omit_values(value)
-            for key, value in item.items()
-            if not isinstance(value, string_types)
-            or (isinstance(value, string_types) and OMIT_VALUE not in value)
-        }
+#
+# def remove_omit_values(item):
+#     """Removes all key/value pairs that contain the the omit marker."""
+#     if not hasattr(item, "items"):
+#         return item
+#     else:
+#         # TODO: check for lists
+#         return {
+#             key: remove_omit_values(value)
+#             for key, value in item.items()
+#             if not isinstance(value, string_types)
+#             or (isinstance(value, string_types) and OMIT_VALUE not in value)
+#         }
 
 
 def get_var_item_from_arg_tree(arg_tree_list, var_key):
@@ -218,7 +218,7 @@ def create_var_value(arg_branch, arg_values):
             raise Exception("This is a bug, please report.")
 
 
-def extract_base_args(tasklist):
+def extract_base_args(tasklist, add_non_required_args=ADD_NON_REQUIRED_ARGS):
     """Extract the base args that are needed as input for this tasklist.
 
     Args:
@@ -234,7 +234,7 @@ def extract_base_args(tasklist):
         result.extend(args)
 
     args = remove_duplicate_args(result)
-    if not ADD_NON_REQUIRED_ARGS:
+    if not add_non_required_args:
         temp = CommentedMap()
         for arg, details in args.items():
             is_root_item = details.get("__meta__", {}).get("root_frecklet", False)

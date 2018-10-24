@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 import click
 import pprintpp
+from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from .frecklet import Frecklet
@@ -25,13 +26,28 @@ from .defaults import (
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
-from .frecklet_arg_helpers import remove_omit_values
+# from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
 
 log = logging.getLogger("freckles")
 
 CALLBACK_CLASSES = load_callback_classes()
+
+def clean_omit_values(d):
+
+    if isinstance(d, (list, tuple)):
+
+        for item in d:
+            clean_omit_values(item)
+
+    elif isinstance(d, (dict, OrderedDict, CommentedMap)):
+
+        for key, val in d.items():
+            if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
+                clean_omit_values(val)
+            elif val == OMIT_VALUE:
+                del d[key]
 
 
 def print_no_run_info(results):
@@ -463,9 +479,9 @@ class FrecklesRunner(object):
                     r = replace_strings_in_obj(
                         task, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                     )
-                    r = remove_omit_values(r)
-                    # print("OUTPUT")
-                    # pp(r)
+                    # r = remove_omit_values(r)
+                    clean_omit_values(r["vars"])
+                    # sys.exit()
                     replaced.append(r)
 
                 connector_obj = self.context.get_connector(connector)
