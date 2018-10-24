@@ -98,9 +98,9 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 runner.set_frecklecutable(frecklecutable)
                 runner.add_extra_vars(self.extra_vars)
 
-                run_config = FrecklesRunConfig(self.context, self.control_dict)
-                click.echo()
                 try:
+                    run_config = FrecklesRunConfig(self.context, self.control_dict)
+                    click.echo()
                     results = runner.run(run_config=run_config, user_input=kwargs)
                 except (Exception) as e:
                     log.debug(e, exc_info=1)

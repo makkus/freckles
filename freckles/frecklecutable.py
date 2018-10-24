@@ -97,6 +97,7 @@ class Frecklecutable(object):
 
         if vars is not None:
             add_user_input(tl, vars)
+
             # self.frecklet.validate_vars(vars)
             # TODO validate
 
