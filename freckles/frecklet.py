@@ -24,7 +24,11 @@ from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
-from .frecklet_arg_helpers import extract_base_args, get_var_item_from_arg_tree, ADD_NON_REQUIRED_ARGS
+from .frecklet_arg_helpers import (
+    extract_base_args,
+    get_var_item_from_arg_tree,
+    ADD_NON_REQUIRED_ARGS,
+)
 
 log = logging.getLogger("freckles")
 
@@ -380,7 +384,11 @@ class Frecklet(LuItem):
 
         tl = self.process_tasklist(parent=None)
 
-        inherit_non_required_args = self.metadata["meta"].get("cli", {}).get("inherit_non_required_args", ADD_NON_REQUIRED_ARGS)
+        inherit_non_required_args = (
+            self.metadata["meta"]
+            .get("cli", {})
+            .get("inherit_non_required_args", ADD_NON_REQUIRED_ARGS)
+        )
 
         args = extract_base_args(tl, add_non_required_args=inherit_non_required_args)
         # 'omit' is a special key
