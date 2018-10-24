@@ -34,3 +34,11 @@ Let's get a list of all the task-lists that are supported out of the box:
 $ frecklecute --help
 {{== __frecklecute_help_text__ ==}}
 ```
+
+If you want to see all available tasks, not just the high-level ones, you can do:
+
+```bash
+$ frecklecute --help-all
+```
+
+## 
