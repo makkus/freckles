@@ -455,6 +455,7 @@ class FrecklesContext(object):
             result = []
             for n in names:
                 frecklet = self.index.get_pkg(n)
+
                 tags = frecklet.meta.get("tags", [])
                 if not tags and "__empty__" in allowed_tags:
                     result.append(n)
