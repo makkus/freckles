@@ -29,7 +29,7 @@ def help_all(ctx, param, value):
     if ctx.obj is None:
         ctx.obj = {}
     if not value:
-        allowed_tags = ["frecklecutable", "__empty__"]
+        allowed_tags = ["featured-frecklecutable", "__empty__"]
     else:
         allowed_tags = ["__all__"]
     ctx.obj["allowed_frecklet_tags"] = allowed_tags
@@ -51,7 +51,7 @@ def help_with(ctx, param, value):
         ctx.obj = {}
 
     if not value:
-        allowed_tags = ["frecklecutable", "__empty__"]
+        allowed_tags = ["featured-frecklecutable", "__empty__"]
     else:
         allowed_tags = ["__all__"]
 
