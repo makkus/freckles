@@ -41,6 +41,72 @@ framework for composable, declarative scripting
 - create and share re-usable deploy configurations
 - free yourself from depending on provider-specific technologies
 
+Examples
+--------
+
+To see what category of tasks I'm talking about, here are a few examples.
+
+**Note:** Currently there is no support for securely specifying passwords that won't show up in logs etc. This will be done
+before the first release, but is not ready currently. For now -- if a password is required -- it's probably best (if possible) to use a
+generic one (like 'change_me') and change it straight after provisioning.
+
+Some of those examples need either root permissions, or an admin user who has password-less sudo setup. Also, most
+of this is only tested on Debian Stretch. For anything involving the generation of https certificates, DNS needs to be setup in advance.
+
+Creating a file with a certain content
+++++++++++++++++++++++++++++++++++++++
+
+This command creates a file with a 'hello world' content string. It also creates all parent folders (if necessary):
+
+.. code-block::
+
+    frecklecute ensure-file-content --content "hello world" /tmp/freckles/example.file
+
+Maybe we want this file on a different host, and we want it owned by a different user and group, and also create that user and group if it doesn't exist yet?
+
+.. code-block::
+
+    frecklecute -h root@dev.cutecode.co ensure-file-content --owner freckles --group freckles
+                --content "hello world" /tmp/freckles/example.file
+
+Docker
+++++++
+
+Installing Docker on a machine is not as straightforward and quick as I think it should be. This is how you do it with *freckles*:
+
+.. code-block::
+
+    frecklecute install-docker
+
+(doesn't work for Ubuntu cosmic yet -- no repository yet)
+
+Setting up Wordpress
+++++++++++++++++++++
+
+Creating files and installing simple applications is boring thoug, lets deploy a full wordpress site, using MariaDB, Apache and LetsEncrypt certificate.
+
+As a hosting provider you can use any of the many available ones, e.g. DigitalOcean, Hetzner, Amazon, etc...
+
+.. code-block::
+
+     frecklecute -h root@dev.cutecode.co setup-wordpress --domain dev.cutecode.co \
+                 --wp-title example-site --wp-admin-email info@cutecode.co \
+                 --letsencrypt-email info@cutecode.co
+
+To see all supported options of this command, use ``frecklecute setup-wordpress --help``
+
+Discourse
++++++++++
+
+Or maybe you want to setup an instance of the `Discourse forum service <https://discourse.org>`_? Also easy:
+
+.. code-block::
+
+    frecklecute -h root@frnds.of.frkl.io setup-discourse --domain frnds.of.frkl.io --admin-email info@frnds.of.frkl.io
+                --smpt-server smtp.postmarkapp.com --smtp-port 587 --smtp-user 'xxxxx' --smtp-password 'xxxxx'
+
+For that to work, you need to have setup your domain and email provider beforehand.
+
 Links
 -----
 
