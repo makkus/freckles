@@ -30,9 +30,10 @@ freckles
 
 **DevOps for the rest of us!**
 
-framework for composable, declarative scripting
+A framework for composable, declarative scripting.
 
-**freckles** helps you save time by automating tasks you usually don't automate:
+**freckles** helps you save time by automating tasks you usually don't automate (unless you already do -- in which case you might still be
+interested in a few of **freckles**'s features that can make your life easier):
 
 - re-use the included task-descriptions, as well as ones curated by the community
 - install fairly complex to setup services with one only command
@@ -62,7 +63,7 @@ This command creates a file with a 'hello world' content string. It also creates
 
     frecklecute ensure-file-content --content "hello world" /tmp/freckles/example.file
 
-Maybe we want this file on a different host, and we want it owned by a different user and group, and also create that user and group if it doesn't exist yet?
+Maybe we want this file on a different host, and we want it owned by a different user and group, and also create that user and group if they don't exist yet?
 
 .. code-block::
 
