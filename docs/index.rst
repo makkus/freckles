@@ -5,8 +5,9 @@ Welcome to freckles's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   readme
+   home
    getting_started
+   installation
    usage/
    frecklets
    contributing

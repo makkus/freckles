@@ -4,7 +4,7 @@
 
 In it's most basic form, a *frecklet* is a text file that contains a list of strings in ``yaml`` format.
 Each list item needs to be the name of another frecklet that exists in the current [context](https://freckles.io/TODO)
-(which can be displayed with ``freckfreckfreck frecklet list``).
+(which can be displayed with ``frecklecute --help-all``).
 
 Here's an example:
 ```yaml
