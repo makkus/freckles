@@ -105,11 +105,11 @@ def task():
     "--show-vars", "-v", help="show task variables", is_flag=True, default=False
 )
 @click.option(
-    "--show-references", "-r", help="show references", is_flag=True, default=False
+    "--show-links", "-l", help="show 'further reading'-links", is_flag=True, default=False
 )
 @click.argument("frecklet_name", metavar="TASK", nargs=1, required=False)
 @click.pass_context
-def info(ctx, frecklet_name, show_vars, show_references):
+def info(ctx, frecklet_name, show_vars, show_links):
 
     click.echo()
     context = ctx.obj["context"]
@@ -125,7 +125,7 @@ def info(ctx, frecklet_name, show_vars, show_references):
         click.echo("No frecklet available for name: {}".format(frecklet_name))
         sys.exit(1)
 
-    show = {"variables": show_vars, "references": show_references}
+    show = {"variables": show_vars, "show_links": show_links}
 
     rst = utils.render_frecklet_to_rst(frecklet_name, p, show=show)
 

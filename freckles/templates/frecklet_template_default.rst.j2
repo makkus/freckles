@@ -6,7 +6,7 @@
 {{== frecklet.get_short_help_string() | make_sentence ==}}
 
 ---------
-Arguments
+Variables
 ---------
 
 {{%= for arg in frecklet.args | dictsort =%}}
@@ -37,13 +37,13 @@ Notes
 {{%= endfor =%}}
 {{%= endif =%}}
 
-{{%= if show.get("references", False) =%}}
-----------
-References
-----------
+{{%= if show.get("show_links", False) =%}}
+---------------
+Further reading
+---------------
 
-{{%= if frecklet.get_doc().get_references() =%}}
-{{%= for r in frecklet.get_doc().get_references() =%}}
+{{%= if frecklet.get_doc().get_further_reading() =%}}
+{{%= for r in frecklet.get_doc().get_further_reading() =%}}
 - `<{{== r ==}}>`_
 {{%= endfor =%}}
 {{%= else =%}}

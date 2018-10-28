@@ -19,6 +19,9 @@ requirements = [
     "plumbum==1.6.6",
     "termcolor==1.1.0",
     "yaspin==0.13.0",
+    "terminaltables==3.1.0",
+    "rst2ansi==0.1.5",
+    "m2r==0.2.1"
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -46,6 +49,7 @@ setup(
             "freckles=freckles.freckles_cli:cli",
             "frecklecute=freckles.frecklecute_cli:cli",
             "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
+            "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
             "freckelize=freckles.freckelize.freckelize_cli:cli",
         ],
         "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
@@ -55,7 +59,9 @@ setup(
         "freckfreckfreck.plugins": [
             "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
             "update_freckles=freckles.freckfreckfreck.fff_update_plugin:update_freckles",
-            "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
+            # "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
+            "tasks=freckles.freckfreckfreck.fff_task_plugin:tasks",
+            "task=freckles.freckfreckfreck.fff_task_plugin:task",
             "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
         ],
         "freckelize.plugins": [
