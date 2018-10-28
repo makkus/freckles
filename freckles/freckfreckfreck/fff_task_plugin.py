@@ -10,8 +10,6 @@ from ruamel.yaml import YAML
 
 from freckles.freckles_runner import FrecklesRunner
 from freckles.doc import utils
-from frutils.frutils_cli import output
-from luci.luitem_index import LuItemMultiIndex
 from terminaltables import SingleTable
 
 yaml = YAML(typ="safe")
