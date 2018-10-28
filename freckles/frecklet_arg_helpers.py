@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy
+from collections import OrderedDict
 
 from cerberus import Validator
 from ruamel.yaml.comments import CommentedMap
@@ -234,6 +235,14 @@ def extract_base_args(tasklist, add_non_required_args=ADD_NON_REQUIRED_ARGS):
         result.extend(args)
 
     args = remove_duplicate_args(result)
+
+    # convert all children arguments into options
+    for n, d in args.items():
+        if d.get("__meta__", {}).get("root_frecklet", False):
+            continue
+        if d.get("cli", {}).get("param_type", "option") == "argument":
+            d["cli"]["param_type"] = "option"
+
     if not add_non_required_args:
         temp = CommentedMap()
         for arg, details in args.items():
@@ -243,7 +252,12 @@ def extract_base_args(tasklist, add_non_required_args=ADD_NON_REQUIRED_ARGS):
                 temp[arg] = details
         args = temp
 
-    return args
+    # sort order
+    sorted_args = OrderedDict()
+    for n in sorted(args.keys()):
+        sorted_args[n] = args[n]
+
+    return sorted_args
 
 
 def extract_base_args_from_task_item(task_item):
