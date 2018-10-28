@@ -2,6 +2,7 @@
 
 import copy
 import logging
+import m2r
 
 from frkl import FrklProcessor, Frkl
 from frkl.defaults import (
@@ -115,7 +116,11 @@ class TaskTypePrefixProcessor(ConfigProcessor):
         if "::" in command_name:
 
             if task_type is not None:
-                raise FrecklesConfigException("Invalid task item '{}': command name contains '::', but type is already specified.".format(new_config))
+                raise FrecklesConfigException(
+                    "Invalid task item '{}': command name contains '::', but type is already specified.".format(
+                        new_config
+                    )
+                )
 
             task_type, command_name = command_name.split("::", 1)
 
@@ -500,9 +505,16 @@ class Frecklet(LuItem):
 
         return Doc(self.doc)
 
-    def get_help_string(self):
+    def get_help_string(self, out_format="rst"):
 
-        return self.doc.get("help", "n/a")
+        help_string = self.doc.get("help", "n/a")
+
+        help_format = self.meta.get("help_format", "markdown")
+        if help_format == "markdown" and out_format == "rst":
+
+            help_string = m2r.convert(help_string)
+
+        return help_string
 
     def get_short_help_string(self):
 
