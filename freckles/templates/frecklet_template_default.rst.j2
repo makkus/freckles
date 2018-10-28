@@ -1,0 +1,53 @@
+=======================
+{{== frecklet_name ==}}
+=======================
+
+{{%= if show.get("variables", False) =%}}
+{{== frecklet.get_short_help_string() | make_sentence ==}}
+
+---------
+Arguments
+---------
+
+{{%= for arg in frecklet.args | dictsort =%}}
+**{{== arg[0] ==}}**
+    **desc:**        {{== arg[1].get("doc", {}).get("short_help", "n/a") ==}}
+
+    **type:**        {{== arg[1].get("type", "string") ==}}
+
+    **required:**    {{== arg[1].get("required", True) ==}}
+
+    **default:**     {{== arg[1].get("default", "-") | sanitize_rst ==}}
+{{%= endfor =%}}
+-----------
+Description
+-----------
+{{%= endif =%}}
+
+{{== frecklet.get_help_string() ==}}
+
+{{%= if frecklet.get_doc().get_notes() =%}}
+
+-----
+Notes
+-----
+
+{{%= for n in frecklet.get_doc().get_notes() =%}}
+- {{== n ==}}
+{{%= endfor =%}}
+{{%= endif =%}}
+
+{{%= if show.get("references", False) =%}}
+----------
+References
+----------
+
+{{%= if frecklet.get_doc().get_references() =%}}
+{{%= for r in frecklet.get_doc().get_references() =%}}
+- `<{{== r ==}}>`_
+{{%= endfor =%}}
+{{%= else =%}}
+n/a
+{{%= endif =%}}
+{{%= endif =%}}
+
