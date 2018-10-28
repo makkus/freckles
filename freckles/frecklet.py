@@ -22,6 +22,8 @@ from frutils import (
 from frutils.doc import Doc
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
+from six import string_types
+
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import (
@@ -101,23 +103,31 @@ class CommandNameProcessor(ConfigProcessor):
         return new_config
 
 
-class UppercaseBecomeProcessor(ConfigProcessor):
+class TaskTypePrefixProcessor(ConfigProcessor):
     """Adds a 'become': True key/value pair if the task name is all uppercase."""
 
     def process_current_config(self):
 
         new_config = self.current_input_config
 
-        if new_config["task"].get("become", None) is not None:
-            return new_config
+        command_name = new_config["task"].get("command", None)
+        task_type = new_config["task"].get("type", None)
 
-        name = new_config["task"].get("name", None)
-        if name is None:
-            return new_config
+        if "::" in command_name:
 
-        if name.isupper():
+            if task_type is not None:
+                raise FrecklesConfigException("Invalid task item '{}': command name contains '::', but type is already specified.".format(new_config))
+
+            task_type, command_name = command_name.split("::", 1)
+
+            new_config["task"]["command"] = command_name
+            new_config["task"]["type"] = task_type
+
+        become = new_config["task"].get("become", None)
+
+        if task_type.isupper() and become is None:
             new_config["task"]["become"] = True
-            new_config["task"]["name"] = name.lower()
+            new_config["task"]["type"] = task_type.lower()
 
         return new_config
 
@@ -447,8 +457,8 @@ class Frecklet(LuItem):
         task_format = generate_tasks_format(self.index)
         chain = [
             FrklProcessor(**task_format),
-            UppercaseBecomeProcessor(),
             CommandNameProcessor(),
+            TaskTypePrefixProcessor(),
             MoveEmbeddedTaskKeysProcessor(),
             InheritedTaskKeyProcessor(parent_metadata=parent),
             AugmentingTaskProcessor(frecklet_index=self.index, parent_metadata=parent),
