@@ -22,7 +22,6 @@ from frutils import (
 from frutils.doc import Doc
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
-from six import string_types
 
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
