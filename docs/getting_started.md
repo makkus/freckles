@@ -31,14 +31,21 @@ The *freckles* package comes with several command-line applications, the one you
 Let's get a list of all the task-lists that are supported out of the box:
 
 ```
-$ frecklecute --help
+frecklecute --help
 {{== __frecklecute_help_text__ ==}}
 ```
 
 If you want to see all available tasks, not just the high-level ones, you can do:
 
 ```bash
-$ frecklecute --help-all
+frecklecute --help-all
 ```
 
-## 
+## Executing a *frecklecutable*
+
+Once you picked the top-level *frecklecutable* you want to run, you can get it's usage information via:
+
+```bash
+frecklecute <frecklecutable_name> --help
+```
+
