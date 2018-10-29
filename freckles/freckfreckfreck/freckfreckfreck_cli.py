@@ -32,7 +32,7 @@ def load_plugins():
     """
 
     log2 = logging.getLogger("stevedore")
-    out_hdlr = logging.StreamHandler(sys.stdout)
+    out_hdlr = logging.StreamHandler(sys.stderr)
     out_hdlr.setFormatter(
         logging.Formatter("freckfreckfreck plugin error -> %(message)s")
     )
