@@ -18,7 +18,7 @@ def sanitize_rst_filter(value):
         return value
 
     if value.endswith("_"):
-        value = "{}\_".format(value[0:-1])
+        value = "{}\\_".format(value[0:-1])
     return value
 
 
