@@ -129,7 +129,7 @@ class TaskTypePrefixProcessor(ConfigProcessor):
 
         become = new_config["task"].get("become", None)
 
-        if task_type.isupper() and become is None:
+        if task_type and task_type.isupper() and become is None:
             new_config["task"]["become"] = True
             new_config["task"]["type"] = task_type.lower()
 

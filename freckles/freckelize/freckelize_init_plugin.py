@@ -299,7 +299,7 @@ def init_freckle(
     """Setup a new project from a folder, repo or archive."""
 
     # whether to not modify the target host when parsing/copying the folder
-    minimal = True
+    minimal = False
 
     if not freckle and not copy_freckle:
 
