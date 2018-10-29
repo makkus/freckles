@@ -52,7 +52,7 @@ def get_pip_path():
     return pip_path
 
 
-@click.command("update-freckles")
+@click.command()
 @click.option(
     "--force-reinstall",
     "-f",

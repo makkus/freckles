@@ -103,7 +103,11 @@ def task():
     "--show-vars", "-v", help="show task variables", is_flag=True, default=False
 )
 @click.option(
-    "--show-links", "-l", help="show 'further reading'-links", is_flag=True, default=False
+    "--show-links",
+    "-l",
+    help="show 'further reading'-links",
+    is_flag=True,
+    default=False,
 )
 @click.argument("frecklet_name", metavar="TASK", nargs=1, required=False)
 @click.pass_context
