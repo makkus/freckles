@@ -58,8 +58,6 @@ setup(
         ],
         "freckfreckfreck.plugins": [
             "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
-            "update_freckles=freckles.freckfreckfreck.fff_update_plugin:update_freckles",
-            "inaugurate=freckles.freckfreckfreck.fff_inaugurate_plugin:inaugurate",
             "tasks=freckles.freckfreckfreck.fff_task_plugin:tasks",
             "task=freckles.freckfreckfreck.fff_task_plugin:task",
             "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
