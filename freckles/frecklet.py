@@ -149,7 +149,7 @@ class MoveEmbeddedTaskKeysProcessor(ConfigProcessor):
             new_config["vars"] = vars
 
         vars_to_move = {}
-        for k in vars.keys():
+        for k in list(vars.keys()):
             if "." in k:
                 vars_to_move[k] = vars.pop(k)
 
