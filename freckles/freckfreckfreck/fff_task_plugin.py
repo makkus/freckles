@@ -129,7 +129,7 @@ def info(ctx, frecklet_name, show_vars, show_links):
 
     show = {"variables": show_vars, "show_links": show_links}
 
-    rst = utils.render_frecklet_to_rst(frecklet_name, p, show=show)
+    rst = utils.render_frecklet(frecklet_name, p, show=show)
 
     rendered = rst2ansi(rst)
     click.echo(rendered)
@@ -165,7 +165,7 @@ def vars(ctx, vars, only_names):
 
     show = {"arg_list_filter": show_args, "only_names": only_names}
 
-    rst = utils.render_frecklet_to_rst(
+    rst = utils.render_frecklet(
         frecklet_name, p, template_name="frecklet_template_args.rst.j2", show=show
     )
 
@@ -187,7 +187,7 @@ def describe_frecklecutable(ctx, frecklecutable):
     }
 
     try:
-        runner = FrecklesRunner(context, control_vars=control_dict)
+        runner = FrecklesRunner(context)
         runner.load_frecklecutable_from_name_or_file(frecklecutable)
 
         runner.describe_tasklist()
