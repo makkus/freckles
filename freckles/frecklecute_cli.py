@@ -67,6 +67,7 @@ def help_with(ctx, param, value):
 
         sys.exit(0)
 
+
 def apropos(ctx, param, value):
 
     if ctx.obj is None:
@@ -89,6 +90,7 @@ def apropos(ctx, param, value):
 
         sys.exit(0)
 
+
 class FrecklecuteCommand(FrecklesBaseCommand):
     def __init__(self, *args, **kwargs):
         super(FrecklecuteCommand, self).__init__(**kwargs)
@@ -96,7 +98,8 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     def list_freckles_commands(self, ctx):
 
         return self.context.get_frecklet_names(
-            allowed_tags=ctx.obj.get("allowed_frecklet_tags", None), apropos=ctx.obj.get("apropos", None)
+            allowed_tags=ctx.obj.get("allowed_frecklet_tags", None),
+            apropos=ctx.obj.get("apropos", None),
         )
 
     def get_freckles_command(self, ctx, name):

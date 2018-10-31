@@ -33,6 +33,7 @@ def make_sentence_filter(value):
     value = value.capitalize()
     return value
 
+
 DOC_JINJA_FILTERS = {
     "sanitize_rst": sanitize_rst_filter,
     "make_sentence": make_sentence_filter,
@@ -54,7 +55,11 @@ def get_frecklecute_help_text():
 
 
 def render_frecklet(
-    frecklet_name, frecklet, show=None, template_name="frecklet_template_default.rst.j2", jinja_env=None
+    frecklet_name,
+    frecklet,
+    show=None,
+    template_name="frecklet_template_default.rst.j2",
+    jinja_env=None,
 ):
 
     if jinja_env is None:

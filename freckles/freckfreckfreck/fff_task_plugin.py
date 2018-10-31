@@ -179,12 +179,12 @@ def vars(ctx, vars, only_names):
 def describe_frecklecutable(ctx, frecklecutable):
 
     context = ctx.obj["context"]
-    control_dict = {
-        "no_run": True,
-        "host": "localhost",
-        "output": "default",
-        "elevated": "not_elevated",
-    }
+    # control_dict = {
+    #     "no_run": True,
+    #     "host": "localhost",
+    #     "output": "default",
+    #     "elevated": "not_elevated",
+    # }
 
     try:
         runner = FrecklesRunner(context)
