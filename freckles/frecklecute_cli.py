@@ -53,7 +53,7 @@ def help_with(ctx, param, value):
     if not value:
         allowed_tags = ["featured-frecklecutable", "__empty__"]
     else:
-        allowed_tags = ["__all__"]
+        allowed_tags = list(value)
 
     ctx.obj["allowed_frecklet_tags"] = allowed_tags
 
@@ -67,6 +67,27 @@ def help_with(ctx, param, value):
 
         sys.exit(0)
 
+def apropos(ctx, param, value):
+
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    if not value:
+        apropos = None
+    else:
+        apropos = list(value)
+
+    ctx.obj["apropos"] = apropos
+
+    if value:
+        command = ctx.command
+
+        create_context(ctx, force=True)
+
+        help = command.get_help(ctx)
+        click.echo(help)
+
+        sys.exit(0)
 
 class FrecklecuteCommand(FrecklesBaseCommand):
     def __init__(self, *args, **kwargs):
@@ -75,7 +96,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     def list_freckles_commands(self, ctx):
 
         return self.context.get_frecklet_names(
-            allowed_tags=ctx.obj["allowed_frecklet_tags"]
+            allowed_tags=ctx.obj.get("allowed_frecklet_tags", None), apropos=ctx.obj.get("apropos", None)
         )
 
     def get_freckles_command(self, ctx, name):
@@ -146,6 +167,24 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     subcommand_metavar="FRECKLECUTEABLE",
 )
 # @click.option("--vars", "-v", help="additional vars", multiple=True, type=VarsType())
+@click_log.simple_verbosity_option(logging.getLogger(), "--verbosity")
+@click.option(
+    "--help-with",
+    "--apropos",
+    help="Show this message, listing all commands that contain this value in their name or description.",
+    metavar="TAG",
+    multiple=True,
+    is_eager=True,
+    callback=apropos,
+)
+# @click.option(
+#     "--help-with",
+#     help="Show this message, listing all commands tagged with this value(s).",
+#     metavar="TAG",
+#     multiple=True,
+#     is_eager=True,
+#     callback=help_with,
+# )
 @click.option(
     "--help-all",
     help="Show this message, listing all possible commands.",
@@ -153,7 +192,6 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     is_eager=True,
     callback=help_all,
 )
-@click_log.simple_verbosity_option(logging.getLogger(), "--verbosity")
 @click.pass_context
 def cli(ctx, vars, **kwargs):
     pass
