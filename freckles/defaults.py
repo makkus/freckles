@@ -51,7 +51,7 @@ FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_CONFIG_PROFILES_DIR = os.path.expanduser(
     os.path.join(FRECKLES_CONFIG_DIR, "run-profiles")
 )
-USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "frecklets")
+USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_CONFIG_DIR, "frecklets")
 
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
