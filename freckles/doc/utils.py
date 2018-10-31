@@ -33,9 +33,13 @@ def make_sentence_filter(value):
     value = value.capitalize()
     return value
 
+DOC_JINJA_FILTERS = {
+    "sanitize_rst": sanitize_rst_filter,
+    "make_sentence": make_sentence_filter,
+}
 
-DOC_JINJA_ENV.filters["sanitize_rst"] = sanitize_rst_filter
-DOC_JINJA_ENV.filters["make_sentence"] = make_sentence_filter
+for key, value in DOC_JINJA_FILTERS.items():
+    DOC_JINJA_ENV.filters[key] = value
 
 
 def get_frecklecute_help_text():
@@ -49,14 +53,17 @@ def get_frecklecute_help_text():
     return stdout
 
 
-def render_frecklet_to_rst(
-    frecklet_name, frecklet, show=None, template_name="frecklet_template_default.rst.j2"
+def render_frecklet(
+    frecklet_name, frecklet, show=None, template_name="frecklet_template_default.rst.j2", jinja_env=None
 ):
+
+    if jinja_env is None:
+        jinja_env = DOC_JINJA_ENV
 
     if show is None:
         show = {"arguments": False, "references": False, "arg_list_filter": []}
 
     repl_dict = {"frecklet_name": frecklet_name, "frecklet": frecklet, "show": show}
-    template = DOC_JINJA_ENV.get_template(template_name)
+    template = jinja_env.get_template(template_name)
     rendered = template.render(**repl_dict)
     return rendered

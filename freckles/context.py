@@ -442,7 +442,11 @@ class FrecklesContext(object):
 
         return copy.deepcopy(frecklet)
 
-    def get_frecklet_names(self, allowed_tags=None):
+    def get_frecklet_names(self, allowed_tags=None, apropos=None):
+        """Lists all available frecklet names, filtered by tags or strings in the description.
+
+
+        """
 
         if allowed_tags is None:
             allowed_tags = ["__all__"]
@@ -450,7 +454,7 @@ class FrecklesContext(object):
         names = self.index.get_pkg_names()
 
         if "__all__" in allowed_tags:
-            return names
+            result = names
         else:
             result = []
             for n in names:
@@ -464,7 +468,18 @@ class FrecklesContext(object):
                 for at in allowed_tags:
                     if at in tags:
                         result.append(n)
-            return result
+
+        if apropos:
+            temp = []
+            for r in result:
+                frecklet = self.index.get_pkg(r)
+                match = frecklet.get_doc().matches_apropos(apropos)
+                if match:
+                    temp.append(r)
+
+            result = temp
+
+        return result
 
     def get_connector(self, name):
 

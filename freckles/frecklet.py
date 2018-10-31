@@ -505,7 +505,7 @@ class Frecklet(LuItem):
 
         return Doc(self.doc)
 
-    def get_help_string(self, out_format="rst"):
+    def get_help_string(self, out_format="md"):
 
         help_string = self.doc.get("help", "n/a")
 
