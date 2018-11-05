@@ -27,6 +27,7 @@ log = logging.getLogger("freckles")
 
 PULL_CACHE = {}
 
+
 class FrecklesRepo(object):
     @classmethod
     def create_repo_desc(self, name, content_type=None, alias=None):
@@ -128,7 +129,6 @@ class FrecklesRepo(object):
             PULL_CACHE[self.url] = time.time()
 
 
-
 class RepoManager(object):
     def __init__(self, cnf_interpreter):
 
@@ -208,15 +208,15 @@ class RepoManager(object):
 
     # def download_community_repos(self):
     #     pass
-        # for desc in self.get_repo_descs():
-        #     import pp
-        #     # pp(desc)
-        #     if desc.get("alias", None) == "community":
-        #         log.debug("Downloading community repo: {}".format(desc))
-        #         import pp
-        #         print("DOWNLOADING")
-        #         # pp(desc)
-        #         self.get_repo(desc)
+    # for desc in self.get_repo_descs():
+    #     import pp
+    #     # pp(desc)
+    #     if desc.get("alias", None) == "community":
+    #         log.debug("Downloading community repo: {}".format(desc))
+    #         import pp
+    #         print("DOWNLOADING")
+    #         # pp(desc)
+    #         self.get_repo(desc)
 
     def get_repo_descs(self, only_content_types=None, ignore_invalid_repos=True):
         """Returns the repo desc dictionary for the provided name or url.
