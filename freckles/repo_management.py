@@ -2,6 +2,7 @@
 import copy
 import logging
 import os
+import time
 
 import click
 from frutils import (
@@ -16,7 +17,7 @@ from frkl import dict_from_url
 from frkl.helpers import content_from_url
 from frkl.utils import expand_string_to_git_details
 
-from .defaults import FRECKLES_CACHE_BASE, COMMUNITY_REPO_DESC, MIXED_CONTENT_TYPE
+from .defaults import FRECKLES_CACHE_BASE, MIXED_CONTENT_TYPE
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
 log = logging.getLogger("freckles")
@@ -24,6 +25,7 @@ log = logging.getLogger("freckles")
 
 # DEFAULT_URLS = {"frecklets": [os.path.join(MODULE_FOLDER, "external", "frecklets")]}
 
+PULL_CACHE = {}
 
 class FrecklesRepo(object):
     @classmethod
@@ -105,6 +107,10 @@ class FrecklesRepo(object):
                 )
 
         else:
+            if self.url in PULL_CACHE:
+                log.debug("Not pulling again: {}".format(self.url))
+                return
+
             # TODO: check if remote/branch is right?
             click.echo("- pulling from remote: {}...".format(self.url))
             git = local["git"]
@@ -118,6 +124,9 @@ class FrecklesRepo(object):
                     raise FrecklesConfigException(
                         "Could not pull repository '{}': {}".format(self.url, stderr)
                     )
+
+            PULL_CACHE[self.url] = time.time()
+
 
 
 class RepoManager(object):
@@ -135,6 +144,7 @@ class RepoManager(object):
                     content_types
                     and repo_type not in content_types
                     and repo_type != "frecklets"
+                    and repo_type != MIXED_CONTENT_TYPE
                 ):
                     continue
                 for repo_url in repo_urls:
@@ -161,12 +171,12 @@ class RepoManager(object):
 
     def check_permission_for_repo(self, repo_desc):
 
-        if repo_desc == COMMUNITY_REPO_DESC:
-            allow_community = self.cnf_interpreter.get_cnf_value("allow_community")
-            if allow_community:
-                return (True, "Community repo allowed.")
-            else:
-                return (False, "Community repo not allowed")
+        # if repo_desc == COMMUNITY_REPO_DESC:
+        #     allow_community = self.cnf_interpreter.get_cnf_value("allow_community")
+        #     if allow_community:
+        #         return (True, "Community repo allowed.")
+        #     else:
+        #         return (False, "Community repo not allowed")
 
         allow_remote = self.cnf_interpreter.get_cnf_value("allow_remote")
 
@@ -195,6 +205,18 @@ class RepoManager(object):
             return path
         else:
             return None
+
+    # def download_community_repos(self):
+    #     pass
+        # for desc in self.get_repo_descs():
+        #     import pp
+        #     # pp(desc)
+        #     if desc.get("alias", None) == "community":
+        #         log.debug("Downloading community repo: {}".format(desc))
+        #         import pp
+        #         print("DOWNLOADING")
+        #         # pp(desc)
+        #         self.get_repo(desc)
 
     def get_repo_descs(self, only_content_types=None, ignore_invalid_repos=True):
         """Returns the repo desc dictionary for the provided name or url.
@@ -248,7 +270,6 @@ class RepoManager(object):
                 if is_alias:
                     all_urls = self.aliases[_name]
                     alias = _name
-
                     for c_type, urls in all_urls.items():
                         if c_type not in self.all_content_types_so_far:
                             self.all_content_types_so_far.append(c_type)
@@ -265,7 +286,6 @@ class RepoManager(object):
                         url, alias=None, content_type=_content_type
                     )
                     all_repos.append(r)
-
             except (Exception) as e:
                 log.warn(
                     "Could not create repo for '{}': {}".format(name_or_url, e),
@@ -275,7 +295,6 @@ class RepoManager(object):
                     raise e
 
         result = []
-
         for r in all_repos:
 
             c_type = r["content_type"]

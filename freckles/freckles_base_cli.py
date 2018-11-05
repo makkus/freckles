@@ -188,7 +188,7 @@ def get_common_options(print_version_callback=print_version):
     )
     no_run_option = click.Option(
         param_decls=["--no-run"],
-        help="create the run environment (if applicable), but don't run the frecklecutable",
+        help="create the run environment (if applicable), but don't run the frecklet",
         flag_value=True,
         default=None,
     )

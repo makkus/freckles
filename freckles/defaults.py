@@ -35,17 +35,17 @@ FRECKLES_SHARE_DIR = os.path.join(
 
 MIXED_CONTENT_TYPE = "hodgepodge"
 
-COMMUNITY_REPO_URL = "https://gitlab.com/freckles-io/freckles-community.git"
-COMMUNITY_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "community")
-COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, "frecklets")
-COMMUNITY_ROLES_FOLDER = os.path.join(COMMUNITY_FOLDER, "roles")
-COMMUNITY_REPO_DESC = {
-    "path": COMMUNITY_FOLDER,
-    "url": COMMUNITY_REPO_URL,
-    "alias": "community",
-    "remote": True,
-    "content_type": MIXED_CONTENT_TYPE,
-}
+# COMMUNITY_REPO_URL = "https://gitlab.com/freckles-io/freckles-community.git"
+# COMMUNITY_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "community")
+# COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, "frecklets")
+# COMMUNITY_ROLES_FOLDER = os.path.join(COMMUNITY_FOLDER, "roles")
+# COMMUNITY_REPO_DESC = {
+#     "path": COMMUNITY_FOLDER,
+#     "url": COMMUNITY_REPO_URL,
+#     "alias": "community",
+#     "remote": True,
+#     "content_type": MIXED_CONTENT_TYPE,
+# }
 
 FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_CONFIG_PROFILES_DIR = os.path.expanduser(
@@ -81,10 +81,10 @@ DEFAULT_FRECKLES_REPOS = ["default", "user"]
 DEFAULT_FRECKLES_ALIASES = {
     "default": {"frecklets": [DEFAULT_FRECKLETS_FOLDER]},
     "user": {"frecklets": [USER_FRECKLETS_FOLDER]},
-    "community": {
-        "frecklets": [COMMUNITY_FRECKLETS_FOLDER],
-        "roles": [COMMUNITY_ROLES_FOLDER],
-    },
+    # "community": {
+    #     "frecklets": [COMMUNITY_FRECKLETS_FOLDER],
+    #     "roles": [COMMUNITY_ROLES_FOLDER],
+    # },
 }
 
 FRECKLES_CONFIG_SCHEMA = {
