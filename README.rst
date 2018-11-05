@@ -234,7 +234,7 @@ This frecklecutable will create the user if it doesn't already exit:
 
 .. code-block::
 
-    frecklecute download-file --become-user root --owner www-data --dest /var/www/html/logo.svg
+    frecklecute download-file --become-user root --owner www-data --dest /var/www/html/logo.svg https://frkl.io/images/frkl-logo-black.svg
 
 Here we need to set the ``--become-user`` option, because our normal user wouldn't have permissions to create a new
 user if necessary, and to create a file in ``var/www/html/``.
