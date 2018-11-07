@@ -13,10 +13,14 @@ from frutils.frutils import (
     string_for_boolean_filter,
     basename_filter,
     dirname_filter,
-    true_if_string_exists_filter,
-    false_if_string_exists_filter,
-    true_if_string_doesnt_exist_filter,
-    false_if_string_doesnt_exist_filter,
+    true_if_not_empty_filter,
+    false_if_not_empty_filter,
+    true_if_empty_filter,
+    false_if_empty_filter,
+    false_if_all_not_empty_filter,
+    true_if_all_not_empty_filter,
+    true_if_all_empty_filter,
+    false_if_all_empty_filter,
 )
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
@@ -243,7 +247,7 @@ FRECKLES_RUN_CONTROL_PROFILES = {
         "host": "localhost",
         "no_run": False,
         "output": "freckles",
-        "run_callback_config": {"profile": "default"},
+        "run_callback_config": {"profile": "verbose"},
     }
 }
 
@@ -255,9 +259,15 @@ DEFAULT_FRECKLES_JINJA_ENV.filters["default_if_empty"] = default_if_empty_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["string_for_boolean"] = string_for_boolean_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["basename"] = basename_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters["dirname"] = dirname_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_not_empty"] = true_if_string_exists_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_not_empty"] = false_if_string_exists_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_empty"] = true_if_string_doesnt_exist_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_not_empty"] = true_if_not_empty_filter
 DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "false_if_empty"
-] = false_if_string_doesnt_exist_filter
+    "true_if_all_not_empty"
+] = true_if_all_not_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_all_empty"] = true_if_all_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_not_empty"] = false_if_not_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters[
+    "false_if_all_not_empty"
+] = false_if_all_not_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_all_empty"] = false_if_all_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_empty"] = true_if_empty_filter
+DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_empty"] = false_if_empty_filter
