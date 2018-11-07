@@ -11,19 +11,19 @@ meta:
       - example
 
 tasks:
-    - download-file:
+    - file-downloaded:
         url: https://github.com/thecoshman/http/releases/download/v1.4.0/http-v1.4.0
         mode: "0775"
         dest: /opt/http-service/http
         owner: freckles
         become_user: root
-    - ensure-file-content:
+    - file-exists-with-content:
         path: /home/freckles/example/example_file
         owner: freckles
         content: |
           hello world!
         become_user: root
-    - add-systemd-unit:
+    - systemd-unit-exists:
         name: http
         ServiceUser: freckles
         ExecStart: /opt/http-service/http --port 8080 /home/freckles/example

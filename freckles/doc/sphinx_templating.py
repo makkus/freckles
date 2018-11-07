@@ -14,7 +14,7 @@ from .utils import get_frecklecute_help_text
 DOC_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["documentation"])
 
 ensure_user_example_path = os.path.join(
-    NSBL_INTERNAL_FRECKLET_REPO, "system", "users", "create-user.frecklet"
+    NSBL_INTERNAL_FRECKLET_REPO, "system", "users", "user-exists.frecklet"
 )
 with open(ensure_user_example_path) as f:
     ensure_user_frecklet_string = f.read()
