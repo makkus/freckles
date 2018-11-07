@@ -2,13 +2,13 @@
 import copy
 from collections import OrderedDict
 
-from cerberus import Validator
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils import is_templated, replace_strings_in_obj, get_template_keys
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
+from frutils.parameters import FrutilsNormalizer
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
 import logging
@@ -57,9 +57,10 @@ def remove_duplicate_args(args_list):
             continue
 
         existing_schema = result[arg_name]
-        if existing_schema["type"] != schema["type"] or existing_schema.get(
-            "schema", {}
-        ) != schema.get("schema", {}):
+
+        if existing_schema.get("type", "string") != schema.get(
+            "type", "string"
+        ) or existing_schema.get("schema", {}) != schema.get("schema", {}):
             log.debug(
                 "Multiple arguments with name '{}', but different details: {} -> {}".format(
                     arg_name, existing_schema, schema
@@ -110,12 +111,18 @@ def create_vars_for_task_item(task_item, arg_values):
     return vars
 
 
-def validate_var(key_name, value, schema):
+def validate_var(key_name, value, schema, password_coerced=True):
 
     schema = copy.deepcopy(schema)
     schema.pop("doc", None)
     schema.pop("cli", None)
+    schema.pop("__meta__", None)
     schema.pop("dependencies", None)  # we only validate a single argument here
+    if password_coerced:
+        schema.pop("coerce", None)
+
+    if schema.get("type", "string") == "password":
+        schema["type"] = "string"
 
     s = {key_name: schema}
     if value is not None:
@@ -123,7 +130,7 @@ def validate_var(key_name, value, schema):
     else:
         d = {}
 
-    val = Validator(s)
+    val = FrutilsNormalizer(s)
     valid = val.validated(d)
 
     if valid is None:

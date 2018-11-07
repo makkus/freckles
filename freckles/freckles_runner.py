@@ -4,6 +4,8 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
+import random
+import string
 import uuid
 from collections import OrderedDict
 
@@ -346,6 +348,8 @@ class FrecklesRunner(object):
         self.frecklecutable = None
         self.is_sub_task = is_sub_task
 
+        self.password_store_method = "environment"
+
         self.extra_vars = {}
 
         # self.run_config = FrecklesRunConfig(context, self.control_vars)
@@ -404,7 +408,38 @@ class FrecklesRunner(object):
         temp.pop("omit", None)
         log.debug("post-cleaned user input: {}".format(temp))
 
-        return temp
+        # process passwords
+        passwords = {}
+        password_vars = self.frecklecutable.frecklet.get_parameters().get_all_varnames_of_type(
+            "password"
+        )
+
+        for varname in password_vars:
+            if varname in temp.keys():
+                password_wrap = self.process_password_var(varname, temp[varname])
+                temp[varname] = password_wrap["alias"]
+                passwords[password_wrap["alias"]] = password_wrap
+
+        return (temp, passwords)
+
+    def process_password_var(self, var_name, value):
+
+        result = {"type": self.password_store_method}
+
+        if self.password_store_method == "environment":
+            result["password"] = value
+            result["alias"] = "".join(
+                random.choice(string.ascii_lowercase) for _ in range(14)
+            )
+            result["var"] = var_name
+        else:
+            raise FrecklesConfigException(
+                "Password-wrap-method '{}' not supported.".format(
+                    self.password_store_method
+                )
+            )
+
+        return result
 
     def describe_tasklist(self):
 
@@ -425,10 +460,12 @@ class FrecklesRunner(object):
         if self.frecklecutable is None:
             raise FrecklesConfigException("No frecklecutable set yet.")
 
-        cleaned_user_input = self.postprocess_user_input(user_input)
+        cleaned_user_input, passwords = self.postprocess_user_input(user_input)
         processed = self.frecklecutable.postprocess_click_input(cleaned_user_input)
 
-        result = self.execute_tasklist(vars=processed, run_config=run_config)
+        result = self.execute_tasklist(
+            vars=processed, run_config=run_config, passwords=passwords
+        )
 
         # result = self.frecklecutable.execute_tasklist(
         #     vars=processed, context=self.context, run_config=self.run_config, is_sub_task=self.is_sub_task
@@ -437,7 +474,7 @@ class FrecklesRunner(object):
         # log.debug("execute tasklist result:\n\n{}".format(pprintpp.pformat(result)))
         return result
 
-    def execute_tasklist(self, run_config, vars=None):
+    def execute_tasklist(self, run_config, vars=None, passwords=None):
 
         parent_task = TaskDetail(self.frecklecutable.name, "run", task_parent=None)
 
@@ -539,6 +576,7 @@ class FrecklesRunner(object):
                     final,
                     context_config=self.context.cnf.get_interpreter(connector),
                     run_config=run_config.run_cnf.get_interpreter(connector),
+                    passwords=passwords,
                     result_callback=result_callback,
                     output_callback=callback_adapter,
                     parent_task=task_details,

@@ -21,7 +21,7 @@ requirements = [
     "yaspin==0.13.0",
     "terminaltables==3.1.0",
     "rst2ansi==0.1.5",
-    "m2r==0.2.1"
+    "m2r==0.2.1",
 ]
 
 setup_requirements = ["pytest-runner"]

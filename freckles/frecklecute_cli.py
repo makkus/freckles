@@ -7,6 +7,8 @@ import click
 import click_completion
 import click_log
 
+from freckles.frecklet_arg_helpers import validate_var
+from frutils.doc import Doc
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable
 from .freckles_base_cli import FrecklesBaseCommand, create_context
@@ -109,7 +111,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 frecklecutable = Frecklecutable.create_from_file_or_name(
                     name, context=self.context
                 )
-            except (FrecklesConfigException) as e:
+            except (Exception) as e:
                 log.warn("Error creating command '{}': {}".format(name, e))
                 return None
             # runner.init(name)
@@ -118,7 +120,56 @@ class FrecklecuteCommand(FrecklesBaseCommand):
             @click.command(name=name)
             def command(*args, **kwargs):
 
+                for arg, details in frecklecutable.frecklet.args.items():
+
+                    if details.get("type", "string") == "password":
+                        coerce = "coerce" in details.keys()
+                        if details["required"] is True:
+                            click.echo(
+                                "Please provide a value for arg '{}'.".format(arg)
+                            )
+                            if details.get("doc", {}).get("short_help", "n/a") != "n/a":
+                                msg = details["doc"]["short_help"]
+                            else:
+                                msg = arg
+                            msg = Doc.to_list_item_format(
+                                msg, first_char_lowercase=False
+                            )
+                            pw = click.prompt(msg, type=str, hide_input=True)
+                            if coerce:
+                                pw = validate_var(
+                                    arg, pw, details, password_coerced=False
+                                )
+
+                            kwargs[arg] = pw
+                        else:
+                            if arg in kwargs.keys() and kwargs[arg] is True:
+                                click.echo(
+                                    "Please provide a value for arg '{}'.".format(arg)
+                                )
+                                if (
+                                    details.get("doc", {}).get("short_help", "n/a")
+                                    != "n/a"
+                                ):
+                                    msg = details["doc"]["short_help"]
+                                else:
+                                    msg = arg
+                                msg = Doc.to_list_item_format(
+                                    msg, first_char_lowercase=False
+                                )
+                                pw = click.prompt(msg, type=str, hide_input=True)
+                                if coerce:
+                                    pw = validate_var(
+                                        arg, pw, details, password_coerced=False
+                                    )
+
+                                kwargs[arg] = pw
+
+                            elif arg in kwargs.keys() and not kwargs[arg]:
+                                kwargs.pop(arg, None)
+
                 runner = FrecklesRunner(self.context)
+
                 runner.set_frecklecutable(frecklecutable)
                 runner.add_extra_vars(self.extra_vars)
 
