@@ -20,7 +20,6 @@ from frutils import (
     replace_string,
     DEFAULT_ENV,
 )
-from frutils.doc import Doc
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
 
@@ -189,7 +188,9 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                 #     )
 
                 parent_key = self.parent_metadata["task"][key]
-                task.setdefault("__inherited_keys__", {}).setdefault(key, []).append(parent_key)
+                task.setdefault("__inherited_keys__", {}).setdefault(key, []).append(
+                    parent_key
+                )
                 required_keys = get_template_keys(
                     parent_key, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                 )
