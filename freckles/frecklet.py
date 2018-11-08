@@ -152,7 +152,6 @@ class MoveEmbeddedTaskKeysProcessor(ConfigProcessor):
         for k in list(vars.keys()):
             if "." in k:
                 vars_to_move[k] = vars.pop(k)
-
         for k, v in vars_to_move.items():
             add_key_to_dict(new_config, k, v)
 
@@ -181,17 +180,18 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                 if key not in self.parent_metadata["task"].keys():
                     continue
 
-                if key in task.keys():
+                # if key in task.keys():
+                #
+                #     log.debug(
+                #         "Overwriting parent key '{}': {} -> {}".format(
+                #             key, task[key], "XXX"
+                #         )
+                #     )
 
-                    log.debug(
-                        "Overwriting parent key '{}': {} -> {}".format(
-                            key, task[key], "XXX"
-                        )
-                    )
-
-                task[key] = self.parent_metadata["task"][key]
+                parent_key = self.parent_metadata["task"][key]
+                task.setdefault("__inherited_keys__", {}).setdefault(key, []).append(parent_key)
                 required_keys = get_template_keys(
-                    task[key], jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    parent_key, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                 )
 
                 for k in required_keys:
@@ -503,11 +503,11 @@ class Frecklet(LuItem):
 
     def get_doc(self):
 
-        return Doc(self.doc)
+        return self.doc
 
     def get_help_string(self, out_format="md"):
 
-        help_string = self.doc.get("help", "n/a")
+        help_string = self.doc.get_help()
 
         help_format = self.meta.get("help_format", "markdown")
         if help_format == "markdown" and out_format == "rst":
@@ -516,9 +516,9 @@ class Frecklet(LuItem):
 
         return help_string
 
-    def get_short_help_string(self):
+    def get_short_help_string(self, list_item_format=False):
 
-        return self.doc.get("short_help", "n/a")
+        return self.doc.get_short_help(list_item_format=list_item_format)
 
     def __str__(self):
 

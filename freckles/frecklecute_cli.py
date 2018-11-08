@@ -204,7 +204,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 return None
             command.params = parameters
             command.help = frecklecutable.get_doc().get_help()
-            command.short_help = frecklecutable.get_doc().get_short_help()
+            command.short_help = frecklecutable.get_doc().get_short_help(list_item_format=True)
             # command.epilog = XXX
 
             return command

@@ -20,12 +20,27 @@ def is_disabled(task):
     if disabled is None:
         return False
 
-    if disabled is not True and disabled is not False and disabled:
-        raise FrecklesConfigException(
-            "value for 'disabled' key needs to be of type 'bool': {}".format(disabled)
-        )
+    if disabled is True:
+        return True
 
-    return disabled
+    if disabled is not False and disabled:
+
+        log.debug("Adding downstream skip condition: {}".format(disabled))
+        task.setdefault("__skip_internal__", []).append(disabled)
+        # raise FrecklesConfigException(
+        #     "value for 'disabled' key needs to be of type 'bool': {}".format(disabled)
+        # )
+
+    for skip in task.get("__inherited_keys__", {}).get("__skip__", []):
+
+        if skip is True:
+            return True
+
+        if skip is not False and skip:
+            log.debug("Adding downstream skip condition: {}".format(disabled))
+            task.setdefault("__skip_internal__", []).append(skip)
+
+    return False
 
 
 def needs_elevated_permissions(tasklist):
@@ -85,9 +100,9 @@ class Frecklecutable(object):
 
         return self.frecklet.get_help_string()
 
-    def get_short_help_string(self):
+    def get_short_help_string(self, list_item_format=False):
 
-        return self.frecklet.get_short_help_string()
+        return self.frecklet.get_short_help_string(list_item_format=list_item_format)
 
     def process_tasklist(self, vars=None):
 
