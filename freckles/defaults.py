@@ -234,7 +234,7 @@ FRECKLES_CNF_PROFILES = {
         # "allow_dynamic_frecklets": False,
         # "guess_args_for_roles": False,
         # "require_absolute_path": True,
-        "allowed_connectors": ["freckles", "shell", "nsbl"],
+        "allowed_connectors": ["freckles", "shell", "nsbl", "templig"],
         # "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
         # "run_folder": FRECKLES_RUN_DIR,
         "ignore_invalid_repos": True,

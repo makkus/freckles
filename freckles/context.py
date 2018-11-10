@@ -314,7 +314,6 @@ class FrecklesContext(object):
                     raise e
 
         for c_name, connector in self.connectors.items():
-
             supported_types = connector.get_supported_repo_content_types()
             if FRECKLETS_KEY in supported_types:
                 supported_types.remove(FRECKLETS_KEY)
