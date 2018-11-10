@@ -10,7 +10,7 @@ meta:
     tags:
       - example
 
-tasks:
+frecklets:
     - file-downloaded:
         url: https://github.com/thecoshman/http/releases/download/v1.4.0/http-v1.4.0
         mode: "0775"

@@ -6,8 +6,8 @@ meta:
     - debug
     - freckelize
 
-tasks:
-  - task:
+frecklets:
+  - frecklet:
       command: debug
       type: ansible-module
       __msg__: "debugging freckelize var: {{:: var1 ::}}"

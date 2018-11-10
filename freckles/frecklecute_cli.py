@@ -98,11 +98,15 @@ class FrecklecuteCommand(FrecklesBaseCommand):
         super(FrecklecuteCommand, self).__init__(**kwargs)
 
     def list_freckles_commands(self, ctx):
-
-        return self.context.get_frecklet_names(
-            allowed_tags=ctx.obj.get("allowed_frecklet_tags", None),
-            apropos=ctx.obj.get("apropos", None),
-        )
+        try:
+            return self.context.get_frecklet_names(
+                allowed_tags=ctx.obj.get("allowed_frecklet_tags", None),
+                apropos=ctx.obj.get("apropos", None),
+            )
+        except (Exception) as e:
+            log.debug(e, exc_info=1)
+            log.warn("Error creating commands: {}".format(e))
+            sys.exit(1)
 
     def get_freckles_command(self, ctx, name):
 
@@ -112,6 +116,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                     name, context=self.context
                 )
             except (Exception) as e:
+                log.debug(e, exc_info=1)
                 log.warn("Error creating command '{}': {}".format(name, e))
                 return None
             # runner.init(name)
