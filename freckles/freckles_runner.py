@@ -24,6 +24,7 @@ from .defaults import (
     FRECKLES_RUN_CONFIG_PROFILES_DIR,
     FRECKLES_CONTROL_CONFIG_SCHEMA,
     DEFAULT_FRECKLES_JINJA_ENV,
+    FRECKLET_NAME,
 )
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
@@ -510,7 +511,7 @@ class FrecklesRunner(object):
 
                     # import pp
                     # print("---------------")
-                    # print("TASK")
+                    # print(FRECKLET_NAME)
                     # pp(task)
                     # print("INPUT")
                     # pp(input)
@@ -541,7 +542,7 @@ class FrecklesRunner(object):
                     # import sys, pp
                     # pp(replaced)
                     # sys.exit()
-                    if not is_disabled(t["task"]):
+                    if not is_disabled(t[FRECKLET_NAME]):
                         final.append(t)
                     else:
                         log.debug("Skipping task: {}".format(t))

@@ -10,7 +10,7 @@ import click
 from ruamel.yaml import YAML
 
 import frkl
-from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV
+from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLETS_KEY
 from freckles.exceptions import FrecklesConfigException
 from freckles.frecklecutable import Frecklecutable
 from freckles.freckles_runner import (
@@ -519,7 +519,7 @@ def init_freckle(
     # for p in profiles.keys():
     #     click.echo("  - {}".format(p))
 
-    frecklet_metadata = {"tasks": tasklist}
+    frecklet_metadata = {FRECKLETS_KEY: tasklist}
     frecklet = context.create_frecklet(frecklet_metadata)
     frecklecutable = Frecklecutable("freckelize-profiles", frecklet, context=context)
 

@@ -7,6 +7,7 @@ import logging
 import os
 from collections import OrderedDict
 
+from .defaults import FRECKLET_NAME
 from .context import FrecklesContext
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import add_user_input
@@ -46,7 +47,7 @@ def is_disabled(task):
 def needs_elevated_permissions(tasklist):
 
     for task in tasklist:
-        become = task["task"].get("become", False) or task["task"].get(
+        become = task[FRECKLET_NAME].get("become", False) or task[FRECKLET_NAME].get(
             "needs_become", False
         )
         if become:
@@ -118,9 +119,9 @@ class Frecklecutable(object):
 
         unknowns = []
         for item in tl:
-            task_type = item["task"].get("type", "unknown")
+            task_type = item[FRECKLET_NAME].get("type", "unknown")
             if task_type == "unknown":
-                unknowns.append(item["task"]["name"])
+                unknowns.append(item[FRECKLET_NAME]["name"])
 
         if unknowns:
             raise FrecklesConfigException(
@@ -133,9 +134,9 @@ class Frecklecutable(object):
         task_list_index = 0
         for index, task in enumerate(tl):
 
-            task["task"]["_task_id"] = index
+            task[FRECKLET_NAME]["_task_id"] = index
 
-            task_type = task["task"]["type"]
+            task_type = task[FRECKLET_NAME]["type"]
             connector_task = self.context.connector_map.get(task_type, None)
             if connector_task is None:
                 raise FrecklesConfigException(
@@ -148,7 +149,7 @@ class Frecklecutable(object):
             if current_connector != connector_task:
                 # new frecklecutable run
                 for t in current_task_list:
-                    t["task"]["_task_list_id"] = task_list_index
+                    t[FRECKLET_NAME]["_task_list_id"] = task_list_index
                 task_lists[task_list_index] = {
                     "task_list": current_task_list,
                     "connector": current_connector,
@@ -162,7 +163,7 @@ class Frecklecutable(object):
 
         if current_task_list:
             for t in current_task_list:
-                t["task"]["_task_list_id"] = task_list_index
+                t[FRECKLET_NAME]["_task_list_id"] = task_list_index
             task_lists[task_list_index] = {
                 "task_list": current_task_list,
                 "connector": current_connector,
@@ -275,7 +276,7 @@ class Frecklecutable(object):
     #                 # import sys, pp
     #                 # pp(replaced)
     #                 # sys.exit()
-    #                 if not is_disabled(t["task"]):
+    #                 if not is_disabled(t[FRECKLET_NAME]):
     #                     final.append(t)
     #                 else:
     #                     log.debug("Skipping task: {}".format(t))

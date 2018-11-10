@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 from termcolor import colored
 
 from frutils.doc import Doc
+from .defaults import FRECKLET_NAME, FRECKLETS_KEY
 
 log = logging.getLogger("frutils")
 
@@ -46,11 +47,11 @@ class FrecklesDoc:
 
         for task in self.tasklist:
 
-            frecklet_name = task["task"]["_parent_frecklet"]["name"]
+            frecklet_name = task[FRECKLET_NAME]["_parent_frecklet"]["name"]
 
             if current_frecklet_name is None or frecklet_name != current_frecklet_name:
                 if current_frecklet_name is not None:
-                    current_frecklet_info["tasks"] = current_task_list
+                    current_frecklet_info[FRECKLETS_KEY] = current_task_list
                     result.append(current_frecklet_info)
 
                 current_frecklet_info = {}
@@ -62,10 +63,10 @@ class FrecklesDoc:
 
             current_frecklet_name = frecklet_name
 
-            # task_id = task["task"]["_task_id"]
-            name = task["task"]["name"]
-            task_type = task["task"]["type"]
-            command = task["task"]["command"]
+            # task_id = task[FRECKLET_NAME]["_task_id"]
+            name = task[FRECKLET_NAME]["name"]
+            task_type = task[FRECKLET_NAME]["type"]
+            command = task[FRECKLET_NAME]["command"]
             doc = task.get("doc", {})
 
             current_task = {}
@@ -76,7 +77,7 @@ class FrecklesDoc:
 
             current_task_list.append(current_task)
 
-        current_frecklet_info["tasks"] = current_task_list
+        current_frecklet_info[FRECKLETS_KEY] = current_task_list
         result.append(current_frecklet_info)
 
         return result
@@ -112,8 +113,8 @@ class FrecklesDoc:
             )
             click.echo(u"{}   {}{} desc: {}".format(f_line, VERTICAL_RIGHT, END, help))
             click.echo(u"{}   {}{} tasks:".format(f_line, ARC_UP_RIGHT, END))
-            t_max = len(frecklet["tasks"])
-            for t_idx, t in enumerate(frecklet["tasks"]):
+            t_max = len(frecklet[FRECKLETS_KEY])
+            for t_idx, t in enumerate(frecklet[FRECKLETS_KEY]):
                 if t_idx == (t_max - 1):
                     t_end = ARC_UP_RIGHT
                     t_line = " "

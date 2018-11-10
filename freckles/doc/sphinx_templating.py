@@ -10,6 +10,7 @@ from freckles.frecklet import FRECKLET_SCHEMA
 from frutils import readable, StringYAML, JINJA_DELIMITER_PROFILES, replace_string
 from freckles_connector_nsbl.defaults import NSBL_INTERNAL_FRECKLET_REPO
 from .utils import get_frecklecute_help_text
+from freckles.defaults import FRECKLETS_KEY
 
 DOC_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["documentation"])
 
@@ -25,14 +26,14 @@ ensure_user_data = yaml.load(ensure_user_frecklet_string)
 
 ensure_user_doc_section = ensure_user_data.get("doc")
 ensure_user_args_section = ensure_user_data.get("args")
-ensure_user_tasks_section = ensure_user_data.get("tasks")
+ensure_user_tasks_section = ensure_user_data.get(FRECKLETS_KEY)
 ensure_user_doc_string = readable(
     {"doc": ensure_user_doc_section}, out="yaml", sort_keys=True
 )
 ensure_user_args_string = readable(
     {"args": ensure_user_args_section}, out="yaml", sort_keys=True
 )
-ensure_user_tasks_string = readable({"tasks": ensure_user_tasks_section}, out="yaml")
+ensure_user_tasks_string = readable({FRECKLETS_KEY: ensure_user_tasks_section}, out="yaml")
 
 frecklecute_help_text = get_frecklecute_help_text()
 

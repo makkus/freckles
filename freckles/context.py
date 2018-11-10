@@ -16,7 +16,7 @@ from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .connectors.connectors import get_connectors
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER
+from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER, FRECKLETS_KEY
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,
@@ -40,7 +40,7 @@ log = logging.getLogger("freckles")
 # FRECKLES_ABBREVS = generate_custom_abbrevs(FRECKLES_EXTRA_ABBREVS)
 
 
-add_luitem_reader_profile("frecklets", FRECKLET_DEFAULT_READER_PROFILE)
+add_luitem_reader_profile(FRECKLETS_KEY, FRECKLET_DEFAULT_READER_PROFILE)
 add_luitem_reader_profile("frecklets_path", FRECKLET_PATH_DEFAULT_READER_PROFILE)
 
 
@@ -261,14 +261,14 @@ class FrecklesContext(object):
 
         self.connector_indexes = {}
 
-        included_frecklets = os.path.join(MODULE_FOLDER, "external", "frecklets")
+        included_frecklets = os.path.join(MODULE_FOLDER, "external", FRECKLETS_KEY)
         try:
             index = LuItemFolderIndex(
                 url=included_frecklets,
                 pkg_base_url=included_frecklets,
                 item_type="frecklet",
                 reader_params={
-                    "reader_profile": "frecklets",
+                    "reader_profile": FRECKLETS_KEY,
                     "ignore_invalid_dictlets": True,
                 },
                 ignore_invalid_pkg_metadata=True,
@@ -284,7 +284,7 @@ class FrecklesContext(object):
                 raise e
 
         frecklet_repos = self.repo_manager.get_repo_descs(
-            only_content_types=["frecklets"],
+            only_content_types=[FRECKLETS_KEY],
             ignore_invalid_repos=self.ignore_invalid_repos,
         )
 
@@ -301,7 +301,7 @@ class FrecklesContext(object):
                     pkg_base_url=path,
                     item_type="frecklet",
                     reader_params={
-                        "reader_profile": "frecklets",
+                        "reader_profile": FRECKLETS_KEY,
                         "ignore_invalid_dictlets": True,
                     },
                     ignore_invalid_pkg_metadata=True,
@@ -316,8 +316,8 @@ class FrecklesContext(object):
         for c_name, connector in self.connectors.items():
 
             supported_types = connector.get_supported_repo_content_types()
-            if "frecklets" in supported_types:
-                supported_types.remove("frecklets")
+            if FRECKLETS_KEY in supported_types:
+                supported_types.remove(FRECKLETS_KEY)
 
             if not supported_types:
                 continue

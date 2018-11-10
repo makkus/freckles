@@ -17,13 +17,13 @@ from frkl import dict_from_url
 from frkl.helpers import content_from_url
 from frkl.utils import expand_string_to_git_details
 
-from .defaults import FRECKLES_CACHE_BASE, MIXED_CONTENT_TYPE
+from .defaults import FRECKLES_CACHE_BASE, MIXED_CONTENT_TYPE, FRECKLETS_KEY
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
 log = logging.getLogger("freckles")
 
 
-# DEFAULT_URLS = {"frecklets": [os.path.join(MODULE_FOLDER, "external", "frecklets")]}
+# DEFAULT_URLS = {FRECKLETS_KEY: [os.path.join(MODULE_FOLDER, "external", FRECKLETS_KEY)]}
 
 PULL_CACHE = {}
 
@@ -143,7 +143,7 @@ class RepoManager(object):
                 if (
                     content_types
                     and repo_type not in content_types
-                    and repo_type != "frecklets"
+                    and repo_type != FRECKLETS_KEY
                     and repo_type != MIXED_CONTENT_TYPE
                 ):
                     continue

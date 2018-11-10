@@ -4,6 +4,8 @@ import logging
 import sys
 
 import click
+
+from freckles.defaults import FRECKLET_NAME
 from frutils.doc import Doc
 from rst2ansi import rst2ansi
 from ruamel.yaml import YAML
@@ -109,7 +111,7 @@ def task():
     is_flag=True,
     default=False,
 )
-@click.argument("frecklet_name", metavar="TASK", nargs=1, required=False)
+@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
 @click.pass_context
 def info(ctx, frecklet_name, show_vars, show_links):
 
@@ -143,7 +145,7 @@ def info(ctx, frecklet_name, show_vars, show_links):
     is_flag=True,
     default=False,
 )
-@click.argument("vars", metavar="TASK", nargs=-1, required=True)
+@click.argument("vars", metavar=FRECKLET_NAME, nargs=-1, required=True)
 @click.pass_context
 def vars(ctx, vars, only_names):
 

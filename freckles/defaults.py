@@ -24,9 +24,12 @@ from frutils.frutils import (
 )
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
+FRECKLET_NAME = "frecklet"
+FRECKLETS_KEY = "frecklets"
+
 MODULE_FOLDER = os.path.join(os.path.dirname(__file__))
 EXTERNAL_FOLDER = os.path.join(MODULE_FOLDER, "external")
-DEFAULT_FRECKLETS_FOLDER = os.path.join(EXTERNAL_FOLDER, "frecklets")
+DEFAULT_FRECKLETS_FOLDER = os.path.join(EXTERNAL_FOLDER, FRECKLETS_KEY)
 
 if os.path.exists(os.path.expanduser("~/.freckles")):
     FRECKLES_CONFIG_DIR = os.path.expanduser("~/.freckles")
@@ -41,7 +44,7 @@ MIXED_CONTENT_TYPE = "hodgepodge"
 
 # COMMUNITY_REPO_URL = "https://gitlab.com/freckles-io/freckles-community.git"
 # COMMUNITY_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "community")
-# COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, "frecklets")
+# COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, FRECKLETS_KEY)
 # COMMUNITY_ROLES_FOLDER = os.path.join(COMMUNITY_FOLDER, "roles")
 # COMMUNITY_REPO_DESC = {
 #     "path": COMMUNITY_FOLDER,
@@ -55,7 +58,7 @@ FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_CONFIG_PROFILES_DIR = os.path.expanduser(
     os.path.join(FRECKLES_CONFIG_DIR, "run-profiles")
 )
-USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_CONFIG_DIR, "frecklets")
+USER_FRECKLETS_FOLDER = os.path.join(FRECKLES_CONFIG_DIR, FRECKLETS_KEY)
 
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
@@ -83,10 +86,10 @@ def PICK_ALL_FRECKLET_FILES_FUNCTION(path):
 DEFAULT_FRECKLES_REPOS = ["default", "user"]
 
 DEFAULT_FRECKLES_ALIASES = {
-    "default": {"frecklets": [DEFAULT_FRECKLETS_FOLDER]},
-    "user": {"frecklets": [USER_FRECKLETS_FOLDER]},
+    "default": {FRECKLETS_KEY: [DEFAULT_FRECKLETS_FOLDER]},
+    "user": {FRECKLETS_KEY: [USER_FRECKLETS_FOLDER]},
     # "community": {
-    #     "frecklets": [COMMUNITY_FRECKLETS_FOLDER],
+    #     FRECKLETS_KEY: [COMMUNITY_FRECKLETS_FOLDER],
     #     "roles": [COMMUNITY_ROLES_FOLDER],
     # },
 }
@@ -211,8 +214,8 @@ FRECKLET_DEFAULT_READER_PROFILE = {
     "use_subfolders_as_tags": True,
     "get_pkg_name_function": PICK_ALL_FRECKLET_FILES_FUNCTION,
     "get_pkg_name_function_metadata": PICK_ALL_FRECKLET_FILES_FUNCTION,
-    "default_metadata_key": "frecklet",
-    "move_list_to_dict_key": "tasks",
+    "default_metadata_key": "frecklet_meta",
+    "move_list_to_dict_key": FRECKLETS_KEY,
 }
 FRECKLET_PATH_DEFAULT_READER_PROFILE = {
     "use_files": True,
@@ -221,8 +224,8 @@ FRECKLET_PATH_DEFAULT_READER_PROFILE = {
     "use_subfolders_as_tags": True,
     "get_pkg_name_function": PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME,
     "get_pkg_name_function_metadata": PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME,
-    "default_metadata_key": "frecklet",
-    "move_list_to_dict_key": "tasks",
+    "default_metadata_key": "frecklet_meta",
+    "move_list_to_dict_key": FRECKLETS_KEY,
 }
 FRECKLES_CNF_PROFILES = {
     "default": {
@@ -247,7 +250,7 @@ FRECKLES_RUN_CONTROL_PROFILES = {
         "host": "localhost",
         "no_run": False,
         "output": "freckles",
-        "run_callback_config": {"profile": "verbose"},
+        "run_callback_config": {"profile": "default"},
     }
 }
 

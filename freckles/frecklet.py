@@ -23,7 +23,7 @@ from frutils import (
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
 
-from .defaults import DEFAULT_FRECKLES_JINJA_ENV
+from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME, FRECKLETS_KEY
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import (
     extract_base_args,
@@ -35,10 +35,10 @@ log = logging.getLogger("freckles")
 
 DEFAULT_KEY_KEY = "default-key"
 FRECKLET_FORMAT = {
-    CHILD_MARKER_NAME: "tasks",
-    DEFAULT_LEAF_NAME: "task",
+    CHILD_MARKER_NAME: FRECKLETS_KEY,
+    DEFAULT_LEAF_NAME: FRECKLET_NAME,
     DEFAULT_LEAFKEY_NAME: "name",
-    OTHER_KEYS_NAME: ["args", "doc", "frecklet", "meta"],
+    OTHER_KEYS_NAME: ["args", "doc", "frecklet_meta", "meta"],
     KEY_MOVE_MAP_NAME: {"*": ("vars", "default")},
     "use_context": True,
 }
@@ -54,13 +54,13 @@ def generate_tasks_format(frecklet_index):
         if frecklet is None:
             continue
 
-        if DEFAULT_KEY_KEY in frecklet.frecklet.keys():
+        if DEFAULT_KEY_KEY in frecklet.frecklet_meta.keys():
             # TODO: check for duplicate keys?
             result[KEY_MOVE_MAP_NAME][frecklet_name] = "vars/{}".format(
-                frecklet.frecklet[DEFAULT_KEY_KEY]
+                frecklet.frecklet_meta[DEFAULT_KEY_KEY]
             )
 
-    # result["key_move_map"]["skip"] = ("task", "skip")
+    # result["key_move_map"]["skip"] = (FRECKLET_NAME, "skip")
 
     return result
 
@@ -68,19 +68,19 @@ def generate_tasks_format(frecklet_index):
 def fill_defaults(task_item):
 
     if (
-        "name" not in task_item["task"].keys()
-        and "command" not in task_item["task"].keys()
+        "name" not in task_item[FRECKLET_NAME].keys()
+        and "command" not in task_item[FRECKLET_NAME].keys()
     ):
         raise FrecklesConfigException(
             "Neither 'command' nor 'name' key in task config: {}".format(
-                task_item["task"]
+                task_item[FRECKLET_NAME]
             )
         )
 
-    if "name" not in task_item["task"].keys():
-        task_item["task"]["name"] = task_item["task"]["command"]
-    elif "command" not in task_item["task"].keys():
-        task_item["task"]["command"] = task_item["task"]["name"]
+    if "name" not in task_item[FRECKLET_NAME].keys():
+        task_item[FRECKLET_NAME]["name"] = task_item[FRECKLET_NAME]["command"]
+    elif "command" not in task_item[FRECKLET_NAME].keys():
+        task_item[FRECKLET_NAME]["command"] = task_item[FRECKLET_NAME]["name"]
 
 
 DEFAULT_ARG_SCHEMA = {"type": "string", "required": True, "doc": {"help": "n/a"}}
@@ -109,8 +109,8 @@ class TaskTypePrefixProcessor(ConfigProcessor):
 
         new_config = self.current_input_config
 
-        command_name = new_config["task"].get("command", None)
-        task_type = new_config["task"].get("type", None)
+        command_name = new_config[FRECKLET_NAME].get("command", None)
+        task_type = new_config[FRECKLET_NAME].get("type", None)
 
         if "::" in command_name:
 
@@ -123,14 +123,14 @@ class TaskTypePrefixProcessor(ConfigProcessor):
 
             task_type, command_name = command_name.split("::", 1)
 
-            new_config["task"]["command"] = command_name
-            new_config["task"]["type"] = task_type
+            new_config[FRECKLET_NAME]["command"] = command_name
+            new_config[FRECKLET_NAME]["type"] = task_type
 
-        become = new_config["task"].get("become", None)
+        become = new_config[FRECKLET_NAME].get("become", None)
 
         if task_type and task_type.isupper() and become is None:
-            new_config["task"]["become"] = True
-            new_config["task"]["type"] = task_type.lower()
+            new_config[FRECKLET_NAME]["become"] = True
+            new_config[FRECKLET_NAME]["type"] = task_type.lower()
 
         return new_config
 
@@ -173,10 +173,10 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
 
         if self.parent_metadata:
 
-            task = new_config["task"]
+            task = new_config[FRECKLET_NAME]
             for key in InheritedTaskKeyProcessor.INHERITED_TASK_KEYS:
 
-                if key not in self.parent_metadata["task"].keys():
+                if key not in self.parent_metadata[FRECKLET_NAME].keys():
                     continue
 
                 # if key in task.keys():
@@ -187,7 +187,7 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                 #         )
                 #     )
 
-                parent_key = self.parent_metadata["task"][key]
+                parent_key = self.parent_metadata[FRECKLET_NAME][key]
                 task.setdefault("__inherited_keys__", {}).setdefault(key, []).append(
                     parent_key
                 )
@@ -211,11 +211,11 @@ FRECKLET_SCHEMA = {
     "doc": {"type": "dict", "schema": {"short_help": {"type": "string"}}},
     "meta": {"type": "dict"},
     "args": {"type": "dict", "schema": {"type": "string"}},
-    "tasks": {
+    FRECKLETS_KEY: {
         "type": "list",
         "schema": {
             "type": "dict",
-            "schema": {"task": {"type": "dict"}, "vars": {"type": "dict"}},
+            "schema": {FRECKLET_NAME: {"type": "dict"}, "vars": {"type": "dict"}},
         },
     },
 }
@@ -245,9 +245,9 @@ class AugmentingTaskProcessor(ConfigProcessor):
         args = new_config.pop("args", None)
 
         # maybe, just in case, store the meta-info, but not at root level
-        frecklet = new_config.pop("frecklet", None)
+        frecklet = new_config.pop("frecklet_meta", None)
         new_config.pop("meta", None)
-        new_config["task"]["_parent_frecklet"] = frecklet
+        new_config[FRECKLET_NAME]["_parent_frecklet"] = frecklet
 
         # get all template keys from this frecklet
         template_keys = sorted(
@@ -305,12 +305,12 @@ class AugmentingTaskProcessor(ConfigProcessor):
             arg_tree.append(arg_tree_item)
 
         new_config["arg_tree"] = arg_tree
-        task_type = new_config["task"].get("type", None)
+        task_type = new_config[FRECKLET_NAME].get("type", None)
         if task_type is not None and task_type != "frecklet":
             yield new_config
             return
 
-        child_name = new_config["task"].get("name", None)
+        child_name = new_config[FRECKLET_NAME].get("name", None)
         if child_name is None:
             raise FrecklesConfigException(
                 "No 'name' key found in processed task metadata: {}".format(new_config)
@@ -355,7 +355,7 @@ class Frecklet(LuItem):
     @classmethod
     def pdict(cls, frecklet_metadata):
 
-        task = frecklet_metadata.get("task", None)
+        task = frecklet_metadata.get(FRECKLET_NAME, None)
         if task is None:
             raise FrecklesConfigException("No 'task' key in frecklet metadata.")
 
@@ -365,7 +365,7 @@ class Frecklet(LuItem):
         task.pop("_task_id")
         task.pop("_task_list_id")
         task.pop("_parent_frecklet")
-        result["task"] = task
+        result[FRECKLET_NAME] = task
 
         vars = frecklet_metadata.get("vars", {})
         result["vars"] = vars
@@ -381,7 +381,7 @@ class Frecklet(LuItem):
 
     def get_urls(self):
 
-        urls = self.frecklet.get("urls")
+        urls = self.frecklet_meta.get("urls")
         result = []
         for u in urls:
             url_raw = u["url"]
@@ -417,7 +417,7 @@ class Frecklet(LuItem):
 
     def process_metadata(self, metadata):
 
-        tasks = metadata.get("tasks", None)
+        tasks = metadata.get(FRECKLETS_KEY, None)
         if tasks is None:
             raise FrecklesConfigException(
                 "No tasks specified in frecklet: {}".format(metadata)
@@ -432,7 +432,7 @@ class Frecklet(LuItem):
         if args_raw is None:
             args_raw_temp = list(
                 get_template_keys(
-                    {"tasks": tasks, "vars": vars}, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    {FRECKLETS_KEY: tasks, "vars": vars}, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                 )
             )
             args_raw = {}
@@ -441,20 +441,20 @@ class Frecklet(LuItem):
 
         doc = metadata.get("doc", {})
 
-        frecklet = metadata.get("frecklet", {})
+        frecklet_meta = metadata.get("frecklet_meta", {})
 
         return {
-            "tasks": tasks,
+            FRECKLETS_KEY: tasks,
             "args": args_raw,
             "doc": doc,
-            "frecklet": frecklet,
+            "frecklet_meta": frecklet_meta,
             "vars": vars,
             "meta": meta,
         }
 
     def process_tasklist(self, parent=None):
 
-        log.debug("Processing tasklist for frecklet: {}".format(self.frecklet))
+        log.debug("Processing tasklist for frecklet: {}".format(self.frecklet_meta))
 
         if parent is None:
             parent = {}

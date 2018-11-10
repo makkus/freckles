@@ -9,7 +9,7 @@ from frutils import is_templated, replace_strings_in_obj, get_template_keys
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
-from .defaults import DEFAULT_FRECKLES_JINJA_ENV
+from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME
 from .exceptions import FrecklesConfigException
 import logging
 
@@ -104,7 +104,7 @@ def create_vars_for_task_item(task_item, arg_values):
             vars[key] = value
         except (Exception) as e:
             # TODO: double check this is ok
-            if "__skip__" in task_item["task"].keys():
+            if "__skip__" in task_item[FRECKLET_NAME].keys():
                 log.debug("Invalid var, assuming this task will be skipped later on.")
             else:
                 raise e

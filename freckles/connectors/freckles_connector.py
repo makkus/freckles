@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from freckles.defaults import FRECKLET_NAME
 from freckles.freckles_runner import FrecklesRunner
 
 from .connectors import FrecklesConnector
@@ -33,7 +33,7 @@ class FrecklesChildConnector(FrecklesConnector):
         )
         for task in tasklist:
 
-            command = task["task"]["command"]
+            command = task[FRECKLET_NAME]["command"]
             vars = task.get("vars", {})
             runner = FrecklesRunner(self.context, is_sub_task=True)
             runner.load_frecklecutable_from_name_or_file(command)
@@ -68,8 +68,8 @@ class FrecklesCallbackAdapter(object):
     def add_command_started(self, task):
 
         details = {}
-        # details["task_id"] = task["task"]["_task_id"]
-        details["name"] = task["task"]["name"]
+        # details["task_id"] = task[FRECKLET_NAME]["_task_id"]
+        details["name"] = task[FRECKLET_NAME]["name"]
         self.output_callback.task_started(details)
 
     def add_command_result(self, result_dict):
