@@ -440,7 +440,8 @@ class FrecklesContext(object):
                 "Could not find frecklet '{}'".format(frecklet_path_or_name_or_metadata)
             )
 
-        return copy.deepcopy(frecklet)
+        return frecklet
+        # return copy.deepcopy(frecklet)
 
     def get_frecklet_names(self, allowed_tags=None, apropos=None):
         """Lists all available frecklet names, filtered by tags or strings in the description.
