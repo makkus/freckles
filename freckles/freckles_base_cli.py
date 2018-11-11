@@ -231,7 +231,7 @@ class FrecklesBaseCommand(click.MultiCommand):
         super(FrecklesBaseCommand, self).__init__(
             name=None,
             invoke_without_command=False,
-            no_args_is_help=None,
+            no_args_is_help=False,
             subcommand_metavar=None,
             chain=False,
             result_callback=None,

@@ -203,6 +203,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 parameters = frecklecutable.generate_click_parameters(
                     default_vars=self.extra_vars
                 )
+                # parameters = []
             except (Exception) as e:
                 log.warn("Error parsing frecklet '{}': {}".format(name, e))
                 log.debug(e, exc_info=1)
@@ -255,6 +256,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 )
 @click.pass_context
 def cli(ctx, vars, **kwargs):
+
     pass
 
 

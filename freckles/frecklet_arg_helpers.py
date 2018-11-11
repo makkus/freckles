@@ -194,7 +194,6 @@ def create_var_value(arg_branch, arg_values):
 
     else:
         if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
-
             if "value" in arg_branch.keys():
                 value = arg_branch["value"]
             else:

@@ -33,7 +33,9 @@ ensure_user_doc_string = readable(
 ensure_user_args_string = readable(
     {"args": ensure_user_args_section}, out="yaml", sort_keys=True
 )
-ensure_user_tasks_string = readable({FRECKLETS_KEY: ensure_user_tasks_section}, out="yaml")
+ensure_user_tasks_string = readable(
+    {FRECKLETS_KEY: ensure_user_tasks_section}, out="yaml"
+)
 
 frecklecute_help_text = get_frecklecute_help_text()
 

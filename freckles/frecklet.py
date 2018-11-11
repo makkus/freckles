@@ -432,7 +432,8 @@ class Frecklet(LuItem):
         if args_raw is None:
             args_raw_temp = list(
                 get_template_keys(
-                    {FRECKLETS_KEY: tasks, "vars": vars}, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    {FRECKLETS_KEY: tasks, "vars": vars},
+                    jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
                 )
             )
             args_raw = {}
@@ -459,7 +460,8 @@ class Frecklet(LuItem):
         if parent is None:
             parent = {}
 
-        task_format = generate_tasks_format(self.index)
+        # task_format = generate_tasks_format(self.index)
+        task_format = FRECKLET_FORMAT
         chain = [
             FrklProcessor(**task_format),
             CommandNameProcessor(),
