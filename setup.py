@@ -5,7 +5,7 @@
 
 from setuptools import setup, find_packages
 
-with open("README.rst") as readme_file:
+with open("README.md") as readme_file:
     readme = readme_file.read()
 
 with open("HISTORY.rst") as history_file:
@@ -59,9 +59,10 @@ setup(
         ],
         "freckfreckfreck.plugins": [
             "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
-            "tasks=freckles.freckfreckfreck.fff_task_plugin:tasks",
-            "task=freckles.freckfreckfreck.fff_task_plugin:task",
+            "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
+            "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
             "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
+            "filter=freckles.freckfreckfreck.fff_filter_plugin:filter",
         ],
         "freckelize.plugins": [
             "init=freckles.freckelize.freckelize_init_plugin:init_freckle",
