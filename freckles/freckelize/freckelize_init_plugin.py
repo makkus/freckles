@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import copy
 import logging
 import os
 import sys
@@ -414,7 +415,7 @@ def init_freckle(
                 # TODO: link to explanation
                 sys.exit()
 
-        frecklet = context.create_frecklet(profile)
+        frecklet = copy.deepcopy(context.create_frecklet(profile))
 
         can_freckelize = frecklet.meta.get("freckelize", None)
         try:
@@ -520,7 +521,7 @@ def init_freckle(
     #     click.echo("  - {}".format(p))
 
     frecklet_metadata = {FRECKLETS_KEY: tasklist}
-    frecklet = context.create_frecklet(frecklet_metadata)
+    frecklet = copy.deepcopy(context.create_frecklet(frecklet_metadata))
     frecklecutable = Frecklecutable("freckelize-profiles", frecklet, context=context)
 
     arg_list = frecklecutable.generate_click_parameters()
