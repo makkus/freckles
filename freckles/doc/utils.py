@@ -71,4 +71,5 @@ def render_frecklet(
     repl_dict = {"frecklet_name": frecklet_name, "frecklet": frecklet, "show": show}
     template = jinja_env.get_template(template_name)
     rendered = template.render(**repl_dict)
+
     return rendered

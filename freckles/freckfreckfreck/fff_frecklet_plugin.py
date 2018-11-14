@@ -4,8 +4,12 @@ import logging
 import sys
 
 import click
+from pygments import highlight
+from pygments.formatters.terminal256 import Terminal256Formatter
+from pygments.lexers.data import YamlLexer
 
 from freckles.defaults import FRECKLET_NAME
+from frutils import readable_yaml
 from frutils.doc import Doc
 from rst2ansi import rst2ansi
 from ruamel.yaml import YAML
@@ -105,9 +109,10 @@ def frecklet():
 @click.option(
     "--hide-links", help="hide 'further reading'-links", is_flag=True, default=False
 )
-@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
+@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=True)
 @click.pass_context
-def help(ctx, frecklet_name, hide_vars, hide_links):
+def frecklet_help(ctx, frecklet_name, hide_vars, hide_links):
+    """Displays full help about a frecklet."""
 
     click.echo()
     context = ctx.obj["context"]
@@ -124,9 +129,7 @@ def help(ctx, frecklet_name, hide_vars, hide_links):
         sys.exit(1)
 
     show = {"variables": not hide_vars, "show_links": not hide_links}
-
     rst = utils.render_frecklet(frecklet_name, p, show=show)
-
     rendered = rst2ansi(rst)
     click.echo(rendered)
 
@@ -154,10 +157,33 @@ def info(ctx, frecklet_name):
     show = {"variables": False, "show_links": False}
 
     rst = utils.render_frecklet(frecklet_name, p, show=show)
-
     rendered = rst2ansi(rst)
+
     click.echo(rendered)
 
+@frecklet.command("print")
+@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
+@click.pass_context
+def print_frecklet(ctx, frecklet_name):
+    """Prints the (raw) frecklet."""
+
+    click.echo()
+    context = ctx.obj["context"]
+
+    if not frecklet_name:
+        print_available_tasks(context)
+        sys.exit()
+
+    index = context.index
+
+    p = index.get_pkg(frecklet_name)
+    if p is None:
+        click.echo("No frecklet available for name: {}".format(frecklet_name))
+        sys.exit(1)
+
+    output_string = readable_yaml(p.metadata_raw, sort_keys=False)
+    output_string = highlight(output_string, YamlLexer(), Terminal256Formatter())
+    click.echo(output_string)
 
 @frecklet.command("vars")
 @click.option(
