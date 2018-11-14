@@ -75,13 +75,9 @@ frecklets:
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: parent_dir_mode | default(omit) ::}}"
-  - frecklet:
-      command: copy
-      type: ansible-module
-      __msg__: "[writing content to file: {{:: path ::}}]"
-      become: "{{ 'yes' if {{:: become ::}} or ( {{:: owner | default(false) ::}} and ansible_user != '{{:: owner ::}}' ) else 'no' }}"
-    vars:
-      dest: "{{:: path ::}}"
+  - file-exists-with-content-freck:
+      become: "{{:: become ::}}"
+      path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: mode | default(omit) ::}}"

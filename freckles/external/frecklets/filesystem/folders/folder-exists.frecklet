@@ -57,16 +57,11 @@ frecklets:
       group: "{{:: group ::}}"
   - user-exists:
       name: "{{:: owner ::}}"
-  - frecklet:
-      command: file
-      type: ansible-module
-      __msg__: "[creating directory: {{:: path ::}}']"
-      __skip__: "{{:: path | true_if_empty ::}}"
+  - folder-exists-freck:
       become: "{{:: become ::}}"
-    vars:
       path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: mode | default(omit) ::}}"
-      recurse: true
-      state: directory
+
+

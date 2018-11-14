@@ -71,14 +71,10 @@ frecklets:
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: parent_dir_mode | default(omit) ::}}"
       become: "{{:: become | default(omit) ::}}"
-  - frecklet:
-      command: file
-      type: ansible-module
-      __msg__: "[creating file (if it doesn't exist): {{:: path ::}}']"
-      become: "{{ 'yes' if {{:: become ::}} or ( {{:: owner | default(false) ::}} and ansible_user != '{{:: owner ::}}' ) else 'no' }}"
-    vars:
+  - file-exists-freck:
       path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: mode | default(omit) ::}}"
-      state: touch
+      become: "{{:: become::}}"
+

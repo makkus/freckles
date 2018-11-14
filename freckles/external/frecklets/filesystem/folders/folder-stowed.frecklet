@@ -54,13 +54,9 @@ frecklets:
       path: "{{:: target ::}}"
       owner: "{{:: target_owner | default(omit) ::}}"
       become: "{{:: target_owner | false_if_empty ::}}"
-  - frecklet:
-      command: stow
-      type: ansible-module
-      become: "{{:: target_owner | false_if_empty ::}}"
-      become_user: "{{:: target_owner | default(omit) ::}}"
-      __msg__: "stowing '{{:: src ::}} -> {{:: target ::}}"
-    vars:
+  - folder-stowed-freck:
+      become: "{{:: become ::}}"
+      target_owner: "{{:: target_owner | default(omit) ::}}"
       name: "{{:: dirname ::}}"
-      source_dir: "{{:: src ::}}"
-      target_dir: "{{:: target ::}}"
+      src: "{{:: src ::}}"
+      target: "{{:: target ::}}"

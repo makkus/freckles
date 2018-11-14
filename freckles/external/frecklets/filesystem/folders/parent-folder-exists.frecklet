@@ -54,30 +54,10 @@ meta:
     - featured-frecklecutable
 
 frecklets:
-  - frecklet:
-      command: stat
-      type: ansible-module
-      __msg__: "[checking if parent folder exists]"
+  - folder-exists:
       become: "{{:: become ::}}"
-      register: "__parent_folder__"
-    vars:
-      path: "{{:: path | dirname ::}}"
-  - group-exists:
-      frecklet.__skip__: "__parent_folder__.stat.exists"
-      group: "{{:: group ::}}"
-  - user-exists:
-      frecklet.__skip__: "__parent_folder__.stat.exists"
-      name: "{{:: owner ::}}"
-  - frecklet:
-      command: file
-      type: ansible-module
-      __msg__: "[creating directory: {{:: path | dirname ::}}']"
-      become: "{{ 'yes' if {{:: become ::}} or ansible_user != '{{:: owner ::}}' else 'no' }}"
-      when: "not __parent_folder__.stat.exists"
-    vars:
       path: "{{:: path | dirname ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: mode | default(omit) ::}}"
-      recurse: true
-      state: directory
+

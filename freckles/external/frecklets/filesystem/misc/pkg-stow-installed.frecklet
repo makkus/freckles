@@ -29,15 +29,13 @@ meta:
     - pkg
 
 frecklets:
-  - frecklet:
-      command: install
-      type: ansible-module
-      __msg__: "[enabling 'epel-release' on CentOS platform]"
-    vars:
+  - pkgs-installed:
+      pkg_mgr: "{{:: pkg_mgr ::}}"
       packages:
         - name: epel-release
           pkgs:
-            centos: epel-release
+            centos:
+              - epel-release
             default: ignore
   - pkgs-installed:
       packages:
