@@ -12,10 +12,11 @@ yaml = YAML(typ="safe")
 def repos(ctx):
     """command-group for repo management tasks"""
 
-    context = ctx.obj["context"]
-    control_dict = ctx.obj["control_dict"]
-
-    context.set_control_vars(control_vars=control_dict)
+    pass
+    # context = ctx.obj["context"]
+    # control_dict = ctx.obj["control_dict"]
+    #
+    # context.set_control_vars(control_vars=control_dict)
 
 
 @repos.command("list", short_help="list all repos")
