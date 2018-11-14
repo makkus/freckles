@@ -260,27 +260,27 @@ class FrecklesContext(object):
 
         self.connector_indexes = {}
 
-        included_frecklets = os.path.join(MODULE_FOLDER, "external", FRECKLETS_KEY)
-        try:
-            index = LuItemFolderIndex(
-                url=included_frecklets,
-                pkg_base_url=included_frecklets,
-                item_type="frecklet",
-                reader_params={
-                    "reader_profile": FRECKLETS_KEY,
-                    "ignore_invalid_dictlets": True,
-                },
-                ignore_invalid_pkg_metadata=True,
-            )
-            self.indexes.append(index)
-
-        except (NoSuchDictletException) as e:
-            log.debug(
-                "Can't create index '{}': {}".format(included_frecklets, e),
-                exc_info=True,
-            )
-            if not self.ignore_invalid_repos:
-                raise e
+        # included_frecklets = os.path.join(MODULE_FOLDER, "external", FRECKLETS_KEY)
+        # try:
+        #     index = LuItemFolderIndex(
+        #         url=included_frecklets,
+        #         pkg_base_url=included_frecklets,
+        #         item_type="frecklet",
+        #         reader_params={
+        #             "reader_profile": FRECKLETS_KEY,
+        #             "ignore_invalid_dictlets": True,
+        #         },
+        #         ignore_invalid_pkg_metadata=True,
+        #     )
+        #     self.indexes.append(index)
+        #
+        # except (NoSuchDictletException) as e:
+        #     log.debug(
+        #         "Can't create index '{}': {}".format(included_frecklets, e),
+        #         exc_info=True,
+        #     )
+        #     if not self.ignore_invalid_repos:
+        #         raise e
 
         frecklet_repos = self.repo_manager.get_repo_descs(
             only_content_types=[FRECKLETS_KEY],
@@ -288,7 +288,6 @@ class FrecklesContext(object):
         )
 
         for repo in frecklet_repos:
-
             path = self.repo_manager.get_repo(repo)
             if path is None:
                 log.debug("Not a valid repo, or repo doesn't exist: {}".format(repo))
