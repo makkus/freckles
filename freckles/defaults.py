@@ -4,24 +4,8 @@ import os
 
 from jinja2.nativetypes import NativeEnvironment
 
-from frutils import JINJA_DELIMITER_PROFILES
-from frutils.frutils import (
-    to_yaml_filter,
-    negate_filter,
-    negate_or_default_filter,
-    default_if_empty_filter,
-    string_for_boolean_filter,
-    basename_filter,
-    dirname_filter,
-    true_if_not_empty_filter,
-    false_if_not_empty_filter,
-    true_if_empty_filter,
-    false_if_empty_filter,
-    false_if_all_not_empty_filter,
-    true_if_all_not_empty_filter,
-    true_if_all_empty_filter,
-    false_if_all_empty_filter,
-)
+from frutils import JINJA_DELIMITER_PROFILES, jinja2_filters
+
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
 FRECKLET_NAME = "frecklet"
@@ -255,22 +239,5 @@ FRECKLES_RUN_CONTROL_PROFILES = {
 }
 
 DEFAULT_FRECKLES_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["freckles"])
-DEFAULT_FRECKLES_JINJA_ENV.filters["to_yaml"] = to_yaml_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["negate"] = negate_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["negate_or_default"] = negate_or_default_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["default_if_empty"] = default_if_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["string_for_boolean"] = string_for_boolean_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["basename"] = basename_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["dirname"] = dirname_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_not_empty"] = true_if_not_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "true_if_all_not_empty"
-] = true_if_all_not_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_all_empty"] = true_if_all_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_not_empty"] = false_if_not_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters[
-    "false_if_all_not_empty"
-] = false_if_all_not_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_all_empty"] = false_if_all_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["true_if_empty"] = true_if_empty_filter
-DEFAULT_FRECKLES_JINJA_ENV.filters["false_if_empty"] = false_if_empty_filter
+for filter_name, filter_details in jinja2_filters.ALL_FRUTIL_FILTERS.items():
+    DEFAULT_FRECKLES_JINJA_ENV.filters[filter_name] = filter_details["func"]
