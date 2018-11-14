@@ -28,7 +28,7 @@ from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import (
     extract_base_args,
     get_var_item_from_arg_tree,
-    ADD_NON_REQUIRED_ARGS,
+    DEFAULT_INHERIT_ARGS_MODE,
 )
 
 log = logging.getLogger("freckles")
@@ -240,13 +240,20 @@ class AugmentingTaskProcessor(ConfigProcessor):
     def process_current_config(self):
 
         new_config = self.current_input_config
+        # frecklet_level = new_config["meta"]["frecklet_level"]
+        if not self.parent_metadata:
+            frecklet_level = 0
+        else:
+            frecklet_level = self.parent_metadata["meta"]["__frecklet_level__"] + 1
+        new_config["meta"]["__frecklet_level__"] = frecklet_level
+        new_config["meta"]["__frecklet_name__"] = new_config["frecklet"]["name"]
 
         # the frecklets defined arguments, to pick from if we encounter a template key
         args = new_config.pop("args", None)
 
         # maybe, just in case, store the meta-info, but not at root level
         frecklet = new_config.pop("frecklet_meta", None)
-        new_config.pop("meta", None)
+        # new_config.pop("meta", None)
         new_config[FRECKLET_NAME]["_parent_frecklet"] = frecklet
 
         # get all template keys from this frecklet
@@ -263,7 +270,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         for key in template_keys:
 
-            arg_tree_item = {"var": key}
+            arg_tree_item = {"var": key, "__meta__": new_config["meta"]}
 
             schema = args.get(key, None)
             if schema is None:
@@ -399,13 +406,14 @@ class Frecklet(LuItem):
 
         tl = self.process_tasklist(parent=None)
 
-        inherit_non_required_args = (
-            self.metadata["meta"]
-            .get("cli", {})
-            .get("inherit_non_required_args", ADD_NON_REQUIRED_ARGS)
-        )
+        # inherit_non_required_args = (
+        #     self.metadata["meta"]
+        #     .get("cli", {})
+        #     .get("inherit_non_required_args", DEFAULT_INHERIT_ARGS_MODE)
+        # )
+        inherit_args_mode = self.metadata["meta"].get("inherit-child-args", DEFAULT_INHERIT_ARGS_MODE)
 
-        args = extract_base_args(tl, add_non_required_args=inherit_non_required_args)
+        args = extract_base_args(tl, inherit_args_mode=inherit_args_mode)
         # 'omit' is a special key
         args.pop("omit", None)
 
@@ -457,7 +465,9 @@ class Frecklet(LuItem):
 
         log.debug("Processing tasklist for frecklet: {}".format(self.frecklet_meta))
 
+        process_metadata = False
         if parent is None:
+            # process_metadata = True
             parent = {}
 
         # task_format = generate_tasks_format(self.index)
@@ -473,6 +483,12 @@ class Frecklet(LuItem):
 
         f = Frkl(self.metadata, chain)
         tasklist = f.process()
+
+        # if process_metadata:
+        #     for t in tasklist:
+        #         import pp, sys
+        #         pp(t)
+        #         sys.exit()
 
         return tasklist
 

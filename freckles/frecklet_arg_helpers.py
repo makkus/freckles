@@ -5,7 +5,7 @@ from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
-from frutils import is_templated, replace_strings_in_obj, get_template_keys
+from frutils import is_templated, replace_strings_in_obj, get_template_keys, readable_yaml
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
@@ -15,7 +15,7 @@ import logging
 
 log = logging.getLogger("freckles")
 
-ADD_NON_REQUIRED_ARGS = False
+DEFAULT_INHERIT_ARGS_MODE = "only-required"
 
 #
 # def remove_omit_values(item):
@@ -44,16 +44,17 @@ def get_var_item_from_arg_tree(arg_tree_list, var_key):
 
 
 def remove_duplicate_args(args_list):
-
     result = CommentedMap()
+    meta_dict = {}
 
-    for arg_name, schema in args_list:
+    for arg_name, schema, meta in args_list:
 
         if arg_name == "omit":
             continue
 
         if arg_name not in result.keys():
             result[arg_name] = schema
+            meta_dict[arg_name] = meta
             continue
 
         existing_schema = result[arg_name]
@@ -73,8 +74,9 @@ def remove_duplicate_args(args_list):
             )
 
         result[arg_name] = schema
+        meta_dict[arg_name] = meta
 
-    return result
+    return result, meta_dict
 
 
 def add_user_input(tasklist, arg_values):
@@ -93,7 +95,6 @@ def create_vars_for_task_item(task_item, arg_values):
 
     # TODO: currently, this does not extract args that are only used in the 'task' key, but not 'vars'
     arg_tree = task_item["arg_tree"]
-
     vars = {}
     for details in arg_tree:
 
@@ -166,9 +167,12 @@ def create_var_value(arg_branch, arg_values):
 
             raise Exception("Probably a bug, invalid key: {}".format(value))
 
-        v = replace_strings_in_obj(
-            value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-        )
+        try:
+            v = replace_strings_in_obj(
+                value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+            )
+        except (Exception) as e:
+            raise FrecklesConfigException("Could not process template (error: {}):\n\n{}".format(e, value))
         if not isinstance(v, bool) and not v:
             v = None
 
@@ -225,7 +229,7 @@ def create_var_value(arg_branch, arg_values):
             raise Exception("This is a bug, please report.")
 
 
-def extract_base_args(tasklist, add_non_required_args=ADD_NON_REQUIRED_ARGS):
+def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_MODE):
     """Extract the base args that are needed as input for this tasklist.
 
     Args:
@@ -240,23 +244,37 @@ def extract_base_args(tasklist, add_non_required_args=ADD_NON_REQUIRED_ARGS):
         args = extract_base_args_from_task_item(task)
         result.extend(args)
 
-    args = remove_duplicate_args(result)
+    args, meta_dict = remove_duplicate_args(result)
 
     # convert all children arguments into options
     for n, d in args.items():
-        if d.get("__meta__", {}).get("root_frecklet", False):
+        level = meta_dict[n]["__frecklet_level__"]
+        if level == 0:
             continue
         if d.get("cli", {}).get("param_type", "option") == "argument":
             d["cli"]["param_type"] = "option"
 
-    if not add_non_required_args:
+    if inherit_args_mode == "only-required":
         temp = CommentedMap()
         for arg, details in args.items():
-            is_root_item = details.get("__meta__", {}).get("root_frecklet", False)
+            level = meta_dict[arg]["__frecklet_level__"]
             required = details.get("required", False)
-            if is_root_item or required:
+            if level == 0 or required:
                 temp[arg] = details
         args = temp
+    elif inherit_args_mode == "all":
+        pass
+    elif inherit_args_mode == "one-level":
+        temp = CommentedMap()
+        for arg, details in args.items():
+            level = meta_dict[arg]["__frecklet_level__"]
+            required = details.get("required", False)
+            if level < 2 or required:
+                temp[arg] = details
+        args = temp
+    else:
+        raise FrecklesConfigException("Specified inherit-args-mode '{}' not valid.".format(inherit_args_mode))
+
 
     # sort order
     sorted_args = OrderedDict()
@@ -315,6 +333,7 @@ def parse_arg_tree_branch(branch, base_arg_list=[]):
             return base_arg_list
 
         schema = branch["schema"]
-        base_arg_list.append((branch_key, schema))
+        meta = branch["__meta__"]
+        base_arg_list.append((branch_key, schema, meta))
 
     return base_arg_list
