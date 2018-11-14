@@ -161,6 +161,7 @@ def info(ctx, frecklet_name):
 
     click.echo(rendered)
 
+
 @frecklet.command("print")
 @click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
 @click.pass_context
@@ -184,6 +185,7 @@ def print_frecklet(ctx, frecklet_name):
     output_string = readable_yaml(p.metadata_raw, sort_keys=False)
     output_string = highlight(output_string, YamlLexer(), Terminal256Formatter())
     click.echo(output_string)
+
 
 @frecklet.command("vars")
 @click.option(

@@ -5,11 +5,7 @@ from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
-from frutils import (
-    is_templated,
-    replace_strings_in_obj,
-    get_template_keys,
-)
+from frutils import is_templated, replace_strings_in_obj, get_template_keys
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
