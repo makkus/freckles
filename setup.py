@@ -22,6 +22,7 @@ requirements = [
     "terminaltables==3.1.0",
     "rst2ansi==0.1.5",
     "m2r==0.2.1",
+    "Pygments==2.2.0"
 ]
 
 setup_requirements = ["pytest-runner"]
