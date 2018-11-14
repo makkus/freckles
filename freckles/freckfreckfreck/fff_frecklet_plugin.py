@@ -101,14 +101,9 @@ def frecklet():
 
 
 @frecklet.command("help")
+@click.option("--hide-vars", help="hide task variables", is_flag=True, default=False)
 @click.option(
-    "--hide-vars", help="hide task variables", is_flag=True, default=False
-)
-@click.option(
-    "--hide-links",
-    help="hide 'further reading'-links",
-    is_flag=True,
-    default=False,
+    "--hide-links", help="hide 'further reading'-links", is_flag=True, default=False
 )
 @click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
 @click.pass_context
@@ -134,6 +129,7 @@ def help(ctx, frecklet_name, hide_vars, hide_links):
 
     rendered = rst2ansi(rst)
     click.echo(rendered)
+
 
 @frecklet.command("info")
 @click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
@@ -161,6 +157,7 @@ def info(ctx, frecklet_name):
 
     rendered = rst2ansi(rst)
     click.echo(rendered)
+
 
 @frecklet.command("vars")
 @click.option(

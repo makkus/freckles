@@ -9,10 +9,13 @@ from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import PythonLexer
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
 from frutils import reindent
-from frutils.jinja2_filters import ALL_FILTERS, ALL_DEFAULT_JINJA2_FILTERS, ALL_FRUTIL_FILTERS
+from frutils.jinja2_filters import (
+    ALL_FILTERS,
+    ALL_DEFAULT_JINJA2_FILTERS,
+    ALL_FRUTIL_FILTERS,
+)
 
 yaml = YAML()
 
@@ -30,13 +33,23 @@ def filter(ctx):
 
 
 @filter.command("list", short_help="list all jinja filters")
-@click.option("--all", "-a", help="also show default jinja2 filters", is_flag=True, required=False)
-@click.option("--only-jinja-default", "-j", help="only show default jinja2 filters", is_flag=True, required=False)
+@click.option(
+    "--all", "-a", help="also show default jinja2 filters", is_flag=True, required=False
+)
+@click.option(
+    "--only-jinja-default",
+    "-j",
+    help="only show default jinja2 filters",
+    is_flag=True,
+    required=False,
+)
 @click.pass_context
 def list_filters(ctx, all, only_jinja_default):
 
     if all and only_jinja_default:
-        click.echo("'--all' and '--only-jinja-default' options can't be used together. Choose one.")
+        click.echo(
+            "'--all' and '--only-jinja-default' options can't be used together. Choose one."
+        )
         sys.exit(1)
 
     if all:
@@ -50,6 +63,7 @@ def list_filters(ctx, all, only_jinja_default):
 
     for filter_name, filter_details in sorted(filters.items()):
         print(filter_name)
+
 
 @filter.command("info", short_help="show filter information")
 @click.option("--details", "-d", help="show full details for this filter", is_flag=True)
@@ -79,4 +93,3 @@ def filter_info(filter_name, details):
         else:
             indented = reindent(src, 4)
             click.echo(highlight(indented, PythonLexer(), Terminal256Formatter()))
-

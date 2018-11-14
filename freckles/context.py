@@ -11,11 +11,11 @@ from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils.cnf import get_cnf
-from luci.exceptions import NoSuchDictletException
+# from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .connectors.connectors import get_connectors
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, MODULE_FOLDER, FRECKLETS_KEY
+from .defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLETS_KEY
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,

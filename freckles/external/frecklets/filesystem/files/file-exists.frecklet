@@ -1,0 +1,84 @@
+doc:
+  short_help: Ensures a file exists.
+  help: |
+    Ensures a file exists, creating the necessary user and parent directories if necessary.
+
+    If a user is created, it won't have any password set, so you might have to do that in a different (ideally earlier - to have more control) step.
+
+    If intermediate parent directories have to be created, they will inherit the owner/group information of the file to be created. If any of those
+    parent directories already exist, they won't be touched at all.
+
+args:
+  path:
+    doc:
+      short_help: "The path to the file."
+    type: string
+    required: true
+    cli:
+      param_type: argument
+  owner:
+    doc:
+      short_help: "The owner of the file."
+    type: string
+    required: false
+    cli:
+      metavar: USER
+  group:
+    doc:
+      short_help: "The group of the file."
+    type: string
+    required: false
+    cli:
+      metavar: GROUP
+  mode:
+    doc:
+      short_help: "The permissions of the file."
+    type: string
+    required: false
+    cli:
+      metavar: MODE
+  parent_dir_mode:
+    doc:
+      short_help: "The permissions of the parent directory."
+    type: string
+    required: false
+    cli:
+      metavar: MODE
+  become:
+    doc:
+      short_help: "Whether to use root privileges to create the file."
+    type: boolean
+    default: false
+    required: false
+    cli:
+      is_flag: true
+meta:
+  is_interface: true
+  tags:
+    - file
+    - filesystem
+    - touch
+    - featured-frecklecutable
+
+frecklets:
+  - user-exists:
+      frecklet.__skip__: "{{:: owner | true_if_empty ::}}"
+      name: "{{:: owner ::}}"
+      group: "{{:: group | default(omit) ::}}"
+  - parent-folder-exists:
+      path: "{{:: path ::}}"
+      owner: "{{:: owner | default(omit) ::}}"
+      group: "{{:: group | default(omit) ::}}"
+      mode: "{{:: parent_dir_mode | default(omit) ::}}"
+      become: "{{:: become | default(omit) ::}}"
+  - frecklet:
+      command: file
+      type: ansible-module
+      __msg__: "[creating file (if it doesn't exist): {{:: path ::}}']"
+      become: "{{ 'yes' if {{:: become ::}} or ( {{:: owner | default(false) ::}} and ansible_user != '{{:: owner ::}}' ) else 'no' }}"
+    vars:
+      path: "{{:: path ::}}"
+      owner: "{{:: owner | default(omit) ::}}"
+      group: "{{:: group | default(omit) ::}}"
+      mode: "{{:: mode | default(omit) ::}}"
+      state: touch

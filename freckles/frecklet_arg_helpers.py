@@ -5,7 +5,11 @@ from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
-from frutils import is_templated, replace_strings_in_obj, get_template_keys, readable_yaml
+from frutils import (
+    is_templated,
+    replace_strings_in_obj,
+    get_template_keys,
+)
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
@@ -172,7 +176,9 @@ def create_var_value(arg_branch, arg_values):
                 value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
             )
         except (Exception) as e:
-            raise FrecklesConfigException("Could not process template (error: {}):\n\n{}".format(e, value))
+            raise FrecklesConfigException(
+                "Could not process template (error: {}):\n\n{}".format(e, value)
+            )
         if not isinstance(v, bool) and not v:
             v = None
 
@@ -273,8 +279,9 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_MODE):
                 temp[arg] = details
         args = temp
     else:
-        raise FrecklesConfigException("Specified inherit-args-mode '{}' not valid.".format(inherit_args_mode))
-
+        raise FrecklesConfigException(
+            "Specified inherit-args-mode '{}' not valid.".format(inherit_args_mode)
+        )
 
     # sort order
     sorted_args = OrderedDict()

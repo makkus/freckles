@@ -411,7 +411,9 @@ class Frecklet(LuItem):
         #     .get("cli", {})
         #     .get("inherit_non_required_args", DEFAULT_INHERIT_ARGS_MODE)
         # )
-        inherit_args_mode = self.metadata["meta"].get("inherit-child-args", DEFAULT_INHERIT_ARGS_MODE)
+        inherit_args_mode = self.metadata["meta"].get(
+            "inherit-child-args", DEFAULT_INHERIT_ARGS_MODE
+        )
 
         args = extract_base_args(tl, inherit_args_mode=inherit_args_mode)
         # 'omit' is a special key
@@ -465,7 +467,7 @@ class Frecklet(LuItem):
 
         log.debug("Processing tasklist for frecklet: {}".format(self.frecklet_meta))
 
-        process_metadata = False
+        # process_metadata = False
         if parent is None:
             # process_metadata = True
             parent = {}

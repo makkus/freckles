@@ -1,0 +1,48 @@
+doc:
+  short_help: "Installs the stow package."
+  help: |
+    Installs the '[stow](https://www.gnu.org/software/stow/)' package.
+
+    ``stow`` is a package that can recursively create symlinks to a source folder, in a smart way. This can be useful
+    -- for example -- if you want to version control a folder that has files strewn across different locations in the
+    folder hierarchy. So, instead of creating a very involved ``.gitignore`` file, you would create a folder with only
+    the files you are interested in, version-control it, and  then'stow' it into it's target location.
+
+  furter_reading:
+    - https://www.gnu.org/software/stow/
+
+args:
+  pkg_mgr:
+    doc:
+      short_help: the package manager to use
+    type: string
+    default: auto
+    required: false
+    cli:
+      metavar: PKG-MGR
+
+meta:
+  is_interface: true
+  tags:
+    - stow
+    - install
+    - pkg
+
+frecklets:
+  - frecklet:
+      command: install
+      type: ansible-module
+      __msg__: "[enabling 'epel-release' on CentOS platform]"
+    vars:
+      packages:
+        - name: epel-release
+          pkgs:
+            centos: epel-release
+            default: ignore
+  - pkgs-installed:
+      packages:
+        - name: stow
+          conda_channels:
+            - conda-forge
+            - freckles
+          pkg_mgr: "{{:: pkg_mgr ::}}"

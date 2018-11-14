@@ -112,7 +112,6 @@ class Frecklecutable(object):
         #     v.setdefault("__meta__", {})["root_frecklet"] = True
         #     frecklet.meta["__frecklet_level__"] = 0
 
-
         tl = frecklet.process_tasklist()
         # sys.exit()
         if vars is not None:

@@ -1,0 +1,66 @@
+doc:
+  short_help: Stows (symlinks) a folder.
+  help: |
+    Stows a folder.
+
+    This uses the [stow](https://www.gnu.org/software/stow/) application to symbolically link a folder (recursively).
+
+    If ``target_owner`` is set, the destination folder will be changed to be owned by this user (and created with root permissions if
+    it doesn't exist yet), and stow will be executed as that user.
+  further_reading:
+    - https://www.gnu.org/software/stow/
+
+args:
+  dirname:
+    doc:
+      short_help: "The name of the directory to stow."
+    type: string
+    required: true
+  src:
+    doc:
+      short_help: "The (parent) source directory to stow from."
+    type: string
+    required: true
+  target:
+    doc:
+      short_help: "The (parent) target directory to stow into."
+    type: string
+    required: true
+  become:
+    doc:
+      short_help: "Whether to stow using root permissions."
+    type: boolean
+    required: false
+    cli:
+      is_flag: true
+  target_owner:
+    doc:
+      short_help: "The user to who owns the destination folder."
+    type: string
+    required: false
+
+
+meta:
+  is_interface: true
+  tags:
+    - stow
+    - symlink
+    - folder
+    - filesystem
+
+frecklets:
+  - pkg-stow-installed
+  - folder-exists:
+      path: "{{:: target ::}}"
+      owner: "{{:: target_owner | default(omit) ::}}"
+      become: "{{:: target_owner | false_if_empty ::}}"
+  - frecklet:
+      command: stow
+      type: ansible-module
+      become: "{{:: target_owner | false_if_empty ::}}"
+      become_user: "{{:: target_owner | default(omit) ::}}"
+      __msg__: "stowing '{{:: src ::}} -> {{:: target ::}}"
+    vars:
+      name: "{{:: dirname ::}}"
+      source_dir: "{{:: src ::}}"
+      target_dir: "{{:: target ::}}"
