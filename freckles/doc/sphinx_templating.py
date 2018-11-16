@@ -10,12 +10,12 @@ from freckles.frecklet import FRECKLET_SCHEMA
 from frutils import readable, StringYAML, JINJA_DELIMITER_PROFILES, replace_string
 from freckles_connector_nsbl.defaults import NSBL_INTERNAL_FRECKLET_REPO
 from .utils import get_frecklecute_help_text
-from freckles.defaults import FRECKLETS_KEY
+from freckles.defaults import FRECKLETS_KEY, MODULE_FOLDER
 
 DOC_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["documentation"])
 
 ensure_user_example_path = os.path.join(
-    NSBL_INTERNAL_FRECKLET_REPO, "system", "users", "user-exists.frecklet"
+    MODULE_FOLDER, "external", "frecklets", "system", "users", "user-exists.frecklet"
 )
 with open(ensure_user_example_path) as f:
     ensure_user_frecklet_string = f.read()
