@@ -54,7 +54,7 @@ frecklets:
       path: "{{:: target ::}}"
       owner: "{{:: target_owner | default(omit) ::}}"
       become: "{{:: target_owner | false_if_empty ::}}"
-  - folder-stowed-freck:
+  - folder-stowed-impl:
       become: "{{:: become ::}}"
       target_owner: "{{:: target_owner | default(omit) ::}}"
       name: "{{:: dirname ::}}"

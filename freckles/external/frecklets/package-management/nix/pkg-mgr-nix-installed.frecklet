@@ -1,0 +1,35 @@
+doc:
+  short_help: Ensure the nix package manager is installed.
+  help: |
+    Install the nix package manager.
+
+    This follows the instructions from the [nix homepage](https://nixos.org/nix/download.html).
+
+  furter_reading:
+    - "[nix](https://nixos.org/nix/download.html)"
+    - "[freckfrackery.install-nix Ansible role](https://gitlab.com/freckfrackery/freckfrackery.install-nix)"
+
+args:
+  disable_signature_verify:
+    required: false
+    type: boolean
+    doc:
+      short_help: don't verify nix installer signature
+    default: false
+    cli:
+      is_flag: true
+      param_decls:
+        - "--disable-signature-check"
+
+meta:
+  tags:
+    - featured-frecklecutable
+    - nix
+    - package-manager
+    - package-management
+    - install
+
+frecklets:
+  - pkg-mgr-nix-installed-impl:
+       disable_signamture_verify: "{{:: disable_signature_verify | default(omit) ::}}"
+

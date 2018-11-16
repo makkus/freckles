@@ -1,0 +1,43 @@
+doc:
+  short_help: "Conda package manager installed"
+  help: |
+    Install the conda package manager.
+
+    No root permissions are required for this as long as the ``bzip2`` system package is available.
+  further_reading:
+    - "[Conda homepage](https://conda.io)"
+
+
+args:
+  no_add_to_path:
+    required: false
+    type: boolean
+    doc:
+      short_help: "Don't verify nix installer signature."
+    default: false
+    cli:
+      is_flag: true
+  init_files:
+    type: list
+    schema: {"type": "string"}
+    required: false
+    default:
+      - "{{ ansible_env.HOME }}/.profile"
+    doc:
+      short_help: "Files to add a 'PATH=...' directive to."
+    cli:
+      metavar: PATH
+
+meta:
+  tags:
+    - featured-frecklecutable
+    - conda
+    - package-manager
+    - package-management
+    - install
+
+frecklets:
+  - pkg-mgr-conda-installed-impl:
+       no_add_to_path: "{{:: no_add_to_path | default(omit) ::}}"
+       init_files: "{{:: init_files | default(omit) ::}}"
+

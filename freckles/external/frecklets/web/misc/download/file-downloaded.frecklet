@@ -1,0 +1,104 @@
+doc:
+  short_help: "Downloads file."
+  help: |
+    Downloads a file, creates intermediate destination directories and a user/group if necessary.
+
+    If no 'dest' option is provided, the file will be downloaded into '~/Downloads'.
+
+    This uses the [Ansible get_url module](https://docs.ansible.com/ansible/latest/modules/get_url_module.html), check
+    it's help for more details.
+
+  further_reading:
+    - "[the get_url Ansible module](https://docs.ansible.com/ansible/latest/modules/get_url_module.html)"
+
+args:
+  become:
+    doc:
+      short_help: Whether to use root privileges to do the downloading and saving.
+    type: boolean
+    default: false
+    required: false
+    cli:
+      is_flag: true
+  url:
+    doc:
+      short_help: "The url to download."
+    type: string
+    required: true
+    cli:
+      nargs: 1
+      metavar: URL
+      param_type: argument
+  dest:
+    doc:
+      short_help: "The destination file (or directory)."
+    type: string
+    required: false
+    default: "~/Downloads/"
+    cli:
+      metavar: DEST
+      show_default: true
+  owner:
+    doc:
+      short_help: "The owner of the target file."
+    type: string
+    required: false
+    cli:
+      metavar: USER
+  group:
+    doc:
+      short_help: "The group of the target file."
+    type: string
+    required: false
+    cli:
+      metavar: GROUP
+  force:
+    doc:
+      short_help: "Whether to force download/overwrite the target."
+    type: boolean
+    required: false
+    default: false
+    cli:
+      is_flag: true
+  mode:
+    doc:
+      short_help: "The mode the file should have, in octal (e.g. 0755)."
+    type: string
+    required: false
+    cli:
+      metavar: MODE
+  system_user:
+    doc:
+      short_help: Whether the user (and group) should be of system user/group type.
+    type: boolean
+    default: false
+    required: false
+    cli:
+      show_default: true
+      is_flag: true
+
+meta:
+  tags:
+    - download
+    - web
+    - featured-frecklecutable
+
+frecklets:
+  - user-exists:
+      name: "{{:: owner ::}}"
+      group: "{{:: group ::}}"
+      system_user: "{{:: sytsem_user | default(omit) ::}}"
+  - parent-folder-exists:
+      become_user: "{{:: become_user | default(omit) ::}}"
+      path: "{{:: dest ::}}"  # TODO: make sure this also works for dest directories
+      owner: "{{:: owner ::}}"
+      group: "{{:: group ::}}"
+      become: "{{:: become | default(omit) ::}}"
+  - file-downloaded-impl:
+      url: "{{:: url ::}}"
+      dest: "{{:: dest ::}}"
+      owner: "{{:: owner | default(omit) ::}}"
+      group: "{{:: group | default(omit) ::}}"
+      force: "{{:: force | default(omit) ::}}"
+      mode: "{{:: mode | default(omit) ::}}"
+      become: "{{:: become | default(omit) ::}}"

@@ -42,6 +42,15 @@ args:
     required: false
     cli:
       is_flag: true
+  system_user:
+    doc:
+      short_help: Whether the user (and group) should be of system user/group type.
+    type: boolean
+    default: false
+    required: false
+    cli:
+      show_default: true
+      is_flag: true
 
 meta:
   is_interface: true
@@ -55,9 +64,13 @@ meta:
 frecklets:
   - group-exists:
       group: "{{:: group ::}}"
+      system_group: "{{:: system_user | default(omit) ::}}"
+      frecklet.__skip__: "{{:: group | true_if_empty ::}}"
   - user-exists:
       name: "{{:: owner ::}}"
-  - folder-exists-freck:
+      system_user: "{{:: system_user | default(omit) ::}}"
+      frecklet.__skip__: "{{:: owner | true_if_empty ::}}"
+  - folder-exists-impl:
       become: "{{:: become ::}}"
       path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"

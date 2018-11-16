@@ -1,0 +1,50 @@
+doc:
+  short_help: Ensures a group exists.
+  help: |
+    Creates a group on a system if it doesn't exist yet.
+
+    If the ``group`` argument is not present or empty, this task will be skipped.
+
+    If the group exists, and the optional ``gid`` argument is specified, it'll be changed if necessary.
+    Optionally, the group can be marked as a 'system' group.
+
+  further_reading:
+    - "[underlying Ansible module doc](https://docs.ansible.com/ansible/latest/modules/group_module.html)"
+    - "[what is a 'system' group](https://askubuntu.com/questions/523949/what-is-a-system-group-as-opposed-to-a-normal-group)"
+
+args:
+  group:
+    doc:
+      short_help: The name of the group.
+    type: string
+    required: false
+    cli:
+      param_type: argument
+      metavar: GROUP_NAME
+  gid:
+    doc:
+      short_help: The gid of the group.
+    type: integer
+    required: false
+    cli:
+      metavar: GID
+  system_group:
+    doc:
+      short_help: Whether the group should be created as 'system' group.
+    type: boolean
+    required: false
+    cli:
+      show_default: true
+      is_flag: true
+
+meta:
+  tags:
+    - group
+    - user-management
+    - system
+
+frecklets:
+  - group-exists-impl:
+      group: "{{:: group ::}}"
+      gid: "{{:: gid | default(omit) ::}}"
+      system_group: "{{:: system_group | default(omit) ::}}"

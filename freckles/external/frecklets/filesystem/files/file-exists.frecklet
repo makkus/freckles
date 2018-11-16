@@ -52,6 +52,15 @@ args:
     required: false
     cli:
       is_flag: true
+  system_user:
+    doc:
+      short_help: Whether the user and group should be of system user/group type.
+    type: boolean
+    default: false
+    required: false
+    cli:
+      show_default: true
+      is_flag: true
 meta:
   is_interface: true
   tags:
@@ -65,13 +74,14 @@ frecklets:
       frecklet.__skip__: "{{:: owner | true_if_empty ::}}"
       name: "{{:: owner ::}}"
       group: "{{:: group | default(omit) ::}}"
+      system_user: "{{:: system_user | default(omit) ::}}"
   - parent-folder-exists:
       path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: parent_dir_mode | default(omit) ::}}"
       become: "{{:: become | default(omit) ::}}"
-  - file-exists-freck:
+  - file-exists-impl:
       path: "{{:: path ::}}"
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"

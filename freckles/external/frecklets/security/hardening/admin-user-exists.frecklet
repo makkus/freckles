@@ -1,0 +1,97 @@
+doc:
+  short_help: Ensures admin user with a specified username exists.
+  help: |
+    Creates an admin user with the provided password (hashed, see: https://docs.ansible.com/ansible/latest/modules/user_module.html).
+
+    If no ``admin_password`` or ``admin_password_plain`` argument is provided, the created user won't be able do login via ssh via
+    password auth, and they won't be able to do sudo if passwordless sudo is not enabled for the user.
+
+    This task allows for providing the password either as [pre-encrypted string](https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module), or in plain text. It is strongly recommended to use the 'pre-encrypt' variable
+    (``admin_password``) over the plain text one (``admin_password_plain``). If both are provided, ``admin_password`` takes precedence.
+
+    Also lets you choose the default shell of that user, provide public ssh keys, and whether passwordless sudo should be enabled for the user.
+
+  examples:
+    doc:
+      short_help: Create admin user with passwordless-sudo enabled, and ssh-keys added.
+    vars:
+      user_name: 'admin'
+      ssh_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDv3DM/SDAa2S5iWlWCtXWoL5hy/IBe0o7i445BjQ4RugoCs5Be36/Yi5ZQntOwN2z/g8h1mTRvH6LUWJmEFoEFtWiZyRcbEFK8yZLvU1X7AJaP6QAbbD766hjJPYJh8UoiCZ0z0a4g2GHkdOjctt6zvXK6R49I15Je6bpTiOjA4+WU5UZIjy78lSs3bzp1kj0RcWa7HGrnUAj0bIL86mpxaRkw1eZruwXdqfVZERY2RBrkP4CUzEfhQcGy7kazBlb7RsC0IXtEy26XRzU89Dc5hPNcbTFLUjwKg6CCEhJY2hfWeaRtTui3ah3Wd3X4n6cZPtVNTHG441KcMPkmyr6B markus@think"
+      passwordless_sudo: true
+
+meta:
+  tags:
+    - user
+    - admin
+    - featured-frecklecutable
+    - hardening
+
+args:
+    user_name:
+      doc:
+        short_help: The username of the admin user.
+      type: string
+      required: true
+      cli:
+        param_type: argument
+    admin_password:
+      doc:
+        short_help: "The crypted user password."
+        help: |
+          This sets the users password. If not provided, the user won't be able to login via password auth, and can't do
+          sudo if passwordless sudo is not configured.
+        further_reading:
+          - "[password encryption](https://docs.ansible.com/ansible/latest/modules/user_module.html)"
+      type: password
+      required: false
+      cli:
+        metavar: PWD
+    admin_password_plain:
+      doc:
+        short_help: "The user password in plain text."
+        help: |
+          This sets the users password in plain text. The user input will be sha512-hashed before forwareded to the connector.
+          It is strongly recommended to use the ``password`` argument in favor of this.
+
+          If not provided, the user won't be able to login via password auth, and can't do
+          sudo if passwordless sudo is not configured.
+      type: password
+      coerce: sha512_crypt
+      required: false
+      cli:
+        metavar: PWD
+    shell:
+      doc:
+        short_help: Default shell of admin user.
+      type: string
+      required: false
+      default: "/bin/bash"
+      cli:
+        metavar: SHELL
+    ssh_keys:
+      aliases:
+        - ssh-key
+      doc:
+        short_help: "A list of public ssh keys for this admin user."
+      type: list
+      required: false
+      cli:
+        metavar: KEY
+    passwordless_sudo:
+      doc:
+        short_help: Whether to enable passwordless sudo for this user.
+      type: boolean
+      required: false
+      cli:
+        is_flag: true
+      default: false
+
+frecklets:
+  - admin-user-exists-impl:
+      user_name: "{{:: user_name ::}}"
+      admin_password: "{{:: admin_password | default(omit) ::}}"
+      admin_password_plain: "{{:: admin_password_plain | default(omit) ::}}"
+      shell: "{{:: shell | default(omit) ::}}"
+      ssh_keys: "{{:: ssh_keys | default(omit) ::}}"
+      passwordless_sudo: "{{:: passwordless_sudo | default(omit) ::}}"
