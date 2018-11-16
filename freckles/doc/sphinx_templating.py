@@ -8,7 +8,6 @@ from jinja2.nativetypes import NativeEnvironment
 
 from freckles.frecklet import FRECKLET_SCHEMA
 from frutils import readable, StringYAML, JINJA_DELIMITER_PROFILES, replace_string
-from freckles_connector_nsbl.defaults import NSBL_INTERNAL_FRECKLET_REPO
 from .utils import get_frecklecute_help_text
 from freckles.defaults import FRECKLETS_KEY, MODULE_FOLDER
 
