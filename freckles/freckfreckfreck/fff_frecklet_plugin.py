@@ -187,6 +187,37 @@ def print_frecklet(ctx, frecklet_name):
     click.echo(output_string)
 
 
+@frecklet.command("debug")
+@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
+@click.pass_context
+def debug(ctx, frecklet_name):
+    """Prints the (raw) frecklet."""
+
+    click.echo()
+    context = ctx.obj["context"]
+
+    if not frecklet_name:
+        print_available_tasks(context)
+        sys.exit()
+
+    index = context.index
+
+    md = context.get_frecklet_metadata(frecklet_name)
+    import pp, sys
+
+    pp(md)
+    sys.exit()
+
+    p = index.get_pkg(frecklet_name)
+    if p is None:
+        click.echo("No frecklet available for name: {}".format(frecklet_name))
+        sys.exit(1)
+
+    output_string = readable_yaml(p.metadata_raw, sort_keys=False)
+    # output_string = highlight(output_string, YamlLexer(), Terminal256Formatter())
+    # click.echo(output_string)
+
+
 @frecklet.command("vars")
 @click.option(
     "--only-names",
