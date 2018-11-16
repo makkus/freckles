@@ -389,6 +389,50 @@ class FrecklesContext(object):
 
         self.cnf.set_cnf_key(key, value)
 
+    def get_frecklet_metadata(self, frecklet_path_or_name_or_metadata):
+
+        if isinstance(frecklet_path_or_name_or_metadata, string_types):
+
+            # if is_url_or_abbrev(frecklet_path_or_name_or_metadata):
+            #     self.repo_manager.get_remote_dict()
+
+            if os.path.isfile(frecklet_path_or_name_or_metadata):
+                path = os.path.abspath(frecklet_path_or_name_or_metadata)
+                index = LuItemFolderIndex(
+                    url=path,
+                    item_type="frecklet",
+                    alias=frecklet_path_or_name_or_metadata,
+                    pkg_base_url=frecklet_path_or_name_or_metadata,
+                    reader_params={"reader_profile": "frecklets_path"},
+                )
+                frecklet_metadata = index.get_pkg_metadata(path)
+            else:
+                frecklet_metadata = self.index.get_pkg_metadata(
+                    frecklet_path_or_name_or_metadata
+                )
+            if frecklet_metadata is None:
+                try:
+                    frecklet_metadata = self.repo_manager.get_remote_dict(
+                        frecklet_path_or_name_or_metadata
+                    )
+                except (FrecklesConfigException):
+                    raise FrecklesConfigException(
+                        "No such frecklet or invalid metadata."
+                    )
+
+                frecklet_metadata
+        else:
+            log.debug(
+                "Invalid object type: {}".format(frecklet_path_or_name_or_metadata)
+            )
+            raise Exception(
+                "Invalid object type '{}', can't create frecklet.".format(
+                    type(frecklet_path_or_name_or_metadata)
+                )
+            )
+
+        return frecklet_metadata
+
     def create_frecklet(self, frecklet_path_or_name_or_metadata):
 
         if isinstance(frecklet_path_or_name_or_metadata, string_types):
@@ -439,6 +483,12 @@ class FrecklesContext(object):
                 "Could not find frecklet '{}'".format(frecklet_path_or_name_or_metadata)
             )
 
+        # if frecklet_path_or_name_or_metadata == "apache-vhost-configured":
+        # if frecklet_path_or_name_or_metadata == "file-exists":
+        #     print("XXXXX")
+        #     import pp
+        #     pp(frecklet)
+        #     print(type(frecklet))
         return frecklet
         # return copy.deepcopy(frecklet)
 
