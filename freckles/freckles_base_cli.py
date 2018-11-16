@@ -8,13 +8,13 @@ import click
 import click_completion
 import click_log
 import six
-from .exceptions import FrecklesPermissionException, FrecklesConfigException
 
 from frkl import VarsType
 from frutils import merge_list_of_dicts
 from luci.exceptions import NoSuchDictletException
 from . import print_version
 from .context import FrecklesContext
+from .exceptions import FrecklesPermissionException, FrecklesConfigException
 
 log = logging.getLogger("freckles")
 click_log.basic_config()

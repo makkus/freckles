@@ -4,14 +4,13 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
-from collections import OrderedDict
 
+from collections import OrderedDict
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils.cnf import get_cnf
-
 # from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile

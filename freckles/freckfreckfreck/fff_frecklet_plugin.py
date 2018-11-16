@@ -7,16 +7,15 @@ import click
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.data import YamlLexer
-
-from freckles.defaults import FRECKLET_NAME
-from frutils import readable_yaml
-from frutils.doc import Doc
 from rst2ansi import rst2ansi
 from ruamel.yaml import YAML
-
-from freckles.freckles_runner import FrecklesRunner
-from freckles.doc import utils
 from terminaltables import SingleTable
+
+from freckles.defaults import FRECKLET_NAME
+from freckles.doc import utils
+from freckles.freckles_runner import FrecklesRunner
+from frutils import readable_yaml
+from frutils.doc import Doc
 
 yaml = YAML(typ="safe")
 
@@ -200,20 +199,16 @@ def debug(ctx, frecklet_name):
         print_available_tasks(context)
         sys.exit()
 
-    index = context.index
+    # index = context.index
 
     md = context.get_frecklet_metadata(frecklet_name)
-    import pp, sys
+    print(md)
+    # p = index.get_pkg(frecklet_name)
+    # if p is None:
+    #     click.echo("No frecklet available for name: {}".format(frecklet_name))
+    #     sys.exit(1)
 
-    pp(md)
-    sys.exit()
-
-    p = index.get_pkg(frecklet_name)
-    if p is None:
-        click.echo("No frecklet available for name: {}".format(frecklet_name))
-        sys.exit(1)
-
-    output_string = readable_yaml(p.metadata_raw, sort_keys=False)
+    # output_string = readable_yaml(p.metadata_raw, sort_keys=False)
     # output_string = highlight(output_string, YamlLexer(), Terminal256Formatter())
     # click.echo(output_string)
 

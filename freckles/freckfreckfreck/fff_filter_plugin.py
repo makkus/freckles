@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 import inspect
-
-import click
 import sys
 
+import click
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import PythonLexer

@@ -5,7 +5,6 @@ import os
 from jinja2.nativetypes import NativeEnvironment
 
 from frutils import JINJA_DELIMITER_PROFILES, jinja2_filters
-
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
 FRECKLET_NAME = "frecklet"

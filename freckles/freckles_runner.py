@@ -7,14 +7,13 @@ import os
 import random
 import string
 import uuid
-from collections import OrderedDict
 
 import click
 import pprintpp
-from ruamel.yaml.comments import CommentedMap
+from collections import OrderedDict
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
-from .frecklet import Frecklet
 from frutils import dict_merge, replace_strings_in_obj
 from frutils.cnf import CnfPlugin
 from frutils.cnf import get_cnf
@@ -29,7 +28,7 @@ from .defaults import (
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
-
+from .frecklet import Frecklet
 # from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
@@ -41,7 +40,7 @@ CALLBACK_CLASSES = load_callback_classes()
 
 def clean_omit_values(d):
 
-    if isinstance(d, (list, tuple)):
+    if isinstance(d, (list, tuple, CommentedSeq)):
 
         for item in d:
             clean_omit_values(item)

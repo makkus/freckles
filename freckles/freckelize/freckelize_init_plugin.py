@@ -4,10 +4,10 @@ import copy
 import logging
 import os
 import sys
-from collections import OrderedDict
 from copy import deepcopy
 
 import click
+from collections import OrderedDict
 from ruamel.yaml import YAML
 
 import frkl
@@ -19,6 +19,7 @@ from freckles.freckles_runner import (
     FrecklesRunConfig,
     print_no_run_info,
 )
+from frkl.utils import expand_string_to_git_details
 from frutils import (
     add_key_to_dict,
     dict_merge,
@@ -26,7 +27,6 @@ from frutils import (
     is_url_or_abbrev,
     DEFAULT_URL_ABBREVIATIONS_REPO,
 )
-from frkl.utils import expand_string_to_git_details
 
 yaml = YAML(typ="safe")
 

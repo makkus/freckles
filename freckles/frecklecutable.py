@@ -5,10 +5,11 @@ from __future__ import absolute_import, division, print_function
 import copy
 import logging
 import os
+
 from collections import OrderedDict
 
-from .defaults import FRECKLET_NAME
 from .context import FrecklesContext
+from .defaults import FRECKLET_NAME
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import add_user_input
 
@@ -17,6 +18,8 @@ log = logging.getLogger("freckles")
 
 def is_disabled(task):
 
+    # import pp
+    # pp(task)
     disabled = task.get("__skip__", None)
     if disabled is None:
         return False
@@ -113,7 +116,7 @@ class Frecklecutable(object):
         #     frecklet.meta["__frecklet_level__"] = 0
 
         tl = frecklet.process_tasklist()
-        # sys.exit()
+
         if vars is not None:
             add_user_input(tl, vars)
 

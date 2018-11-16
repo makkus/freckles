@@ -5,18 +5,17 @@ import os
 import time
 
 import click
-from frutils import (
-    is_url_or_abbrev,
-    calculate_cache_location_for_url,
-    DEFAULT_URL_ABBREVIATIONS_REPO,
-)
 from plumbum import local
 from six import string_types
 
 from frkl import dict_from_url
 from frkl.helpers import content_from_url
 from frkl.utils import expand_string_to_git_details
-
+from frutils import (
+    is_url_or_abbrev,
+    calculate_cache_location_for_url,
+    DEFAULT_URL_ABBREVIATIONS_REPO,
+)
 from .defaults import FRECKLES_CACHE_BASE, MIXED_CONTENT_TYPE, FRECKLETS_KEY
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
