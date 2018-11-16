@@ -22,7 +22,7 @@ requirements = [
     "terminaltables==3.1.0",
     "rst2ansi==0.1.5",
     "m2r==0.2.1",
-    "Pygments==2.2.0"
+    "Pygments==2.2.0",
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -56,7 +56,7 @@ setup(
         ],
         "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
         "freckles.connectors": [
-            "freckles=freckles.connectors.freckles_connector:FrecklesChildConnector",
+            "freckles=freckles.connectors.freckles_connector:FrecklesChildConnector"
         ],
         "freckfreckfreck.plugins": [
             "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
