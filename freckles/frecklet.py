@@ -2,7 +2,9 @@
 
 import copy
 import logging
+
 import m2r
+from ruamel.yaml.comments import CommentedSeq
 
 from frkl import FrklProcessor, Frkl
 from frkl.defaults import (
@@ -22,13 +24,12 @@ from frutils import (
 )
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
-
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME, FRECKLETS_KEY
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import (
     extract_base_args,
     get_var_item_from_arg_tree,
-    DEFAULT_INHERIT_ARGS_MODE,
+    DEFAULT_INHERIT_ARGS_LEVEL,
 )
 
 log = logging.getLogger("freckles")
@@ -204,12 +205,21 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                         temp = get_default_schema()
                     new_config.setdefault("args", {})[k] = temp
 
+                # import pp
+                # pp(new_config)
+
         return new_config
 
 
 FRECKLET_SCHEMA = {
     "doc": {"type": "dict", "schema": {"short_help": {"type": "string"}}},
-    "meta": {"type": "dict"},
+    "meta": {
+        "type": "dict",
+        "schema": {
+            "tags": {"type": "list", "schema": {"type": "string"}},
+            "inherit-child-args": {"type": "integer"},
+        },
+    },
     "args": {"type": "dict", "schema": {"type": "string"}},
     FRECKLETS_KEY: {
         "type": "list",
@@ -240,6 +250,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
     def process_current_config(self):
 
         new_config = self.current_input_config
+
         # frecklet_level = new_config["meta"]["frecklet_level"]
         if not self.parent_metadata:
             frecklet_level = 0
@@ -343,7 +354,7 @@ class Frecklet(LuItem):
     def pprint(cls, frecklet_metadata, indent=0):
 
         pdicts = []
-        if isinstance(frecklet_metadata, (list, tuple)):
+        if isinstance(frecklet_metadata, (list, tuple, CommentedSeq)):
             for f in frecklet_metadata:
                 pdict = cls.pdict(f)
                 pdicts.append(pdict)
@@ -412,7 +423,7 @@ class Frecklet(LuItem):
         #     .get("inherit_non_required_args", DEFAULT_INHERIT_ARGS_MODE)
         # )
         inherit_args_mode = self.metadata["meta"].get(
-            "inherit-child-args", DEFAULT_INHERIT_ARGS_MODE
+            "inherit-child-args", DEFAULT_INHERIT_ARGS_LEVEL
         )
 
         args = extract_base_args(tl, inherit_args_mode=inherit_args_mode)
@@ -422,7 +433,6 @@ class Frecklet(LuItem):
         # print(args)
         # print(default_vars)
         parameters = create_parameters(copy.deepcopy(args), default_vars=default_vars)
-
         return parameters
 
     def process_metadata(self, metadata):
@@ -453,7 +463,6 @@ class Frecklet(LuItem):
         doc = metadata.get("doc", {})
 
         frecklet_meta = metadata.get("frecklet_meta", {})
-
         return {
             FRECKLETS_KEY: tasks,
             "args": args_raw,
@@ -484,6 +493,7 @@ class Frecklet(LuItem):
         ]
 
         f = Frkl(self.metadata, chain)
+
         tasklist = f.process()
 
         # if process_metadata:
@@ -514,13 +524,13 @@ class Frecklet(LuItem):
     #
     #     return tl
 
-    def validate_vars(self, vars=None):
-
-        if vars is None:
-            vars = {}
-
-        validated = self.get_parameters().validate(vars)
-        return validated
+    # def validate_vars(self, vars=None):
+    #
+    #     if vars is None:
+    #         vars = {}
+    #
+    #     validated = self.get_parameters().validate(vars)
+    #     return validated
 
     def get_doc(self):
 
