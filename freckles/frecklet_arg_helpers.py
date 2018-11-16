@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 import copy
-from collections import OrderedDict
+import logging
 
+from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
-from frutils import is_templated, replace_strings_in_obj, get_template_keys
+from frutils import (
+    is_templated,
+    replace_strings_in_obj,
+    get_template_keys,
+)
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME
 from .exceptions import FrecklesConfigException
-import logging
 
 log = logging.getLogger("freckles")
 
-DEFAULT_INHERIT_ARGS_MODE = "only-required"
+DEFAULT_INHERIT_ARGS_LEVEL = 0
 
 #
 # def remove_omit_values(item):
@@ -48,7 +52,6 @@ def remove_duplicate_args(args_list):
     meta_dict = {}
 
     for arg_name, schema, meta in args_list:
-
         if arg_name == "omit":
             continue
 
@@ -57,24 +60,36 @@ def remove_duplicate_args(args_list):
             meta_dict[arg_name] = meta
             continue
 
-        existing_schema = result[arg_name]
+        level = meta["__frecklet_level__"]
+        current_level = meta_dict[arg_name]["__frecklet_level__"]
 
-        if existing_schema.get("type", "string") != schema.get(
-            "type", "string"
-        ) or existing_schema.get("schema", {}) != schema.get("schema", {}):
-            log.debug(
-                "Multiple arguments with name '{}', but different details: {} -> {}".format(
-                    arg_name, existing_schema, schema
-                )
-            )
-            raise Exception(
-                "Multiple arguments with name '{}', but different details.".format(
-                    arg_name
-                )
-            )
+        if level <= current_level:
+            result[arg_name] = schema
+            meta_dict[arg_name] = meta
+            continue
 
-        result[arg_name] = schema
-        meta_dict[arg_name] = meta
+        # existing_schema = result[arg_name]
+        #
+        # print(existing_schema)
+        # print(schema)
+        # continue
+        #
+        # if existing_schema.get("type", "string") != schema.get(
+        #     "type", "string"
+        # ) or existing_schema.get("schema", {}) != schema.get("schema", {}):
+        #     log.debug(
+        #         "Multiple arguments with name '{}', but different details: {} -> {}".format(
+        #             arg_name, existing_schema, schema
+        #         )
+        #     )
+        #     raise Exception(
+        #         "Multiple arguments with name '{}', but different details.".format(
+        #             arg_name
+        #         )
+        #     )
+
+        # result[arg_name] = schema
+        # meta_dict[arg_name] = meta
 
     return result, meta_dict
 
@@ -155,7 +170,6 @@ def create_var_value(arg_branch, arg_values):
 
         r = {"omit": OMIT_VALUE}
         for child_details in values:
-
             k, v = create_var_value(child_details, arg_values)
             if k is None:
                 continue
@@ -168,6 +182,7 @@ def create_var_value(arg_branch, arg_values):
             raise Exception("Probably a bug, invalid key: {}".format(value))
 
         try:
+
             v = replace_strings_in_obj(
                 value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
             )
@@ -181,17 +196,18 @@ def create_var_value(arg_branch, arg_values):
         # TODO: test for other var types than string
         if isinstance(v, string_types) and OMIT_VALUE in v:
             return (None, None)
-
         try:
             # import pp
             # print("------")
             # pp(var_key)
             # pp(v)
             # pp(schema)
-
+            if v is not None and schema.get("type", None) == "string":
+                v = str(v)
             validated = validate_var(var_key, v, schema)
             return (var_key, validated)
         except (ParametersException) as e:
+
             raise FrecklesConfigException(
                 "Invalid or missing argument '{}': '{}' => {}".format(
                     var_key, v, e.errors
@@ -231,7 +247,7 @@ def create_var_value(arg_branch, arg_values):
             raise Exception("This is a bug, please report.")
 
 
-def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_MODE):
+def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
     """Extract the base args that are needed as input for this tasklist.
 
     Args:
@@ -256,7 +272,8 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_MODE):
         if d.get("cli", {}).get("param_type", "option") == "argument":
             d["cli"]["param_type"] = "option"
 
-    if inherit_args_mode == "only-required":
+    if inherit_args_mode == 0:
+
         temp = CommentedMap()
         for arg, details in args.items():
             level = meta_dict[arg]["__frecklet_level__"]
@@ -264,20 +281,19 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_MODE):
             if level == 0 or required:
                 temp[arg] = details
         args = temp
-    elif inherit_args_mode == "all":
+    elif inherit_args_mode < 0:
         pass
-    elif inherit_args_mode == "one-level":
+    else:
         temp = CommentedMap()
         for arg, details in args.items():
             level = meta_dict[arg]["__frecklet_level__"]
             required = details.get("required", False)
-            if level < 2 or required:
+            if level < inherit_args_mode + 1 or required:
                 temp[arg] = details
         args = temp
-    else:
-        raise FrecklesConfigException(
-            "Specified inherit-args-mode '{}' not valid.".format(inherit_args_mode)
-        )
+
+    # import pp
+    # print(readable_yaml(args))
 
     # sort order
     sorted_args = OrderedDict()
