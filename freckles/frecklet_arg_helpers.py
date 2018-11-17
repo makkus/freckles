@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import copy
 import logging
+import pprint
 
 from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
-from frutils import (
-    is_templated,
-    replace_strings_in_obj,
-    get_template_keys,
-)
+from frutils import is_templated, replace_strings_in_obj, get_template_keys
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
@@ -204,13 +201,14 @@ def create_var_value(arg_branch, arg_values):
             # pp(schema)
             if v is not None and schema.get("type", None) == "string":
                 v = str(v)
+
             validated = validate_var(var_key, v, schema)
             return (var_key, validated)
         except (ParametersException) as e:
 
             raise FrecklesConfigException(
-                "Invalid or missing argument '{}': '{}' => {}".format(
-                    var_key, v, e.errors
+                "Invalid or missing argument '{}':\n\nvalue:\n{}\n\nschema:\n{}\n\n  => {}".format(
+                    var_key, pprint.pformat(value), pprint.pformat(schema), e.errors
                 )
             )
 
@@ -236,8 +234,11 @@ def create_var_value(arg_branch, arg_values):
             return (var_key, validated)
         except (ParametersException) as e:
             raise FrecklesConfigException(
-                "Invalid (or missing) var '{}': {} => {}".format(
-                    var_key, value, e.errors
+                "Invalid (or missing) var '{}':\n\nvalue:\n{}\n\nschema:\n{}\n\n  => {}".format(
+                    var_key,
+                    pprint.pformat(value),
+                    pprint.pformat(temp_schema),
+                    e.errors,
                 )
             )
 
