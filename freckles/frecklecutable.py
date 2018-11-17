@@ -21,8 +21,9 @@ def is_disabled(task):
     # import pp
     # pp(task)
     disabled = task.get("__skip__", None)
-    if disabled is None:
-        return False
+
+    # if disabled is None:
+    #     return False
 
     if disabled is True:
         return True

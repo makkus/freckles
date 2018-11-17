@@ -151,6 +151,11 @@ class FrecklesCallback(object):
         skipped=True,
         result_data=None,
     ):
+
+        if details is None:
+            log.warn("Empty task details")
+            return
+
         if result_data is not None:
             if result_data.get("debug", False):
                 details.debug_data = result_data["debug"]
