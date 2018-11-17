@@ -86,6 +86,7 @@ frecklets:
       owner: "{{:: owner | default(omit) ::}}"
       group: "{{:: group | default(omit) ::}}"
       mode: "{{:: parent_dir_mode | default(omit) ::}}"
+      become: "{{:: become | default(omit) ::}}"
   - file-exists-with-content-impl:
       become: "{{:: become ::}}"
       path: "{{:: path ::}}"
