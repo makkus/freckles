@@ -98,7 +98,7 @@ class FreckletCommand(FrecklesBaseCommand):
     def list_freckles_commands(self, ctx):
 
         return self.context.get_frecklet_names(
-            allowed_tags=ctx.obj.get("allowed_frecklet_tags", None),
+            tag_whitelist=ctx.obj.get("allowed_frecklet_tags", None),
             apropos=ctx.obj.get("apropos", None),
         )
 

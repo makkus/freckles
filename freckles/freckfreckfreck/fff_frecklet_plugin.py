@@ -58,6 +58,8 @@ def print_available_tasks(context, filter_names=[], apropos=[]):
     for n in pkgs:
 
         p = index.get_pkg(n)
+        if p is None:
+            continue
         doc = p.doc
         temp = [n, doc.get_short_help()]
         data.append(temp)

@@ -492,18 +492,22 @@ class FrecklesContext(object):
         return frecklet
         # return copy.deepcopy(frecklet)
 
-    def get_frecklet_names(self, allowed_tags=None, apropos=None):
+    def get_frecklet_names(self, tag_whitelist=None, tag_blacklist=None, apropos=None, check_valid=False):
         """Lists all available frecklet names, filtered by tags or strings in the description.
 
-
+        Args:
+          tag_whitelist (list): a list of tags to include
+          tag_blacklist (list): a list of tags to exclude, will be run after the whitelist filer, and before apropos
+          apropos (list): a list of strings, filters out everything that doesn't match all of them in description/help of the frecklet (if provided)
+          check_valid (bool): checks whether the frecklets are valid (takes longer)
         """
 
-        if allowed_tags is None:
-            allowed_tags = ["__all__"]
+        if tag_whitelist is None:
+            tag_whitelist = ["__all__"]
 
         names = self.index.get_pkg_names()
 
-        if "__all__" in allowed_tags:
+        if "__all__" in tag_whitelist:
             result = names
         else:
             result = []
@@ -513,25 +517,54 @@ class FrecklesContext(object):
                     log.warn("Could not read frecklet '{}'".format(n))
                     continue
                 tags = frecklet.meta.get("tags", [])
-                if not tags and "__empty__" in allowed_tags:
+                if not tags and "__empty__" in tag_whitelist:
                     result.append(n)
                     continue
 
-                for at in allowed_tags:
+                for at in tag_whitelist:
                     if at in tags:
                         result.append(n)
+
+        if tag_blacklist:
+            temp = []
+            for r in result:
+                frecklet = self.index.get_pkg(r)
+                tags = frecklet.meta.get("tags", [])
+                if not tags and "__empty__" in tag_blacklist:
+                    temp.append(r)
+                    continue
+                for dt in tag_blacklist:
+                    if dt in tags:
+                        temp.append(r)
+
+            for t in temp:
+                result.remove(t)
 
         if apropos:
             temp = []
             for r in result:
                 frecklet = self.index.get_pkg(r)
+                if frecklet is None:
+                    continue
                 match = frecklet.get_doc().matches_apropos(apropos)
                 if match:
                     temp.append(r)
 
             result = temp
 
-        return result
+        if not check_valid:
+            return result
+
+        final = []
+        for r in result:
+            try:
+                f = self.create_frecklet(r)
+                f.generate_click_parameters()
+                final.append(r)
+            except (Exception) as e:
+                log.debug("invalid frecklet '{}': {}".format(r, e))
+
+        return final
 
     def get_connector(self, name):
 

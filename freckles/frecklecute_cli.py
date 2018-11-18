@@ -101,7 +101,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
     def list_freckles_commands(self, ctx):
         try:
             return self.context.get_frecklet_names(
-                allowed_tags=ctx.obj.get("allowed_frecklet_tags", None),
+                tag_whitelist=ctx.obj.get("allowed_frecklet_tags", None),
                 apropos=ctx.obj.get("apropos", None),
             )
         except (Exception) as e:
@@ -232,7 +232,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 # @click.option("--vars", "-v", help="additional vars", multiple=True, type=VarsType())
 @click_log.simple_verbosity_option(logging.getLogger(), "--verbosity")
 @click.option(
-    "--help-with",
+    # "--help-with",
     "--apropos",
     help="Show this message, listing all commands that contain this value in their name or description.",
     metavar="TAG",

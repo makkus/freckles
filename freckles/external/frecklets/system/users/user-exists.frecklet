@@ -3,8 +3,6 @@ doc:
   help: |
     Ensure a user exists on a system.
 
-    If the ``user`` argument is not specified or empty, the this task will be skipped.
-
     If no ``password`` or ``password_plain`` argument is provided, the created user won't be able do login via ssh via
     password auth, and they won't be able to do sudo if passwordless sudo is not enabled for the user.
 
@@ -23,7 +21,7 @@ args:
     doc:
       short_help: The name of the user to create.
     type: string
-    required: false
+    required: true
     cli:
       metavar: USER_NAME
       param_type: argument
