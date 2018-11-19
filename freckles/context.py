@@ -492,7 +492,9 @@ class FrecklesContext(object):
         return frecklet
         # return copy.deepcopy(frecklet)
 
-    def get_frecklet_names(self, tag_whitelist=None, tag_blacklist=None, apropos=None, check_valid=False):
+    def get_frecklet_names(
+        self, tag_whitelist=None, tag_blacklist=None, apropos=None, check_valid=False
+    ):
         """Lists all available frecklet names, filtered by tags or strings in the description.
 
         Args:

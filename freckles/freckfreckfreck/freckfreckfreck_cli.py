@@ -66,7 +66,7 @@ class FreckFreckFreckCommand(FrecklesBaseCommand):
 
         return sorted(self.commands.keys())
 
-    def get_freckles_command(self, ctx, name):
+    def get_freckles_command(self, ctx, name, **kwargs):
 
         ctx.obj["control_dict"] = self.control_dict
         command = self.commands[name]
