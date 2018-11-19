@@ -1,0 +1,31 @@
+doc:
+  short_help: "Installs the sshpass package."
+  help: |
+    Installs the arp network scanning utility.
+
+args:
+  pkg_mgr:
+    doc:
+      short_help: the package manager to use
+    type: string
+    default: auto
+    required: false
+    cli:
+      metavar: PKG-MGR
+
+meta:
+  is_interface: true
+  tags:
+    - nmap
+    - install
+    - pkg
+
+frecklets:
+
+  - pkgs-installed:
+      packages:
+        - name: arp
+          pkg_mgr: "{{:: pkg_mgr ::}}"
+          pkgs:
+            debian: network-tools
+            default: arp-scan
