@@ -129,7 +129,7 @@ def check_askpass_available(ctx, param, value):
             log.debug("failed to load 'sshpass': {}".format(e))
 
             click.echo(
-                "You specified the '--ask-pass' flag, but the 'sshpass' package is not available on this system.\n\nYou can either install it manually, for details and security implications, check:\n\nhttps://www.cyberciti.biz/faq/noninteractive-shell-script-ssh-password-provider/\n\nOr use the 'pkg-askpass-installed' frecklecutable:\n\nfrecklecute pkg-sshpass-installed\n"
+                "\nYou specified the '--ask-pass' flag, but the 'sshpass' package is not available on this system.\n\nYou can either install it manually, for details and security implications, check:\n\nhttps://www.cyberciti.biz/faq/noninteractive-shell-script-ssh-password-provider/\n\nOr use the 'pkg-askpass-installed' frecklecutable:\n\nfrecklecute pkg-sshpass-installed\n"
             )
 
             sys.exit(1)
