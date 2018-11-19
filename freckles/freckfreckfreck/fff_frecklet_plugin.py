@@ -131,6 +131,11 @@ def frecklet_help(ctx, frecklet_name, hide_vars, hide_links):
 
     show = {"variables": not hide_vars, "show_links": not hide_links}
     rst = utils.render_frecklet(frecklet_name, p, show=show)
+
+    # otherwise Python 3 fails
+    if hasattr(rst, "encode"):
+        rst = rst.encode("utf-8")
+
     rendered = rst2ansi(rst)
     click.echo(rendered)
 
@@ -158,6 +163,9 @@ def info(ctx, frecklet_name):
     show = {"variables": False, "show_links": False}
 
     rst = utils.render_frecklet(frecklet_name, p, show=show)
+    # otherwise Python 3 fails
+    if hasattr(rst, "encode"):
+        rst = rst.encode("utf-8")
     rendered = rst2ansi(rst)
 
     click.echo(rendered)
@@ -248,6 +256,10 @@ def vars(ctx, vars, only_names):
     rst = utils.render_frecklet(
         frecklet_name, p, template_name="frecklet_template_args.rst.j2", show=show
     )
+
+    # otherwise Python 3 fails
+    if hasattr(rst, "encode"):
+        rst = rst.encode("utf-8")
 
     rendered = rst2ansi(rst)
     click.echo(rendered)
