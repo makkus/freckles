@@ -25,6 +25,7 @@ FRECKLES_SHARE_DIR = os.path.join(
 
 MIXED_CONTENT_TYPE = "hodgepodge"
 
+COMMUNITY_REPO_ALIAS = "community"
 # COMMUNITY_REPO_URL = "https://gitlab.com/freckles-io/freckles-community.git"
 # COMMUNITY_FOLDER = os.path.join(FRECKLES_SHARE_DIR, "community")
 # COMMUNITY_FRECKLETS_FOLDER = os.path.join(COMMUNITY_FOLDER, FRECKLETS_KEY)
