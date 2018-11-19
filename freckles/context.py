@@ -288,7 +288,10 @@ class FrecklesContext(object):
             ignore_invalid_repos=self.ignore_invalid_repos,
         )
 
+        repo_download_done = []
         for repo in frecklet_repos:
+            repo_download_done.append(repo["path"])
+
             path = self.repo_manager.get_repo(repo)
             if path is None:
                 log.debug("Not a valid repo, or repo doesn't exist: {}".format(repo))
@@ -324,12 +327,18 @@ class FrecklesContext(object):
                 ignore_invalid_repos=self.ignore_invalid_repos,
             )
 
-            # TODO: don't do this multiple time for the same repo
+            # this only downloads the repos, so it's ok to only do it once per url
             for r in repos:
+
+                if r["path"] in repo_download_done:
+                    continue
+                repo_download_done.append(path)
+                # print(repo_download_done)
                 path = self.repo_manager.get_repo(r)
                 if path is None:
                     log.debug("Not a valid repo, or repo doesn't exist: {}".format(r))
                     continue
+
             connector.set_content_repos(repos)
 
             indexes = connector.get_indexes()
