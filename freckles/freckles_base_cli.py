@@ -8,6 +8,7 @@ import click
 import click_completion
 import click_log
 import six
+from plumbum import local
 
 from frkl import VarsType
 from frutils import merge_list_of_dicts
@@ -118,6 +119,22 @@ def allow_community_repo(ctx, param, value):
         sys.exit()
 
 
+def check_askpass_available(ctx, param, value):
+
+    if value:
+        try:
+            local["sshpass"]
+            return True
+        except (Exception) as e:
+            log.debug("failed to load 'sshpass': {}".format(e))
+
+            click.echo(
+                "You specified the '--ask-pass' flag, but the 'sshpass' package is not available on this system.\n\nYou can either install it manually, for details and security implications, check:\n\nhttps://www.cyberciti.biz/faq/noninteractive-shell-script-ssh-password-provider/\n\nOr use the 'pkg-askpass-installed' frecklecutable:\n\nfrecklecute pkg-sshpass-installed\n"
+            )
+
+            sys.exit(1)
+
+
 def get_common_options(print_version_callback=print_version):
 
     version_option = click.Option(
@@ -176,7 +193,17 @@ def get_common_options(print_version_callback=print_version):
         type=str,
         default="localhost",
     )
-
+    ask_pass_option = click.Option(
+        param_decls=["--ask-pass"],
+        help="ask for the connection password",
+        multiple=False,
+        type=bool,
+        default=False,
+        is_flag=True,
+        is_eager=True,
+        callback=check_askpass_available,
+        expose_value=True,
+    )
     elevated_option = click.Option(
         param_decls=["--elevated", "-e", "elevated"],
         help="indicate that this run needs elevated permissions",
@@ -201,6 +228,7 @@ def get_common_options(print_version_callback=print_version):
         community_option,
         repo_option,
         host_option,
+        ask_pass_option,
         output_option,
         vars_option,
         elevated_option,
@@ -305,9 +333,20 @@ class FrecklesBaseCommand(click.MultiCommand):
         self.init_parent_command(ctx)
         return self.list_freckles_commands(ctx)
 
+    def ask_ssh_and_sudo_passwords(self, ctx):
+        ssh_pass = None
+        sudo_pass = None
+        if ctx.params.get("ask_pass", False) is True:
+            ssh_pass = click.prompt("SSH PASS", type=str, hide_input=True)
+        if ctx.params.get("elevated", None) == "elevated":
+            sudo_pass = click.prompt("SUDO PASS", type=str, hide_input=True)
+
+        return (ssh_pass, sudo_pass)
+
     def get_command(self, ctx, name):
         try:
             self.init_parent_command(ctx)
+
             return self.get_freckles_command(ctx, name)
         except (FrecklesPermissionException) as e:
             click.echo()

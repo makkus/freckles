@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import logging
+import os
 import sys
 
 import click
@@ -179,10 +180,20 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 runner.set_frecklecutable(frecklecutable)
                 runner.add_extra_vars(self.extra_vars)
 
+                run_vars = {"__freckles_run__": {"pwd": os.getcwd()}}
+
+                ssh_pass, sudo_pass = self.ask_ssh_and_sudo_passwords(ctx)
+                if sudo_pass is not None:
+                    run_vars["__freckles_run__"]["sudo_pass"] = sudo_pass
+                if ssh_pass is not None:
+                    run_vars["__freckles_run__"]["ssh_pass"] = ssh_pass
+
                 try:
                     run_config = FrecklesRunConfig(self.context, self.control_dict)
                     click.echo()
-                    results = runner.run(run_config=run_config, user_input=kwargs)
+                    results = runner.run(
+                        run_config=run_config, run_vars=run_vars, user_input=kwargs
+                    )
                 except (Exception) as e:
                     log.debug(e, exc_info=1)
                     click.echo()

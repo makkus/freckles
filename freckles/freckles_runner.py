@@ -48,7 +48,8 @@ def clean_omit_values(d):
 
     elif isinstance(d, (dict, OrderedDict, CommentedMap)):
 
-        for key, val in d.items():
+        for key in list(d):
+            val = d[key]
             if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
                 clean_omit_values(val)
             elif val == OMIT_VALUE:
@@ -126,7 +127,12 @@ class HostConfigContextPlugin(CnfPlugin):
                 host = host_type_plus.convert(host, None, None)
             except (Exception) as e:
                 log.debug(e)
-                msg = e.message
+                if hasattr(e, "message"):
+                    msg = e.message
+                elif hasattr(e, "msg"):
+                    msg = e.msg
+                else:
+                    msg = "n/a"
                 raise FrecklesConfigException(
                     "Error with host string '{}': {}".format(host, msg)
                 )
@@ -453,9 +459,11 @@ class FrecklesRunner(object):
             )
             doc.describe()
 
-    def run(self, run_config, user_input=None):
+    def run(self, run_config, run_vars=None, user_input=None):
 
-        if not user_input:
+        if run_vars is None:
+            run_vars = {}
+        if user_input is None:
             user_input = {}
 
         if self.frecklecutable is None:
@@ -465,7 +473,10 @@ class FrecklesRunner(object):
         processed = self.frecklecutable.postprocess_click_input(cleaned_user_input)
 
         result = self.execute_tasklist(
-            vars=processed, run_config=run_config, passwords=passwords
+            vars=processed,
+            run_config=run_config,
+            passwords=passwords,
+            run_vars=run_vars,
         )
 
         # result = self.frecklecutable.execute_tasklist(
@@ -475,7 +486,13 @@ class FrecklesRunner(object):
         # log.debug("execute tasklist result:\n\n{}".format(pprintpp.pformat(result)))
         return result
 
-    def execute_tasklist(self, run_config, vars=None, passwords=None):
+    def execute_tasklist(self, run_config, vars=None, passwords=None, run_vars=None):
+
+        if run_vars is None:
+            run_vars = {}
+
+        if "pwd" not in run_vars.get("__freckles_run__", {}).keys():
+            run_vars.setdefault("__freckles_run__", {})["pwd"] = os.getcwd()
 
         parent_task = TaskDetail(self.frecklecutable.name, "run", task_parent=None)
 
@@ -581,6 +598,7 @@ class FrecklesRunner(object):
                     result_callback=result_callback,
                     output_callback=callback_adapter,
                     parent_task=task_details,
+                    run_vars=run_vars,
                 )
 
                 if callback_adapter is not None:
