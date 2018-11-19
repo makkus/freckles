@@ -16,7 +16,12 @@ from frutils import (
     calculate_cache_location_for_url,
     DEFAULT_URL_ABBREVIATIONS_REPO,
 )
-from .defaults import FRECKLES_CACHE_BASE, MIXED_CONTENT_TYPE, FRECKLETS_KEY
+from .defaults import (
+    FRECKLES_CACHE_BASE,
+    MIXED_CONTENT_TYPE,
+    FRECKLETS_KEY,
+    COMMUNITY_REPO_ALIAS,
+)
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
 
 log = logging.getLogger("freckles")
@@ -170,14 +175,14 @@ class RepoManager(object):
 
     def check_permission_for_repo(self, repo_desc):
 
-        # if repo_desc == COMMUNITY_REPO_DESC:
-        #     allow_community = self.cnf_interpreter.get_cnf_value("allow_community")
-        #     if allow_community:
-        #         return (True, "Community repo allowed.")
-        #     else:
-        #         return (False, "Community repo not allowed")
-
         allow_remote = self.cnf_interpreter.get_cnf_value("allow_remote")
+
+        if repo_desc.get("alias", None) == COMMUNITY_REPO_ALIAS:
+            allow_community = self.cnf_interpreter.get_cnf_value("allow_community")
+            if allow_community:
+                return (True, "'ommunity' repo allowed.")
+            elif not allow_remote:
+                return (False, "'community' repo not allowed")
 
         if repo_desc["remote"] and not allow_remote:
             return (False, "No remote repos allowed.")
