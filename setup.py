@@ -16,7 +16,6 @@ requirements = [
     "Click>=6.7",
     "click-plugins>=1.0.3",
     "colorama==0.3.9",
-    "plumbum==1.6.6",
     "termcolor==1.1.0",
     "yaspin==0.13.0",
     "terminaltables==3.1.0",
