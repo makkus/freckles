@@ -18,12 +18,7 @@ log = logging.getLogger("freckles")
 
 def is_disabled(task):
 
-    # import pp
-    # pp(task)
-    disabled = task.get("__skip__", None)
-
-    # if disabled is None:
-    #     return False
+    disabled = task[FRECKLET_NAME].get("__skip__", None)
 
     if disabled is True:
         return True
@@ -31,13 +26,9 @@ def is_disabled(task):
     if disabled is not False and disabled:
 
         log.debug("Adding downstream skip condition: {}".format(disabled))
-        task.setdefault("__skip_internal__", []).append(disabled)
-        # raise FrecklesConfigException(
-        #     "value for 'disabled' key needs to be of type 'bool': {}".format(disabled)
-        # )
+        task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(disabled)
 
-    for skip in task.get("__inherited_keys__", {}).get("__skip__", []):
-
+    for skip in task["meta"].get("__inherited_keys__", {}).get("__skip__", []):
         if skip is True:
             return True
 

@@ -175,6 +175,14 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
         if self.parent_metadata:
 
             task = new_config[FRECKLET_NAME]
+
+            for ik, ikv in (
+                self.parent_metadata["meta"].get("__inherited_keys__", {}).items()
+            ):
+                new_config.setdefault("meta", {}).setdefault(
+                    "__inherited_keys__", {}
+                ).setdefault(ik, []).extend(ikv)
+
             for key in InheritedTaskKeyProcessor.INHERITED_TASK_KEYS:
 
                 if key not in self.parent_metadata[FRECKLET_NAME].keys():
@@ -189,13 +197,17 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                 #     )
 
                 parent_key = self.parent_metadata[FRECKLET_NAME][key]
-                task.setdefault("__inherited_keys__", {}).setdefault(key, []).append(
-                    parent_key
-                )
+
+                new_config.setdefault("meta", {}).setdefault(
+                    "__inherited_keys__", {}
+                ).setdefault(key, []).append(parent_key)
+
+                # get all required arguments for this task
+                # and set and associate an arg-list with
+                # arg metadata to it
                 required_keys = get_template_keys(
                     parent_key, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                 )
-
                 for k in required_keys:
                     temp = get_var_item_from_arg_tree(
                         self.parent_metadata.get("arg_tree", []), k

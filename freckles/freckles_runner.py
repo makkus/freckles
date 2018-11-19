@@ -559,7 +559,7 @@ class FrecklesRunner(object):
                     # import sys, pp
                     # pp(replaced)
                     # sys.exit()
-                    if not is_disabled(t[FRECKLET_NAME]):
+                    if not is_disabled(t):
                         final.append(t)
                     else:
                         log.debug("Skipping task: {}".format(t))

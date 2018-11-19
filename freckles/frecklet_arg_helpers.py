@@ -259,7 +259,6 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
     """
     result = []
     for task in tasklist:
-
         args = extract_base_args_from_task_item(task)
         result.extend(args)
 
@@ -278,8 +277,10 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
         temp = CommentedMap()
         for arg, details in args.items():
             level = meta_dict[arg]["__frecklet_level__"]
-            required = details.get("required", False)
-            if level == 0 or required:
+            # required = details.get("required", False)
+            # required = False
+            # if level == 0 or required:
+            if level == 0:
                 temp[arg] = details
         args = temp
     elif inherit_args_mode < 0:
@@ -288,8 +289,10 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
         temp = CommentedMap()
         for arg, details in args.items():
             level = meta_dict[arg]["__frecklet_level__"]
-            required = details.get("required", False)
-            if level < inherit_args_mode + 1 or required:
+            # required = details.get("required", False)
+            # required = False
+            # if level < inherit_args_mode + 1 or required:
+            if level < inherit_args_mode + 1:
                 temp[arg] = details
         args = temp
 
