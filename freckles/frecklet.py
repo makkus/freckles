@@ -174,7 +174,7 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
 
         if self.parent_metadata:
 
-            task = new_config[FRECKLET_NAME]
+            # task = new_config[FRECKLET_NAME]
 
             for ik, ikv in (
                 self.parent_metadata["meta"].get("__inherited_keys__", {}).items()

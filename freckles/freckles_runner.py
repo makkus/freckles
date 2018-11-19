@@ -23,7 +23,6 @@ from .defaults import (
     FRECKLES_RUN_CONFIG_PROFILES_DIR,
     FRECKLES_CONTROL_CONFIG_SCHEMA,
     DEFAULT_FRECKLES_JINJA_ENV,
-    FRECKLET_NAME,
 )
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
