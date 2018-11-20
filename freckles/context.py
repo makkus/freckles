@@ -554,11 +554,16 @@ class FrecklesContext(object):
         if apropos:
             temp = []
             for r in result:
+                match_title = True
+                for a in apropos:
+                    if a.lower() not in r.lower():
+                        match_title = False
+
                 frecklet = self.index.get_pkg(r)
                 if frecklet is None:
                     continue
                 match = frecklet.get_doc().matches_apropos(apropos)
-                if match:
+                if match or match_title:
                     temp.append(r)
 
             result = temp

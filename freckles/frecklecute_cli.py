@@ -82,7 +82,10 @@ def apropos(ctx, param, value):
     else:
         apropos = list(value)
 
-    ctx.obj["apropos"] = apropos
+    if apropos is not None:
+        ctx.obj["apropos"] = [a.lower() for a in apropos]
+    else:
+        ctx.obj["apropos"] = apropos
 
     if value:
         command = ctx.command
