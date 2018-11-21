@@ -13,7 +13,7 @@ args:
     required: false
     type: boolean
     doc:
-      short_help: "Don't verify nix installer signature."
+      short_help: "Don't add conda to PATH in init files."
     default: false
     cli:
       is_flag: true

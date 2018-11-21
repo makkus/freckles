@@ -80,6 +80,12 @@ args:
     required: false
     cli:
       metavar: PWD
+  shell:
+    doc:
+      short_help: "The users default shell."
+    type: string
+    required: false
+    default: "/bin/bash"
 
 meta:
   tags:
@@ -100,3 +106,4 @@ frecklets:
       system: "{{:: system_user | default(omit) ::}}"
       password: "{{:: password | default(omit) ::}}"
       password_plain: "{{:: password_plain | default(omit) ::}}"
+      shell: "{{:: shell | default(omit) ::}}"
