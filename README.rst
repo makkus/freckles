@@ -47,10 +47,6 @@ Examples
 
 To see what category of tasks I'm talking about, here are a few examples.
 
-**Note:** Currently there is no support for securely specifying passwords that won't show up in logs etc. This will be done
-before the first release, but is not ready currently. For now -- if a password is required -- it's probably best (if possible) to use a
-generic one (like 'change_me') and change it straight after provisioning.
-
 Some of those examples need either root permissions, or an admin user who has password-less sudo setup. Also, most
 of this is only tested on Debian Stretch. For anything involving the generation of https certificates, DNS needs to be setup in advance.
 
@@ -61,14 +57,27 @@ This command creates a file with a 'hello world' content string. It also creates
 
 .. code-block::
 
-    frecklecute ensure-file-content --content "hello world" /tmp/freckles/example.file
+    $ frecklecute ensure-file-content
 
-Maybe we want this file on a different host, and we want it owned by a different user and group, and also create that user and group if they don't exist yet?
+    ╭─ starting: 'file-exists-with-content'
+    ├╼ connector: nsbl
+    │  ├╼ host: localhost
+    │  │  ├╼ starting playbook
+    │  │  │  ╰╼ ok
+    │  │  │  ├╼ checking if parent folder exists
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ creating parent directory for: /tmp/freckles/example.file'
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ writing content to file: /tmp/freckles/example.file
+    │  │  │  │  ╰╼ ok
+    │  │  │  ╰╼ ok
+    │  │  ╰╼ ok
+    │  ╰╼ ok
+    ╰─ ok
 
-.. code-block::
 
-    frecklecute -h root@dev.cutecode.co ensure-file-content --owner freckles --group freckles
-                --content "hello world" /tmp/freckles/example.file
+This would also work on another host, all you need to do is specify the ``--host <username>@<hostname>`` flag.
+
 
 Docker
 ++++++
@@ -77,24 +86,24 @@ Installing Docker on a machine is not as straightforward and quick as I think it
 
 .. code-block::
 
-    frecklecute install-docker
+    frecklecute pkg-docker-installed
 
 (doesn't work for Ubuntu cosmic yet -- no repository yet)
+
 
 Setting up Wordpress
 ++++++++++++++++++++
 
-Creating files and installing simple applications is boring thoug, lets deploy a full wordpress site, using MariaDB, Apache and LetsEncrypt certificate.
+Creating files and installing simple applications is boring thoug, lets deploy a full wordpress site, using MariaDB, Apache (or, if you want, Nginx) and LetsEncrypt certificate.
 
 As a hosting provider you can use any of the many available ones, e.g. DigitalOcean, Hetzner, Amazon, etc...
 
 .. code-block::
 
-     frecklecute -h root@dev.cutecode.co setup-wordpress --domain dev.cutecode.co \
-                 --wp-title example-site --wp-admin-email info@cutecode.co \
-                 --letsencrypt-email info@cutecode.co
+     frecklecute -h root@dev.cutecode.co --community wordpress-single-site --host dev.cutecode.co \
+                 --wp-title example-site --wp-admin-email info@cutecode.co
 
-To see all supported options of this command, use ``frecklecute setup-wordpress --help``
+To see all supported options of this command, use ``frecklecute --community wordpress-single-site --help``. Notice the ``--community`` flag. This points to a collection of community-curated task 'recipes': https://gitlab.com/frecklets
 
 Discourse
 +++++++++
