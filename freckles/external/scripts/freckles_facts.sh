@@ -14,7 +14,7 @@ export PATH="${FRECKLES_PRE_PATH}:${PATH}:${FRECKLES_POST_PATH}"
 
 if [ -z ${FRECKLES_CHECK_EXECUTABLES} ]
 then
-  export FRECKLES_CHECK_EXECUTABLES="cat:wget:curl:python:python2:python2.7:python3:python3.6:vagrant:pip:conda:nix:asdf:brew:rsync"
+  export FRECKLES_CHECK_EXECUTABLES="cat:wget:curl:python:python2:python2.7:python3:python3.6:vagrant:pip:conda:nix:asdf:brew:rsync:stow"
 fi
 if [ -z ${FRECKLES_CHECK_PYTHON_MODULES} ]
 then

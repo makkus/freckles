@@ -1,0 +1,72 @@
+doc:
+  short_help: "Ensures 'asdf' is installed."
+  help: |
+    Installs the [asdf](https://github.com/asdf-vm/asdf) versions/package manager.
+  further_reading:
+    - "[asdf github page](https://github.com/asdf-vm/asdf)"
+    - "[cimon-io.asdf Ansible role](https://github.com/cimon-io/ansible-role-asdf)"
+
+args:
+  user:
+    doc:
+      short_help: "The name of the user (optional)."
+    type: string
+    required: false
+    default: "{{ ansible_env.USER }}"
+  plugin:
+    doc:
+      short_help: "The name of the plugin."
+    type: string
+    required: true
+    empty: false
+  versions:
+    doc:
+      short_help: "A list of versions to install (optional)."
+    type: list
+    required: true
+    empty: false
+    schema:
+      type: string
+      empty: false
+    cli:
+      param_decls:
+        - "--version"
+        - "-v"
+      metavar: VERSION
+  global:
+    doc:
+      short_help: "A global version for the plugin (optional)."
+    type: string
+    required: false
+    empty: false
+    cli:
+      metavar: VERSION
+  dependencies:
+    doc:
+      short_help: "A list of optional plugin dependencies."
+    type: list
+    required: false
+    schema:
+      type: string
+    cli:
+      metavar: PKG
+
+meta:
+  tags:
+    - featured-frecklecutable
+    - conda
+    - package-manager
+    - package-management
+    - install
+
+frecklets:
+  - frecklet:
+      command: cimon-io.asdf
+      type: ansible-role
+      __msg__: "installing asdf"
+    vars:
+      asdf_plugins:
+        - name: "{{:: plugin ::}}"
+          versions: "{{:: versions | default(omit) ::}}"
+          global: "{{:: global | default(versions[0]) ::}}"
+      asdf_user: "{{:: user ::}}"
