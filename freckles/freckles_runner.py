@@ -491,7 +491,7 @@ class FrecklesRunner(object):
             run_vars = {}
 
         if "pwd" not in run_vars.get("__freckles_run__", {}).keys():
-            run_vars.setdefault("__freckles_run__", {})["pwd"] = os.getcwd()
+            run_vars.setdefault("__freckles_run__", {})["pwd"] = os.path.realpath(os.getcwd())
 
         parent_task = TaskDetail(self.frecklecutable.name, "run", task_parent=None)
 

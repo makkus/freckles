@@ -183,7 +183,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                 runner.set_frecklecutable(frecklecutable)
                 runner.add_extra_vars(self.extra_vars)
 
-                run_vars = {"__freckles_run__": {"pwd": os.getcwd()}}
+                run_vars = {"__freckles_run__": {"pwd": os.path.realpath(os.getcwd())}}
 
                 ssh_pass, sudo_pass = self.ask_ssh_and_sudo_passwords(ctx)
                 if sudo_pass is not None:
