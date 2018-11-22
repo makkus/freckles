@@ -5,7 +5,7 @@
 # Shell script to gather basic facts about a machine.
 #
 # Copyright 2018 Markus Binsteiner
-# licensed under The Parity Public License 2.3.1 (https://licensezero.com/licenses/parity)
+# licensed under The Parity Public License 3.0.0 (https://licensezero.com/licenses/parity)
 #
 # -----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ export PATH="${FRECKLES_PRE_PATH}:${PATH}:${FRECKLES_POST_PATH}"
 
 if [ -z ${FRECKLES_CHECK_EXECUTABLES} ]
 then
-  export FRECKLES_CHECK_EXECUTABLES="cat:wget:curl:python:python2:python2.7:python3:python3.6:vagrant:pip:conda:nix:asdf:brew:rsync:stow"
+  export FRECKLES_CHECK_EXECUTABLES="bzip2:cat:gunzip:wget:curl:python:python2:python2.7:python3:python3.6:vagrant:pip:conda:nix:asdf:brew:rsync:stow:unzip:unrar"
 fi
 if [ -z ${FRECKLES_CHECK_PYTHON_MODULES} ]
 then
