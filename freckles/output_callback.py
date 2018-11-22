@@ -522,11 +522,12 @@ class DefaultCallback(FrecklesCallback):
             self.current_message = None
             return
 
-        # detail_level = details.detail_level
-        # if self.display_detail_level < detail_level:
-        #     self.delete_last_line()
-        #     self.current_message = None
-        #     return
+        detail_level = details.detail_level
+        if self.display_detail_level < detail_level and details.success:
+
+            self.delete_last_line()
+            self.current_message = None
+            return
         if details.msg:
             msg = details.msg
 
