@@ -4,6 +4,7 @@ import os
 
 from jinja2.nativetypes import NativeEnvironment
 
+from frkl import VarsType
 from frutils import JINJA_DELIMITER_PROFILES, jinja2_filters
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
@@ -241,3 +242,13 @@ FRECKLES_RUN_CONTROL_PROFILES = {
 DEFAULT_FRECKLES_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["freckles"])
 for filter_name, filter_details in jinja2_filters.ALL_FRUTIL_FILTERS.items():
     DEFAULT_FRECKLES_JINJA_ENV.filters[filter_name] = filter_details["func"]
+
+FRECKLES_CLICK_CEREBUS_ARG_MAP = {
+    "string": str,
+    "float": float,
+    "integer": int,
+    "boolean": bool,
+    "dict": VarsType(),
+    "password": str,
+    # "list": list
+}

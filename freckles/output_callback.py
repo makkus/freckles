@@ -287,7 +287,7 @@ DISPLAY_PROFILES = {
         "display_unchanged": True,
         "display_msg_when_successful": False,
         "display_ok_status": True,
-        "display_detail_level": 0,
+        "display_detail_level": 1,
         "display_nothing": False,
         "display_run_parameters": False,
         "display_connector_run_parameters": False,
@@ -298,7 +298,7 @@ DISPLAY_PROFILES = {
         "display_unchanged": True,
         "display_msg_when_successful": True,
         "display_ok_status": True,
-        "display_detail_level": 1,
+        "display_detail_level": 2,
         "display_nothing": False,
         "display_run_parameters": True,
         "display_connector_run_parameters": True,
@@ -522,12 +522,12 @@ class DefaultCallback(FrecklesCallback):
             self.current_message = None
             return
 
-        detail_level = details.detail_level
-        if self.display_detail_level < detail_level and details.success:
-
-            self.delete_last_line()
-            self.current_message = None
-            return
+        # detail_level = details.detail_level
+        # if self.display_detail_level < detail_level and details.success:
+        #
+        #     self.delete_last_line()
+        #     self.current_message = None
+        #     return
         if details.msg:
             msg = details.msg
 
