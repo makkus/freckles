@@ -76,7 +76,7 @@ setup(
         ],
     },
     install_requires=requirements,
-    license="The Parity Public License 3.0.0",
+    license="Parity Public License 5.0.0",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="freckles",
