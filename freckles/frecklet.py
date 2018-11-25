@@ -24,7 +24,12 @@ from frutils import (
 )
 from frutils.frutils_cli import create_parameters
 from luci.luitem import LuItem
-from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME, FRECKLETS_KEY, FRECKLES_CLICK_CEREBUS_ARG_MAP
+from .defaults import (
+    DEFAULT_FRECKLES_JINJA_ENV,
+    FRECKLET_NAME,
+    FRECKLETS_KEY,
+    FRECKLES_CLICK_CEREBUS_ARG_MAP,
+)
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import (
     extract_base_args,
@@ -177,7 +182,9 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
             # task = new_config[FRECKLET_NAME]
 
             for ik, ikv in (
-                self.parent_metadata[FRECKLET_NAME].get("__inherited_keys__", {}).items()
+                self.parent_metadata[FRECKLET_NAME]
+                .get("__inherited_keys__", {})
+                .items()
             ):
                 new_config.setdefault(FRECKLET_NAME, {}).setdefault(
                     "__inherited_keys__", {}
@@ -283,7 +290,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
         # if frecklet_level == 0 and new_config[FRECKLET_NAME].get("__skip__", None) is not None:
         #     new_config["meta"]["__root_skip__"] = new_config[FRECKLET_NAME]["__skip__"]
 
-
         # the arg_tree is a tree-like structure that stores each 'root' argument,
         # including all the required child args to construct it, including the ones
         # that the user interacts with
@@ -293,7 +299,11 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         for key in template_keys:
 
-            arg_tree_item = {"var": key, "__meta__": new_config["meta"], FRECKLET_NAME: new_config[FRECKLET_NAME]}
+            arg_tree_item = {
+                "var": key,
+                "__meta__": new_config["meta"],
+                FRECKLET_NAME: new_config[FRECKLET_NAME],
+            }
 
             schema = args.get(key, None)
             if schema is None:
@@ -315,7 +325,8 @@ class AugmentingTaskProcessor(ConfigProcessor):
                 # else:
                 parent_template_keys = sorted(
                     get_template_keys(
-                        {"vars": parent_vars, "frecklet": parent_frecklet}, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                        {"vars": parent_vars, "frecklet": parent_frecklet},
+                        jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
                     )
                 )
                 value = parent_vars
@@ -446,7 +457,11 @@ class Frecklet(LuItem):
 
         # print(args)
         # print(default_vars)
-        parameters = create_parameters(copy.deepcopy(args), default_vars=default_vars, type_map=FRECKLES_CLICK_CEREBUS_ARG_MAP)
+        parameters = create_parameters(
+            copy.deepcopy(args),
+            default_vars=default_vars,
+            type_map=FRECKLES_CLICK_CEREBUS_ARG_MAP,
+        )
         return parameters
 
     def process_metadata(self, metadata):
@@ -519,9 +534,7 @@ class Frecklet(LuItem):
 
     def generate_click_parameters(self, default_vars=None):
 
-        parameters = self.get_parameters(
-            default_vars=default_vars
-        )
+        parameters = self.get_parameters(default_vars=default_vars)
         result = parameters.generate_click_parameters(use_defaults=True)
         return result
 

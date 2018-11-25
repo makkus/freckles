@@ -104,15 +104,10 @@ def create_vars_for_task_item(task_item, arg_values):
     """
     # TODO: currently, this does not extract args that are only used in the 'task' key, but not 'vars'
     arg_tree = task_item["arg_tree"]
-    # print(task_item["frecklet"]["command"])
-    tk = get_template_keys(task_item, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-    # print(tk)
     vars = {}
 
     for details in arg_tree:
-        # import pp
-        # print("------------------------------")
-        # pp(details)
+
         try:
             key, value = create_var_value(details, arg_values)
             if key is None:
@@ -125,7 +120,6 @@ def create_vars_for_task_item(task_item, arg_values):
             else:
                 raise e
 
-    # print(vars)
     return vars
 
 
@@ -158,6 +152,7 @@ def validate_var(key_name, value, schema, password_coerced=True):
         return valid[key_name]
     else:
         return None
+
 
 def create_var_value(arg_branch, arg_values):
 
@@ -236,41 +231,39 @@ def create_var_value(arg_branch, arg_values):
 
         return extract_var_value(var_key, schema, arg_branch, arg_values)
 
+
 def extract_var_value(var_key, schema, arg_branch, arg_values):
 
-        if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
-            if "value" in arg_branch.keys():
-                value = arg_branch["value"]
+    if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
+        if "value" in arg_branch.keys():
+            value = arg_branch["value"]
+        else:
+            if var_key in arg_values.keys():
+                value = arg_values[var_key]
+            elif "default" in schema.keys():
+                value = schema["default"]
             else:
-                if var_key in arg_values.keys():
-                    value = arg_values[var_key]
-                elif "default" in schema.keys():
-                    value = schema["default"]
-                else:
-                    return (None, None)
+                return (None, None)
 
-        if "__meta__" in schema:
-            temp_schema = copy.deepcopy(schema)
-            temp_schema.pop("__meta__")
-        else:
-            temp_schema = schema
-        try:
-            validated = validate_var(var_key, value, temp_schema)
+    if "__meta__" in schema:
+        temp_schema = copy.deepcopy(schema)
+        temp_schema.pop("__meta__")
+    else:
+        temp_schema = schema
+    try:
+        validated = validate_var(var_key, value, temp_schema)
 
-            return (var_key, validated)
-        except (ParametersException) as e:
-            raise FrecklesConfigException(
-                "Invalid (or missing) var '{}':\n\nvalue:\n{}\n\nschema:\n{}\n\n  => {}".format(
-                    var_key,
-                    pprint.pformat(value),
-                    pprint.pformat(temp_schema),
-                    e.errors,
-                )
+        return (var_key, validated)
+    except (ParametersException) as e:
+        raise FrecklesConfigException(
+            "Invalid (or missing) var '{}':\n\nvalue:\n{}\n\nschema:\n{}\n\n  => {}".format(
+                var_key, pprint.pformat(value), pprint.pformat(temp_schema), e.errors
             )
-            # return (var_key, value)
+        )
+        # return (var_key, value)
 
-        else:
-            raise Exception("This is a bug, please report.")
+    else:
+        raise Exception("This is a bug, please report.")
 
 
 def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
