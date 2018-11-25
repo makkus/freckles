@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 import copy
 import logging
 import os
-
 from collections import OrderedDict
 
 from .context import FrecklesContext
@@ -28,7 +27,7 @@ def is_disabled(task):
         log.debug("Adding downstream skip condition: {}".format(disabled))
         task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(disabled)
 
-    for skip in task["meta"].get("__inherited_keys__", {}).get("__skip__", []):
+    for skip in task[FRECKLET_NAME].get("__inherited_keys__", {}).get("__skip__", []):
         if skip is True:
             return True
 

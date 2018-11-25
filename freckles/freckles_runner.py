@@ -4,13 +4,11 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
-import random
-import string
 import uuid
+from collections import OrderedDict
 
 import click
 import pprintpp
-from collections import OrderedDict
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
@@ -28,7 +26,6 @@ from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
 from .frecklet import Frecklet
-
 # from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
@@ -434,9 +431,10 @@ class FrecklesRunner(object):
 
         if self.password_store_method == "environment":
             result["password"] = value
-            result["alias"] = "".join(
-                random.choice(string.ascii_lowercase) for _ in range(14)
-            )
+            # random_string = "".join(
+            #     random.choice(string.ascii_lowercase) for _ in range(14)
+            # )
+            result["alias"] = "__{}__".format(var_name)
             result["var"] = var_name
         else:
             raise FrecklesConfigException(

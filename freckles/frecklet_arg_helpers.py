@@ -2,8 +2,8 @@
 import copy
 import logging
 import pprint
-
 from collections import OrderedDict
+
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
@@ -48,7 +48,7 @@ def remove_duplicate_args(args_list):
     result = CommentedMap()
     meta_dict = {}
 
-    for arg_name, schema, meta in args_list:
+    for arg_name, schema, meta, frecklets in args_list:
         if arg_name == "omit":
             continue
 
@@ -94,9 +94,7 @@ def remove_duplicate_args(args_list):
 def add_user_input(tasklist, arg_values):
     """Creates a high-level vars dict out of user input.
     """
-
     for task in tasklist:
-
         vars = create_vars_for_task_item(task, arg_values)
         task["input"] = vars
 
@@ -104,12 +102,17 @@ def add_user_input(tasklist, arg_values):
 def create_vars_for_task_item(task_item, arg_values):
     """Creates the high level vars for this task.
     """
-
     # TODO: currently, this does not extract args that are only used in the 'task' key, but not 'vars'
     arg_tree = task_item["arg_tree"]
+    # print(task_item["frecklet"]["command"])
+    tk = get_template_keys(task_item, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+    # print(tk)
     vars = {}
-    for details in arg_tree:
 
+    for details in arg_tree:
+        # import pp
+        # print("------------------------------")
+        # pp(details)
         try:
             key, value = create_var_value(details, arg_values)
             if key is None:
@@ -121,6 +124,8 @@ def create_vars_for_task_item(task_item, arg_values):
                 log.debug("Invalid var, assuming this task will be skipped later on.")
             else:
                 raise e
+
+    # print(vars)
     return vars
 
 
@@ -154,7 +159,6 @@ def validate_var(key_name, value, schema, password_coerced=True):
     else:
         return None
 
-
 def create_var_value(arg_branch, arg_values):
 
     var_key = arg_branch["var"]
@@ -165,28 +169,44 @@ def create_var_value(arg_branch, arg_values):
 
         values = arg_branch["values"]
 
+        # this is a root var
+        # if value is None and len(values) == 1:
+        #     v =
+
         r = {"omit": OMIT_VALUE}
         for child_details in values:
             k, v = create_var_value(child_details, arg_values)
             if k is None:
                 continue
             r[k] = v
-        child_template_keys = get_template_keys(
-            value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-        )
-        if not child_template_keys:
 
-            raise Exception("Probably a bug, invalid key: {}".format(value))
+        if value is None and var_key in r.keys():
 
-        try:
+            v = r[var_key]
 
-            v = replace_strings_in_obj(
-                value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        else:
+
+            if value is None:
+                # should be an ignored tasks
+                return (None, None)
+
+            child_template_keys = get_template_keys(
+                value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
             )
-        except (Exception) as e:
-            raise FrecklesConfigException(
-                "Could not process template (error: {}):\n\n{}".format(e, value)
-            )
+
+            if not child_template_keys:
+
+                raise Exception("Probably a bug, invalid key: {}".format(value))
+
+            try:
+                v = replace_strings_in_obj(
+                    value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                )
+            except (Exception) as e:
+                raise FrecklesConfigException(
+                    "Could not process template (error: {}):\n\n{}".format(e, value)
+                )
+
         if not isinstance(v, bool) and not v:
             v = None
 
@@ -213,6 +233,11 @@ def create_var_value(arg_branch, arg_values):
             )
 
     else:
+
+        return extract_var_value(var_key, schema, arg_branch, arg_values)
+
+def extract_var_value(var_key, schema, arg_branch, arg_values):
+
         if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
             if "value" in arg_branch.keys():
                 value = arg_branch["value"]
@@ -231,6 +256,7 @@ def create_var_value(arg_branch, arg_values):
             temp_schema = schema
         try:
             validated = validate_var(var_key, value, temp_schema)
+
             return (var_key, validated)
         except (ParametersException) as e:
             raise FrecklesConfigException(
@@ -241,8 +267,7 @@ def create_var_value(arg_branch, arg_values):
                     e.errors,
                 )
             )
-
-            return (var_key, value)
+            # return (var_key, value)
 
         else:
             raise Exception("This is a bug, please report.")
@@ -281,7 +306,21 @@ def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):
             # required = False
             # if level == 0 or required:
             if level == 0:
+                # print("YES")
+                # print(arg)
+                # import pp
+                # pp(details)
+                # pp(meta_dict[arg])
+                # print("--------------")
                 temp[arg] = details
+            else:
+                pass
+                # print("NOT")
+                # print(arg)
+                # import pp
+                # pp(details)
+                # pp(meta_dict[arg])
+                # print("--------------")
         args = temp
     elif inherit_args_mode < 0:
         pass
@@ -357,6 +396,7 @@ def parse_arg_tree_branch(branch, base_arg_list=[]):
 
         schema = branch["schema"]
         meta = branch["__meta__"]
-        base_arg_list.append((branch_key, schema, meta))
+        frecklets = branch[FRECKLET_NAME]
+        base_arg_list.append((branch_key, schema, meta, frecklets))
 
     return base_arg_list
