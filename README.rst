@@ -57,7 +57,8 @@ This command creates a file with a 'hello world' content string. It also creates
 
 .. code-block::
 
-    $ frecklecute ensure-file-content
+    $ frecklecute file-exists-with-content --content "Hello World" /tmp/hello_file.txt
+
 
     ╭─ starting: 'file-exists-with-content'
     ├╼ connector: nsbl
