@@ -124,8 +124,9 @@ Links
 This here ``README`` only contains very basic information. *freckles* is a fairly feature-full framework, and has a lot
 of bells and whistles. For more in-depth information, visit one of the following links:
 
-- `Documentation <https://docs.freckles.io>`_ ( work in progess )
-- `Homepage <https://freckles.io>`_ ( work in progress - currently this is only my old blog )
+- `Upcoming homepage incl. Documentation <https://freckles.netlify.com>`_ (Work in progress)
+- `Documentation <https://docs.freckles.io>`_ ( out of date )
+- `Homepage <https://freckles.io>`_ ( this is only my old blog -- explains a few key-concepts )
 
 Installation
 ------------
