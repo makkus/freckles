@@ -4,10 +4,10 @@ import logging
 import pprint
 from collections import OrderedDict
 
-from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
-from frutils import is_templated, replace_strings_in_obj, get_template_keys
+from frutils import string_is_templated, replace_strings_in_obj, get_template_keys
 from frutils.defaults import OMIT_VALUE
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
@@ -185,22 +185,44 @@ def create_var_value(arg_branch, arg_values):
                 # should be an ignored tasks
                 return (None, None)
 
-            child_template_keys = get_template_keys(
-                value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-            )
+            else:
 
-            if not child_template_keys:
+                # need to figure out whether we need to do the templating or not
+                do_templating = False
+                if isinstance(value, string_types):
+                    do_templating = string_is_templated(
+                        value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    )
+                elif isinstance(
+                    value,
+                    (dict, CommentedMap, OrderedDict, list, set, CommentedSeq, tuple),
+                ):
+                    do_templating = True
 
-                raise Exception("Probably a bug, invalid key: {}".format(value))
+                if do_templating:
+                    child_template_keys = get_template_keys(
+                        value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    )
 
-            try:
-                v = replace_strings_in_obj(
-                    value, replacement_dict=r, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-                )
-            except (Exception) as e:
-                raise FrecklesConfigException(
-                    "Could not process template (error: {}):\n\n{}".format(e, value)
-                )
+                    if not child_template_keys:
+
+                        v = value
+                        # raise Exception("Probably a bug, invalid key: {}".format(value))
+                    else:
+                        try:
+                            v = replace_strings_in_obj(
+                                value,
+                                replacement_dict=r,
+                                jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
+                            )
+                        except (Exception) as e:
+                            raise FrecklesConfigException(
+                                "Could not process template (error: {}):\n\n{}".format(
+                                    e, value
+                                )
+                            )
+                else:
+                    v = value
 
         if not isinstance(v, bool) and not v:
             v = None
@@ -234,7 +256,7 @@ def create_var_value(arg_branch, arg_values):
 
 def extract_var_value(var_key, schema, arg_branch, arg_values):
 
-    if not is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
+    if not string_is_templated(var_key, DEFAULT_FRECKLES_JINJA_ENV):
         if "value" in arg_branch.keys():
             value = arg_branch["value"]
         else:
