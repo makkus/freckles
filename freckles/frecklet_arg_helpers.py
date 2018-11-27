@@ -182,8 +182,12 @@ def create_var_value(arg_branch, arg_values):
         else:
 
             if value is None:
-                # should be an ignored tasks
-                return (None, None)
+
+                default = schema.get("default", None)
+                if default is not None:
+                    v = default
+                else:
+                    v = None
 
             else:
 

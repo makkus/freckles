@@ -469,7 +469,6 @@ class FrecklesRunner(object):
 
         cleaned_user_input, passwords = self.postprocess_user_input(user_input)
         processed = self.frecklecutable.postprocess_click_input(cleaned_user_input)
-
         result = self.execute_tasklist(
             vars=processed,
             run_config=run_config,
