@@ -134,9 +134,7 @@ class FrecklecuteCommand(FrecklesBaseCommand):
                     msg = "Please provide value for '{}'".format(arg)
                     if details.get("doc", {}).get("short_help", "n/a") != "n/a":
                         desc = details["doc"]["short_help"]
-                        desc = Doc.to_list_item_format(
-                          desc, first_char_lowercase=True
-                        )
+                        desc = Doc.to_list_item_format(desc, first_char_lowercase=True)
                         msg = "{} ({})".format(msg, desc)
 
                     if details.get("type", "string") == "password":

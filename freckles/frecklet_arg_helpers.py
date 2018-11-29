@@ -54,7 +54,9 @@ def create_vars_for_task_item(task_item, user_input):
     for var_name, var_details in arg_tree.items():
 
         try:
-            key, value = create_var_value(var_name, var_details, user_input, task_item=task_item)
+            key, value = create_var_value(
+                var_name, var_details, user_input, task_item=task_item
+            )
             if value == OMIT_VALUE or value is None:
                 omit_keys.append(key)
                 continue
@@ -145,7 +147,9 @@ def create_var_value(var_name, var_details, user_input, task_item):
         if none_value:
             replaced = None
         else:
-            replaced = replace_string(p_var_name, repl, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+            replaced = replace_string(
+                p_var_name, repl, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+            )
 
         try:
             validated = validate_var(var_name, replaced, arg)
@@ -155,7 +159,10 @@ def create_var_value(var_name, var_details, user_input, task_item):
             else:
                 msg = str(pe)
                 parameters = pe.parameters
-                new_msg = msg + ". This is most likely because a parent frecklet does not forward a required var to this frecklet. Be aware that every non-defined parent var does invalidate a whoe child var, even if it contains other content (strings/template vars)."
+                new_msg = (
+                    msg
+                    + ". This is most likely because a parent frecklet does not forward a required var to this frecklet. Be aware that every non-defined parent var does invalidate a whoe child var, even if it contains other content (strings/template vars)."
+                )
                 new_pe = ParametersException(parameters=parameters, errors=new_msg)
                 raise new_pe
         if none_value:
@@ -164,7 +171,9 @@ def create_var_value(var_name, var_details, user_input, task_item):
 
     else:
 
-        if not isinstance(arg, (dict, CommentedMap, OrderedDict)) or not arg.get("__is_arg__", False):
+        if not isinstance(arg, (dict, CommentedMap, OrderedDict)) or not arg.get(
+            "__is_arg__", False
+        ):
             value = arg
         else:
             value = user_input.get(var_name, None)
@@ -175,7 +184,9 @@ def create_var_value(var_name, var_details, user_input, task_item):
                 if arg.get("required", True):
 
                     if default is None:
-                        raise Exception("No value provided for required arg '{}'".format(var_name))
+                        raise Exception(
+                            "No value provided for required arg '{}'".format(var_name)
+                        )
                     else:
                         value = default
                 else:
@@ -205,6 +216,7 @@ def calculate_required_user_input(args):
 
     return result
 
+
 def get_end_nodes(arg, var_tree, end_nodes=None):
 
     if end_nodes is None:
@@ -224,7 +236,9 @@ def get_end_nodes(arg, var_tree, end_nodes=None):
 
                 arg = var_details["arg"]
                 if var_name in end_nodes.keys():
-                    raise Exception("End node key '{}' already in list of keys.".format(var_name))
+                    raise Exception(
+                        "End node key '{}' already in list of keys.".format(var_name)
+                    )
                 end_nodes[var_name] = arg
 
     return end_nodes
@@ -251,7 +265,6 @@ def consolidate_arguments(argument_lists):
                 result[arg_name] = details
 
     return result
-
 
 
 def extract_base_args(tasklist, inherit_args_mode=DEFAULT_INHERIT_ARGS_LEVEL):

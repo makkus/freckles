@@ -31,10 +31,7 @@ from .defaults import (
     FRECKLES_CLICK_CEREBUS_ARG_MAP,
 )
 from .exceptions import FrecklesConfigException
-from .frecklet_arg_helpers import (
-    extract_base_args,
-    DEFAULT_INHERIT_ARGS_LEVEL,
-)
+from .frecklet_arg_helpers import extract_base_args, DEFAULT_INHERIT_ARGS_LEVEL
 
 log = logging.getLogger("freckles")
 
@@ -97,13 +94,11 @@ def get_default_schema():
     result["__auto_generated__"] = True
     return result
 
+
 def get_default_arg():
 
     arg = get_default_schema()
-    arg["doc"] = {
-        "short_help": "n/a",
-        "help": "n/a",
-    }
+    arg["doc"] = {"short_help": "n/a", "help": "n/a"}
 
     return arg
 
@@ -338,7 +333,9 @@ class AugmentingTaskProcessor(ConfigProcessor):
                 if parent_var is not None:
 
                     if parent_var != "__inherit__":
-                        tpks = get_template_keys(parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                        tpks = get_template_keys(
+                            parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                        )
                         for tpk in tpks:
                             if tpk in parent_arg_tree.keys():
                                 parent_vars[tpk] = parent_arg_tree[tpk]
@@ -357,7 +354,11 @@ class AugmentingTaskProcessor(ConfigProcessor):
                     if arg.get("required", True):
 
                         if default is None:
-                            raise Exception("Argument '{}' for frecklet '{}' is required (and no 'default' set), but not specified in parent '{}'.".format(key, frecklet_name, parent_name))
+                            raise Exception(
+                                "Argument '{}' for frecklet '{}' is required (and no 'default' set), but not specified in parent '{}'.".format(
+                                    key, frecklet_name, parent_name
+                                )
+                            )
 
                         arg_tree_item["value"] = default
 
@@ -547,7 +548,11 @@ class Frecklet(LuItem):
             TaskTypePrefixProcessor(),
             MoveEmbeddedTaskKeysProcessor(),
             InheritedTaskKeyProcessor(parent_metadata=parent),
-            AugmentingTaskProcessor(frecklet_index=self.index, parent_metadata=parent, frecklet_meta=self.metadata["frecklet_meta"]),
+            AugmentingTaskProcessor(
+                frecklet_index=self.index,
+                parent_metadata=parent,
+                frecklet_meta=self.metadata["frecklet_meta"],
+            ),
         ]
 
         f = Frkl(self.metadata, chain)
