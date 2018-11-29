@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import copy
 import logging
 import os
 import uuid
@@ -26,7 +27,6 @@ from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
 from .frecklet import Frecklet
-
 # from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
@@ -522,22 +522,15 @@ class FrecklesRunner(object):
                 replaced = []
                 for task in tasklist:
                     task.pop("arg_tree")
-                    input = task["input"]
-                    input["omit"] = OMIT_VALUE
-
-                    # import pp
-                    # print("---------------")
-                    # print(FRECKLET_NAME)
-                    # pp(task)
-                    # print("INPUT")
-                    # pp(input)
+                    input = copy.copy(task["input"])
+                    omit_keys = task["omit_keys"]
+                    for k in omit_keys:
+                        input[k] = OMIT_VALUE
 
                     r = replace_strings_in_obj(
                         task, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                     )
-                    # r = remove_omit_values(r)
                     clean_omit_values(r["vars"])
-                    # sys.exit()
                     replaced.append(r)
 
                 connector_obj = self.context.get_connector(connector)

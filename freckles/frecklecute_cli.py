@@ -131,20 +131,19 @@ class FrecklecuteCommand(FrecklesBaseCommand):
             def command(*args, **kwargs):
 
                 for arg, details in frecklecutable.frecklet.args.items():
+                    msg = "Please provide value for '{}'".format(arg)
+                    if details.get("doc", {}).get("short_help", "n/a") != "n/a":
+                        desc = details["doc"]["short_help"]
+                        desc = Doc.to_list_item_format(
+                          desc, first_char_lowercase=True
+                        )
+                        msg = "{} ({})".format(msg, desc)
 
                     if details.get("type", "string") == "password":
+                        click.echo()
                         coerce = "coerce" in details.keys()
+
                         if details["required"] is True:
-                            click.echo(
-                                "Please provide a value for arg '{}'.".format(arg)
-                            )
-                            if details.get("doc", {}).get("short_help", "n/a") != "n/a":
-                                msg = details["doc"]["short_help"]
-                            else:
-                                msg = arg
-                            msg = Doc.to_list_item_format(
-                                msg, first_char_lowercase=False
-                            )
                             pw = click.prompt(msg, type=str, hide_input=True)
                             if coerce:
                                 pw = validate_var(
@@ -153,20 +152,9 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 
                             kwargs[arg] = pw
                         else:
+                            click.echo()
                             if arg in kwargs.keys() and kwargs[arg] is True:
-                                click.echo(
-                                    "Please provide a value for arg '{}'.".format(arg)
-                                )
-                                if (
-                                    details.get("doc", {}).get("short_help", "n/a")
-                                    != "n/a"
-                                ):
-                                    msg = details["doc"]["short_help"]
-                                else:
-                                    msg = arg
-                                msg = Doc.to_list_item_format(
-                                    msg, first_char_lowercase=False
-                                )
+
                                 pw = click.prompt(msg, type=str, hide_input=True)
                                 if coerce:
                                     pw = validate_var(
