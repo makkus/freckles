@@ -13,15 +13,16 @@ import pprintpp
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
-from frutils import dict_merge, replace_strings_in_obj
+from frutils import dict_merge, replace_strings_in_obj, get_template_keys
 from frutils.cnf import CnfPlugin
 from frutils.cnf import get_cnf
-from frutils.frutils_cli import HostTypePlus, OMIT_VALUE
+from frutils.frutils_cli import HostTypePlus
 from .defaults import (
     FRECKLES_RUN_CONTROL_PROFILES,
     FRECKLES_RUN_CONFIG_PROFILES_DIR,
     FRECKLES_CONTROL_CONFIG_SCHEMA,
     DEFAULT_FRECKLES_JINJA_ENV,
+    FRECKLET_NAME,
 )
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
@@ -37,21 +38,25 @@ log = logging.getLogger("freckles")
 CALLBACK_CLASSES = load_callback_classes()
 
 
-def clean_omit_values(d):
+def clean_omit_values(d, non_value_keys):
 
     if isinstance(d, (list, tuple, CommentedSeq)):
 
         for item in d:
-            clean_omit_values(item)
+            clean_omit_values(item, non_value_keys=non_value_keys)
 
     elif isinstance(d, (dict, OrderedDict, CommentedMap)):
 
         for key in list(d):
             val = d[key]
             if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
-                clean_omit_values(val)
-            elif val == OMIT_VALUE:
-                del d[key]
+                clean_omit_values(val, non_value_keys=non_value_keys)
+            else:
+                t_keys = get_template_keys(val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                if len(t_keys) == 1:
+                    t = list(t_keys)[0]
+                    if t in non_value_keys:
+                        del d[key]
 
 
 def print_no_run_info(results):
@@ -181,8 +186,10 @@ class HostConfigContextPlugin(CnfPlugin):
 class FrecklesRunConfig(object):
     """The object holding configuration for a freckles run."""
 
-    def __init__(self, context, config_dict, callback_details=None, **kwargs):
+    def __init__(self, context, config_dict=None, callback_details=None, **kwargs):
 
+        if config_dict is None:
+            config_dict = {}
         self.context = context
 
         self.run_cnf = get_cnf(
@@ -524,14 +531,19 @@ class FrecklesRunner(object):
                 for task in tasklist:
                     task.pop("arg_tree")
                     input = copy.copy(task["input"])
-                    omit_keys = task["omit_keys"]
-                    for k in omit_keys:
-                        input[k] = OMIT_VALUE
+
+                    none_value_keys = []
+                    for k, v in input.items():
+                        if v is None:
+                            none_value_keys.append(k)
+
+                    clean_omit_values(task[FRECKLET_NAME], none_value_keys)
+                    clean_omit_values(task["vars"], none_value_keys)
 
                     r = replace_strings_in_obj(
                         task, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                     )
-                    clean_omit_values(r["vars"])
+
                     replaced.append(r)
 
                 connector_obj = self.context.get_connector(connector)

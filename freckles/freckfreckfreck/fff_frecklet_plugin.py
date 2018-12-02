@@ -14,8 +14,9 @@ from terminaltables import SingleTable
 from freckles.defaults import FRECKLET_NAME
 from freckles.doc import utils
 from freckles.freckles_runner import FrecklesRunner
-from frutils import readable_yaml
+from frutils import readable_yaml, reindent
 from frutils.doc import Doc
+from frutils.frutils_cli import output
 
 yaml = YAML(typ="safe")
 
@@ -212,15 +213,43 @@ def debug(ctx, frecklet_name):
     # index = context.index
 
     md = context.get_frecklet_metadata(frecklet_name)
-    print(md)
-    # p = index.get_pkg(frecklet_name)
-    # if p is None:
-    #     click.echo("No frecklet available for name: {}".format(frecklet_name))
-    #     sys.exit(1)
 
-    # output_string = readable_yaml(p.metadata_raw, sort_keys=False)
-    # output_string = highlight(output_string, YamlLexer(), Terminal256Formatter())
-    # click.echo(output_string)
+    click.secho("Raw frecklet", bold=True)
+    click.echo()
+    output(md, output_type="yaml")
+    click.echo()
+    click.echo()
+
+    try:
+        frecklet = context.create_frecklet(frecklet_name)
+        tl = frecklet.process_tasklist()
+        click.secho("Processed tasklist", bold=True)
+        click.echo()
+        output(tl, output_type="yaml", ignore_aliases=True)
+        click.echo()
+        click.echo()
+
+        parameters = frecklet.get_parameters()
+        click.secho("Parameters", bold=True)
+        click.echo()
+        for p in parameters.param_list:
+            click.secho("  {}".format(p.name), bold=True)
+            click.echo()
+            click.secho("    doc", bold=True)
+            click.echo(reindent(str(p.doc), 6))
+            if p.cli:
+                click.secho("    cli", bold=True)
+                output(p.cli, output_type="yaml", indent=6)
+            else:
+                click.secho("    cli", bold=True, nl=False)
+                click.echo(" --")
+            click.echo()
+            click.secho("    schema", bold=True)
+            output(p.scheme, output_type="yaml", indent=6)
+    except (Exception) as e:
+        log.debug(e, exc_info=1)
+        click.echo(e)
+        sys.exit(1)
 
 
 @frecklet.command("vars")

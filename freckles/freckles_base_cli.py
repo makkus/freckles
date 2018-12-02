@@ -56,7 +56,9 @@ def create_context(ctx, force=False):
         repos.append("community")
 
     try:
-        ctx.obj["context"] = FrecklesContext(config, freckles_repos=repos)
+        ctx.obj["context"] = FrecklesContext.create_context(
+            config, freckles_repos=repos
+        )
     except (FrecklesPermissionException) as e:
         log.debug(e, exc_info=1)
         click.echo()

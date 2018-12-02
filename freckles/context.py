@@ -4,8 +4,8 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
-
 from collections import OrderedDict
+
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from six import string_types
@@ -163,13 +163,18 @@ class FrecklesContext(object):
         **kwargs: additional configuration which will be layered on top of the merged profiles
     """
 
-    def __init__(self, config_profiles, freckles_repos=None, **kwargs):
+    @classmethod
+    def create_context(self, config_profiles=None, freckles_repos=None, **kwargs):
 
-        self.default_profile = load_profile_from_disk("default")
-        self.vanilla_profile = False
-        if self.default_profile is None:
-            self.vanilla_profile = True
-            self.default_profile = FRECKLES_CNF_PROFILES["default"]
+        if config_profiles is None:
+            config_profiles = []
+
+        if freckles_repos is None:
+            freckles_repos = []
+
+        default_profile = load_profile_from_disk("default")
+        if default_profile is None:
+            default_profile = FRECKLES_CNF_PROFILES["default"]
 
             for t_config in config_profiles:
                 if t_config != "default":
@@ -182,12 +187,25 @@ class FrecklesContext(object):
                     "No permission to use custom repositories. Create a custom default profile first. Check https://freckles.io/configuration for more details."
                 )
 
-        self.cnf = get_cnf(
+        cnf = get_cnf(
             config_profiles=config_profiles,
             additional_values=kwargs,
-            available_profiles_dict={"default": self.default_profile},
+            available_profiles_dict={"default": default_profile},
             profiles_dir=FRECKLES_CONFIG_PROFILES_DIR,
         )
+
+        return FrecklesContext(cnf, freckles_repos=freckles_repos, **kwargs)
+
+    def __init__(self, cnf, freckles_repos=None, **kwargs):
+
+        if cnf is None:
+            raise Exception("Can't initialize context with empty cnf object.")
+
+        if freckles_repos is None:
+            freckles_repos = []
+
+        self.cnf = cnf
+
         # self.current_control_vars = None
         self.cnf_interpreter = self.cnf.add_cnf_interpreter(
             "global", FRECKLES_CONFIG_SCHEMA

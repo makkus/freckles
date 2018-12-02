@@ -17,7 +17,7 @@ log = logging.getLogger("freckles")
 
 def is_disabled(task):
 
-    disabled = task[FRECKLET_NAME].get("__skip__", None)
+    disabled = task.get("control", {}).get("skip", None)
 
     if disabled is True:
         return True
@@ -27,13 +27,13 @@ def is_disabled(task):
         log.debug("Adding downstream skip condition: {}".format(disabled))
         task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(disabled)
 
-    for skip in task[FRECKLET_NAME].get("__inherited_keys__", {}).get("__skip__", []):
+    for skip in task.get("control", {}).get("inherited_keys", {}).get("skip", []):
         if skip is True:
             return True
 
         if skip is not False and skip:
             log.debug("Adding downstream skip condition: {}".format(disabled))
-            task.setdefault("__skip_internal__", []).append(skip)
+            task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(skip)
 
     return False
 
@@ -55,7 +55,7 @@ class Frecklecutable(object):
     def create_from_file_or_name(cls, frecklet_path_or_name, vars=None, context=None):
 
         if context is None:
-            context = FrecklesContext()
+            context = FrecklesContext.create_context()
 
         name = os.path.splitext(os.path.basename(frecklet_path_or_name))[0]
         frecklet = context.create_frecklet(frecklet_path_or_name)
@@ -67,7 +67,7 @@ class Frecklecutable(object):
         self.name = name
 
         if context is None:
-            context = FrecklesContext()
+            context = FrecklesContext.create_context()
 
         self.context = context
         if vars is None:
