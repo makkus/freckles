@@ -1,0 +1,9 @@
+args:
+frecklets:
+  - frecklet:
+      command: debug
+      type: ansible-module
+      __msg__: grand-child 1
+    vars:
+      msg: "{{ ansible_env.USER }}"
+
