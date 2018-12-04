@@ -222,7 +222,7 @@ def debug(ctx, frecklet_name):
 
     try:
         frecklet = context.create_frecklet(frecklet_name)
-        tl = frecklet.process_tasklist()
+        tl = frecklet.get_tasklist()
         click.secho("Processed tasklist", bold=True)
         click.echo()
         output(tl, output_type="yaml", ignore_aliases=True)

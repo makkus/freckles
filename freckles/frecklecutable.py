@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-import copy
 import logging
 import os
 from collections import OrderedDict
@@ -10,7 +9,6 @@ from collections import OrderedDict
 from .context import FrecklesContext
 from .defaults import FRECKLET_NAME
 from .exceptions import FrecklesConfigException
-from .frecklet_arg_helpers import add_user_input
 
 log = logging.getLogger("freckles")
 
@@ -101,18 +99,12 @@ class Frecklecutable(object):
 
     def process_tasklist(self, vars=None):
 
-        frecklet = copy.deepcopy(self.frecklet)
+        # frecklet = copy.deepcopy(self.frecklet)
         # for k, v in frecklet.args.items():
         #     v.setdefault("__meta__", {})["root_frecklet"] = True
         #     frecklet.meta["__frecklet_level__"] = 0
 
-        tl = frecklet.process_tasklist()
-
-        if vars is not None:
-            add_user_input(tl, vars)
-
-            # self.frecklet.validate_vars(vars)
-            # TODO validate
+        tl = self.frecklet.render_tasklist(vars)
 
         unknowns = []
         for item in tl:

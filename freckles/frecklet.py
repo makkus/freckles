@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import itertools
 import logging
+import uuid
 from collections import OrderedDict
 
 import m2r
-from ruamel.yaml.comments import CommentedSeq
+from ruamel.yaml.comments import CommentedSeq, CommentedMap
 
 from frkl import FrklProcessor, Frkl
 from frkl.defaults import (
@@ -31,8 +33,8 @@ from .defaults import (
     FRECKLETS_KEY,
     FRECKLES_CLICK_CEREBUS_ARG_MAP,
 )
-from .exceptions import FrecklesConfigException, FreckletException
-from .frecklet_arg_helpers import extract_base_args
+from .exceptions import FrecklesConfigException
+from .frecklet_arg_helpers import extract_base_args, create_vars_for_task_item
 
 log = logging.getLogger("freckles")
 
@@ -89,19 +91,19 @@ def fill_defaults(task_item):
 DEFAULT_ARG_SCHEMA = {"type": "string", "required": True, "doc": {"help": "n/a"}}
 
 
-def get_default_schema():
-
-    result = copy.deepcopy(DEFAULT_ARG_SCHEMA)
-    result["__auto_generated__"] = True
-    return result
-
-
-def get_default_arg():
-
-    arg = get_default_schema()
-    arg["doc"] = {"short_help": "n/a", "help": "n/a"}
-
-    return arg
+# def get_default_schema():
+#
+#     result = copy.deepcopy(DEFAULT_ARG_SCHEMA)
+#     result["__auto_generated__"] = True
+#     return result
+#
+#
+# def get_default_arg():
+#
+#     arg = get_default_schema()
+#     arg["doc"] = {"short_help": "n/a", "help": "n/a"}
+#
+#     return arg
 
 
 class CommandNameProcessor(ConfigProcessor):
@@ -224,6 +226,18 @@ FRECKLET_SCHEMA = {
     },
 }
 
+def find_frecklet_in_tree(task_tree, id):
+
+    if id in task_tree: return task_tree[id]
+
+    for k, v in task_tree.items():
+        if isinstance(v, (dict, OrderedDict, CommentedMap)):
+            item = find_frecklet_in_tree(v, id)
+            if item is not None:
+                return item
+
+
+    # raise Exception("Could not find id '{}' in task tree.".format(id))
 
 class AugmentingTaskProcessor(ConfigProcessor):
     """Processor to augment a basic task list.
@@ -240,31 +254,8 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         self.frecklet_index = self.init_params.get("frecklet_index", None)
         self.parent_metadata = self.init_params.get("parent_metadata", {})
-        self.frecklet_meta = self.init_params.get("frecklet_meta")
-        self.tree_properties = self.init_params.get("tree_properties", {})
-
-    # def add_argument_backlink(self, new_config, key):
-    #     inherit_uuid = None
-    #     if self.parent_metadata:
-    #         parent_arg = (
-    #             self.parent_metadata["arg_tree"]
-    #             .get(key, {})
-    #             .get("arg", {})
-    #             .get("uuid", None)
-    #         )
-    #         if parent_arg is not None:
-    #             inherit_uuid = parent_arg
-    #
-    #     if inherit_uuid is None:
-    #         inherit_uuid = str(uuid.uuid4())
-    #
-    #     new_config["vars"][key] = "{{{{:: {} ::}}}}".format(key)
-    #     arg = {"uuid": inherit_uuid}
-    #     new_config.setdefault("args", {})[key] = arg
-    #     self.tree_properties.setdefault("inherit_vars", {}).setdefault(
-    #         inherit_uuid, {}
-    #     ).setdefault("backlinks", []).append({key: arg})
-    #     return inherit_uuid
+        # self.frecklet_meta = self.init_params.get("frecklet_meta")
+        self.task_tree = self.init_params.get("task_tree")
 
     def process_current_config(self):
 
@@ -275,122 +266,54 @@ class AugmentingTaskProcessor(ConfigProcessor):
         else:
             frecklet_level = self.parent_metadata["meta"]["__frecklet_level__"] + 1
 
-        frecklet_name = self.frecklet_meta.get("name", "n/a")
-
-        # 'meta' is the key where we store anything additional we come up with here
-        new_config["meta"]["__frecklet_level__"] = frecklet_level
-        new_config["meta"]["__frecklet_name__"] = frecklet_name
-
-        # the frecklets defined arguments, to pick from if we encounter a template key
+        task = new_config[FRECKLET_NAME]
+        task_type = task.get("type", None)
+        if task_type is None:
+            task_type = "frecklet"
+            task["type"] = task_type
+        doc = new_config.get("doc", None)
+        if doc is None:
+            doc = {}
+            new_config["doc"] = doc
+        vars = new_config.get("vars", None)
+        if vars is None:
+            vars = {}
+            new_config["vars"] = vars
+        control = new_config.get("control", None)
+        if control is None:
+            control = {}
+            new_config["control"] = control
         args = new_config.get("args", None)
+        if args is None:
+            args = {}
+            new_config["args"] = args
+        meta = new_config.get("meta", None)
+        if meta is None:
+            meta = {}
+            new_config["meta"] = meta
+        # 'meta' is the key where we store anything additional we come up with here
+        meta["__frecklet_level__"] = frecklet_level
+        frecklet_uuid = str(uuid.uuid4())
+        meta["__id__"] = frecklet_uuid
 
-        # maybe, just in case, store the meta-info, but not at root level
-        # frecklet = new_config.pop("frecklet_meta", None)
+        if not self.parent_metadata:
+            new_config["parent"] = None
+            parent_id = None
+            p_node = self.task_tree
+        else:
+            new_config["parent"] = self.parent_metadata
+            parent_id = self.parent_metadata["meta"]["__id__"]
+            p_node = find_frecklet_in_tree(self.task_tree, parent_id)
 
-        # the arg_tree is a tree-like structure that stores each 'root' argument,
-        # including all the required child args to construct it, including the ones
-        # that the user interacts with
-        arg_tree = {}
+        var_template_keys = get_template_keys(vars, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+        control_template_keys = get_template_keys(control, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+        task_template_keys = get_template_keys(task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
 
-        # get all template keys from this frecklet
-        control_dict = copy.deepcopy(new_config.get("control", {}))
-        control_dict_template_keys = get_template_keys(control_dict, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+        all_keys = set(itertools.chain(var_template_keys, control_template_keys, task_template_keys))
+        meta["__template_keys__"] = {"all": all_keys, "vars": var_template_keys, "control": control_template_keys, "task": task_template_keys}
 
-        # inherit_map = {}
-        # for k, v in new_config.get("vars", {}).items():
-        #     if v == "__inherit__":
-        #         i_uuid = self.add_argument_backlink(new_config, k)
-        #         inherit_map[k] = i_uuid
-
-
-        inherited_control = control_dict.pop("inherited_keys", {})
-        template_keys = sorted(
-            get_template_keys(
-                {
-                    "vars": new_config["vars"],
-                    FRECKLET_NAME: new_config[FRECKLET_NAME],
-                    "control": control_dict,
-                },
-                jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
-            )
-            # get_template_keys(new_config,
-            #              jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-        )
-        new_config["meta"]["__template_keys__"] = template_keys
-
-        # now let's go through all the required template keys
-        for key in template_keys:
-            meta = new_config["meta"]
-            arg_tree_item = {
-                "__meta__": meta
-            }
-
-            arg = args.get(key, None)
-            if arg is None:
-                arg = get_default_arg()
-
-            arg["__is_arg__"] = True
-            arg_tree_item["arg"] = arg
-
-            if self.parent_metadata:
-
-                # if this frecklet has a parent, we try to use vars that come from there
-                parent_var = self.parent_metadata.get("vars", {}).get(key, None)
-                parent_name = self.parent_metadata["meta"]["__frecklet_name__"]
-                parent_arg_tree = self.parent_metadata["arg_tree"]
-
-                parent_vars = {}
-
-                if parent_var is not None:
-
-                    tpks = get_template_keys(
-                        parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-                    )
-                    for tpk in tpks:
-                        if tpk in parent_arg_tree.keys():
-                            parent_vars[tpk] = parent_arg_tree[tpk]
-
-
-                    arg_tree_item["parent"] = {
-                        "var_name": parent_var,
-                        "vars": parent_vars,
-                    }
-
-                else:
-
-                        # we don't look for anything apart from the default
-                        default = arg.get("default", None)
-                        if arg.get("required", True):
-
-                            if default is None:
-
-                                    raise FreckletException(
-                                        "Argument '{}' for frecklet '{}' is required (and no 'default' set), but not specified in parent: '{}'.".format(
-                                            key, frecklet_name, parent_name
-                                        ),
-                                        new_config,
-                                    )
-                            else:
-                                arg_tree_item["value"] = default
-
-                        else:
-                            if default is not None:
-                                arg_tree_item["value"] = default
-                            else:
-                                # non-required argument, not specified in parent, means we will remove the var from the child when it comes to replacing the strings
-                                pass
-
-            else:
-                # means we're at level 0
-                pass
-
-            if arg_tree_item is not None:
-                arg_tree[key] = arg_tree_item
-
-        new_config["arg_tree"] = arg_tree
-
-        task_type = new_config[FRECKLET_NAME].get("type", None)
         if task_type is not None and task_type != "frecklet":
+            p_node[frecklet_uuid] = None
             yield new_config
             return
 
@@ -400,16 +323,18 @@ class AugmentingTaskProcessor(ConfigProcessor):
                 "No 'name' key found in processed task metadata: {}".format(new_config)
             )
 
+
         child = self.frecklet_index.get_pkg(child_name)
         if child is None:
             raise Exception(
                 "No child frecklet with name '{}' found.".format(child_name)
             )
 
-        for t in child.process_tasklist(
-            parent=new_config, tree_properties=self.tree_properties
-        ):
+        p_node[frecklet_uuid] = OrderedDict()
 
+        for t in child.process_tasklist(
+            parent=new_config, task_tree=self.task_tree
+        ):
             yield t
 
 
@@ -463,7 +388,9 @@ class Frecklet(LuItem):
         self.processed_tasklist = None
         super(Frecklet, self).__init__(metadata, base_url=base_url, index=index)
 
-        self.tasklist_cache = None
+        self.task_list = None
+        self.task_tree = None
+        self.base_args = None
 
     def get_urls(self):
 
@@ -481,19 +408,59 @@ class Frecklet(LuItem):
     def set_index(self, index):
         self.index = index
 
+    def render_tasklist(self, user_input):
+        """Augments a task item with user input.
+
+        If there is no user input for a var, the value will be calculated out of the 'arg_tree', which includes looking at
+        parent values and defaults.
+
+        Args:
+          tasklist (list): a list of dicts, describing one task each
+          user_input (dict): the user input
+
+        """
+
+        if user_input is None:
+            user_input = {}
+
+        if not isinstance(user_input, (dict, CommentedMap, OrderedDict)):
+            raise Exception("Invalid user input type: {}".format((type(user_input))))
+
+        tasklist = copy.deepcopy(self.get_tasklist())
+
+        for task in tasklist:
+            vars = create_vars_for_task_item(task, user_input, self.get_base_args())
+            task["input"] = vars
+
+        return tasklist
+
+
+    def get_base_args(self):
+
+        if self.base_args is None:
+            tl = self.get_tasklist()
+            base_args = extract_base_args(tl)
+            # sort order
+            self.base_args = OrderedDict()
+            for n in sorted(base_args.keys()):
+                self.base_args[n] = base_args[n]
+
+        return self.base_args
+
     def get_parameters(self, default_vars=None):
 
-        tl = self.process_tasklist(parent=None)
 
-        args = extract_base_args(tl)
+        base_args = self.get_base_args()
 
-        # sort order
-        sorted_args = OrderedDict()
-        for n in sorted(args.keys()):
-            sorted_args[n] = args[n]
+
+        param_raw = OrderedDict()
+        for k, v in base_args.items():
+
+            arg = v["arg"]
+            param_raw[k] = arg
 
         parameters = create_parameters(
-            copy.deepcopy(sorted_args),
+            param_raw,
             default_vars=default_vars,
             type_map=FRECKLES_CLICK_CEREBUS_ARG_MAP,
         )
@@ -509,20 +476,20 @@ class Frecklet(LuItem):
 
         vars = metadata.get("vars", {})
 
-        args_raw = metadata.get("args", None)
+        args_raw = metadata.get("args", {})
 
         meta = metadata.get("meta", {})
-        if args_raw is None:
-            args_raw_temp = list(
-                get_template_keys(
-                    {FRECKLETS_KEY: tasks, "vars": vars},
-                    jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
-                )
-            )
-            args_raw = {}
-            for a in args_raw_temp:
-                args_raw[a] = get_default_arg()
-                args_raw[a]["__is_arg__"] = True
+        # if args_raw is None:
+        #     args_raw_temp = list(
+        #         get_template_keys(
+        #             {FRECKLETS_KEY: tasks, "vars": vars},
+        #             jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
+        #         )
+        #     )
+        #     args_raw = {}
+        #     for a in args_raw_temp:
+        #         args_raw[a] = get_default_arg()
+        #         args_raw[a]["__is_arg__"] = True
 
         doc = metadata.get("doc", {})
 
@@ -537,18 +504,19 @@ class Frecklet(LuItem):
             "meta": meta,
         }
 
-    def process_tasklist(self, parent=None, tree_properties=None):
+    def get_tasklist(self):
+
+        if self.task_list is None:
+            self.task_tree = OrderedDict()
+            self.task_list = self.process_tasklist(self.task_tree)
+        return self.task_list
+
+    def process_tasklist(self, task_tree, parent=None):
+
+        if task_tree is None:
+            raise Exception("'task_tree' can't be 'None'")
 
         log.debug("Processing tasklist for frecklet: {}".format(self.frecklet_meta))
-
-        # process_metadata = False
-        initial_tree_properties = None
-        if parent is None:
-            # process_metadata = True
-
-            parent = {}
-            initial_tree_properties = {}
-            tree_properties = initial_tree_properties
 
         # task_format = generate_tasks_format(self.index)
         task_format = FRECKLET_FORMAT
@@ -557,12 +525,12 @@ class Frecklet(LuItem):
             CommandNameProcessor(),
             TaskTypePrefixProcessor(),
             MoveEmbeddedTaskKeysProcessor(),
-            InheritedTaskKeyProcessor(parent_metadata=parent),
+            # InheritedTaskKeyProcessor(parent_metadata=parent),
             AugmentingTaskProcessor(
                 frecklet_index=self.index,
                 parent_metadata=parent,
-                tree_properties=tree_properties,
-                frecklet_meta=self.frecklet_meta,
+                # frecklet_meta=self.frecklet_meta,
+                task_tree=task_tree
             ),
         ]
 

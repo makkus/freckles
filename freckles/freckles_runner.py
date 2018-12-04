@@ -13,6 +13,7 @@ import pprintpp
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
+from freckles.context import FrecklesContext
 from frutils import dict_merge, replace_strings_in_obj, get_template_keys
 from frutils.cnf import CnfPlugin
 from frutils.cnf import get_cnf
@@ -28,7 +29,6 @@ from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
 from .frecklet import Frecklet
-
 # from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
@@ -63,7 +63,7 @@ def print_no_run_info(results):
 
     click.echo("Not running task-list(s). Expanded task-list(s) information:")
     click.echo()
-    if len(results.items()) > 1:
+    if len(results.result_dict.items()) > 1:
         for tl_id, result in results.items():
             click.echo("frecklet: {}".format(result["name"]))
             click.echo()
@@ -76,7 +76,7 @@ def print_no_run_info(results):
             click.echo("  tasklist:")
             Frecklet.pprint(tasklist, indent=4)
     else:
-        result = results[0]
+        result = results.result_dict[0]
         click.echo("frecklet: {}".format(result["name"]))
         click.echo()
         generated_env = result["run_properties"].get("env_dir", None)
@@ -344,6 +344,32 @@ class TaskDetail(object):
 
         return pprintpp.pformat(self.__dict__)
 
+class FrecklesRun(object):
+
+    def __init__(self, run_id, result_dict):
+
+        self.run_id = run_id
+        self.result_dict = result_dict
+
+        self.connector = self.result_dict["connector"]
+        self.frecklet_name = self.result_dict["name"]
+        self.outcome = self.result_dict["result"]
+        self.run_properties = self.result_dict["run_properties"]
+        self.task_list = self.result_dict["task_list"]
+
+
+class FrecklesRuns(object):
+
+    def __init__(self, result_dict):
+        self.result_dict = result_dict
+        self.run_results = OrderedDict()
+        for id, details in result_dict.items():
+            frr = FrecklesRun(id, details)
+            self.run_results[id] = frr
+
+    def get_run(self, id):
+        return self.run_results.get(id, None)
+
 
 class FrecklesRunner(object):
     """Object to start and monitor one or several freckles runs.
@@ -353,6 +379,61 @@ class FrecklesRunner(object):
         control_varls (dict): variables to control the execution of this runners runs
         is_sub_task (bool): whether this is used within a freckles run
     """
+
+    @classmethod
+    def from_frecklet(cls, frecklet_name_or_path, context=None):
+        """
+        Creates a :class:`FrecklesRunner` object from a single frecklet.
+
+        Args:
+            frecklet_name_or_path (str): the frecklet name or path
+            context (FrecklesContext): the context, if not provided  context will be created with all default values
+
+        Returns:
+            FrecklesRunner: the runner
+        """
+
+        if context is None:
+            context = FrecklesContext.create_context()
+
+        frecklcutable = Frecklecutable.create_from_file_or_name(frecklet_name_or_path, context=context)
+        runner = FrecklesRunner(context)
+        runner.set_frecklecutable(frecklcutable)
+        return runner
+
+    @classmethod
+    def run_frecklet(cls, frecklet_name_or_path, context=None, user_input=None, run_config=None, no_run=False):
+        """
+        Creates a temporary :class:`FrecklesRunner` object from a frecklet, and runs the frecklet.
+
+        Args:
+            frecklet_name_or_path (str): the frecklet name or path
+            context (FrecklesContext): the context, if not provided  context will be created with all default values
+            user_input (dict): the user input vars
+            run_config: the run config
+            no_run: whether to run with the 'no_run' option, convenience flag, overwrites whatever is in 'run_config'
+
+        Returns:
+            dict: the result dict
+        """
+
+        runner = cls.from_frecklet(frecklet_name_or_path=frecklet_name_or_path, context=context)
+        if run_config is None:
+            run_config = {}
+
+        if no_run:
+            run_config["no_run"] = no_run
+
+        if user_input is None:
+            user_input = {}
+
+        control_dict = {}
+
+        run_cfg = FrecklesRunConfig(context, run_config)
+
+        results = runner.run(user_input=user_input, run_config=run_cfg)
+
+        return results
 
     def __init__(self, context, is_sub_task=False):
 
@@ -484,12 +565,8 @@ class FrecklesRunner(object):
             run_vars=run_vars,
         )
 
-        # result = self.frecklecutable.execute_tasklist(
-        #     vars=processed, context=self.context, run_config=self.run_config, is_sub_task=self.is_sub_task
-        # )
-
-        # log.debug("execute tasklist result:\n\n{}".format(pprintpp.pformat(result)))
-        return result
+        result_obj = FrecklesRuns(result)
+        return result_obj
 
     def execute_tasklist(self, run_config, vars=None, passwords=None, run_vars=None):
 
@@ -510,7 +587,7 @@ class FrecklesRunner(object):
         if vars is None:
             vars = {}
 
-        callback_adapter = run_config.callback_details["adapter"]
+        callback_adapter = run_config.callback_details.get("adapter", None)
         if callback_adapter is not None:
             callback_adapter.task_started(parent_task)
 
@@ -529,7 +606,6 @@ class FrecklesRunner(object):
 
                 replaced = []
                 for task in tasklist:
-                    task.pop("arg_tree")
                     input = copy.copy(task["input"])
 
                     none_value_keys = []
