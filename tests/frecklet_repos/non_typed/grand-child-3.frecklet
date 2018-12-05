@@ -1,9 +1,12 @@
 args:
+  grand_child_3_var_1:
+    default: "grand_child_3_var_1_default"
+    type: string
 frecklets:
   - frecklet:
       command: debug
       type: ansible-module
-      __msg__: grand-child 1
+      __msg__: grand-child 3
     vars:
-      msg: "{{:: grand_child_3_var_1 ::}} - {{:: grand_child_3_var_2 ::}}"
+      msg: "{{:: grand_child_3_var_1 ::}}"
 

@@ -4,5 +4,5 @@ frecklets:
       type: ansible-module
       __msg__: grand-child 1
     vars:
-      msg: "{{:: grand_child_2_var_1 ::}}"
+      msg: "{{:: grand_child_4_var_1 ::}} - {{:: grand_child_4_var_2 ::}}"
 
