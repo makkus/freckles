@@ -344,8 +344,8 @@ class TaskDetail(object):
 
         return pprintpp.pformat(self.__dict__)
 
-class FrecklesRun(object):
 
+class FrecklesRun(object):
     def __init__(self, run_id, result_dict):
 
         self.run_id = run_id
@@ -359,7 +359,6 @@ class FrecklesRun(object):
 
 
 class FrecklesRuns(object):
-
     def __init__(self, result_dict):
         self.result_dict = result_dict
         self.run_results = OrderedDict()
@@ -396,13 +395,22 @@ class FrecklesRunner(object):
         if context is None:
             context = FrecklesContext.create_context()
 
-        frecklcutable = Frecklecutable.create_from_file_or_name(frecklet_name_or_path, context=context)
+        frecklcutable = Frecklecutable.create_from_file_or_name(
+            frecklet_name_or_path, context=context
+        )
         runner = FrecklesRunner(context)
         runner.set_frecklecutable(frecklcutable)
         return runner
 
     @classmethod
-    def run_frecklet(cls, frecklet_name_or_path, context=None, user_input=None, run_config=None, no_run=False):
+    def run_frecklet(
+        cls,
+        frecklet_name_or_path,
+        context=None,
+        user_input=None,
+        run_config=None,
+        no_run=False,
+    ):
         """
         Creates a temporary :class:`FrecklesRunner` object from a frecklet, and runs the frecklet.
 
@@ -417,7 +425,9 @@ class FrecklesRunner(object):
             dict: the result dict
         """
 
-        runner = cls.from_frecklet(frecklet_name_or_path=frecklet_name_or_path, context=context)
+        runner = cls.from_frecklet(
+            frecklet_name_or_path=frecklet_name_or_path, context=context
+        )
         if run_config is None:
             run_config = {}
 
@@ -426,8 +436,6 @@ class FrecklesRunner(object):
 
         if user_input is None:
             user_input = {}
-
-        control_dict = {}
 
         run_cfg = FrecklesRunConfig(context, run_config)
 

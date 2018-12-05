@@ -15,23 +15,12 @@ log = logging.getLogger("freckles")
 
 def is_disabled(task):
 
-    disabled = task.get("control", {}).get("skip", None)
+    skip = task.get("control", {}).get("skip", [])
 
-    if disabled is True:
-        return True
+    for s in skip:
 
-    if disabled is not False and disabled:
-
-        log.debug("Adding downstream skip condition: {}".format(disabled))
-        task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(disabled)
-
-    for skip in task.get("control", {}).get("inherited_keys", {}).get("skip", []):
-        if skip is True:
+        if s is True:
             return True
-
-        if skip is not False and skip:
-            log.debug("Adding downstream skip condition: {}".format(disabled))
-            task[FRECKLET_NAME].setdefault("__skip_internal__", []).append(skip)
 
     return False
 

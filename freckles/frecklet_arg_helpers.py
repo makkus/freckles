@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 from ruamel.yaml.comments import CommentedMap
 
-from frutils import replace_strings_in_obj, dict_merge, get_template_keys
+from frutils import dict_merge, get_template_keys, replace_strings_in_obj
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME
@@ -16,7 +16,18 @@ log = logging.getLogger("freckles")
 DEFAULT_INHERIT_ARGS_LEVEL = 0
 
 
-def create_vars_for_task_item(task_item, user_input, base_args):
+def get_parent_chain(task_item):
+
+    start = task_item
+    chain = [start["meta"]["__name__"]]
+    while "parent" in start.keys() and start["parent"]:
+        start = start["parent"]
+        chain.append(start["meta"]["__name__"])
+
+    return chain
+
+
+def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
     """Calculates all necessary values for vars in a task item.
 
     Args:
@@ -30,24 +41,20 @@ def create_vars_for_task_item(task_item, user_input, base_args):
 
     # the arg tree is a dict that contains details for every var required for a var
     vars = {}
-
+    # pp(task_item)
+    # print("--------")
+    # pp(base_args)
+    # sys.exit()
     # TODO: prevent duplicate processing for base args that end up in a single var
-    for var_name, var_details in base_args.items():
+    for var_name, var_details in task_item["arg_tree"].items():
 
         try:
-            vars_new = create_var_value(var_name,
-                var_details, user_input
-            )
-            # TODO: check for duplicates
-            dict_merge(vars, vars_new, copy_dct=False)
+            vars_new = create_var_value(var_name, var_details, user_input)
 
         except (Exception) as e:
 
-            control = task_item.get("control", {})
-            skip = task_item.get("skip", None)
-
-            print("KEY: {}".format(var_name))
-            print("skip: {}".format(skip))
+            # control = task_item.get("control", {})
+            # skip = task_item.get("skip", None)
 
             if (
                 "skip" in task_item.get("control", {}).keys()
@@ -55,10 +62,35 @@ def create_vars_for_task_item(task_item, user_input, base_args):
                 in task_item.get("control", {}).get("inherited_keys", {}).keys()
             ):
                 log.debug("Invalid var, assuming this task will be skipped later on.")
+                continue
             else:
                 # TODO: attach task information
                 log.warning("Invalid task item: {}".format(task_item[FRECKLET_NAME]))
+                log.debug(e, exc_info=True)
+                log.debug(
+                    "Issue with task item: {}".format(task_item["meta"]["__name__"])
+                )
+                log.debug("Task chain: {}".format(get_parent_chain(task_item)))
                 raise e
+
+        # TODO: check for duplicates
+        dict_merge(vars, vars_new, copy_dct=False)
+
+    # # now validating the whole task item, in case there was something not forwarded in the chain
+    # for n, d in task_item["arg_tree"].items():
+    #     required = d["arg"].get("required", True)
+    #     if required:
+    #         if n not in vars.keys():
+    #             import pp
+    #             print("TASK\n\n\n\n\n\n\n\n\n\n")
+    #             pp(task_item)
+    #             print('-------')
+    #             print(user_input)
+    #             raise FreckletException("Required task variable '{}' not available for task '{}', this indicates it hasn't been forwarded from a parent task.".format(n, d["meta"].get("__parent_name__", "n/a")), frecklet)
+    #     empty = d["arg"].get("empty", False)
+    #     if not empty:
+    #         if vars.get(n, None) is not None and not isinstance(vars[n], bool) and not vars[n]:
+    #             raise FreckletException("Task argument '{}' empty, this is not allowed by its schema: '{}'.".format(n, d["arg"]), frecklet)
 
     return vars
 
@@ -87,14 +119,11 @@ def validate_var(key_name, value, schema, password_coerced=True):
 
     val = FrutilsNormalizer(s)
     valid = val.validated(d)
-
     if valid is None:
         raise ParametersException(d, val.errors)
 
-    if value is not None:
-        return valid[key_name]
-    else:
-        return None
+    return valid.get(key_name, None)
+
 
 def get_paths_for_level(level, paths):
 
@@ -114,41 +143,55 @@ def get_paths_for_level(level, paths):
     return relevant_paths
 
 
-def get_vars_for_level(relevant_paths, input):
+# def get_vars_for_level(relevant_paths, input):
+#
+#     import pp
+#     print("REL PATHS")
+#     pp(relevant_paths)
+#     print("INPUT: {}".format(input))
+#
+#     result = {}
+#     for k, v in relevant_paths.items():
+#
+#         parent_var = v["parent_var"]
+#         if parent_var is None:
+#             v_new = input.get(k, None)
+#         else:
+#             v_new = replace_strings_in_obj(parent_var, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+#
+#         arg = v["arg"]
+#         # arg_type = arg.get("type", "unknown")
+#         # if arg_type == "unknown":
+#         #     validated = validate_var(k, v_new, arg)
+#         #     result[k] = validated
+#         #     continue
+#
+#         try:
+#             validated = validate_var(k, v_new, arg)
+#             print("--------")
+#             print(v["meta"]["__name__"])
+#             import pp
+#             pp(v)
+#             print("KEY: {}".format(k))
+#             print("VALIDATED: {}".format(validated))
+#             print("================")
+#             result[k] = validated
+#         except (ParametersException) as pe:
+#             log.debug("Invalid input for '{}': {}".format(k, input))
+#             log.debug(pe, exc_info=1)
+#             raise pe
+#
+#     return result
 
-    result = {}
-    for k, v in relevant_paths.items():
 
-        parent_var = v["parent_var"]
-        if parent_var is None:
-            v_new = input.get(k, None)
-        else:
-            v_new = replace_strings_in_obj(parent_var, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-
-        arg = v["arg"]
-        arg_type = arg.get("type", "unknown")
-        if arg_type == "unknown":
-            result[k] = v_new
-            continue
-
-        try:
-            validated = validate_var(k, v_new, arg)
-            result[k] = validated
-        except (ParametersException) as pe:
-            log.debug("Invalid input for '{}': {}".format(k, input))
-            log.debug(pe, exc_info=1)
-            raise pe
-
-    return result
-
-def create_var_value(var_name, var_details, user_input):
+def create_var_value(var_name, var_details, input):
     """Calculates the value for a var (within a task).
 
     Takes into consideration the user input, the parent task value, and potential defaults.
 
     Args:
       var_name (string): the top-level var name
-      var_details (dict): the var details
+      var_details (dict): the var details from the arg_tree
       user_input (dict): the user input
       task_item (dict): the current task item
 
@@ -156,42 +199,43 @@ def create_var_value(var_name, var_details, user_input):
         tuple: a tuple in the form: (key, value)
     """
 
-    current_level = 0
-    input = user_input
+    arg = var_details["arg"]
 
-    check_top_level_arg = True
+    if "parent" in var_details.keys():
 
-    # not sure whether to do this or not
-    # this is only an issue if there is no manual top-level arg specified, as well
-    # as not any the whole way down.
-    if check_top_level_arg:
-        top_level_arg = var_details["arg"]
-        top_level_user_input = user_input.get(var_name, None)
-        try:
-            validate_var(var_name, top_level_user_input, top_level_arg)
-        except (ParametersException) as pe:
-            log.debug("Invalid input for '{}': {}".format(var_name, input))
-            log.debug(pe, exc_info=1)
-            raise pe
+        if "parent_var" not in var_details.keys():
+            raise Exception(
+                "Missing parent var value, this is probably a bug: {}".format(
+                    var_details
+                )
+            )
 
-    while True:
-        relevant_paths = get_paths_for_level(current_level, var_details["path"])
+        parent = var_details["parent"]
+        parent_var = var_details["parent_var"]
+        repl = {}
+        for k, v in parent.items():
+            temp = create_var_value(k, v, input)
+            dict_merge(repl, temp, copy_dct=False)
 
-        if relevant_paths is None:
-            break
+        replaced = replace_strings_in_obj(
+            parent_var, repl, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
+        result = {var_name: replaced}
 
-        input = get_vars_for_level(relevant_paths, input)
+    else:
+        if "parent_var" in var_details.keys() and var_details["parent_var"] is not None:
+            result = {var_name: var_details["parent_var"]}
+        else:
+            result = {var_name: input.get(var_name, None)}
 
-        # for arg, arg_details in relevant_paths.items():
-        #     import pp
-        #     print(arg)
-        #     pp(arg_details)
+    try:
+        validated = validate_var(var_name, result.get(var_name, None), arg)
+        return {var_name: validated}
 
-        current_level = current_level + 1
-
-
-
-    return input
+    except (ParametersException) as pe:
+        log.debug("Invalid input for '{}': {}".format(var_name, input))
+        log.debug(pe, exc_info=1)
+        raise pe
 
 
 def new_arg_is_better(old_arg, new_arg, default=False):
@@ -287,9 +331,15 @@ def add_arguments(result_args, arg_path, arg_inherit_strategy="none"):
             if arg is None:
                 arg = get_default_arg()
 
+        if "required" not in arg.keys():
+            arg["required"] = True
+        if "empty" not in arg.keys():
+            arg["empty"] = False
+
         result_args[arg_name]["arg"] = arg
 
     return True
+
 
 def consolidate_arguments(argument_lists, arg_inherit_strategy="none"):
 
@@ -314,18 +364,24 @@ def consolidate_arguments(argument_lists, arg_inherit_strategy="none"):
             #     other_required.setdefault(path[0][0], []).append(path)
 
     if other_required:
-        raise FrecklesConfigException("One or more required vars don't are not set within the chain: {}".format(other_required.keys()))
+        raise FrecklesConfigException(
+            "One or more required vars don't are not set within the chain: {}".format(
+                other_required.keys()
+            )
+        )
 
     return result
 
 
-def get_unknown_arg():
+# def get_unknown_arg():
+#
+#     return {"required": True, "empty": False}
 
-    return {"type": "unknown"}
 
 def get_default_arg():
 
-    return {"type": "string", "required": True}
+    return {"required": True, "empty": False}
+
 
 def extract_base_args(task_list):
     """Extract the base args that are needed as input for this tasklist.
@@ -339,6 +395,7 @@ def extract_base_args(task_list):
     result = []
     for task in task_list:
         arg_tree = create_arg_tree_for_task(task)
+        task["arg_tree"] = arg_tree
         flatten = flatten_arg_tree(arg_tree)
         result.append(flatten)
 
@@ -346,9 +403,11 @@ def extract_base_args(task_list):
 
     return args
 
+
 def find_leaf_node_paths_old(arg_tree):
 
     leafs = []
+
     def _get_leaf_nodes(node):
 
         for var_name, var_details in node.items():
@@ -357,8 +416,9 @@ def find_leaf_node_paths_old(arg_tree):
 
             item = (var_name, var_details, arg_parent)
 
-            if not isinstance(var_details, (dict, CommentedMap, OrderedDict)) or not var_details.get("__is_arg_tree__",
-                                                                                                     False):
+            if not isinstance(
+                var_details, (dict, CommentedMap, OrderedDict)
+            ) or not var_details.get("__is_arg_tree__", False):
                 # adding fixed values
                 leafs.append(item)
             else:
@@ -376,25 +436,25 @@ def find_leaf_node_paths_old(arg_tree):
 
 def find_leaf_node_paths(arg_name, arg_details):
 
+    if not isinstance(
+        arg_details, (dict, CommentedMap, OrderedDict)
+    ) or not arg_details.get("__is_arg_tree__", False):
+        # means we have a 'value'
+        return [(arg_name, arg_details)]
 
-        if not isinstance(arg_details, (dict, CommentedMap, OrderedDict)) or not arg_details.get("__is_arg_tree__", False):
-            # means we have a 'value'
-            return [(arg_name, arg_details)]
+    if "parent" not in arg_details:
+        return [(arg_name, arg_details)]
 
-        if not "parent" in arg_details:
-            return [(arg_name, arg_details)]
-
-        parent_args = arg_details["parent"]
-        result = []
-        for a_name, arg in parent_args.items():
-            ln = find_leaf_node_paths(a_name, arg)
-            result.extend(ln)
-        result.append((arg_name, arg_details))
-        return result
+    parent_args = arg_details["parent"]
+    result = []
+    for a_name, arg in parent_args.items():
+        ln = find_leaf_node_paths(a_name, arg)
+        result.extend(ln)
+    result.append((arg_name, arg_details))
+    return result
 
 
 def flatten_arg_tree(arg_tree):
-
 
     args = {}
     for arg_name, arg_details in arg_tree.items():
@@ -408,7 +468,6 @@ def flatten_arg_tree(arg_tree):
         args[arg_name] = temp
 
     return args
-
 
 
 def create_arg_tree_for_task(task_item, task_cache={}):
@@ -434,10 +493,20 @@ def create_arg_tree_for_task(task_item, task_cache={}):
         if key in task_item["args"].keys():
             arg = task_item["args"][key]
         else:
-            arg = get_unknown_arg()
+            arg = get_default_arg()
+
+        if "required" not in arg.keys():
+            arg["required"] = True
+        if "empty" not in arg.keys():
+            arg["empty"] = False
 
         if task_item["parent"] is None:
-            arg_tree[key] = {"arg": arg, "meta": task_item["meta"], "__is_arg_tree__": True, "parent_var": None}
+            arg_tree[key] = {
+                "arg": arg,
+                "meta": task_item["meta"],
+                "__is_arg_tree__": True,
+                "parent_var": None,
+            }
         else:
             parent_tree = create_arg_tree_for_task(task_item["parent"])
             parent_var = task_item["parent"]["vars"].get(key, None)
@@ -445,13 +514,20 @@ def create_arg_tree_for_task(task_item, task_cache={}):
                 parent_var_template_keys = []
             else:
 
-                parent_var_template_keys = get_template_keys(parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                parent_var_template_keys = get_template_keys(
+                    parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                )
                 # parent_var_template_keys = []
 
             parent_relevant_tree = {}
             for pvtk in parent_var_template_keys:
                 parent_relevant_tree[pvtk] = parent_tree[pvtk]
-            arg_tree[key] = {"parent_var": task_item["parent"]["vars"].get(key), "arg": arg, "meta": task_item["meta"], "__is_arg_tree__": True}
+            arg_tree[key] = {
+                "parent_var": task_item["parent"]["vars"].get(key),
+                "arg": arg,
+                "meta": task_item["meta"],
+                "__is_arg_tree__": True,
+            }
             if parent_relevant_tree:
                 arg_tree[key]["parent"] = parent_relevant_tree
 

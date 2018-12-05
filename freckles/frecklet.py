@@ -186,23 +186,26 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
 
         if self.parent_metadata:
 
-            for ik, ikv in (
-                self.parent_metadata.get("control", {})
-                .get("inherited_keys", {})
-                .items()
-            ):
-                new_config.setdefault("control", {}).setdefault(
-                    "inherited_keys", {}
-                ).setdefault(ik, []).extend(ikv)
+            # for ik, ikv in (
+            #     self.parent_metadata.get("control", {})
+            #     .get("inherited_keys", {})
+            #     .items()
+            # ):
+            #     new_config.setdefault("control", {}).setdefault(
+            #         "inherited_keys", {}
+            #     ).setdefault(ik, []).extend(ikv)
 
             if "skip" in self.parent_metadata.get("control", {}).keys():
-
                 parent_key = self.parent_metadata["control"]["skip"]
                 if not isinstance(parent_key, (list, tuple, CommentedSeq)):
                     parent_key = [parent_key]
-                new_config.setdefault("control", {}).setdefault(
-                    "inherited_keys", {}
-                ).setdefault("skip", []).extend(parent_key)
+                if "skip" in new_config.get("control", {}):
+                    skip_value = new_config["control"]["skip"]
+                    if not isinstance(skip_value, (list, tuple, CommentedSeq)):
+                        new_config["control"]["skip"] = [skip_value]
+                new_config.setdefault("control", {}).setdefault("skip", []).extend(
+                    parent_key
+                )
 
         return new_config
 
@@ -226,9 +229,11 @@ FRECKLET_SCHEMA = {
     },
 }
 
+
 def find_frecklet_in_tree(task_tree, id):
 
-    if id in task_tree: return task_tree[id]
+    if id in task_tree:
+        return task_tree[id]
 
     for k, v in task_tree.items():
         if isinstance(v, (dict, OrderedDict, CommentedMap)):
@@ -236,8 +241,8 @@ def find_frecklet_in_tree(task_tree, id):
             if item is not None:
                 return item
 
-
     # raise Exception("Could not find id '{}' in task tree.".format(id))
+
 
 class AugmentingTaskProcessor(ConfigProcessor):
     """Processor to augment a basic task list.
@@ -260,6 +265,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
     def process_current_config(self):
 
         new_config = self.current_input_config
+        frecklet_name = new_config[FRECKLET_NAME]["command"]
 
         if not self.parent_metadata:
             frecklet_level = 0
@@ -283,6 +289,11 @@ class AugmentingTaskProcessor(ConfigProcessor):
         if control is None:
             control = {}
             new_config["control"] = control
+        if "skip" in control.keys():
+            skip_value = control["skip"]
+            if not isinstance(skip_value, (list, tuple, CommentedSeq)):
+                skip_value = [skip_value]
+                control["skip"] = skip_value
         args = new_config.get("args", None)
         if args is None:
             args = {}
@@ -295,6 +306,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
         meta["__frecklet_level__"] = frecklet_level
         frecklet_uuid = str(uuid.uuid4())
         meta["__id__"] = frecklet_uuid
+        meta["__name__"] = frecklet_name
 
         if not self.parent_metadata:
             new_config["parent"] = None
@@ -304,13 +316,29 @@ class AugmentingTaskProcessor(ConfigProcessor):
             new_config["parent"] = self.parent_metadata
             parent_id = self.parent_metadata["meta"]["__id__"]
             p_node = find_frecklet_in_tree(self.task_tree, parent_id)
+            meta["__parent_name__"] = self.parent_metadata["meta"]["__name__"]
 
-        var_template_keys = get_template_keys(vars, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-        control_template_keys = get_template_keys(control, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-        task_template_keys = get_template_keys(task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+        var_template_keys = get_template_keys(
+            vars, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
+        control_template_keys = get_template_keys(
+            control, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
+        task_template_keys = get_template_keys(
+            task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
 
-        all_keys = set(itertools.chain(var_template_keys, control_template_keys, task_template_keys))
-        meta["__template_keys__"] = {"all": all_keys, "vars": var_template_keys, "control": control_template_keys, "task": task_template_keys}
+        all_keys = set(
+            itertools.chain(
+                var_template_keys, control_template_keys, task_template_keys
+            )
+        )
+        meta["__template_keys__"] = {
+            "all": all_keys,
+            "vars": var_template_keys,
+            "control": control_template_keys,
+            "task": task_template_keys,
+        }
 
         if task_type is not None and task_type != "frecklet":
             p_node[frecklet_uuid] = None
@@ -323,7 +351,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
                 "No 'name' key found in processed task metadata: {}".format(new_config)
             )
 
-
         child = self.frecklet_index.get_pkg(child_name)
         if child is None:
             raise Exception(
@@ -332,9 +359,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         p_node[frecklet_uuid] = OrderedDict()
 
-        for t in child.process_tasklist(
-            parent=new_config, task_tree=self.task_tree
-        ):
+        for t in child.process_tasklist(parent=new_config, task_tree=self.task_tree):
             yield t
 
 
@@ -429,11 +454,12 @@ class Frecklet(LuItem):
         tasklist = copy.deepcopy(self.get_tasklist())
 
         for task in tasklist:
-            vars = create_vars_for_task_item(task, user_input, self.get_base_args())
+            vars = create_vars_for_task_item(
+                task, user_input, self.get_base_args(), self
+            )
             task["input"] = vars
 
         return tasklist
-
 
     def get_base_args(self):
 
@@ -449,9 +475,7 @@ class Frecklet(LuItem):
 
     def get_parameters(self, default_vars=None):
 
-
         base_args = self.get_base_args()
-
 
         param_raw = OrderedDict()
         for k, v in base_args.items():
@@ -525,12 +549,12 @@ class Frecklet(LuItem):
             CommandNameProcessor(),
             TaskTypePrefixProcessor(),
             MoveEmbeddedTaskKeysProcessor(),
-            # InheritedTaskKeyProcessor(parent_metadata=parent),
+            InheritedTaskKeyProcessor(parent_metadata=parent),
             AugmentingTaskProcessor(
                 frecklet_index=self.index,
                 parent_metadata=parent,
                 # frecklet_meta=self.frecklet_meta,
-                task_tree=task_tree
+                task_tree=task_tree,
             ),
         ]
 
