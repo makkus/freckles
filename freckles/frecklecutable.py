@@ -17,6 +17,10 @@ def is_disabled(task):
 
     skip = task.get("control", {}).get("skip", [])
 
+    # print("---")
+    # print(task["meta"]["__name__"])
+    # print(skip)
+
     for s in skip:
 
         if s is True:

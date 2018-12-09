@@ -9,6 +9,8 @@ import click
 import click_completion
 import click_log
 
+from freckles.frecklet_arg_helpers import validate_var
+from frutils.doc import Doc
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable
 from .freckles_base_cli import FrecklesBaseCommand, create_context
@@ -128,39 +130,48 @@ class FrecklecuteCommand(FrecklesBaseCommand):
             @click.command(name=name)
             def command(*args, **kwargs):
 
-                # for arg, details in frecklecutable.frecklet.args.items():
-                #     msg = "Please provide value for '{}'".format(arg)
-                #     if details.get("doc", {}).get("short_help", "n/a") != "n/a":
-                #         desc = details["doc"]["short_help"]
-                #         desc = Doc.to_list_item_format(desc, first_char_lowercase=True)
-                #         msg = "{} ({})".format(msg, desc)
-                #
-                #     if details.get("type", "string") == "password":
-                #         click.echo()
-                #         coerce = "coerce" in details.keys()
-                #
-                #         if details["required"] is True:
-                #             pw = click.prompt(msg, type=str, hide_input=True)
-                #             if coerce:
-                #                 pw = validate_var(
-                #                     arg, pw, details, password_coerced=False
-                #                 )
-                #
-                #             kwargs[arg] = pw
-                #         else:
-                #             click.echo()
-                #             if arg in kwargs.keys() and kwargs[arg] is True:
-                #
-                #                 pw = click.prompt(msg, type=str, hide_input=True)
-                #                 if coerce:
-                #                     pw = validate_var(
-                #                         arg, pw, details, password_coerced=False
-                #                     )
-                #
-                #                 kwargs[arg] = pw
-                #
-                #             elif arg in kwargs.keys() and not kwargs[arg]:
-                #                 kwargs.pop(arg, None)
+                for arg, details in frecklecutable.frecklet.args.items():
+
+                    if details.get("type", "string") == "password":
+
+                        # password_flag = kwargs.get(arg, False)
+                        # if not details.get("required", True) and not password_flag:
+                        #     kwargs.pop(arg, None)
+                        #     continue
+
+                        msg = "Please provide value for '{}'".format(arg)
+                        if details.get("doc", {}).get("short_help", "n/a") != "n/a":
+                            desc = details["doc"]["short_help"]
+                            desc = Doc.to_list_item_format(
+                                desc, first_char_lowercase=True
+                            )
+                            msg = "{} ({})".format(msg, desc)
+
+                        click.echo()
+                        coerce = "coerce" in details.keys()
+
+                        if details["required"] is True:
+                            pw = click.prompt(msg, type=str, hide_input=True)
+                            if coerce:
+                                pw = validate_var(
+                                    arg, pw, details, password_coerced=False
+                                )
+
+                            kwargs[arg] = pw
+                        else:
+                            click.echo()
+                            if arg in kwargs.keys() and kwargs[arg] is True:
+
+                                pw = click.prompt(msg, type=str, hide_input=True)
+                                if coerce:
+                                    pw = validate_var(
+                                        arg, pw, details, password_coerced=False
+                                    )
+
+                                kwargs[arg] = pw
+
+                            elif arg in kwargs.keys() and not kwargs[arg]:
+                                kwargs.pop(arg, None)
 
                 runner = FrecklesRunner(self.context)
 

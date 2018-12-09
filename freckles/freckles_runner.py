@@ -29,6 +29,7 @@ from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
 from .freckles_doc import FrecklesDoc
 from .frecklet import Frecklet
+
 # from .frecklet_arg_helpers import remove_omit_values
 from .output_callback import load_callback_classes, DISPLAY_PROFILES
 from .result_callback import FrecklesResultCallback
@@ -57,6 +58,46 @@ def clean_omit_values(d, non_value_keys):
                     t = list(t_keys)[0]
                     if t in non_value_keys:
                         del d[key]
+
+
+# def find_none_value_keys(input_dict):
+#
+#     result = set()
+#
+#     if isinstance(input_dict, (list, tuple, CommentedSeq)):
+#         for item in input_dict:
+#             temp = find_none_value_keys(item)
+#             for t in temp:
+#                 result.add(t)
+#     elif isinstance(input_dict, (dict, OrderedDict, CommentedMap)):
+#         for k, v in input_dict.items():
+#             if v is None:
+#                 result.add(k)
+#             else:
+#                 temp = find_none_value_keys(v)
+#                 for t in temp:
+#                     result.add(t)
+#
+#     return result
+
+
+def remove_none_values(input):
+
+    if isinstance(input, (list, tuple, set, CommentedSeq)):
+        result = []
+        for item in input:
+            temp = remove_none_values(item)
+            result.append(temp)
+        return result
+    elif isinstance(input, (dict, OrderedDict, CommentedMap)):
+        result = CommentedMap()
+        for k, v in input.items():
+            if v is not None:
+                temp = remove_none_values(v)
+                result[k] = temp
+        return result
+    else:
+        return input
 
 
 def print_no_run_info(results):
@@ -617,15 +658,18 @@ class FrecklesRunner(object):
                     input = copy.copy(task["input"])
 
                     none_value_keys = []
+
                     for k, v in input.items():
                         if v is None:
                             none_value_keys.append(k)
+
+                    input_clean = remove_none_values(copy.deepcopy(input))
 
                     clean_omit_values(task[FRECKLET_NAME], none_value_keys)
                     clean_omit_values(task["vars"], none_value_keys)
 
                     r = replace_strings_in_obj(
-                        task, input, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                        task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                     )
 
                     replaced.append(r)
