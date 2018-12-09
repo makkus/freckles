@@ -22,6 +22,7 @@ requirements = [
     "rst2ansi==0.1.5",
     "m2r==0.2.1",
     "Pygments==2.2.0",
+    "passlib==1.7.1"
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -62,6 +63,7 @@ setup(
             "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
             "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
             "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
+            "utils=freckles.freckfreckfreck.fff_utils_plugin:utils",
             "filter=freckles.freckfreckfreck.fff_filter_plugin:filter",
         ],
         "freckelize.plugins": [
