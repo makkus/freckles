@@ -311,10 +311,12 @@ def add_arguments(result_args, arg_path, arg_inherit_strategy="none"):
                 if path_level == 0:
                     continue
                 parent_var = path_details["parent_var"]
+
                 if not parent_var:
                     break
                 if temp_arg_name not in parent_var:
                     break
+
                 if parent_var != "{{{{:: {} ::}}}}".format(temp_arg_name):
                     break
 
@@ -392,6 +394,7 @@ def extract_base_args(task_list):
     Returns:
         dict: the args dict
     """
+
     result = []
     for task in task_list:
         arg_tree = create_arg_tree_for_task(task)

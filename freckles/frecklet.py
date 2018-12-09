@@ -310,7 +310,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         if not self.parent_metadata:
             new_config["parent"] = None
-            parent_id = None
             p_node = self.task_tree
         else:
             new_config["parent"] = self.parent_metadata
