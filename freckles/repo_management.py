@@ -114,12 +114,19 @@ class FrecklesRepo(object):
             # TODO: figure out a way to do this with callbacks or something
             click.echo("- cloning repo: {}...".format(self.url))
             git = local["git"]
-            rc, stdout, stderr = git.run(["clone", self.url, self.path])
+            cmd = ["clone"]
+            if self.branch is not None:
+                cmd.append("-b")
+                cmd.append(self.branch)
+            cmd.append(self.url)
+            cmd.append(self.path)
+            rc, stdout, stderr = git.run(cmd)
 
             if rc != 0:
                 raise FrecklesConfigException(
                     "Could not clone repository '{}': {}".format(self.url, stderr)
                 )
+            PULL_CACHE[self.url] = time.time()
 
         else:
             if self.url in PULL_CACHE:
