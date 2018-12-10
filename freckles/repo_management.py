@@ -31,6 +31,16 @@ log = logging.getLogger("freckles")
 
 PULL_CACHE = {}
 
+ADDED_PATHS = [
+    os.path.expanduser("~/.nix-profile/etc/profile.d/nix.sh"),
+    os.path.expanduser("~/.local/share/inaugurate/conda/envs/inaugurate/bin"),
+    os.path.expanduser("~/.local/share/inaugurate/conda/bin"),
+    os.path.expanduser("~/.local/share/inaugurate/bin"),
+    os.path.expanduser("~/.local/bin"),
+]
+
+local.env.path.extend(ADDED_PATHS)
+
 
 class FrecklesRepo(object):
     @classmethod
