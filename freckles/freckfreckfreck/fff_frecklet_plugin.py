@@ -7,12 +7,10 @@ import click
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.data import YamlLexer
-from rst2ansi import rst2ansi
 from ruamel.yaml import YAML
 from terminaltables import SingleTable
 
 from freckles.defaults import FRECKLET_NAME
-from freckles.doc import utils
 from freckles.freckles_runner import FrecklesRunner
 from frutils import readable_yaml, reindent
 from frutils.doc import Doc
@@ -106,72 +104,6 @@ def frecklet():
     pass
 
 
-@frecklet.command("help")
-@click.option("--hide-vars", help="hide task variables", is_flag=True, default=False)
-@click.option(
-    "--hide-links", help="hide 'further reading'-links", is_flag=True, default=False
-)
-@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=True)
-@click.pass_context
-def frecklet_help(ctx, frecklet_name, hide_vars, hide_links):
-    """Displays full help about a frecklet."""
-
-    click.echo()
-    context = ctx.obj["context"]
-
-    if not frecklet_name:
-        print_available_tasks(context)
-        sys.exit()
-
-    index = context.index
-
-    p = index.get_pkg(frecklet_name)
-    if p is None:
-        click.echo("No frecklet available for name: {}".format(frecklet_name))
-        sys.exit(1)
-
-    show = {"variables": not hide_vars, "show_links": not hide_links}
-    rst = utils.render_frecklet(frecklet_name, p, show=show)
-
-    # otherwise Python 3 fails
-    if hasattr(rst, "encode"):
-        rst = rst.encode("utf-8")
-
-    rendered = rst2ansi(rst)
-    click.echo(rendered)
-
-
-@frecklet.command("info")
-@click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
-@click.pass_context
-def info(ctx, frecklet_name):
-    """Displays frecklet description."""
-
-    click.echo()
-    context = ctx.obj["context"]
-
-    if not frecklet_name:
-        print_available_tasks(context)
-        sys.exit()
-
-    index = context.index
-
-    p = index.get_pkg(frecklet_name)
-    if p is None:
-        click.echo("No frecklet available for name: {}".format(frecklet_name))
-        sys.exit(1)
-
-    show = {"variables": False, "show_links": False}
-
-    rst = utils.render_frecklet(frecklet_name, p, show=show)
-    # otherwise Python 3 fails
-    if hasattr(rst, "encode"):
-        rst = rst.encode("utf-8")
-    rendered = rst2ansi(rst)
-
-    click.echo(rendered)
-
-
 @frecklet.command("print")
 @click.argument("frecklet_name", metavar=FRECKLET_NAME, nargs=1, required=False)
 @click.pass_context
@@ -252,48 +184,6 @@ def debug(ctx, frecklet_name):
         sys.exit(1)
 
 
-@frecklet.command("vars")
-@click.option(
-    "--only-names",
-    "-n",
-    help="only display variable names",
-    is_flag=True,
-    default=False,
-)
-@click.argument("vars", metavar=FRECKLET_NAME, nargs=-1, required=True)
-@click.pass_context
-def vars(ctx, vars, only_names):
-
-    click.echo()
-
-    context = ctx.obj["context"]
-    index = context.index
-
-    frecklet_name = vars[0]
-
-    show_args = []
-    if len(vars) > 1:
-        show_args = vars[1:]
-
-    p = index.get_pkg(frecklet_name)
-    if p is None:
-        click.echo("No frecklet available for name: {}".format(frecklet_name))
-        sys.exit(1)
-
-    show = {"arg_list_filter": show_args, "only_names": only_names}
-
-    rst = utils.render_frecklet(
-        frecklet_name, p, template_name="frecklet_template_args.rst.j2", show=show
-    )
-
-    # otherwise Python 3 fails
-    if hasattr(rst, "encode"):
-        rst = rst.encode("utf-8")
-
-    rendered = rst2ansi(rst)
-    click.echo(rendered)
-
-
 @frecklet.command("describe")
 @click.argument("frecklecutable", metavar="FRECKLECUTABLE", nargs=1)
 @click.pass_context
@@ -310,9 +200,9 @@ def describe_frecklecutable(ctx, frecklecutable):
     try:
         runner = FrecklesRunner(context)
         runner.load_frecklecutable_from_name_or_file(frecklecutable)
-
         runner.describe_tasklist()
         sys.exit(0)
     except (Exception) as e:
+        log.debug(e, exc_info=1)
         click.echo()
         click.echo(e)
