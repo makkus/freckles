@@ -2,9 +2,10 @@
 {{== frecklet_name ==}}
 ============================================================================
 
-{{%= if show.get("variables", False) =%}}
+{{%= if show.get("variables", False) or show.get("show_links", False) =%}}
 {{== frecklet.get_short_help_string() | make_sentence ==}}
 
+{{%= if show.get("variables", False) =%}}
 ---------
 Variables
 ---------
@@ -19,6 +20,11 @@ Variables
 
     **default:**     {{== arg[1].get("default", "-") | sanitize_rst ==}}
 {{%= endfor =%}}
+{{%= endif =%}}
+{{%= endif =%}}
+
+{{%= if show.get("desc", True) =%}}
+{{%= if show.get("variables", False) or show.get("show_links", False) =%}}
 -----------
 Description
 -----------
@@ -27,7 +33,6 @@ Description
 {{== frecklet.get_help_string(out_format="rst") ==}}
 
 {{%= if frecklet.get_doc().get_notes() =%}}
-
 -----
 Notes
 -----
@@ -35,6 +40,7 @@ Notes
 {{%= for n in frecklet.get_doc().get_notes() =%}}
 - {{== n ==}}
 {{%= endfor =%}}
+{{%= endif =%}}
 {{%= endif =%}}
 
 {{%= if show.get("show_links", False) =%}}

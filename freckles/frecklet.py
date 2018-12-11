@@ -32,6 +32,7 @@ from .defaults import (
     FRECKLET_NAME,
     FRECKLETS_KEY,
     FRECKLES_CLICK_CEREBUS_ARG_MAP,
+    TASK_INSTANCE_NAME,
 )
 from .exceptions import FrecklesConfigException
 from .frecklet_arg_helpers import extract_base_args, create_vars_for_task_item
@@ -43,7 +44,7 @@ FRECKLET_FORMAT = {
     CHILD_MARKER_NAME: FRECKLETS_KEY,
     DEFAULT_LEAF_NAME: FRECKLET_NAME,
     DEFAULT_LEAFKEY_NAME: "name",
-    OTHER_KEYS_NAME: ["args", "doc", "frecklet_meta", "meta", "control"],
+    OTHER_KEYS_NAME: ["args", "doc", "frecklet_meta", "meta", TASK_INSTANCE_NAME],
     KEY_MOVE_MAP_NAME: {"*": ("vars", "default")},
     "use_context": True,
 }
@@ -187,25 +188,25 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
         if self.parent_metadata:
 
             # for ik, ikv in (
-            #     self.parent_metadata.get("control", {})
+            #     self.parent_metadata.get(TASK_INSTANCE_NAME, {})
             #     .get("inherited_keys", {})
             #     .items()
             # ):
-            #     new_config.setdefault("control", {}).setdefault(
+            #     new_config.setdefault(TASK_INSTANCE_NAME, {}).setdefault(
             #         "inherited_keys", {}
             #     ).setdefault(ik, []).extend(ikv)
 
-            if "skip" in self.parent_metadata.get("control", {}).keys():
-                parent_key = self.parent_metadata["control"]["skip"]
+            if "skip" in self.parent_metadata.get(TASK_INSTANCE_NAME, {}).keys():
+                parent_key = self.parent_metadata[TASK_INSTANCE_NAME]["skip"]
                 if not isinstance(parent_key, (list, tuple, CommentedSeq)):
                     parent_key = [parent_key]
-                if "skip" in new_config.get("control", {}):
-                    skip_value = new_config["control"]["skip"]
+                if "skip" in new_config.get(TASK_INSTANCE_NAME, {}):
+                    skip_value = new_config[TASK_INSTANCE_NAME]["skip"]
                     if not isinstance(skip_value, (list, tuple, CommentedSeq)):
-                        new_config["control"]["skip"] = [skip_value]
-                new_config.setdefault("control", {}).setdefault("skip", []).extend(
-                    parent_key
-                )
+                        new_config[TASK_INSTANCE_NAME]["skip"] = [skip_value]
+                new_config.setdefault(TASK_INSTANCE_NAME, {}).setdefault(
+                    "skip", []
+                ).extend(parent_key)
 
         return new_config
 
@@ -285,10 +286,10 @@ class AugmentingTaskProcessor(ConfigProcessor):
         if vars is None:
             vars = {}
             new_config["vars"] = vars
-        control = new_config.get("control", None)
+        control = new_config.get(TASK_INSTANCE_NAME, None)
         if control is None:
             control = {}
-            new_config["control"] = control
+            new_config[TASK_INSTANCE_NAME] = control
         if "skip" in control.keys():
             skip_value = control["skip"]
             if not isinstance(skip_value, (list, tuple, CommentedSeq)):
@@ -335,8 +336,8 @@ class AugmentingTaskProcessor(ConfigProcessor):
         meta["__template_keys__"] = {
             "all": all_keys,
             "vars": var_template_keys,
-            "control": control_template_keys,
-            "task": task_template_keys,
+            TASK_INSTANCE_NAME: control_template_keys,
+            FRECKLET_NAME: task_template_keys,
         }
 
         if task_type is not None and task_type != "frecklet":
@@ -432,7 +433,7 @@ class Frecklet(LuItem):
     def set_index(self, index):
         self.index = index
 
-    def render_tasklist(self, user_input):
+    def render_tasklist(self, user_input, process_user_input=True):
         """Augments a task item with user input.
 
         If there is no user input for a var, the value will be calculated out of the 'arg_tree', which includes looking at
@@ -441,6 +442,7 @@ class Frecklet(LuItem):
         Args:
           tasklist (list): a list of dicts, describing one task each
           user_input (dict): the user input
+          process_user_input (bool): whether to process/validate user input
 
         """
 
@@ -450,14 +452,18 @@ class Frecklet(LuItem):
         if not isinstance(user_input, (dict, CommentedMap, OrderedDict)):
             raise Exception("Invalid user input type: {}".format((type(user_input))))
 
+        # need to make sure that has run
+        self.get_base_args()
         tasklist = copy.deepcopy(self.get_tasklist())
+
+        if not process_user_input:
+            return tasklist
 
         for task in tasklist:
             vars = create_vars_for_task_item(
                 task, user_input, self.get_base_args(), self
             )
             task["input"] = vars
-
         return tasklist
 
     def get_base_args(self):
@@ -530,8 +536,10 @@ class Frecklet(LuItem):
     def get_tasklist(self):
 
         if self.task_list is None:
+
             self.task_tree = OrderedDict()
             self.task_list = self.process_tasklist(self.task_tree)
+
         return self.task_list
 
     def process_tasklist(self, task_tree, parent=None):

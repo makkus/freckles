@@ -3,12 +3,9 @@
 """Generic configuration class."""
 import logging
 
-import click
 from ruamel.yaml import YAML
-from termcolor import colored
 
-from frutils.doc import Doc
-from .defaults import FRECKLET_NAME, FRECKLETS_KEY
+from freckles.defaults import TASK_INSTANCE_NAME
 
 log = logging.getLogger("frutils")
 
@@ -37,104 +34,11 @@ class FrecklesDoc:
         self.tasklist = tasklist
         self.context = context
 
-    def augment_tasks(self):
-
-        result = []
-
-        current_frecklet_name = None
-        current_task_list = []
-        current_frecklet_info = {}
-
-        for task in self.tasklist:
-
-            frecklet_name = task[FRECKLET_NAME]["_parent_frecklet"]["name"]
-
-            if current_frecklet_name is None or frecklet_name != current_frecklet_name:
-                if current_frecklet_name is not None:
-                    current_frecklet_info[FRECKLETS_KEY] = current_task_list
-                    result.append(current_frecklet_info)
-
-                current_frecklet_info = {}
-                current_task_list = []
-                current_frecklet_info["frecklet"] = self.context.create_frecklet(
-                    frecklet_name
-                )
-                current_frecklet_info["name"] = frecklet_name
-
-            current_frecklet_name = frecklet_name
-
-            # task_id = task[FRECKLET_NAME]["_task_id"]
-            name = task[FRECKLET_NAME]["name"]
-            task_type = task[FRECKLET_NAME]["type"]
-            command = task[FRECKLET_NAME]["command"]
-            doc = task.get("doc", {})
-
-            current_task = {}
-            current_task["name"] = name
-            current_task["type"] = task_type
-            current_task["command"] = command
-            current_task["doc"] = Doc(doc)
-
-            current_task_list.append(current_task)
-
-        current_frecklet_info[FRECKLETS_KEY] = current_task_list
-        result.append(current_frecklet_info)
-
-        return result
-
     def describe(self):
 
-        frecklets = self.augment_tasks()
+        for t in self.tasklist:
+            desc = t.get(TASK_INSTANCE_NAME, {}).get("desc", "n/a")
+            f_type = t["frecklet"]["type"]
+            f_command = t["frecklet"]["command"]
 
-        click.echo()
-        click.echo(
-            u"{}{} frecklecutable: {}".format(
-                ARC_DOWN_RIGHT, END, colored(self.name, attrs=["bold"])
-            )
-        )
-        line = u"{}".format(HORIZONTAL) * (
-            len("frecklecutable: {}".format(self.name)) + 3
-        )
-        click.echo(u"{}{}".format(VERTICAL_RIGHT, line))
-        f_max = len(frecklets)
-        for f_idx, frecklet in enumerate(frecklets):
-            click.echo(u"{}".format(VERTICAL))
-            if f_idx == (f_max - 1):
-                f_end = ARC_UP_RIGHT
-                f_line = " "
-            else:
-                f_end = VERTICAL_RIGHT
-                f_line = VERTICAL
-
-            name = frecklet["name"]
-            help = frecklet["frecklet"].get_doc().get_short_help()
-            click.echo(
-                u"{}{} frecklet: {}".format(f_end, END, colored(name, attrs=["bold"]))
-            )
-            click.echo(u"{}   {}{} desc: {}".format(f_line, VERTICAL_RIGHT, END, help))
-            click.echo(u"{}   {}{} tasks:".format(f_line, ARC_UP_RIGHT, END))
-            t_max = len(frecklet[FRECKLETS_KEY])
-            for t_idx, t in enumerate(frecklet[FRECKLETS_KEY]):
-                if t_idx == (t_max - 1):
-                    t_end = ARC_UP_RIGHT
-                    t_line = " "
-                else:
-                    t_end = VERTICAL_RIGHT
-                    t_line = VERTICAL
-
-                desc = t["name"]
-                click.echo(
-                    u"{}       {}{} command: {}".format(
-                        f_line, t_end, END, colored(t["command"], attrs=["bold"])
-                    )
-                )
-                click.echo(
-                    u"{}       {}  {}{} desc: {}".format(
-                        f_line, t_line, VERTICAL_RIGHT, END, desc
-                    )
-                )
-                click.echo(
-                    u"{}       {}  {}{} type: {}".format(
-                        f_line, t_line, ARC_UP_RIGHT, END, t["type"]
-                    )
-                )
+            print("- {} ({}/{})".format(desc, f_command, f_type))

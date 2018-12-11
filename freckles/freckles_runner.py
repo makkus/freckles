@@ -586,7 +586,7 @@ class FrecklesRunner(object):
 
     def describe_tasklist(self):
 
-        tasklists = self.frecklecutable.process_tasklist()
+        tasklists = self.frecklecutable.process_tasklist(process_user_input=False)
 
         for tl_id, tl in tasklists.items():
             tasklist = tl["task_list"]

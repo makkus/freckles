@@ -2,12 +2,13 @@
 
 from __future__ import absolute_import, division, print_function
 
+import copy
 import logging
 import os
 from collections import OrderedDict
 
 from .context import FrecklesContext
-from .defaults import FRECKLET_NAME
+from .defaults import FRECKLET_NAME, TASK_INSTANCE_NAME
 from .exceptions import FrecklesConfigException
 
 log = logging.getLogger("freckles")
@@ -15,7 +16,7 @@ log = logging.getLogger("freckles")
 
 def is_disabled(task):
 
-    skip = task.get("control", {}).get("skip", [])
+    skip = task.get(TASK_INSTANCE_NAME, {}).get("skip", [])
 
     # print("---")
     # print(task["meta"]["__name__"])
@@ -90,14 +91,58 @@ class Frecklecutable(object):
 
         return self.frecklet.get_short_help_string(list_item_format=list_item_format)
 
-    def process_tasklist(self, vars=None):
+    def process_tasklist(self, vars=None, process_user_input=True):
 
         # frecklet = copy.deepcopy(self.frecklet)
         # for k, v in frecklet.args.items():
         #     v.setdefault("__meta__", {})["root_frecklet"] = True
         #     frecklet.meta["__frecklet_level__"] = 0
 
-        tl = self.frecklet.render_tasklist(vars)
+        tl = self.frecklet.render_tasklist(vars, process_user_input=process_user_input)
+
+        remove_skipped = False
+        if remove_skipped:
+            temp = []
+            for t in tl:
+                skip = t.get(TASK_INSTANCE_NAME, {}).get("skip", False)
+                if isinstance(skip, bool) and skip:
+                    continue
+
+                temp.append(t)
+            tl = temp
+
+        remove_idempotent = True
+        if remove_idempotent:
+            temp = []
+            compare_list = []
+            for t in tl:
+                idempotent = t.get(TASK_INSTANCE_NAME, {}).get("idempotent", False)
+                if not idempotent:
+                    temp.append(t)
+                    continue
+
+                tf = copy.copy(t[FRECKLET_NAME])
+                tf.pop("_task_id", None)
+                tf.pop("_task_list_id", None)
+                control = copy.copy(t.get(TASK_INSTANCE_NAME, {}))
+
+                if not process_user_input:
+                    # we can't know whether it'll be skipped or not, but in either case we only need the first time
+                    control.pop("skip", None)
+
+                t_compare = {
+                    FRECKLET_NAME: tf,
+                    TASK_INSTANCE_NAME: control,
+                    "vars": t["vars"],
+                }
+
+                if t_compare in compare_list:
+                    continue
+
+                compare_list.append(t_compare)
+                temp.append(t)
+
+            tl = temp
 
         unknowns = []
         for item in tl:

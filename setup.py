@@ -61,6 +61,7 @@ setup(
         "freckfreckfreck.plugins": [
             "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
             "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
+            "doc=freckles.freckfreckfreck.fff_doc_plugin:doc",
             "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
             "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
             "utils=freckles.freckfreckfreck.fff_utils_plugin:utils",
