@@ -8,6 +8,7 @@ import pytest
 
 # from freckles.frecklecute_cli import cli
 from freckles.context import FrecklesContext
+from freckles.frecklecutable import Frecklecutable
 from freckles.freckles_runner import FrecklesRunner
 from frutils.cnf import Cnf
 from frutils.exceptions import ParametersException
@@ -46,6 +47,14 @@ def ctx_non_typed(freckles_test_config):
 
     return context
 
+@pytest.fixture(scope="class")
+def ctx_task_key(freckles_test_config):
+
+    repos = [os.path.join(THIS_DIR, "frecklet_repos", "task_key")]
+    context = FrecklesContext(freckles_test_config, freckles_repos=repos)
+
+    return context
+
 
 @pytest.fixture(scope="class")
 def ctx_control_vars(freckles_test_config):
@@ -54,6 +63,9 @@ def ctx_control_vars(freckles_test_config):
     context = FrecklesContext(freckles_test_config, freckles_repos=repos)
 
     return context
+
+
+
 
 
 class TestNonTyped(object):
@@ -197,3 +209,54 @@ class TestNonTyped(object):
 
         assert len(task_list) == 1
         assert task_list[0]["vars"] == {"msg": "grand_child_3_var_1_default"}
+
+
+class TestTaskKey(object):
+
+    def test_skip(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-1", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 0
+
+    def test_skip_with_auto_arg(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-2", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={"skip": "x"}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 0
+
+    def test_skip_with_auto_arg_non_skip(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-2", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={"skip": "xx"}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 1
+
+    def test_skip_with_typed_arg(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={"skip": True}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 0
+
+    def test_skip_with_typed_arg_non_skip(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={"skip": False}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 1
+
+    def test_skip_with_typed_arg_default(self, ctx_task_key):
+
+        fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
+
+        processed = fx.process_tasklist(vars={}, cleanup=True)
+
+        assert len(processed[0]["task_list"]) == 0
