@@ -1,8 +1,8 @@
 args:
   skip:
     type: boolean
-#    default: false
-#
+    default: true
+
 frecklets:
   - grand-child-1:
       task::skip: "{{:: skip ::}}"
