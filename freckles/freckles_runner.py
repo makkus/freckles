@@ -22,7 +22,7 @@ from .defaults import (
     FRECKLES_CONTROL_CONFIG_SCHEMA,
 )
 from .exceptions import FrecklesConfigException
-from .frecklecutable import Frecklecutable, needs_elevated_permissions, cleanup_tasklist
+from .frecklecutable import Frecklecutable, needs_elevated_permissions
 from .frecklet import Frecklet
 
 # from .frecklet_arg_helpers import remove_omit_values
@@ -587,15 +587,15 @@ class FrecklesRunner(object):
             for tasklist_id, tasklist_item in tasklists.items():
 
                 connector = tasklist_item["connector"]
-                tasklist = tasklist_item["task_list"]
+                final = tasklist_item["task_list"]
 
-                final = cleanup_tasklist(tasklist)
+                # final = cleanup_tasklist(tasklist)
 
                 connector_obj = self.context.get_connector(connector)
 
                 elevated = run_config.get_config_value("elevated")
                 if elevated is None:
-                    elevated = needs_elevated_permissions(tasklist)
+                    elevated = needs_elevated_permissions(final)
                     run_config.set_config_value("elevated_tasklist", elevated)
 
                 # callback_adapter.set_tasklist(replaced)
@@ -608,7 +608,7 @@ class FrecklesRunner(object):
                 # connector_run_config = run_config.rn_cnf.get_validated_cnf(connector)
                 # log.debug("Connector run config: {}".format(connector_run_config))
                 if len(tasklists) == 1:
-                    tasklist_name = "connector: {}".format(connector)
+                    tasklist_name = "adapter: {}".format(connector)
                 else:
                     tasklist_name = "tasklist part {}, connector: {}".format(
                         tasklist_id, connector
