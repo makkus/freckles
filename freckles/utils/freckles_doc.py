@@ -77,7 +77,7 @@ def get_desc(task_details, context, use_frecklet_name=True):
             try:
                 md = context.get_frecklet_metadata(f_name)
                 desc = md.get("doc", {}).get("short_help", None)
-            except (FrecklesConfigException) as fce:
+            except (FrecklesConfigException):
                 pass
 
     desc_is_command = False
@@ -270,7 +270,7 @@ class FrecklesDoc:
                 try:
                     md = self.context.get_frecklet_metadata(f_name)
                     desc = md.get("doc", {}).get("short_help", None)
-                except (FrecklesConfigException) as fce:
+                except (FrecklesConfigException):
                     pass
 
                 if desc is None:
