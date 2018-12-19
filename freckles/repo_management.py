@@ -207,7 +207,7 @@ class RepoManager(object):
 
         return (True, "Remote repos allowed.")
 
-    def get_repo(self, repo_desc, force_update=True):
+    def get_repo(self, repo_desc, force_update=False):
 
         path = repo_desc["path"]
         exists = False
