@@ -217,7 +217,7 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-1", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={}, cleanup=True)
+        processed = fx.process_tasklist(vars={})
 
         assert len(processed[0]["task_list"]) == 0
 
@@ -225,7 +225,7 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-2", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={"skip": "x"}, cleanup=True)
+        processed = fx.process_tasklist(vars={"skip": "x"})
 
         assert len(processed[0]["task_list"]) == 0
 
@@ -233,7 +233,7 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-2", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={"skip": "xx"}, cleanup=True)
+        processed = fx.process_tasklist(vars={"skip": "xx"})
 
         assert len(processed[0]["task_list"]) == 1
 
@@ -241,7 +241,7 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={"skip": True}, cleanup=True)
+        processed = fx.process_tasklist(vars={"skip": True})
 
         assert len(processed[0]["task_list"]) == 0
 
@@ -249,7 +249,7 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={"skip": False}, cleanup=True)
+        processed = fx.process_tasklist(vars={"skip": False})
 
         assert len(processed[0]["task_list"]) == 1
 
@@ -257,6 +257,6 @@ class TestTaskKey(object):
 
         fx = Frecklecutable.create_from_file_or_name("child-3", context=ctx_task_key)
 
-        processed = fx.process_tasklist(vars={}, cleanup=True)
+        processed = fx.process_tasklist(vars={})
 
         assert len(processed[0]["task_list"]) == 0
