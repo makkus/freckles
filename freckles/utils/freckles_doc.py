@@ -6,13 +6,15 @@ import logging
 
 import click
 import mdv
+from jinja2 import PackageLoader
+from jinja2.nativetypes import NativeEnvironment
 from ruamel.yaml import YAML
+from six import string_types
 
 from freckles.defaults import FRECKLET_NAME
 from freckles.exceptions import FrecklesConfigException
 from freckles.frecklecutable import Frecklecutable, cleanup_tasklist
-from freckles.utils.doc_utils import render_frecklet
-from frutils import readable
+from frutils import readable, JINJA_DELIMITER_PROFILES
 
 log = logging.getLogger("frutils")
 
@@ -34,29 +36,72 @@ ARROW = u"\u279B"
 OK = u"\u2713"
 
 
-# def get_task_hierarchy_old(root_tasks, used_ids, parents=[], result=None):
-#
-#     if result is None:
-#         result = {}
-#
-#     for id, childs in root_tasks.items():
-#
-#         temp_parents = copy.copy(parents)
-#         temp_parents.append(id)
-#
-#         if childs:
-#             get_task_hierarchy(childs, used_ids, parents=temp_parents, result=result)
-#         else:
-#             # if id not in used_ids:
-#             #     continue
-#             # result[id]= parents
-#             start = result
-#             for p in parents:
-#                 start.setdefault(p, {})
-#                 start = start[p]
-#             start.setdefault(id, {})
-#
-#     return result
+DOC_TEMPLATE_LOADER = PackageLoader("freckles", "templates")
+DOC_JINJA_ENV = NativeEnvironment(
+    loader=DOC_TEMPLATE_LOADER, **JINJA_DELIMITER_PROFILES["documentation"]
+)
+
+
+def sanitize_rst_filter(value):
+
+    if not isinstance(value, string_types):
+        return value
+
+    if value.endswith("_"):
+        value = "{}\\_".format(value[0:-1])
+    return value
+
+
+def make_sentence_filter(value):
+
+    if not isinstance(value, string_types):
+        return value
+
+    if not value.endswith("."):
+        value = value + "."
+
+    value = value.capitalize()
+    return value
+
+
+DOC_JINJA_FILTERS = {
+    "sanitize_rst": sanitize_rst_filter,
+    "make_sentence": make_sentence_filter,
+}
+
+for key, value in DOC_JINJA_FILTERS.items():
+    DOC_JINJA_ENV.filters[key] = value
+
+
+def render_frecklet(
+    frecklet_name,
+    frecklet,
+    show=None,
+    template_name="frecklet_template_default.md.j2",
+    jinja_env=None,
+    extra_vars=None,
+):
+
+    if extra_vars is None:
+        extra_vars = {}
+
+    if jinja_env is None:
+        jinja_env = DOC_JINJA_ENV
+
+    if show is None:
+        show = {"arguments": False, "references": False, "arg_list_filter": []}
+
+    repl_dict = {
+        "frecklet_name": frecklet_name,
+        "frecklet": frecklet,
+        "show": show,
+        "extra": extra_vars,
+    }
+
+    template = jinja_env.get_template(template_name)
+    rendered = template.render(**repl_dict)
+
+    return rendered
 
 
 def get_desc(task_details, context, use_frecklet_name=True):
