@@ -1,0 +1,4 @@
+
+{{%= for item in extra.task_hierarchy recursive =%}}
+{{== item | string ==}}
+{{== loop(item["children"]) ==}}{{%= endfor =%}}
