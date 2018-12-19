@@ -20,7 +20,7 @@ requirements = [
     "rst2ansi==0.1.5",
     "m2r==0.2.1",
     "Pygments==2.3.0",
-    "passlib==1.7.1"
+    "passlib==1.7.1",
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -45,12 +45,12 @@ setup(
     description="Elastic scripting",
     entry_points={
         # "console_scripts": [
-            # "freckles=freckles.freckles_cli:cli",
-            # "frecklecute=freckles.frecklecute_cli:cli",
-            # "frecklet=freckles.frecklet_cli:cli",
-            # "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-            # "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-            # "freckelize=freckles.freckelize.freckelize_cli:cli",
+        # "freckles=freckles.freckles_cli:cli",
+        # "frecklecute=freckles.frecklecute_cli:cli",
+        # "frecklet=freckles.frecklet_cli:cli",
+        # "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
+        # "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
+        # "freckelize=freckles.freckelize.freckelize_cli:cli",
         # ],
         "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
         "freckles.adapters": [

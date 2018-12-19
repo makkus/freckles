@@ -24,8 +24,8 @@ def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal
     for id, childs in root_tasks.items():
 
         info = assemble_info(task_map[id], context=context)
-        f_name = task_map[id]["frecklet"]["command"]
-        f_type = task_map[id]["frecklet"]["type"]
+        # f_name = task_map[id]["frecklet"]["command"]
+        # f_type = task_map[id]["frecklet"]["type"]
         # if f_type == "frecklet":
         #     md = context.get_frecklet_metadata(f_name)
         #     doc = md["doc"]

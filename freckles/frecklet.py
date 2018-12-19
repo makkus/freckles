@@ -366,14 +366,14 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         # check all non_var args
         for k in task_template_keys:
-            if k in vars.keys() and not k in aux_vars.keys():
+            if k in vars.keys() and k not in aux_vars.keys():
                 continue
 
             # means we need to add it
             aux_vars[k] = "{{{{:: {} ::}}}}".format(k)
 
         for k in frecklet_template_keys:
-            if k in vars.keys() and not k in aux_vars.keys():
+            if k in vars.keys() and k not in aux_vars.keys():
                 continue
 
             # means we need to add it

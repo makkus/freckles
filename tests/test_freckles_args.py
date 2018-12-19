@@ -47,6 +47,7 @@ def ctx_non_typed(freckles_test_config):
 
     return context
 
+
 @pytest.fixture(scope="class")
 def ctx_task_key(freckles_test_config):
 
@@ -65,11 +66,7 @@ def ctx_control_vars(freckles_test_config):
     return context
 
 
-
-
-
 class TestNonTyped(object):
-
     def test_context(self, ctx_non_typed):
 
         names = ctx_non_typed.get_frecklet_names()
@@ -212,7 +209,6 @@ class TestNonTyped(object):
 
 
 class TestTaskKey(object):
-
     def test_skip(self, ctx_task_key):
 
         fx = Frecklecutable.create_from_file_or_name("child-1", context=ctx_task_key)
