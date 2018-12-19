@@ -160,6 +160,7 @@ class RepoManager(object):
     def add_alias_map(self, alias_map, content_types=None):
 
         for alias, repos in alias_map.items():
+
             for repo_type, repo_urls in repos.items():
                 if (
                     content_types

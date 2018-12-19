@@ -104,10 +104,11 @@ class FrecklecuteCommand(FrecklesBaseCommand):
 
     def list_freckles_commands(self, ctx):
         try:
-            return self.context.get_frecklet_names(
+            result = self.context.get_frecklet_names(
                 tag_whitelist=ctx.obj.get("allowed_frecklet_tags", None),
                 apropos=ctx.obj.get("apropos", None),
             )
+            return result
         except (Exception) as e:
             log.debug(e, exc_info=1)
             log.warn("Error creating commands: {}".format(e))

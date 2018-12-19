@@ -11,7 +11,6 @@ from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils.cnf import get_cnf
-
 # from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
@@ -467,6 +466,8 @@ class FrecklesContext(object):
             # if is_url_or_abbrev(frecklet_path_or_name_or_metadata):
             #     self.repo_manager.get_remote_dict()
 
+            # in case we're dealing with a Multi-Index
+
             if os.path.isfile(frecklet_path_or_name_or_metadata):
                 path = os.path.abspath(frecklet_path_or_name_or_metadata)
                 index = LuItemFolderIndex(
@@ -489,6 +490,7 @@ class FrecklesContext(object):
                     raise FrecklesConfigException(
                         "No such frecklet or invalid metadata."
                     )
+
 
                 frecklet = Frecklet(frecklet_metadata, index=self.index)
         elif isinstance(
