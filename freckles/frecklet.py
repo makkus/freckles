@@ -169,6 +169,10 @@ class MoveEmbeddedTaskKeysProcessor(ConfigProcessor):
                 vars_to_move[k] = vars.pop(k)
         for k, v in vars_to_move.items():
             add_key_to_dict(new_config, k, v, split_token="::")
+            # import pp
+            # pp(new_config)
+            # print(k)
+            # print(v)
 
         return new_config
 
@@ -262,6 +266,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
         self.parent_metadata = self.init_params.get("parent_metadata", {})
         # self.frecklet_meta = self.init_params.get("frecklet_meta")
         self.task_tree = self.init_params.get("task_tree")
+        self.task_map = self.init_params.get("task_map")
 
     def process_current_config(self):
 
@@ -340,6 +345,8 @@ class AugmentingTaskProcessor(ConfigProcessor):
             FRECKLET_NAME: task_template_keys,
         }
 
+        self.task_map[frecklet_uuid] = new_config
+
         if task_type is not None and task_type != "frecklet":
             p_node[frecklet_uuid] = None
             yield new_config
@@ -359,7 +366,9 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         p_node[frecklet_uuid] = OrderedDict()
 
-        for t in child.process_tasklist(parent=new_config, task_tree=self.task_tree):
+        for t in child.process_tasklist(
+            parent=new_config, task_tree=self.task_tree, task_map=self.task_map
+        ):
             yield t
 
 
@@ -408,13 +417,16 @@ class Frecklet(LuItem):
 
         return result
 
-    def __init__(self, metadata, base_url=None, index=None):
+    def __init__(self, metadata, base_url=None, index=None, parent_index=None):
 
         self.processed_tasklist = None
-        super(Frecklet, self).__init__(metadata, base_url=base_url, index=index)
+        super(Frecklet, self).__init__(
+            metadata, base_url=base_url, index=index, parent_index=parent_index
+        )
 
         self.task_list = None
         self.task_tree = None
+        self.task_map = None
         self.base_args = None
 
     def get_urls(self):
@@ -508,17 +520,21 @@ class Frecklet(LuItem):
         args_raw = metadata.get("args", {})
 
         meta = metadata.get("meta", {})
-        # if args_raw is None:
-        #     args_raw_temp = list(
-        #         get_template_keys(
-        #             {FRECKLETS_KEY: tasks, "vars": vars},
-        #             jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
-        #         )
-        #     )
-        #     args_raw = {}
-        #     for a in args_raw_temp:
-        #         args_raw[a] = get_default_arg()
-        #         args_raw[a]["__is_arg__"] = True
+        if self.parent_index is None:
+            frecklet_index_base_url = self.index.pkg_base_url
+        else:
+            frecklet_index_base_url = self.parent_index.pkg_base_url
+        frecklet_rel_path = metadata["frecklet_meta"]["urls"][0]["url"]
+        if frecklet_index_base_url and frecklet_rel_path:
+            frecklet_source_url = frecklet_rel_path.replace(
+                "{{ base_url }}", frecklet_index_base_url
+            )
+        else:
+            frecklet_source_url = "n/a"
+
+        meta["__frecklet_index_base_url__"] = frecklet_index_base_url
+        meta["__frecklet_rel_path__"] = frecklet_rel_path
+        meta["__frecklet_source_url__"] = frecklet_source_url
 
         doc = metadata.get("doc", {})
 
@@ -538,13 +554,36 @@ class Frecklet(LuItem):
         if self.task_list is None:
 
             self.task_tree = OrderedDict()
-            self.task_list = self.process_tasklist(self.task_tree)
+            self.task_map = {}
+            self.task_list = self.process_tasklist(self.task_tree, self.task_map)
 
         return self.task_list
 
-    def process_tasklist(self, task_tree, parent=None):
+    def get_task_tree(self):
+
+        if self.task_tree is None:
+
+            self.task_tree = OrderedDict()
+            self.task_map = {}
+            self.task_list = self.process_tasklist(self.task_tree, self.task_map)
+
+        return self.task_tree
+
+    def get_task_map(self):
+
+        if self.task_map is None:
+
+            self.task_tree = OrderedDict()
+            self.task_map = {}
+            self.task_list = self.process_tasklist(self.task_tree, self.task_map)
+
+        return self.task_map
+
+    def process_tasklist(self, task_tree, task_map, parent=None):
 
         if task_tree is None:
+            raise Exception("'task_tree' can't be 'None'")
+        if task_map is None:
             raise Exception("'task_tree' can't be 'None'")
 
         log.debug("Processing tasklist for frecklet: {}".format(self.frecklet_meta))
@@ -562,13 +601,13 @@ class Frecklet(LuItem):
                 parent_metadata=parent,
                 # frecklet_meta=self.frecklet_meta,
                 task_tree=task_tree,
+                task_map=task_map,
             ),
         ]
 
         f = Frkl(self.metadata, chain)
 
         tasklist = f.process()
-
         return tasklist
 
     def generate_click_parameters(self, default_vars=None):

@@ -7,11 +7,54 @@ import logging
 import os
 from collections import OrderedDict
 
+from ruamel.yaml.comments import CommentedSeq, CommentedMap
+
+from frutils import get_template_keys, replace_strings_in_obj
 from .context import FrecklesContext
-from .defaults import FRECKLET_NAME, TASK_INSTANCE_NAME
+from .defaults import FRECKLET_NAME, TASK_INSTANCE_NAME, DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
 
 log = logging.getLogger("freckles")
+
+
+def clean_omit_values(d, non_value_keys):
+
+    if isinstance(d, (list, tuple, CommentedSeq)):
+
+        for item in d:
+            clean_omit_values(item, non_value_keys=non_value_keys)
+
+    elif isinstance(d, (dict, OrderedDict, CommentedMap)):
+
+        for key in list(d):
+            val = d[key]
+            if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
+                clean_omit_values(val, non_value_keys=non_value_keys)
+            else:
+                t_keys = get_template_keys(val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                if len(t_keys) == 1:
+                    t = list(t_keys)[0]
+                    if t in non_value_keys:
+                        del d[key]
+
+
+def remove_none_values(input):
+
+    if isinstance(input, (list, tuple, set, CommentedSeq)):
+        result = []
+        for item in input:
+            temp = remove_none_values(item)
+            result.append(temp)
+        return result
+    elif isinstance(input, (dict, OrderedDict, CommentedMap)):
+        result = CommentedMap()
+        for k, v in input.items():
+            if v is not None:
+                temp = remove_none_values(v)
+                result[k] = temp
+        return result
+    else:
+        return input
 
 
 def is_disabled(task):
@@ -28,6 +71,43 @@ def is_disabled(task):
             return True
 
     return False
+
+
+def cleanup_tasklist(tasklist):
+
+    replaced = []
+    for task in tasklist:
+        input = copy.copy(task["input"])
+
+        none_value_keys = []
+
+        for k, v in input.items():
+            if v is None:
+                none_value_keys.append(k)
+
+        input_clean = remove_none_values(copy.deepcopy(input))
+
+        clean_omit_values(task[FRECKLET_NAME], none_value_keys)
+        clean_omit_values(task["vars"], none_value_keys)
+
+        r = replace_strings_in_obj(
+            task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
+
+        replaced.append(r)
+
+    # filter disabled tasks
+    final = []
+    for t in replaced:
+        # import sys, pp
+        # pp(replaced)
+        # sys.exit()
+        if not is_disabled(t):
+            final.append(t)
+        else:
+            log.debug("Skipping task: {}".format(t))
+
+    return final
 
 
 def needs_elevated_permissions(tasklist):

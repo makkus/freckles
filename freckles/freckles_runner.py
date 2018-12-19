@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-import copy
 import logging
 import os
 import uuid
@@ -10,11 +9,10 @@ from collections import OrderedDict
 
 import click
 import pprintpp
-from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
 from freckles.context import FrecklesContext
-from frutils import dict_merge, replace_strings_in_obj, get_template_keys
+from frutils import dict_merge
 from frutils.cnf import CnfPlugin
 from frutils.cnf import get_cnf
 from frutils.frutils_cli import HostTypePlus
@@ -22,12 +20,9 @@ from .defaults import (
     FRECKLES_RUN_CONTROL_PROFILES,
     FRECKLES_RUN_CONFIG_PROFILES_DIR,
     FRECKLES_CONTROL_CONFIG_SCHEMA,
-    DEFAULT_FRECKLES_JINJA_ENV,
-    FRECKLET_NAME,
 )
 from .exceptions import FrecklesConfigException
-from .frecklecutable import Frecklecutable, needs_elevated_permissions, is_disabled
-from .freckles_doc import FrecklesDoc
+from .frecklecutable import Frecklecutable, needs_elevated_permissions, cleanup_tasklist
 from .frecklet import Frecklet
 
 # from .frecklet_arg_helpers import remove_omit_values
@@ -37,67 +32,6 @@ from .result_callback import FrecklesResultCallback
 log = logging.getLogger("freckles")
 
 CALLBACK_CLASSES = load_callback_classes()
-
-
-def clean_omit_values(d, non_value_keys):
-
-    if isinstance(d, (list, tuple, CommentedSeq)):
-
-        for item in d:
-            clean_omit_values(item, non_value_keys=non_value_keys)
-
-    elif isinstance(d, (dict, OrderedDict, CommentedMap)):
-
-        for key in list(d):
-            val = d[key]
-            if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
-                clean_omit_values(val, non_value_keys=non_value_keys)
-            else:
-                t_keys = get_template_keys(val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-                if len(t_keys) == 1:
-                    t = list(t_keys)[0]
-                    if t in non_value_keys:
-                        del d[key]
-
-
-# def find_none_value_keys(input_dict):
-#
-#     result = set()
-#
-#     if isinstance(input_dict, (list, tuple, CommentedSeq)):
-#         for item in input_dict:
-#             temp = find_none_value_keys(item)
-#             for t in temp:
-#                 result.add(t)
-#     elif isinstance(input_dict, (dict, OrderedDict, CommentedMap)):
-#         for k, v in input_dict.items():
-#             if v is None:
-#                 result.add(k)
-#             else:
-#                 temp = find_none_value_keys(v)
-#                 for t in temp:
-#                     result.add(t)
-#
-#     return result
-
-
-def remove_none_values(input):
-
-    if isinstance(input, (list, tuple, set, CommentedSeq)):
-        result = []
-        for item in input:
-            temp = remove_none_values(item)
-            result.append(temp)
-        return result
-    elif isinstance(input, (dict, OrderedDict, CommentedMap)):
-        result = CommentedMap()
-        for k, v in input.items():
-            if v is not None:
-                temp = remove_none_values(v)
-                result[k] = temp
-        return result
-    else:
-        return input
 
 
 def print_no_run_info(results):
@@ -584,16 +518,18 @@ class FrecklesRunner(object):
 
         return result
 
-    def describe_tasklist(self):
-
-        tasklists = self.frecklecutable.process_tasklist(process_user_input=False)
-
-        for tl_id, tl in tasklists.items():
-            tasklist = tl["task_list"]
-            doc = FrecklesDoc(
-                name=self.frecklecutable.name, tasklist=tasklist, context=self.context
-            )
-            doc.describe()
+    # def describe_tasklist(self):
+    #
+    #     freckles_doc = FrecklesDoc(self.frecklecutable)
+    #
+    #     # tasklists = self.frecklecutable.process_tasklist(process_user_input=False)
+    #     #
+    #     # for tl_id, tl in tasklists.items():
+    #     #     tasklist = tl["task_list"]
+    #     #     doc = FrecklesDoc(
+    #     #         name=self.frecklecutable.name, tasklist=tasklist, context=self.context
+    #     #     )
+    #     #     doc.describe()
 
     def run(self, run_config, run_vars=None, user_input=None):
 
@@ -653,26 +589,7 @@ class FrecklesRunner(object):
                 connector = tasklist_item["connector"]
                 tasklist = tasklist_item["task_list"]
 
-                replaced = []
-                for task in tasklist:
-                    input = copy.copy(task["input"])
-
-                    none_value_keys = []
-
-                    for k, v in input.items():
-                        if v is None:
-                            none_value_keys.append(k)
-
-                    input_clean = remove_none_values(copy.deepcopy(input))
-
-                    clean_omit_values(task[FRECKLET_NAME], none_value_keys)
-                    clean_omit_values(task["vars"], none_value_keys)
-
-                    r = replace_strings_in_obj(
-                        task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-                    )
-
-                    replaced.append(r)
+                final = cleanup_tasklist(tasklist)
 
                 connector_obj = self.context.get_connector(connector)
 
@@ -685,17 +602,6 @@ class FrecklesRunner(object):
                 # callback_adapter.set_run_config(run_config)
                 # callback_adapter.set_connector(connector)
                 # callback_adapter.set_run_name(self.frecklecutable.name)
-
-                # filter disabled tasks
-                final = []
-                for t in replaced:
-                    # import sys, pp
-                    # pp(replaced)
-                    # sys.exit()
-                    if not is_disabled(t):
-                        final.append(t)
-                    else:
-                        log.debug("Skipping task: {}".format(t))
 
                 # connector_config = self.context.cnf.get_validated_cnf(connector)
                 # log.debug("Connector config: {}".format(connector_config))
