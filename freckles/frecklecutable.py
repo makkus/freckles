@@ -17,6 +17,90 @@ from .exceptions import FrecklesConfigException
 log = logging.getLogger("freckles")
 
 
+def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal=False):
+
+    result = []
+
+    for id, childs in root_tasks.items():
+
+        info = assemble_info(task_map[id], context=context)
+        f_name = task_map[id]["frecklet"]["command"]
+        f_type = task_map[id]["frecklet"]["type"]
+        # if f_type == "frecklet":
+        #     md = context.get_frecklet_metadata(f_name)
+        #     doc = md["doc"]
+        # else:
+        #     f = task_map[id]["frecklet"]
+        #     v = task_map[id].get("vars", {})
+        #     t_dict = {"frecklet": f}
+        #     if v:
+        #         t_dict["vars"] = v
+        #     doc = readable(t_dict, out="yaml", ignore_aliases=True)
+
+        if childs:
+            temp_childs = get_task_hierarchy(
+                childs,
+                used_ids=used_ids,
+                task_map=task_map,
+                context=context,
+                level=level + 1,
+                minimal=minimal,
+            )
+
+            if not temp_childs:
+                continue
+
+            d = {"children": temp_childs, "level": level, "info": info}
+            if minimal:
+                d["child"] = task_map[id]["frecklet"]["command"]
+            else:
+                d["child"] = task_map[id]
+            result.append(d)
+        else:
+            if id not in used_ids:
+                continue
+            d = {"children": [], "level": level, "info": info}
+            if minimal:
+                d["child"] = task_map[id]["frecklet"]["command"]
+            else:
+                d["child"] = task_map[id]
+            result.append(d)
+
+    return result
+
+
+def assemble_info(task, context):
+
+    command = task[FRECKLET_NAME]["command"]
+    f_name = command
+    f_type = task[FRECKLET_NAME]["type"]
+
+    msg = task.get("task", {}).get("msg", None)
+    if msg and msg.startswith("[") and msg.endswith("]"):
+        msg = msg[1:-1].strip()
+
+    desc = task.get("task", {}).get("desc", None)
+
+    if f_type == "frecklet":
+
+        try:
+            md = context.get_frecklet_metadata(f_name)
+            doc = md.get("doc", None)
+        except (FrecklesConfigException):
+            pass
+    else:
+        doc = None
+
+    return {
+        "command": command,
+        "frecklet_name": f_name,
+        "doc": doc,
+        "frecklet_type": f_type,
+        "msg": msg,
+        "desc": desc,
+    }
+
+
 def clean_omit_values(d, non_value_keys):
 
     if isinstance(d, (list, tuple, CommentedSeq)):
@@ -94,6 +178,9 @@ def cleanup_tasklist(tasklist):
             task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
 
+        # also remove None values after filters were applied
+        r = remove_none_values(r)
+
         replaced.append(r)
 
     # filter disabled tasks
@@ -102,10 +189,11 @@ def cleanup_tasklist(tasklist):
         # import sys, pp
         # pp(replaced)
         # sys.exit()
-        if not is_disabled(t):
-            final.append(t)
-        else:
+        if is_disabled(t):
             log.debug("Skipping task: {}".format(t))
+            continue
+
+        final.append(t)
 
     return final
 
@@ -149,6 +237,10 @@ class Frecklecutable(object):
         #     v.setdefault("__meta__", {})["root_frecklet"] = True
         self.frecklet = frecklet
 
+        # self.tasklist_cache = {}  # not used currently
+        self.tasklist_cache_no_user_input = None
+        self.task_hierarchy = None
+
     def generate_click_parameters(self, default_vars=None):
         # frecklet = copy.deepcopy(self.frecklet)
         params = self.frecklet.generate_click_parameters(default_vars=default_vars)
@@ -171,14 +263,91 @@ class Frecklecutable(object):
 
         return self.frecklet.get_short_help_string(list_item_format=list_item_format)
 
+    def get_task_hierarchy(self, vars=None, minimal=False):
+        """
+        Get the task hierarchy for the frecklet.
+
+        If vars is None, the 'pure' frecklet tasklist will be used. Otherwise the tasklist will be rendered with the provided
+        user input (or the empty dict).
+
+        Args:
+            vars: the (empty or non-empty) user_input, or None
+
+        Returns:
+            dict: the task hierarchy
+        """
+
+        if vars is None:
+            if self.task_hierarchy:
+                return self.task_hierarchy
+
+        process = True
+        if vars is None:
+            process = False
+
+        tasklists = self.process_tasklist(vars, process_user_input=process)
+
+        result = []
+        for tl_id, tasklist_details in tasklists.items():
+
+            ids = []
+
+            if vars is not None:
+                # we replace the task items with the rendered one
+                task_map = copy.deepcopy(self.frecklet.get_task_map())
+            else:
+                task_map = self.frecklet.get_task_map()
+
+            for t in tasklist_details["task_list"]:
+                id = t["meta"]["__id__"]
+                ids.append(id)
+                if vars is not None:
+                    task_map[id] = t
+
+            task_hierarchy = get_task_hierarchy(
+                self.frecklet.get_task_tree(),
+                used_ids=ids,
+                task_map=task_map,
+                context=self.context,
+                minimal=minimal,
+            )
+            result.append(task_hierarchy)
+
+        if vars is None:
+            self.task_hierarchy = result
+
+        return result
+
     def process_tasklist(self, vars=None, process_user_input=True):
+        """
+        Processes a tasklist.
+
+        You can choose to not process user input, in case this is run for documentation generation purposes.
+
+        Args:
+            vars: the user input
+            process_user_input: whether to process user input
+
+        Returns:
+            list: a list of processed task-lists
+        """
 
         # frecklet = copy.deepcopy(self.frecklet)
         # for k, v in frecklet.args.items():
         #     v.setdefault("__meta__", {})["root_frecklet"] = True
         #     frecklet.meta["__frecklet_level__"] = 0
 
-        tl = self.frecklet.render_tasklist(vars, process_user_input=process_user_input)
+        if process_user_input:
+            tl = None
+        else:
+            tl = self.tasklist_cache_no_user_input
+
+        if tl is None:
+            tl = self.frecklet.render_tasklist(
+                vars, process_user_input=process_user_input
+            )
+            if not process_user_input:
+                self.tasklist_cache_no_user_input = tl
 
         remove_skipped = False
         if remove_skipped:
@@ -276,6 +445,11 @@ class Frecklecutable(object):
                 "connector": current_connector,
                 "name": self.name,
             }
+
+        if process_user_input:
+            for tl_id, details in task_lists.items():
+                t = cleanup_tasklist(details["task_list"])
+                details["task_list"] = t
 
         return task_lists
 
