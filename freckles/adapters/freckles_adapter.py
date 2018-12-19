@@ -2,13 +2,13 @@
 from freckles.defaults import FRECKLET_NAME
 from freckles.freckles_runner import FrecklesRunner
 
-from .connectors import FrecklesConnector
+from .adapters import FrecklesAdapter
 
 
-class FrecklesChildConnector(FrecklesConnector):
+class FrecklesChildAdapter(FrecklesAdapter):
     def __init__(self, connector_name="freckles"):
 
-        super(FrecklesChildConnector, self).__init__(connector_name=connector_name)
+        super(FrecklesChildAdapter, self).__init__(connector_name=connector_name)
 
         self.require_absolute_path = None
         self.context = None

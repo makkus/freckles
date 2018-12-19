@@ -13,7 +13,7 @@ log = logging.getLogger("freckles")
 
 # extensions
 # ------------------------------------------------------------------------
-def load_connectors():
+def load_adapters():
     """Loading a dictlet finder extension.
 
     Returns:
@@ -29,10 +29,10 @@ def load_connectors():
     log2.addHandler(out_hdlr)
     log2.setLevel(logging.INFO)
 
-    log.debug("Loading freckles connector...")
+    log.debug("Loading freckles adapter...")
 
     mgr = ExtensionManager(
-        namespace="freckles.connectors",
+        namespace="freckles.adapters",
         invoke_on_load=True,
         propagate_map_exceptions=True,
     )
@@ -55,18 +55,18 @@ def load_connectors():
 #     return CONNECTOR_MANAGER[connector_name].obj
 
 
-def get_connectors():
+def get_adapters():
 
     result = []
 
-    for name, ext in load_connectors().items():
+    for name, ext in load_adapters().items():
         result.append(ext.obj)
 
     return result
 
 
 @six.add_metaclass(abc.ABCMeta)
-class FrecklesConnector(object):
+class FrecklesAdapter(object):
     def __init__(self, connector_name=None, config=None):
 
         self.name = connector_name

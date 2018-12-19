@@ -13,8 +13,6 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "luci>=0.2.0",
-    "Click>=6.7",
-    "click-plugins>=1.0.3",
     "colorama==0.3.9",
     "termcolor==1.1.0",
     "yaspin==0.13.0",
@@ -44,29 +42,29 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
     ],
-    description="Generic tasklists",
+    description="Elastic scripting",
     entry_points={
-        "console_scripts": [
-            "freckles=freckles.freckles_cli:cli",
-            "frecklecute=freckles.frecklecute_cli:cli",
-            "frecklet=freckles.frecklet_cli:cli",
-            "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-            "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-            "freckelize=freckles.freckelize.freckelize_cli:cli",
-        ],
+        # "console_scripts": [
+            # "freckles=freckles.freckles_cli:cli",
+            # "frecklecute=freckles.frecklecute_cli:cli",
+            # "frecklet=freckles.frecklet_cli:cli",
+            # "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
+            # "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
+            # "freckelize=freckles.freckelize.freckelize_cli:cli",
+        # ],
         "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
-        "freckles.connectors": [
-            "freckles=freckles.connectors.freckles_connector:FrecklesChildConnector"
+        "freckles.adapters": [
+            "freckles=freckles.adapters.freckles_adapter:FrecklesChildAdapter"
         ],
-        "freckfreckfreck.plugins": [
-            "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
-            "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
-            "doc=freckles.freckfreckfreck.fff_doc_plugin:doc",
-            "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
-            "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
-            "utils=freckles.freckfreckfreck.fff_utils_plugin:utils",
-            "filter=freckles.freckfreckfreck.fff_filter_plugin:filter",
-        ],
+        # "freckfreckfreck.plugins": [
+        #     "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
+        #     "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
+        #     "doc=freckles.freckfreckfreck.fff_doc_plugin:doc",
+        #     "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
+        #     "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
+        #     "utils=freckles.freckfreckfreck.fff_utils_plugin:utils",
+        #     "filter=freckles.freckfreckfreck.fff_filter_plugin:filter",
+        # ],
         "freckelize.plugins": [
             "init=freckles.freckelize.freckelize_init_plugin:init_freckle",
             "update=freckles.freckelize.freckelize_init_plugin:update_freckle",

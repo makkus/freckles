@@ -52,9 +52,9 @@ git+https://gitlab.com/frkl/frutils.git
 git+https://gitlab.com/frkl/frkl.git
 git+https://gitlab.com/frkl/luci.git
 git+https://gitlab.com/nsbl/nsbl.git
-git+https://gitlab.com/freckles-io/freckles.git
 git+https://gitlab.com/freckles-io/freckles-manager.git
+git+https://gitlab.com/freckles-io/freckles-cli.git
 git+https://gitlab.com/freckles-io/freckles-utils.git
-git+https://gitlab.com/freckles-io/freckles-connector-nsbl.git
-git+https://gitlab.com/freckles-io/freckles-connector-shell.git
+git+https://gitlab.com/freckles-io/freckles-adapter-nsbl.git
+#git+https://gitlab.com/freckles-io/freckles-connector-shell.git
 git+https://gitlab.com/frkl/templig.git

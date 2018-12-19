@@ -11,11 +11,10 @@ from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils.cnf import get_cnf
-
 # from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
-from .connectors.connectors import get_connectors
+from .adapters.adapters import get_adapters
 from .defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLETS_KEY
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
@@ -241,7 +240,7 @@ class FrecklesContext(object):
         self.connector_map = {}
         temp_connectors = {}
 
-        for connector in get_connectors():
+        for connector in get_adapters():
 
             # connector.set_config(self.connector_config.get(connector.name, {}))
             temp_connectors[connector.name] = connector
