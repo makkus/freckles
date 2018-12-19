@@ -11,7 +11,8 @@ from ruamel.yaml import YAML
 from terminaltables import SingleTable
 
 from freckles.defaults import FRECKLET_NAME
-from freckles.freckles_runner import FrecklesRunner
+from freckles.utils.freckles_doc import FrecklesDoc
+from frkl import VarsType
 from frutils import readable_yaml, reindent
 from frutils.doc import Doc
 from frutils.frutils_cli import output
@@ -184,25 +185,56 @@ def debug(ctx, frecklet_name):
         sys.exit(1)
 
 
-@frecklet.command("describe")
-@click.argument("frecklecutable", metavar="FRECKLECUTABLE", nargs=1)
+@frecklet.command("preview")
+@click.option(
+    "--vars",
+    "-v",
+    type=VarsType(),
+    help="Variables for this frecklet run",
+    required=False,
+)
+@click.argument("frecklet", metavar="FRECKLECUTABLE", nargs=1)
 @click.pass_context
-def describe_frecklecutable(ctx, frecklecutable):
+def preview_execution(ctx, frecklet, vars=None):
+
+    if vars is None:
+        vars = {}
 
     context = ctx.obj["context"]
-    # control_dict = {
-    #     "no_run": True,
-    #     "host": "localhost",
-    #     "output": "default",
-    #     "elevated": "not_elevated",
-    # }
 
     try:
-        runner = FrecklesRunner(context)
-        runner.load_frecklecutable_from_name_or_file(frecklecutable)
-        runner.describe_tasklist()
+        f = context.create_frecklet(frecklet)
+        freckles_doc = FrecklesDoc(frecklet, f, context)
+
+        freckles_doc.print_rendered(vars)
+        # freckles_doc.print_overview()
+        # runner = FrecklesRunner(context)
+        # runner.load_frecklecutable_from_name_or_file(frecklecutable)
+        # runner.describe_tasklist()
         sys.exit(0)
     except (Exception) as e:
         log.debug(e, exc_info=1)
         click.echo()
-        click.echo(e)
+        click.echo("Error processing frecklet: {}".format(e))
+        sys.exit(1)
+
+
+@frecklet.command("describe")
+@click.argument("frecklet", metavar="FRECKLECUTABLE", nargs=1)
+@click.pass_context
+def describe_frecklet(ctx, frecklet):
+
+    context = ctx.obj["context"]
+
+    try:
+        f = context.create_frecklet(frecklet)
+        freckles_doc = FrecklesDoc(frecklet, f, context)
+
+        freckles_doc.describe()
+
+        sys.exit(0)
+    except (Exception) as e:
+        log.debug(e, exc_info=1)
+        click.echo()
+        click.echo("Error processing frecklet: {}".format(e))
+        sys.exit(1)
