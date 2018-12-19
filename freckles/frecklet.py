@@ -278,11 +278,26 @@ class AugmentingTaskProcessor(ConfigProcessor):
         else:
             frecklet_level = self.parent_metadata["meta"]["__frecklet_level__"] + 1
 
-        task = new_config[FRECKLET_NAME]
-        task_type = task.get("type", None)
+        frecklet_val = new_config[FRECKLET_NAME]
+        task_type = frecklet_val.get("type", None)
         if task_type is None:
             task_type = "frecklet"
-            task["type"] = task_type
+            frecklet_val["type"] = task_type
+
+        if task_type != "frecklet":
+            # means we have an 'end-node' task
+            # setting 'parent' desc here. That way we can re-use a non-impl desc in multiple adapters
+            desc_temp = new_config.get(TASK_INSTANCE_NAME, {}).get("desc", None)
+            if (
+                desc_temp is None
+                and self.parent_metadata is not None
+                and self.parent_metadata.get(TASK_INSTANCE_NAME, {}).get("desc", None)
+                is not None
+            ):
+                new_config.setdefault(TASK_INSTANCE_NAME, {})[
+                    "desc"
+                ] = self.parent_metadata[TASK_INSTANCE_NAME]["desc"]
+
         doc = new_config.get("doc", None)
         if doc is None:
             doc = {}
@@ -291,15 +306,15 @@ class AugmentingTaskProcessor(ConfigProcessor):
         if vars is None:
             vars = {}
             new_config["vars"] = vars
-        control = new_config.get(TASK_INSTANCE_NAME, None)
-        if control is None:
-            control = {}
-            new_config[TASK_INSTANCE_NAME] = control
-        if "skip" in control.keys():
-            skip_value = control["skip"]
+        task_val = new_config.get(TASK_INSTANCE_NAME, None)
+        if task_val is None:
+            task_val = {}
+            new_config[TASK_INSTANCE_NAME] = task_val
+        if "skip" in task_val.keys():
+            skip_value = task_val["skip"]
             if not isinstance(skip_value, (list, tuple, CommentedSeq)):
                 skip_value = [skip_value]
-                control["skip"] = skip_value
+                task_val["skip"] = skip_value
         args = new_config.get("args", None)
         if args is None:
             args = {}
@@ -326,26 +341,47 @@ class AugmentingTaskProcessor(ConfigProcessor):
         var_template_keys = get_template_keys(
             vars, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
-        control_template_keys = get_template_keys(
-            control, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-        )
         task_template_keys = get_template_keys(
-            task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+            task_val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+        )
+        frecklet_template_keys = get_template_keys(
+            frecklet_val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
 
         all_keys = set(
             itertools.chain(
-                var_template_keys, control_template_keys, task_template_keys
+                var_template_keys, task_template_keys, frecklet_template_keys
             )
         )
         meta["__template_keys__"] = {
             "all": all_keys,
             "vars": var_template_keys,
-            TASK_INSTANCE_NAME: control_template_keys,
-            FRECKLET_NAME: task_template_keys,
+            TASK_INSTANCE_NAME: task_template_keys,
+            FRECKLET_NAME: frecklet_template_keys,
         }
 
         self.task_map[frecklet_uuid] = new_config
+
+        aux_vars = {}
+
+        # check all non_var args
+        for k in task_template_keys:
+            if k in vars.keys() and not k in aux_vars.keys():
+                continue
+
+            # means we need to add it
+            aux_vars[k] = "{{{{:: {} ::}}}}".format(k)
+
+        for k in frecklet_template_keys:
+            if k in vars.keys() and not k in aux_vars.keys():
+                continue
+
+            # means we need to add it
+            aux_vars[k] = "{{{{:: {} ::}}}}".format(k)
+
+        if aux_vars:
+            new_config["aux_vars"] = aux_vars
+            # print(aux_vars)
 
         if task_type is not None and task_type != "frecklet":
             p_node[frecklet_uuid] = None
@@ -458,18 +494,18 @@ class Frecklet(LuItem):
 
         """
 
-        if user_input is None:
-            user_input = {}
-
-        if not isinstance(user_input, (dict, CommentedMap, OrderedDict)):
-            raise Exception("Invalid user input type: {}".format((type(user_input))))
-
         # need to make sure that has run
         self.get_base_args()
         tasklist = copy.deepcopy(self.get_tasklist())
 
         if not process_user_input:
             return tasklist
+
+        if user_input is None:
+            user_input = {}
+
+        if not isinstance(user_input, (dict, CommentedMap, OrderedDict)):
+            raise Exception("Invalid user input type: {}".format((type(user_input))))
 
         for task in tasklist:
             vars = create_vars_for_task_item(

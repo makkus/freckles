@@ -49,6 +49,12 @@ def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
     for var_name, var_details in task_item["arg_tree"].items():
 
         try:
+            # print("LOOP")
+            # print(var_name)
+            # print(task_item["vars"].keys())
+            # print(task_item["aux_vars"])
+            # print(task_item["parent"]["args"])
+
             vars_new = create_var_value(var_name, var_details, user_input)
 
         except (Exception) as e:
@@ -214,6 +220,7 @@ def create_var_value(var_name, var_details, input):
 
         parent = var_details["parent"]
         parent_var = var_details["parent_var"]
+
         repl = {}
         for k, v in parent.items():
             temp = create_var_value(k, v, input)
@@ -515,6 +522,11 @@ def create_arg_tree_for_task(task_item, task_cache={}):
         else:
             parent_tree = create_arg_tree_for_task(task_item["parent"])
             parent_var = task_item["parent"]["vars"].get(key, None)
+            temp_var = parent_var
+            if not parent_var:
+                parent_var = task_item["parent"].get("aux_vars", {}).get(key, None)
+                temp_var = parent_var
+
             if not parent_var:
                 parent_var_template_keys = []
             else:
@@ -527,8 +539,9 @@ def create_arg_tree_for_task(task_item, task_cache={}):
             parent_relevant_tree = {}
             for pvtk in parent_var_template_keys:
                 parent_relevant_tree[pvtk] = parent_tree[pvtk]
+
             arg_tree[key] = {
-                "parent_var": task_item["parent"]["vars"].get(key),
+                "parent_var": temp_var,
                 "arg": arg,
                 "meta": task_item["meta"],
                 "__is_arg_tree__": True,
@@ -537,4 +550,6 @@ def create_arg_tree_for_task(task_item, task_cache={}):
                 arg_tree[key]["parent"] = parent_relevant_tree
 
     task_cache[task_id] = arg_tree
+    # import pp
+    # pp(arg_tree)
     return arg_tree
