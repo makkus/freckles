@@ -7,8 +7,8 @@ import sys
 import click
 import click_log
 
+from freckles_cli.freckles_base_cli import FrecklesBaseCommand
 from . import __version__ as VERSION
-from .freckles_base_cli import FrecklesBaseCommand
 from .freckles_runner import FrecklesRunner
 
 log = logging.getLogger("freckles")

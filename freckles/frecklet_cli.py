@@ -7,9 +7,9 @@ import click
 import click_completion
 import click_log
 
+from freckles_cli.freckles_base_cli import FrecklesBaseCommand, create_context
 from .exceptions import FrecklesConfigException
 from .frecklecutable import Frecklecutable
-from .freckles_base_cli import FrecklesBaseCommand, create_context
 from .freckles_runner import FrecklesRunner, FrecklesRunConfig, print_no_run_info
 
 log = logging.getLogger("freckles")

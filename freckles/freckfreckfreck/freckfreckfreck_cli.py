@@ -8,7 +8,7 @@ import click_log
 import colorama
 from stevedore.extension import ExtensionManager
 
-from freckles.freckles_base_cli import FrecklesBaseCommand
+from freckles_cli.freckles_base_cli import FrecklesBaseCommand
 
 log = logging.getLogger("freckles")
 click_log.basic_config(log)
