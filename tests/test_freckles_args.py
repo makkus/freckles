@@ -20,7 +20,7 @@ FRECKLES_TEST_CURRENT_RUN_SYMLINK = os.path.expanduser("/tmp/freckle_tests/curre
 TEST_CNF_PROFILES = {
     "default": {
         "context_repos": [],
-        "allowed_connectors": ["freckles", "shell", "nsbl", "templig"],
+        "allowed_adapters": ["freckles", "shell", "nsbl", "templig"],
         "current_run_folder": FRECKLES_TEST_CURRENT_RUN_SYMLINK,
         "run_folder": FRECKLES_TEST_RUN_DIR,
         "ignore_invalid_repos": True,

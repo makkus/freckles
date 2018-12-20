@@ -268,7 +268,7 @@ DISPLAY_PROFILES = {
         "display_detail_level": 0,
         "display_nothing": False,
         "display_run_parameters": False,
-        "display_connector_run_parameters": False,
+        "display_adapter_run_parameters": False,
         "display_system_messages": False,
     },
     "verbose": {
@@ -279,7 +279,7 @@ DISPLAY_PROFILES = {
         "display_detail_level": 10,
         "display_nothing": False,
         "display_run_parameters": True,
-        "display_connector_run_parameters": True,
+        "display_adapter_run_parameters": True,
         "display_system_messages": True,
     },
     "default": {
@@ -290,7 +290,7 @@ DISPLAY_PROFILES = {
         "display_detail_level": 1,
         "display_nothing": False,
         "display_run_parameters": False,
-        "display_connector_run_parameters": False,
+        "display_adapter_run_parameters": False,
         "display_system_messages": False,
     },
     "detailed": {
@@ -301,7 +301,7 @@ DISPLAY_PROFILES = {
         "display_detail_level": 2,
         "display_nothing": False,
         "display_run_parameters": True,
-        "display_connector_run_parameters": True,
+        "display_adapter_run_parameters": True,
         "display_system_messages": True,
     },
     "info": {
@@ -313,7 +313,7 @@ DISPLAY_PROFILES = {
         "display_detail_level": 0,
         "display_nothing": False,
         "display_run_parameters": False,
-        "display_connector_run_parameters": True,
+        "display_adapter_run_parameters": True,
         "display_system_messages": False,
     },
     "silent": {
@@ -325,7 +325,7 @@ DISPLAY_PROFILES = {
         "display_detail_tasks": False,
         "display_nothing": True,
         "display_run_parameters": False,
-        "display_connector_run_parameters": False,
+        "display_adapter_run_parameters": False,
         "display_system_messages": False,
     },
 }
@@ -443,9 +443,9 @@ class DefaultCallback(FrecklesCallback):
         self.display_run_parameters = kwargs.get(
             "display_run_parameters", profile_dict["display_run_parameters"]
         )
-        self.display_connector_run_parameters = kwargs.get(
-            "display_connector_run_parameters",
-            profile_dict["display_connector_run_parameters"],
+        self.display_adapter_run_parameters = kwargs.get(
+            "display_adapter_run_parameters",
+            profile_dict["display_adapter_run_parameters"],
         )
         self.display_system_messages = kwargs.get(
             "display_system_messages", profile_dict["display_system_messages"]
@@ -655,8 +655,8 @@ class DefaultCallback(FrecklesCallback):
 #         self.current_no_run = kwargs.get("no_run", False)
 #
 #         self.current_task_list = None
-#         self.current_connector = None
-#         self.current_connector_config = None
+#         self.current_adapter = None
+#         self.current_adapter_config = None
 #         self.current_task_id = None
 #
 #         self.current_execution_id = 1
@@ -711,15 +711,15 @@ class DefaultCallback(FrecklesCallback):
 #         self.display_run_parameters = kwargs.get(
 #             "display_run_parameters", profile_dict["display_run_parameters"]
 #         )
-#         self.display_connector_run_parameters = kwargs.get(
-#             "display_connector_run_parameters",
-#             profile_dict["display_connector_run_parameters"],
+#         self.display_adapter_run_parameters = kwargs.get(
+#             "display_adapter_run_parameters",
+#             profile_dict["display_adapter_run_parameters"],
 #         )
 #
-#     def execution_started(self, tasklist, connector_name, run_config):
+#     def execution_started(self, tasklist, adapter_name, run_config):
 #
 #         self.current_task_list = tasklist
-#         self.current_connector = connector_name
+#         self.current_adapter = adapter_name
 #         # TODO: change to run_config
 #         self.run_config = run_config
 #
@@ -733,7 +733,7 @@ class DefaultCallback(FrecklesCallback):
 #         self.output(title)
 #         self.output(u"{}{}{}".format(VERTICAL_RIGHT, (HORIZONTAL * len_title), END))
 #         self.output(
-#             u"{}{} connector: {}".format(VERTICAL_RIGHT, END, self.current_connector)
+#             u"{}{} adapter: {}".format(VERTICAL_RIGHT, END, self.current_adapter)
 #         )
 #
 #         # if self.display_run_parameters:
@@ -753,10 +753,10 @@ class DefaultCallback(FrecklesCallback):
 #         #             self.output(u"{}     {}".format(VERTICAL, line.rstrip()))
 #         #     self.output(u"{}{}{}".format(VERTICAL_RIGHT, (HORIZONTAL * len_title), END))
 #         #
-#         # if self.display_connector_run_parameters:
-#         #     current_connector_config = self.run_config.run_cnf.get_validated_cnf(connector_name)
-#         #     self.output(u"{}{} connector config:".format(VERTICAL_RIGHT, END))
-#         #     config_lines = readable_yaml(current_connector_config).rstrip().split("\n")
+#         # if self.display_adapter_run_parameters:
+#         #     current_adapter_config = self.run_config.run_cnf.get_validated_cnf(adapter_name)
+#         #     self.output(u"{}{} adapter config:".format(VERTICAL_RIGHT, END))
+#         #     config_lines = readable_yaml(current_adapter_config).rstrip().split("\n")
 #         #
 #         #     for index, line in enumerate(config_lines):
 #         #         if index == 0:

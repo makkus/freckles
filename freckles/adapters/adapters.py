@@ -38,7 +38,7 @@ def load_adapters():
     )
 
     for name, ext in mgr.items():
-        ext.obj.set_connector_name(name)
+        ext.obj.set_adapter_name(name)
 
     return mgr
 
@@ -67,9 +67,9 @@ def get_adapters():
 
 @six.add_metaclass(abc.ABCMeta)
 class FrecklesAdapter(object):
-    def __init__(self, connector_name=None, config=None):
+    def __init__(self, adapter_name=None, config=None):
 
-        self.name = connector_name
+        self.name = adapter_name
         self.config = config
         self.cnf_interpreter = None
         self.run_config_interpreter = None
@@ -84,9 +84,9 @@ class FrecklesAdapter(object):
     #
     #     return self.callback
 
-    def set_connector_name(self, connector_name):
+    def set_adapter_name(self, adapter_name):
 
-        self.name = connector_name
+        self.name = adapter_name
 
     # def set_config(self, config):
     #
@@ -103,16 +103,16 @@ class FrecklesAdapter(object):
 
     @abc.abstractmethod
     def get_supported_task_types(self):
-        """Get a list of supported task types of this connector."""
+        """Get a list of supported task types of this adapter."""
 
         pass
 
     def get_supported_repo_content_types(self):
         """Returns a list of supported types of urls.
 
-        Typically, each connector supports different backend-building blocks.
+        Typically, each adapter supports different backend-building blocks.
         For example Ansible supports roles, task_lists, and modules.
-        This function returns a list of the supported types of this connector.
+        This function returns a list of the supported types of this adapter.
         """
 
         return []
@@ -123,7 +123,7 @@ class FrecklesAdapter(object):
         return {}
 
     def set_content_repos(self, content_repos):
-        """Sets all content repos this connector is allowed to use.
+        """Sets all content repos this adapter is allowed to use.
 
         Args:
             content_repos (dict): a dictionary of allowed content repos per content type
@@ -138,7 +138,7 @@ class FrecklesAdapter(object):
         pass
 
     def get_indexes(self):
-        """Returns all extra indexes related to this connector.
+        """Returns all extra indexes related to this adapter.
 
         Typically it'll be possible to enable/disable the creation of those indexes in
         the global configuration.

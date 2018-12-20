@@ -44,16 +44,16 @@ add_luitem_reader_profile(FRECKLETS_KEY, FRECKLET_DEFAULT_READER_PROFILE)
 add_luitem_reader_profile("frecklets_path", FRECKLET_PATH_DEFAULT_READER_PROFILE)
 
 
-class FreckletConnectorIndex(LuItemIndex):
+class FreckletAdapterIndex(LuItemIndex):
     """Special index to catch non-indexed files/frecklets"""
 
-    def __init__(self, connectors, task_type_whitelist=None, task_type_blacklist=None):
+    def __init__(self, adapters, task_type_whitelist=None, task_type_blacklist=None):
 
-        super(FreckletConnectorIndex, self).__init__(
+        super(FreckletAdapterIndex, self).__init__(
             item_type="frecklet", alias="freckles_catchall"
         )
 
-        self.connectors = connectors
+        self.adapters = adapters
         self.allow_multipe_matches = False
         self.task_type_whitelist = task_type_whitelist
         self.task_type_blacklist = task_type_blacklist
@@ -65,24 +65,24 @@ class FreckletConnectorIndex(LuItemIndex):
     def get_pkg_metadata(self, name):
         log.debug("Trying to find dynamic frecklet named: {}".format(name))
         results = OrderedDict()
-        for c_name, connector in self.connectors.items():
+        for c_name, adapter in self.adapters.items():
 
-            log.debug("Using connector: {}".format(c_name))
-            if not connector.supports_allowed_task_type(
+            log.debug("Using adapter: {}".format(c_name))
+            if not adapter.supports_allowed_task_type(
                 task_type_whitelist=self.task_type_whitelist,
                 task_type_blacklist=self.task_type_blacklist,
             ):
                 log.debug("... not used because of black/whitelist")
                 continue
 
-            frecklet_md = connector.get_frecklet_metadata(name)
+            frecklet_md = adapter.get_frecklet_metadata(name)
             if frecklet_md is not None:
                 results[c_name] = frecklet_md
 
         result = None
         if len(results) > 1:
             first_key = next(iter(results))
-            msg = "Multiple connectors produced frecklets for item '{}': {}. Using first match: {}".format(
+            msg = "Multiple adapters produced frecklets for item '{}': {}. Using first match: {}".format(
                 name, results.keys(), first_key
             )
             if self.allow_multipe_matches:
@@ -156,7 +156,7 @@ def load_profile_from_disk(profile_name):
 
 
 class FrecklesContext(object):
-    """Wrapper object to hold connectors as well as global & connector-specific configurations.
+    """Wrapper object to hold adapters as well as global & adapter-specific configurations.
 
     Args:
         config_profiles (list): list of profile names, which will be merged on top of each other
@@ -236,27 +236,26 @@ class FrecklesContext(object):
         #     self.repo_manager.download_community_repos()
         #     # self.repo_manager.get_repo(COMMUNITY_REPO_DESC)
 
-        self.connectors = OrderedDict()
+        self.adapters = OrderedDict()
         self.indexes = []
-        self.connector_map = {}
-        temp_connectors = {}
+        self.adapter_map = {}
+        temp_adapters = {}
 
-        for connector in get_adapters():
+        for adapter in get_adapters():
 
-            # connector.set_config(self.connector_config.get(connector.name, {}))
-            temp_connectors[connector.name] = connector
+            temp_adapters[adapter.name] = adapter
 
-        allowed_connectors = self.cnf_interpreter.get_cnf_value(
-            "allowed_connectors", list(temp_connectors.keys())
+        allowed_adapters = self.cnf_interpreter.get_cnf_value(
+            "allowed_adapters", list(temp_adapters.keys())
         )
 
-        for c_name in allowed_connectors:
+        for c_name in allowed_adapters:
 
-            temp = temp_connectors.get(c_name, None)
+            temp = temp_adapters.get(c_name, None)
             if temp is None:
                 continue
-            self.connectors[c_name] = temp
-            # special case for the internal 'freckles' connector
+            self.adapters[c_name] = temp
+            # special case for the internal 'freckles' adapter
             if c_name == "freckles":
                 temp.set_context(self)
 
@@ -264,12 +263,12 @@ class FrecklesContext(object):
             temp.set_cnf_interpreter(interpreter)
             supported_types = temp.get_supported_task_types()
             for t in supported_types:
-                if t not in self.connector_map.keys():
-                    self.connector_map[t] = c_name
+                if t not in self.adapter_map.keys():
+                    self.adapter_map[t] = c_name
                 else:
                     log.warn(
-                        "More than one connector supports task type '{}', ignoring: {}".format(
-                            t, connector.name
+                        "More than one adapter supports task type '{}', ignoring: {}".format(
+                            t, adapter.name
                         )
                     )
 
@@ -277,7 +276,7 @@ class FrecklesContext(object):
             supported_types = temp.get_supported_repo_content_types()
             self.repo_manager.add_alias_map(aliases, content_types=supported_types)
 
-        self.connector_indexes = {}
+        self.adapter_indexes = {}
 
         # included_frecklets = os.path.join(MODULE_FOLDER, "external", FRECKLETS_KEY)
         # try:
@@ -333,8 +332,8 @@ class FrecklesContext(object):
                 if not self.ignore_invalid_repos:
                     raise e
 
-        for c_name, connector in self.connectors.items():
-            supported_types = connector.get_supported_repo_content_types()
+        for c_name, adapter in self.adapters.items():
+            supported_types = adapter.get_supported_repo_content_types()
             if FRECKLETS_KEY in supported_types:
                 supported_types.remove(FRECKLETS_KEY)
 
@@ -357,10 +356,10 @@ class FrecklesContext(object):
                     log.debug("Not a valid repo, or repo doesn't exist: {}".format(r))
                     continue
 
-            connector.set_content_repos(repos)
+            adapter.set_content_repos(repos)
 
-            indexes = connector.get_indexes()
-            self.connector_indexes[c_name] = indexes
+            indexes = adapter.get_indexes()
+            self.adapter_indexes[c_name] = indexes
 
             if not indexes:
                 continue
@@ -376,8 +375,8 @@ class FrecklesContext(object):
         if allow_dynamic_frecklets:
             # last index is the one that catches everything that wasn't caught before
             self.indexes.append(
-                FreckletConnectorIndex(
-                    self.connectors,
+                FreckletAdapterIndex(
+                    self.adapters,
                     task_type_whitelist=task_type_whitelist,
                     task_type_blacklist=task_type_blacklist,
                 )
@@ -398,11 +397,8 @@ class FrecklesContext(object):
             "interpreter": self.repo_interpreter,
             "type": "repo_manager",
         }
-        for key, connector in self.connectors.items():
-            result[key] = {
-                "interpreter": connector.cnf_interpreter,
-                "type": "connector",
-            }
+        for key, adapter in self.adapters.items():
+            result[key] = {"interpreter": adapter.cnf_interpreter, "type": "adapter"}
 
         return result
 
@@ -602,9 +598,9 @@ class FrecklesContext(object):
 
         return final
 
-    def get_connector(self, name):
+    def get_adapter(self, name):
 
-        return self.connectors.get(name, None)
+        return self.adapters.get(name, None)
 
     # def set_control_vars(self, control_vars):
     #

@@ -6,9 +6,9 @@ from .adapters import FrecklesAdapter
 
 
 class FrecklesChildAdapter(FrecklesAdapter):
-    def __init__(self, connector_name="freckles"):
+    def __init__(self, adapter_name="freckles"):
 
-        super(FrecklesChildAdapter, self).__init__(connector_name=connector_name)
+        super(FrecklesChildAdapter, self).__init__(adapter_name=adapter_name)
 
         self.require_absolute_path = None
         self.context = None

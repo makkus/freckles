@@ -406,7 +406,7 @@ class Frecklecutable(object):
                 "One or more task items with unknown task type: {}".format(unknowns)
             )
 
-        current_connector = None
+        current_adapter = None
         task_lists = OrderedDict()
         current_task_list = []
         task_list_index = 0
@@ -415,25 +415,25 @@ class Frecklecutable(object):
             task[FRECKLET_NAME]["_task_id"] = index
 
             task_type = task[FRECKLET_NAME]["type"]
-            connector_task = self.context.connector_map.get(task_type, None)
-            if connector_task is None:
+            adapter_task = self.context.adapter_map.get(task_type, None)
+            if adapter_task is None:
                 raise FrecklesConfigException(
-                    "No connector for task type '{}': {}".format(task_type, task)
+                    "No adapter for task type '{}': {}".format(task_type, task)
                 )
 
-            if current_connector is None:
-                current_connector = connector_task
+            if current_adapter is None:
+                current_adapter = adapter_task
 
-            if current_connector != connector_task:
+            if current_adapter != adapter_task:
                 # new frecklecutable run
                 for t in current_task_list:
                     t[FRECKLET_NAME]["_task_list_id"] = task_list_index
                 task_lists[task_list_index] = {
                     "task_list": current_task_list,
-                    "connector": current_connector,
+                    "adapter": current_adapter,
                     "name": self.name,
                 }
-                current_connector = connector_task
+                current_adapter = adapter_task
                 current_task_list = []
                 task_list_index = task_list_index + 1
 
@@ -444,7 +444,7 @@ class Frecklecutable(object):
                 t[FRECKLET_NAME]["_task_list_id"] = task_list_index
             task_lists[task_list_index] = {
                 "task_list": current_task_list,
-                "connector": current_connector,
+                "adapter": current_adapter,
                 "name": self.name,
             }
 

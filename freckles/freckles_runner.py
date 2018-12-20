@@ -178,7 +178,7 @@ class FrecklesRunConfig(object):
         self.cnf_interpreter = self.run_cnf.add_cnf_interpreter(
             "freckles_run", FRECKLES_CONTROL_CONFIG_SCHEMA
         )
-        for c_name, con in self.context.connectors.items():
+        for c_name, con in self.context.adapters.items():
             self.run_cnf.add_cnf_interpreter(c_name, con.get_run_config_schema())
 
         for k, v in config_dict.items():
@@ -326,7 +326,7 @@ class FrecklesRun(object):
         self.run_id = run_id
         self.result_dict = result_dict
 
-        self.connector = self.result_dict["connector"]
+        self.adapter = self.result_dict["adapter"]
         self.frecklet_name = self.result_dict["name"]
         self.outcome = self.result_dict["result"]
         self.run_properties = self.result_dict["run_properties"]
@@ -586,32 +586,23 @@ class FrecklesRunner(object):
 
             for tasklist_id, tasklist_item in tasklists.items():
 
-                connector = tasklist_item["connector"]
+                adapter = tasklist_item["adapter"]
                 final = tasklist_item["task_list"]
 
                 # final = cleanup_tasklist(tasklist)
 
-                connector_obj = self.context.get_connector(connector)
+                adapter_obj = self.context.get_adapter(adapter)
 
                 elevated = run_config.get_config_value("elevated")
                 if elevated is None:
                     elevated = needs_elevated_permissions(final)
                     run_config.set_config_value("elevated_tasklist", elevated)
 
-                # callback_adapter.set_tasklist(replaced)
-                # callback_adapter.set_run_config(run_config)
-                # callback_adapter.set_connector(connector)
-                # callback_adapter.set_run_name(self.frecklecutable.name)
-
-                # connector_config = self.context.cnf.get_validated_cnf(connector)
-                # log.debug("Connector config: {}".format(connector_config))
-                # connector_run_config = run_config.rn_cnf.get_validated_cnf(connector)
-                # log.debug("Connector run config: {}".format(connector_run_config))
                 if len(tasklists) == 1:
-                    tasklist_name = "adapter: {}".format(connector)
+                    tasklist_name = "adapter: {}".format(adapter)
                 else:
-                    tasklist_name = "tasklist part {}, connector: {}".format(
-                        tasklist_id, connector
+                    tasklist_name = "tasklist part {}, adapter: {}".format(
+                        tasklist_id, adapter
                     )
                 task_details = TaskDetail(
                     task_name=tasklist_name,
@@ -620,19 +611,12 @@ class FrecklesRunner(object):
                 )
 
                 if callback_adapter is not None:
-                    # callback_adapter.execution_started(final, connector, run_config)
-                    # else:
-                    #     task_details = {
-                    #         "name": "{}_{}".format(self.name, tasklist_id)
-                    #     }
-                    #     callback_adapter.task_started(task_details)
-
                     callback_adapter.task_started(task_details)
 
-                run_properties = connector_obj.run(
+                run_properties = adapter_obj.run(
                     final,
-                    context_config=self.context.cnf.get_interpreter(connector),
-                    run_config=run_config.run_cnf.get_interpreter(connector),
+                    context_config=self.context.cnf.get_interpreter(adapter),
+                    run_config=run_config.run_cnf.get_interpreter(adapter),
                     passwords=passwords,
                     result_callback=result_callback,
                     output_callback=callback_adapter,
@@ -649,7 +633,7 @@ class FrecklesRunner(object):
                     "run_properties": run_properties,
                     "task_list": final,
                     "result": result_callback.result,
-                    "connector": connector,
+                    "adapter": adapter,
                     "name": self.frecklecutable.name,
                 }
 

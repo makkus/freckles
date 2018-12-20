@@ -86,7 +86,7 @@ FRECKLES_CONFIG_SCHEMA = {
         "type": "boolean",
         "default": False,
         "__doc__": {
-            "short_help": "allow the dynamic creation of frecklets from a string (if the connector allows it). This is not implemented yet."
+            "short_help": "allow the dynamic creation of frecklets from a string (if the adapter allows it). This is not implemented yet."
         },
     },
     "task_type_whitelist": {
@@ -101,10 +101,10 @@ FRECKLES_CONFIG_SCHEMA = {
         "schema": {"type": "string"},
         "__doc__": {"short_help": "block certain types of tasks (not implemented yet)"},
     },
-    "allowed_connectors": {
+    "allowed_adapters": {
         "type": "list",
         "schema": {"type": "string"},
-        "__doc__": {"short_help": "a list of allowed connectors"},
+        "__doc__": {"short_help": "a list of allowed adapters"},
     },
 }
 
@@ -156,7 +156,7 @@ REPO_MANAGER_CONFIG_SCHEMA = {
         "type": "boolean",
         "default": False,
         "__doc__": {
-            "short_help": "allow external (remote) resources (frecklets, connector-specific resources, ...)"
+            "short_help": "allow external (remote) resources (frecklets, adapter-specific resources, ...)"
         },
     },
     "allow_community": {
@@ -221,7 +221,7 @@ FRECKLES_CNF_PROFILES = {
         # "allow_dynamic_frecklets": False,
         # "guess_args_for_roles": False,
         # "require_absolute_path": True,
-        "allowed_connectors": ["freckles", "shell", "nsbl", "templig"],
+        "allowed_adapters": ["freckles", "nsbl", "templig"],
         # "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
         # "run_folder": FRECKLES_RUN_DIR,
         "ignore_invalid_repos": True,
