@@ -309,7 +309,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
                     "msg"
                 ] = self.parent_metadata[TASK_INSTANCE_NAME]["msg"]
 
-
         doc = new_config.get("doc", None)
         if doc is None:
             doc = {}

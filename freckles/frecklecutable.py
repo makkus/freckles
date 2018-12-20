@@ -311,7 +311,9 @@ class Frecklecutable(object):
                 context=self.context,
                 minimal=minimal,
             )
-            result.append({"id": tl_id, "hierarchy": task_hierarchy, "details": tasklist_details})
+            result.append(
+                {"id": tl_id, "hierarchy": task_hierarchy, "details": tasklist_details}
+            )
 
         if vars is None:
             self.task_hierarchy = result

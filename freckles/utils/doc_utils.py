@@ -12,6 +12,7 @@ from frutils.doc import Doc
 
 log = logging.getLogger("freckles")
 
+
 def flatten_task_hierarchy(task_hierarchy, result=[], remove_children_from_items=True):
 
     for task_item in task_hierarchy:
@@ -28,6 +29,7 @@ def flatten_task_hierarchy(task_hierarchy, result=[], remove_children_from_items
 
     return result
 
+
 def print_execution_plan(tasklist, indent=0):
 
     for task in tasklist:
@@ -38,7 +40,7 @@ def print_execution_plan(tasklist, indent=0):
 
         info = task["info"]
 
-        if info['doc'] is not None:
+        if info["doc"] is not None:
             doc = Doc(info["doc"])
             msg = doc.get_short_help(list_item_format=True)
         else:
@@ -51,6 +53,7 @@ def print_execution_plan(tasklist, indent=0):
                 msg = "{}: {}".format(f_type, f_name)
 
         click.echo("{}- {}".format(padding, msg))
+
 
 def describe_tasklist_in_markdown(tasklist, use_short_help_name_as_title=False):
 
@@ -67,7 +70,9 @@ def describe_tasklist_in_markdown(tasklist, use_short_help_name_as_title=False):
         doc = info["doc"]
         if doc:
             d = Doc(doc)
-            short_help = d.get_short_help(list_item_format=True, default=None, use_help=True)
+            short_help = d.get_short_help(
+                list_item_format=True, default=None, use_help=True
+            )
             # help = d.get_help(use_short_help=False, default=None)
 
         f_name = info["frecklet_name"]
