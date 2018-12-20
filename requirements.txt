@@ -1,1 +1,6 @@
 flake8
+black
+pytest-runner
+pytest
+bumpversion
+
