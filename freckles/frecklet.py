@@ -285,6 +285,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
             frecklet_val["type"] = task_type
 
         if task_type != "frecklet":
+            # TODO: only do that if it has an 'impl' tag?
             # means we have an 'end-node' task
             # setting 'parent' desc here. That way we can re-use a non-impl desc in multiple adapters
             desc_temp = new_config.get(TASK_INSTANCE_NAME, {}).get("desc", None)
@@ -297,6 +298,17 @@ class AugmentingTaskProcessor(ConfigProcessor):
                 new_config.setdefault(TASK_INSTANCE_NAME, {})[
                     "desc"
                 ] = self.parent_metadata[TASK_INSTANCE_NAME]["desc"]
+            msg_temp = new_config.get(TASK_INSTANCE_NAME, {}).get("msg", None)
+            if (
+                msg_temp is None
+                and self.parent_metadata is not None
+                and self.parent_metadata.get(TASK_INSTANCE_NAME, {}).get("msg", None)
+                is not None
+            ):
+                new_config.setdefault(TASK_INSTANCE_NAME, {})[
+                    "msg"
+                ] = self.parent_metadata[TASK_INSTANCE_NAME]["msg"]
+
 
         doc = new_config.get("doc", None)
         if doc is None:
