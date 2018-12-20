@@ -84,6 +84,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://gitlab.com/makkus/freckles",
-    version="0.6.0",
+    version="1.0.0-beta1",
     zip_safe=False,
 )

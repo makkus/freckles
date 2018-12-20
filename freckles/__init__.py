@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 __author__ = """Markus Binsteiner"""
 __email__ = "makkus@frkl.io"
-__version__ = "0.6.0"
+__version__ = "1.0.0-beta1"
 
 import click
 
