@@ -6,7 +6,6 @@ import logging
 import uuid
 from collections import OrderedDict
 
-import m2r
 from ruamel.yaml.comments import CommentedSeq, CommentedMap
 
 from frkl import FrklProcessor, Frkl
@@ -688,14 +687,14 @@ class Frecklet(LuItem):
 
         return self.doc
 
-    def get_help_string(self, out_format="md"):
+    def get_help_string(self):
 
         help_string = self.doc.get_help()
 
-        help_format = self.meta.get("help_format", "markdown")
-        if help_format == "markdown" and out_format == "rst":
-
-            help_string = m2r.convert(help_string)
+        # help_format = self.meta.get("help_format", "markdown")
+        # if help_format == "markdown" and out_format == "rst":
+        #
+        #     help_string = m2r.convert(help_string)
 
         return help_string
 

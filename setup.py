@@ -13,13 +13,10 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "luci>=0.2.0",
-    "colorama==0.3.9",
+    "colorama==0.4.1",
     "termcolor==1.1.0",
-    "yaspin==0.13.0",
     "terminaltables==3.1.0",
-    "rst2ansi==0.1.5",
-    "m2r==0.2.1",
-    "Pygments==2.3.0",
+    "Pygments==2.3.1",
     "passlib==1.7.1",
 ]
 
