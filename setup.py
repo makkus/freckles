@@ -12,7 +12,7 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    "luci==1.0.0-beta1",
+    "luci==1.0.0b1",
     "colorama==0.4.1",
     "termcolor==1.1.0",
     "terminaltables==3.1.0",
@@ -84,6 +84,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://gitlab.com/makkus/freckles",
-    version="1.0.0-beta1",
+    version="1.0.0b1",
     zip_safe=False,
 )

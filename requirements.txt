@@ -3,4 +3,5 @@ black
 pytest-runner
 pytest
 bumpversion
+wheel
 
