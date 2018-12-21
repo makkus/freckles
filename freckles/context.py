@@ -16,7 +16,7 @@ from frutils.cnf import get_cnf
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .adapters.adapters import get_adapters
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLETS_KEY
+from .defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLETS_KEY, ACCEPT_FRECKLES_LICENSE_KEYNAME
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,
@@ -155,6 +155,19 @@ def load_profile_from_disk(profile_name):
     return profile_dict
 
 
+def check_config_locked():
+    """Checks whether the freckles configuration is locked."""
+
+    default_profile = load_profile_from_disk("default")
+
+    if default_profile is None:
+        return True
+
+    accepted_license = default_profile.get(ACCEPT_FRECKLES_LICENSE_KEYNAME, False)
+
+    return not accepted_license
+
+
 class FrecklesContext(object):
     """Wrapper object to hold adapters as well as global & adapter-specific configurations.
 
@@ -179,12 +192,13 @@ class FrecklesContext(object):
             for t_config in config_profiles:
                 if t_config != "default":
                     raise FrecklesPermissionException(
-                        "No permission to change configuration. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                        "No permission to change default configuration. The initial freckles configuration is locked, use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration"
                     )
 
+            # TODO: check if local repo, accept in that case?
             if freckles_repos and freckles_repos != ["community"]:
                 raise FrecklesPermissionException(
-                    "No permission to use custom repositories. Create a custom default profile first. Check https://freckles.io/configuration for more details."
+                    "No permission to use custom repositories. The initial freckles configuration is locked, use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration"
                 )
 
         cnf = get_cnf(
@@ -388,6 +402,24 @@ class FrecklesContext(object):
             alias="freckles_multi",
             ignore_invalid_pkg_metadata=True,
         )
+
+    def unlock_config(self, user_accepts=False, use_community=False):
+
+        if not user_accepts:
+            raise Exception("Need user acceptance of freckles license to unlock configuration.")
+
+        target = os.path.join(
+            FRECKLES_CONFIG_PROFILES_DIR, "default.profile"
+        )
+        self.cnf.set_cnf_key(ACCEPT_FRECKLES_LICENSE_KEYNAME, True)
+
+        if use_community:
+            cr = self.cnf.config_dict.get("context_repos", [])
+            if "community" not in cr:
+                cr.append("community")
+
+        force=True
+        self.cnf.save_current(target, force=force)
 
     def get_interpreter_map(self):
 
