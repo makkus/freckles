@@ -16,7 +16,11 @@ from frutils.cnf import get_cnf
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
 from .adapters.adapters import get_adapters
-from .defaults import FRECKLES_CONFIG_PROFILES_DIR, FRECKLETS_KEY, ACCEPT_FRECKLES_LICENSE_KEYNAME
+from .defaults import (
+    FRECKLES_CONFIG_PROFILES_DIR,
+    FRECKLETS_KEY,
+    ACCEPT_FRECKLES_LICENSE_KEYNAME,
+)
 from .defaults import (
     FRECKLES_CONFIG_SCHEMA,
     FRECKLET_DEFAULT_READER_PROFILE,
@@ -406,11 +410,11 @@ class FrecklesContext(object):
     def unlock_config(self, user_accepts=False, use_community=False):
 
         if not user_accepts:
-            raise Exception("Need user acceptance of freckles license to unlock configuration.")
+            raise Exception(
+                "Need user acceptance of freckles license to unlock configuration."
+            )
 
-        target = os.path.join(
-            FRECKLES_CONFIG_PROFILES_DIR, "default.profile"
-        )
+        target = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "default.profile")
         self.cnf.set_cnf_key(ACCEPT_FRECKLES_LICENSE_KEYNAME, True)
 
         if use_community:
@@ -418,7 +422,7 @@ class FrecklesContext(object):
             if "community" not in cr:
                 cr.append("community")
 
-        force=True
+        force = True
         self.cnf.save_current(target, force=force)
 
     def get_interpreter_map(self):

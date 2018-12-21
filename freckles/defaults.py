@@ -72,6 +72,7 @@ def PICK_ALL_FRECKLET_FILES_FUNCTION(path):
     else:
         return False
 
+
 ACCEPT_FRECKLES_LICENSE_KEYNAME = "accept_freckles_license"
 DEFAULT_FRECKLES_REPOS = ["default", "user"]
 
