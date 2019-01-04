@@ -11,4 +11,4 @@ recursive-exclude * *.py[co]
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 recursive-include freckles/external *
 recursive-include freckles/templates *
-recursive-include freckles/docs *
+recursive-include freckles/doc *
