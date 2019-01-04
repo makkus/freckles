@@ -1,0 +1,19 @@
+## Parameters
+
+{{%= if params.get_required_vars() =%}}
+### Required
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+{{%= for param in params.get_required_vars() =%}}| {{== param.name ==}} | {{== param.scheme.get("type", "n/a") ==}} | {{== param.scheme.get("default", "--") ==}} | {{== param.doc.get_help() ==}} |
+{{%= endfor =%}}
+{{%= endif =%}}
+
+{{%= if params.get_optional_vars() =%}}
+### Optional
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+{{%= for param in params.get_optional_vars() =%}}| {{== param.name ==}} | {{== param.scheme.get("type", "n/a") ==}} | {{== param.scheme.get("default", "--") ==}} | {{== param.doc.get_help() ==}} |
+{{%= endfor =%}}
+{{%= endif =%}}
