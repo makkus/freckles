@@ -1,0 +1,43 @@
+<h2 id="source_code">Source code</h2>
+<div class="section-block">
+    <ul class="nav nav-tabs" id="source_code_tab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="frecklets-tab" data-toggle="tab" href="#source_code_frecklets" role="tab"
+               aria-controls="frecklets" aria-selected="false"><code>frecklets</code></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="meta-tab" data-toggle="tab" href="#source_code_meta" role="tab" aria-controls="task"
+               aria-selected="false"><code>meta</code></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="args-tab" data-toggle="tab" href="#source_code_args" role="tab" aria-controls="args"
+               aria-selected="false"><code>args</code></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="all-tab" data-toggle="tab" href="#source_code_all" role="tab" aria-controls="all"
+               aria-selected="true"><code>full</code></a>
+        </li>
+
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="source_code_frecklets" role="tabpanel" aria-labelledby="frecklets-tab">
+            {{== frecklet_name | frecklet_raw(key="frecklets") | to_yaml(empty_string="") | to_code_block(format="yaml")
+            | from_markdown ==}}
+        </div>
+        <div class="tab-pane" id="source_code_meta" role="tabpanel" aria-labelledby="meta-tab">
+            {{== frecklet_name | frecklet_raw(key="meta") | to_yaml(empty_string="") | to_code_block(format="yaml")
+            | from_markdown ==}}
+        </div>
+        <div class="tab-pane" id="source_code_args" role="tabpanel" aria-labelledby="args-tab">
+            {{== frecklet_name | frecklet_raw(key="args") | to_yaml(empty_string="") | to_code_block(format="yaml")
+            | from_markdown ==}}
+        </div>
+        <div class="tab-pane" id="source_code_all" role="tabpanel" aria-labelledby="all-tab">
+            {{== frecklet_name | frecklet_raw | to_yaml(empty_string="") | to_code_block(format="yaml")
+            | from_markdown ==}}
+        </div>
+    </div>
+
+</div>
