@@ -6,15 +6,13 @@ import logging
 
 import click
 import mdv
-from jinja2 import PackageLoader
-from jinja2.nativetypes import NativeEnvironment
 from ruamel.yaml import YAML
-from six import string_types
 
 from freckles.defaults import FRECKLET_NAME
 from freckles.exceptions import FrecklesConfigException
 from freckles.frecklecutable import Frecklecutable, cleanup_tasklist
-from frutils import readable, JINJA_DELIMITER_PROFILES
+from freckles.utils.doc_templating import DOC_JINJA_ENV
+from frutils import readable
 
 log = logging.getLogger("frutils")
 
@@ -36,41 +34,35 @@ ARROW = u"\u279B"
 OK = u"\u2713"
 
 
-DOC_TEMPLATE_LOADER = PackageLoader("freckles", "templates")
-DOC_JINJA_ENV = NativeEnvironment(
-    loader=DOC_TEMPLATE_LOADER, **JINJA_DELIMITER_PROFILES["documentation"]
-)
-
-
-def sanitize_rst_filter(value):
-
-    if not isinstance(value, string_types):
-        return value
-
-    if value.endswith("_"):
-        value = "{}\\_".format(value[0:-1])
-    return value
-
-
-def make_sentence_filter(value):
-
-    if not isinstance(value, string_types):
-        return value
-
-    if not value.endswith("."):
-        value = value + "."
-
-    value = value.capitalize()
-    return value
-
-
-DOC_JINJA_FILTERS = {
-    "sanitize_rst": sanitize_rst_filter,
-    "make_sentence": make_sentence_filter,
-}
-
-for key, value in DOC_JINJA_FILTERS.items():
-    DOC_JINJA_ENV.filters[key] = value
+# def sanitize_rst_filter(value):
+#
+#     if not isinstance(value, string_types):
+#         return value
+#
+#     if value.endswith("_"):
+#         value = "{}\\_".format(value[0:-1])
+#     return value
+#
+#
+# def make_sentence_filter(value):
+#
+#     if not isinstance(value, string_types):
+#         return value
+#
+#     if not value.endswith("."):
+#         value = value + "."
+#
+#     value = value.capitalize()
+#     return value
+#
+#
+# DOC_JINJA_FILTERS = {
+#     "sanitize_rst": sanitize_rst_filter,
+#     "make_sentence": make_sentence_filter,
+# }
+#
+# for key, value in DOC_JINJA_FILTERS.items():
+#     DOC_JINJA_ENV.filters[key] = value
 
 
 def render_frecklet(
