@@ -11,7 +11,6 @@ from ruamel.yaml.comments import CommentedMap
 from six import string_types
 
 from frutils.cnf import get_cnf
-
 # from luci.exceptions import NoSuchDictletException
 from luci.luitem_index import LuItemIndex, LuItemMultiIndex, LuItemFolderIndex
 from luci.readers import add_luitem_reader_profile
@@ -257,6 +256,7 @@ class FrecklesContext(object):
         self.adapters = OrderedDict()
         self.indexes = []
         self.adapter_map = {}
+
         temp_adapters = {}
 
         for adapter in get_adapters():

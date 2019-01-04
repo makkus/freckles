@@ -15,6 +15,7 @@ FRECKLETS_KEY = "frecklets"
 MODULE_FOLDER = os.path.join(os.path.dirname(__file__))
 EXTERNAL_FOLDER = os.path.join(MODULE_FOLDER, "external")
 DEFAULT_FRECKLETS_FOLDER = os.path.join(EXTERNAL_FOLDER, FRECKLETS_KEY)
+FRECKLES_DOCS_FOLDER = os.path.join(MODULE_FOLDER, "doc")
 
 if os.path.exists(os.path.expanduser("~/.freckles")):
     FRECKLES_CONFIG_DIR = os.path.expanduser("~/.freckles")
