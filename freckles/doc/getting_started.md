@@ -1,44 +1,56 @@
-nav_priority: 2
+nav_priority: 1
 title: Getting started
 
-## Installing *freckles*
+## Bootstrapping *freckles* {: .section-title}
 
-There are several ways to install the *freckles* package. For the purpose of getting started quickly, we'll use the recommended way, a [bootstrap script](https://gitlab.com/frkl/inaugurate).
+<div class="section-block" markdown="1">
+There are several ways to install the *freckles* package. For the purpose of getting started quickly, we'll use the recommended way, the [inaugurate bootstrap script](https://gitlab.com/frkl/inaugurate).
 
-Apart from installing the *freckles* package, this script can execute one of the applications that come with it straight away, as well as uninstall the whole she-bang after execution (if so desired). For now we don't have to concern ourselves with any of those more advanced features, all we want to do is get *freckles* onto our machine:
+For other options, check [here](/doc/installation).
 
-```
+```console
 curl https://freckles.sh | bash
 ```
 
-or, if we don't have ``curl`` but only ``wget`` available (as is the case on a vanilla 'Debian' install, for example):
+For a quicker and leaner install using system dependencies, you can opt install *freckles* using sudo permissions:
 
+```console
+curl https://freckles.sh | sudo bash
 ```
-wget -O- https://freckles.sh | bash
-```
 
-This will install *freckles* in ``$HOME/.local/share/inaugurate/``, for more details about this process check [here](https://gitlab.com/frkl/inaugurate#how-does-this-work-what-does-it-do).
+Both of those will install *freckles* self-contained under ``$HOME/.local/share/inaugurate/`` and add its location to the ``PATH`` variable (in ``$HOME/.profile`` - for details and config options check the [inaugurate homepage](https://gitlab.com/frkl/inaugurate#how-does-this-work-what-does-it-do)). 
 
-To have the *freckles* commands available in your shell session now, we have to source the ``.profile`` file:
+To have the *freckles* commands available in your shell session, we either have to logout and re-login to our session, orsource the ``.profile`` file:
 
-```bash
+```console
 source ~/.profile
 ```
+</div>
 
-## List available *frecklets*
+## Getting help {: .section-title}
+<div class="section-block" markdown="1">
 
 *freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a wordpress instance').
 
-The *freckles* package comes with several commandline executables, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute pre-written and included *frecklets* (typically installing and configuring a service), as well as your own.
+The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute a set of *frecklets* that are shipped with *freckles* by default (typically installing and configuring a service), as well as your own ones. 
 
-Let's get a list of all the *frecklets* that are supported out of the box:
+To display help for ``frecklecute`` (as well as any of the other included applications), use the ``--help`` flag:
 
-```
-frecklecute --help
-```
-This will show something like this:
-```
-Usage: frecklecute [OPTIONS] COMMAND [ARGS]...
+```console
+$ frecklecute --help
+
+Usage: frecklecute [OPTIONS] FRECKLET [ARGS]
+
+  Execute frecklets using an auto-generated command-line interface.
+
+  frecklecute supports executing any frecklet that is available in the
+  current context as well as external ones. If the selected FRECKLET option
+  is a file and exists, it will be parsed, validated, and executed. If not,
+  a context-lookup will be performed and, if found, that frecklet will be
+  used.
+
+  Use the '--help-frecklets' option to get a list of all available frecklets
+  in the current context.
 
 Options:
   -c, --config TEXT     select config profile(s)
@@ -58,43 +70,57 @@ Options:
   --verbosity LVL       Either CRITICAL, ERROR, WARNING, INFO or DEBUG
   --apropos TAG         Show this message, listing all commands that contain
                         this value in their name or description.
-  --help-all            Show this message, listing all possible commands.
-  --help                Show this message and exit.
+  --help-frecklets      Show this message, listing all available frecklets.
+  --help                Show this message
+
+  frecklecute is part of the 'freckles' project. It is free to use in
+  combination with open source software. For more information on licensing
+  and documentation please visit: https://freckles.io
+```
+
+### List available *frecklets* {: .block-title}
+
+<div class="section-block" markdown="1">
+
+Let's get a list of all the *frecklets* that are supported out of the box, use the ``--help-frecklets`` flag (this might take a few seconds to process the current context):
+
+```console
+$ frecklecute --help-frecklets
+
+Usage: frecklecute [OPTIONS] FRECKLET [ARGS]
+
+  Execute frecklets using an auto-generated command-line interface.
+
+  frecklecute supports executing any frecklet that is available in the
+  ...
+  ...
+  --help                Show this message
 
 Commands:
-  admin-user-exists               ensures admin user with a specified username
-                                  exists
-  devpi-nginx-vhost-config-exists
-                                  creates a vhost for devpi on Nginx
-  file-downloaded                 downloads file
-  file-exists                     ensures a file exists
-  file-exists-with-content        ensures a file exists and its content is the
-                                  one specified as input
-  folder-exists                   ensures a folder exists
-  lang-go-installed               make sure Go is available
-  lang-java-installed             make sure OpenJDK is available
+  admin-user-exists               ensure an admin user with a specified
+                                  username exists
+  apache-vhost-config             ensure file exists with content of the
+                                  'apache_vhost' templig
+  execute-ad-hoc-script           create an executable file from a template,
+                                  execute it, delete it
+  execute-command                 execute a one-off command
   ...
   ...
 ```
-If you want to see all available tasks, not just the featured ones, you can do:
 
-```bash
-frecklecute --help-all
-```
-
-The same list of *frecklets* can also be found online: [frecklets](/frecklet-index).
+The same list of *frecklets* can also be found online: [frecklets](/frecklets).
 
 If you want to see all tasks that are related to one (or several) search terms, use:
 
-``` bash
-frecklecute --apropos <term>
+``` console
+$ frecklecute --apropos <term>
 ```
 
 E.g.:
 
-``` bash
+``` console
 $ frecklecute --apropos nginx
-Usage: frecklecute [OPTIONS] COMMAND [ARGS]...
+Usage: frecklecute [OPTIONS] FRECKLET [ARGS]...
 
 Options:
   -c, --config TEXT     select config profile(s)
@@ -117,8 +143,11 @@ Commands:
   ...
   ...
 ```
+</div>
 
-## Getting help
+### Display *frecklet* help {: .block-title}
+
+<div class="section-block" markdown="1">
 
 Once you picked the *frecklet* you want to run, you can get it's usage information via:
 
@@ -128,7 +157,7 @@ frecklecute <frecklet_name> --help
 
 E.g.:
 
-```
+```console
 $ frecklecute file-downloaded --help
 Usage: frecklecute file-downloaded [OPTIONS] URL
 
@@ -152,21 +181,26 @@ Options:
   --owner USER   The owner of the target file.
   --help         Show this message and exit.
 ```
+</div>
+</div>
 
-## Executing a *frecklet*
+## Executing a *frecklet* {: .section-title}
+<div class="section-block" markdown="1">
 
 You can use the same *frecklet* on your local machine, as well as remotely.
 
-### locally
+### locally {: .block-title}
+
+<div class="section-block" markdown="1">
 
 For local usage, you don't need to do anything special:
 
-```bash
+```console
 frecklecute file-downloaded --dest /tmp/my/temp/downloads/logo.svg https://frkl.io/images/frkl-logo-black.svg
 ```
 
 ??? Abstract "command output"
-    ```
+    ```console
     ╭─ starting: 'file-downloaded'
     ├╼ connector: nsbl
     │  ├╼ host: localhost
@@ -185,18 +219,22 @@ frecklecute file-downloaded --dest /tmp/my/temp/downloads/logo.svg https://frkl.
 
     ```
 
-### remotely
+</div>
+
+### remotely {: .block-title}
+
+<div class="section-block" markdown="1">
 
 For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (which you can setup using a [frecklet](/frecklet-index/default/grant-passwordless-sudo/), by the way).
 
 To login to a remote server, add the ``--host <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
-```bash
+```console
 frecklecute --ask-pass --host pi@10.0.0.209 file-downloaded --dest /tmp/my/remote/download/path/logo.svg https://frkl.io/images/frkl-logo-black.svg
 ```
 
 ??? Abstract "command output"
-    ```
+    ```console
     SSH PASS: xxxx
 
     ╭─ starting: 'file-downloaded'
@@ -215,8 +253,12 @@ frecklecute --ask-pass --host pi@10.0.0.209 file-downloaded --dest /tmp/my/remot
     │  ╰╼ ok
     ╰─ ok
     ```
+</div>
+</div>
 
-## Writing your own *frecklet*
+## Writing your own *frecklet* {: .section-title}
+
+<div class="section-block" markdown="1">
 
 You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](https://TODO).
 
@@ -244,13 +286,13 @@ In our example, let's install a webserver, configure it properly for our task, a
 
 This is how we execute our newly created script:
 
-```bash
+```console
 frecklecute hello-world.frecklet
 ```
 
 ??? abstract "command output"
 
-    ```
+    ```console
     $ frecklecute hello-world.frecklet
     SUDO_PASSWORD: xxxx
     ╭─ starting: 'hello-world'
@@ -314,3 +356,4 @@ frecklecute hello-world.frecklet
     This would ask you for the sudo password, as it needs to install packages via the system package manager.
 
 Visiting [http://localhost](http://localhost) should show you our newly created page.
+</div>

@@ -1,5 +1,6 @@
 title: Overview
 nav_priority: 0
+draft: true
 
 Welcome to the *freckles* documentation.
 
