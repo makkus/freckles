@@ -1,0 +1,20 @@
+{{%= do toc.append({"level": 1, "title": "Command-line", "link": "#command_line"}) =%}}
+<h2 id="command_line">Command-line</h2>
+
+<div class="accordion">
+    {{== ['```console\n', 'frecklecute',
+    frecklet_name, '--help', '\n```'] | join(' ') | from_markdown ==}}
+    <div class="card">
+        <div class="card-header" id="headingCli">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseCli"
+                    aria-expanded="true" aria-controls="collapseCli">
+                [toggle help output]
+            </button>
+        </div>
+        <div id="collapseCli" class="collapse" aria-labelledby="headingCli" data-parent="#collapseCli">
+            <div class="card-body">
+                {{== ['```console\n', frecklet_name | frecklet_cli_help, '\n```'] | join(' ') | from_markdown ==}}
+            </div>
+        </div>
+    </div>
+</div>
