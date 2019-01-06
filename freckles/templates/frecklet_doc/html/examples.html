@@ -13,10 +13,13 @@
     {{%= endif =%}}
     {{%= set example_vars = example.get("vars", {}) =%}}
     {{%= if example_vars =%}}
-    <h5 class="js-toc-ignore block-title">Variables</h5>
-    {{== example_vars | to_yaml | to_code_block(format="yaml")
-    | from_markdown ==}}
+    {{%= set temp = [{frecklet_name: example_vars}] =%}}
+    {{%= else =%}}
+    {{%= set temp = [frecklet_name] =%}}
     {{%= endif =%}}
+    <h5 class="js-toc-ignore block-title">Example frecklet</h5>
+    {{== temp | to_yaml | to_code_block(format="yaml")
+    | from_markdown ==}}
     <h5 class="js-toc-ignore block-title">Processed tasklist</h5>
 
     <ul class="nav nav-tabs" id="example_{{== i ==}}_tab" role="tablist">
