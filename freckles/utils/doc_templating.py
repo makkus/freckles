@@ -7,16 +7,8 @@ from jinja2.nativetypes import NativeEnvironment
 from ruamel.yaml.comments import CommentedMap
 
 from freckles.defaults import FRECKLET_NAME
-from freckles.utils.doc_utils import (
-    get_task_plan_string,
-    describe_tasklist_string,
-)
-from frutils import (
-    dict_merge,
-    JINJA_DELIMITER_PROFILES,
-    readable,
-    readable_yaml,
-)
+from freckles.utils.doc_utils import get_task_plan_string, describe_tasklist_string
+from frutils import dict_merge, JINJA_DELIMITER_PROFILES, readable, readable_yaml
 
 log = logging.getLogger("freckles")
 
@@ -88,7 +80,10 @@ def create_doc_env(freckles_obj, jinja_env=None):
             temp = CommentedMap()
             temp[FRECKLET_NAME] = t[FRECKLET_NAME]
             if "task" in t.keys() and t["task"]:
-                temp["task"] = t["task"]
+                tt = copy.copy(t["task"])
+                tt.pop("msg", None)
+                tt.pop("desc", None)
+                temp["task"] = tt
             if "vars" in t.keys() and t["vars"]:
                 temp["vars"] = t["vars"]
             result.append(temp)
@@ -113,6 +108,9 @@ def create_doc_env(freckles_obj, jinja_env=None):
                 temp[FRECKLET_NAME] = t[FRECKLET_NAME]
                 task = t.get("task", None)
                 if task:
+                    tt = copy.copy(task)
+                    tt.pop("msg", None)
+                    tt.pop("desc", None)
                     temp["task"] = task
                 vars = t.get("vars, None")
                 if vars:
@@ -173,8 +171,8 @@ def create_doc_env(freckles_obj, jinja_env=None):
 def render_frecklet(
     frecklet_name,
     freckles_obj,
-    template_name="frecklet_doc/markdown/layout.md.j2",
     extra_vars=None,
+    template_name="frecklet_doc/markdown/layout.md.j2",
     markdown_renderer=None,
 ):
 
@@ -200,8 +198,27 @@ def render_frecklet(
         jinja_env.filters = filter_backup
 
 
-# def render_frecklet_doc(frecklet_name, context):
-#
-#     markdown = render_frecklet(frecklet_name, context)
-#
-#     return markdown
+def render_cnf(
+    context,
+    freckles_obj,
+    extra_vars=None,
+    template_name="cnf_doc/markdown/layout.md.j2",
+    markdown_renderer=None,
+):
+
+    if extra_vars is None:
+        extra_vars = {}
+
+    repl_dict = dict_merge(extra_vars, {"context": context}, copy_dct=True)
+
+    jinja_env = freckles_obj.get_doc_env()
+    filter_backup = jinja_env.filters
+    try:
+        filters_copy = copy.copy(filter_backup)
+        filters_copy["from_markdown"] = markdown_renderer
+        jinja_env.filters = filters_copy
+        template = freckles_obj.get_doc_env().get_template(template_name)
+        rendered = template.render(**repl_dict)
+        return rendered
+    finally:
+        jinja_env.filters = filter_backup

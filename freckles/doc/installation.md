@@ -79,7 +79,7 @@ A line will be added to ``$HOME/.profile`` to add ``$HOME/.local/bin`` to the us
 <div class="section-block" markdown="1">
 
 In addition to its default way of operating (bootstrapping & running an application), ``inaugurate`` has a few options to make it suitable for different scenarios. For more
-details information check out it's [README](https://gitlab.com/frkl/inaugurate#environment-variables), here are a few examples:
+detailed information check out it's [README](https://gitlab.com/frkl/inaugurate#environment-variables). Here are a few examples:
 
 #### only install
 

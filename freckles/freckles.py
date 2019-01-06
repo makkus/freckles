@@ -9,7 +9,7 @@ from click import Context
 from ruamel.yaml import YAML
 
 from freckles.frecklecutable import Frecklecutable
-from freckles.utils.doc_templating import create_doc_env, render_frecklet
+from freckles.utils.doc_templating import create_doc_env, render_frecklet, render_cnf
 from freckles.utils.doc_utils import flatten_task_hierarchy
 from .context import FrecklesContext
 
@@ -130,6 +130,24 @@ class Freckles(object):
         self._add_to_cache(frecklet_name, thing_type, cli_help)
 
         return cli_help
+
+    def get_cnf(self):
+
+        return self.context.cnf
+
+    def render_cnf(self, template=None, markdown_renderer=None):
+
+        if template is None:
+            template = "cnf_doc/markdown/layout.md.j2"
+
+        rendered = render_cnf(
+            context=self.context,
+            freckles_obj=self,
+            template_name=template,
+            markdown_renderer=markdown_renderer,
+        )
+
+        return rendered
 
     def render_frecklet_help(
         self, frecklet_name, template=None, markdown_renderer=None
