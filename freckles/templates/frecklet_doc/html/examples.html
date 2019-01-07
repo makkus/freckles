@@ -12,11 +12,11 @@
     {{%= else =%}}
     {{%= set temp = [frecklet_name] =%}}
     {{%= endif =%}}
-    {{%= set desc = example.get("desc", None) =%}}
-    {{%= if desc =%}}
     <h5 class="js-toc-ignore block-title">Example frecklet</h5>
     {{== temp | to_yaml | to_code_block(format="yaml")
     | from_markdown ==}}
+    {{%= set desc = example.get("desc", None) =%}}
+    {{%= if desc =%}}
     <h5 class="js-toc-ignore block-title">Description</h5>
     {{== desc | from_markdown ==}}
     {{%= endif =%}}
