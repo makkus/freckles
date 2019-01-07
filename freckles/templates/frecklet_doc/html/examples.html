@@ -6,20 +6,20 @@
     {{%= set title = example.get("title", "Example {{== i ==}}") =%}}
     {{%= set link_id = "example_{}".format(i) =%}}
     {{== title | from_markdown ==}}
-    {{%= set desc = example.get("desc", None) =%}}
-    {{%= if desc =%}}
-    <h5 class="js-toc-ignore block-title">Description</h5>
-    {{== desc | from_markdown ==}}
-    {{%= endif =%}}
     {{%= set example_vars = example.get("vars", {}) =%}}
     {{%= if example_vars =%}}
     {{%= set temp = [{frecklet_name: example_vars}] =%}}
     {{%= else =%}}
     {{%= set temp = [frecklet_name] =%}}
     {{%= endif =%}}
+    {{%= set desc = example.get("desc", None) =%}}
+    {{%= if desc =%}}
     <h5 class="js-toc-ignore block-title">Example frecklet</h5>
     {{== temp | to_yaml | to_code_block(format="yaml")
     | from_markdown ==}}
+    <h5 class="js-toc-ignore block-title">Description</h5>
+    {{== desc | from_markdown ==}}
+    {{%= endif =%}}
     <h5 class="js-toc-ignore block-title">Processed tasklist</h5>
 
     <ul class="nav nav-tabs" id="example_{{== i ==}}_tab" role="tablist">

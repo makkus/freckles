@@ -518,6 +518,7 @@ class Frecklet(LuItem):
             raise Exception("Invalid user input type: {}".format((type(user_input))))
 
         for task in tasklist:
+
             vars = create_vars_for_task_item(
                 task, user_input, self.get_base_args(), self
             )

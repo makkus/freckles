@@ -49,9 +49,9 @@ def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
     for var_name, var_details in task_item["arg_tree"].items():
 
         try:
-            # print("LOOP")
             # print(var_name)
-            # print(task_item["vars"].keys())
+            # pp(var_details)
+            # print(task_item["vars"])
             # print(task_item["aux_vars"])
             # print(task_item["parent"]["args"])
 
@@ -126,6 +126,11 @@ def validate_var(key_name, value, schema, password_coerced=True):
         d = {}
 
     val = FrutilsNormalizer(s)
+    # import pp, traceback
+    # print(key_name)
+    # print(value)
+    # pp(d)
+    # traceback.print_stack()
     valid = val.validated(d)
     if valid is None:
         raise ParametersException(d, val.errors)
