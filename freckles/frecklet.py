@@ -391,7 +391,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
 
         if aux_vars:
             new_config["aux_vars"] = aux_vars
-            # print(aux_vars)
 
         if task_type is not None and task_type != "frecklet":
             p_node[frecklet_uuid] = None
@@ -523,6 +522,7 @@ class Frecklet(LuItem):
                 task, user_input, self.get_base_args(), self
             )
             task["input"] = vars
+
         return tasklist
 
     def get_base_args(self):
