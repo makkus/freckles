@@ -659,9 +659,9 @@ class FrecklesContext(object):
 
         result["no_run"] = no_run
 
-        host = self.current_control_vars.get("host", None)
-        if host is not None:
-            result["host"] = host
+        target = self.current_control_vars.get("target", None)
+        if target is not None:
+            result["target"] = target
 
         output_format = self.current_control_vars.get("output", None)
         if output_format is None:

@@ -83,7 +83,7 @@ class HostConfigContextPlugin(CnfPlugin):
 
     def handles_keys(self):
 
-        return ["host"]
+        return ["target"]
 
     def set_value(self, key, host, current_conf):
         """Parses host dict and augments it with sensible defaults if necessary.

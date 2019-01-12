@@ -186,138 +186,138 @@ def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0):
     return result
 
 
-class FrecklesDoc:
-    def __init__(self, frecklet_name, frecklet, context):
-
-        self.frecklet_name = frecklet_name
-        self.frecklet = frecklet
-        self.context = context
-
-        self.tasklist = frecklet.get_tasklist()
-
-        ids = []
-
-        for t in self.tasklist:
-            id = t["meta"]["__id__"]
-            ids.append(id)
-        self.task_tree = frecklet.get_task_tree()
-        self.task_map = frecklet.get_task_map()
-
-        self.hierarchy = get_task_hierarchy(
-            self.task_tree, used_ids=ids, task_map=self.task_map, context=self.context
-        )
-
-        # output(hierarchy, output_type="yaml", ignore_aliases=True)
-
-    def create_tasklist(self, vars={}):
-
-        frecklecutable = Frecklecutable(
-            name=self.frecklet_name, frecklet=self.frecklet, context=self.context
-        )
-
-        tasklists = frecklecutable.process_tasklist(vars, process_user_input=True)
-
-        task_list = tasklists[0]["task_list"]
-        task_list = cleanup_tasklist(task_list)
-
-        return task_list
-
-    def create_rendered_hierarchy(self, vars={}):
-
-        task_list = self.create_tasklist(vars=vars)
-        ids = []
-
-        task_map = copy.deepcopy(self.task_map)
-
-        for t in task_list:
-            id = t["meta"]["__id__"]
-            ids.append(id)
-            task_map[id] = t
-
-        hierarchy = get_task_hierarchy(
-            self.task_tree, used_ids=ids, task_map=task_map, context=self.context
-        )
-        return hierarchy
-
-    def create_rendered(self, vars={}, render_markdown=False):
-
-        hierarchy = self.create_rendered_hierarchy(vars)
-
-        show = {"details": False}
-
-        extra = {"task_hierarchy": hierarchy}
-
-        rendered = render_frecklet(
-            frecklet_name=self.frecklet_name,
-            frecklet=self.frecklet,
-            show=show,
-            template_name="frecklet_overview.md.j2",
-            extra_vars=extra,
-        )
-        # rendered = render_frecklet(frecklet_name=self.frecklet_name, frecklet=self.frecklet, show=show, template_name="frecklet_debug.md.j2", extra_vars=extra)
-
-        if render_markdown:
-            # rendered = mdvl.main(rendered, no_print=True)[0]
-            rendered = mdv.main(rendered, no_colors=True, header_nrs="1-")
-
-        return rendered
-
-    def print_rendered(self, vars={}):
-
-        rendered = self.create_rendered(vars, render_markdown=True)
-        click.echo(rendered)
-
-    def create_description(self):
-
-        # self.print_task_hierarchy(self.hierarchy, task_map=self.task_map)
-
-        show = {"details": True}
-
-        extra = {"task_hierarchy": self.hierarchy}
-
-        rendered = render_frecklet(
-            frecklet_name=self.frecklet_name,
-            frecklet=self.frecklet,
-            show=show,
-            template_name="frecklet_overview.md.j2",
-            extra_vars=extra,
-        )
-        # rendered = render_frecklet(frecklet_name=self.frecklet_name, frecklet=self.frecklet, show=show, template_name="frecklet_debug.md.j2", extra_vars=extra)
-
-        render = True
-        if render:
-            # rendered = mdvl.main(rendered, no_print=True)[0]
-            rendered = mdv.main(rendered, no_colors=True, header_nrs="1-")
-
-        return rendered
-
-    def describe(self):
-
-        result = self.create_description()
-        click.echo(result)
-
-    def print_task_hierarchy(self, hierarchy, task_map, level=0):
-
-        for id, children in hierarchy.items():
-            f = task_map[id]
-            f_name = f[FRECKLET_NAME]["command"]
-            desc = f.get("task", {}).get("msg", None)
-            task_type = f[FRECKLET_NAME]["type"]
-            if desc is None:
-                try:
-                    md = self.context.get_frecklet_metadata(f_name)
-                    desc = md.get("doc", {}).get("short_help", None)
-                except (FrecklesConfigException):
-                    pass
-
-                if desc is None:
-                    desc = "frecklet: {}".format(f_name)
-            padding = "  " * level
-            # desc = "{}: {}".format(f_name, desc)
-            msg = "{}{}".format(padding, desc)
-            if task_type != "frecklet":
-                msg = "{} (frecklet: {}/{})".format(msg, task_type, f_name)
-            else:
-                msg = "{} (frecklet: {})".format(msg, f_name)
-
-            self.print_task_hierarchy(children, task_map, level=level + 1)
+# class FrecklesDoc:
+#     def __init__(self, frecklet_name, frecklet, context):
+#
+#         self.frecklet_name = frecklet_name
+#         self.frecklet = frecklet
+#         self.context = context
+#
+#         self.tasklist = frecklet.get_tasklist()
+#
+#         ids = []
+#
+#         for t in self.tasklist:
+#             id = t["meta"]["__id__"]
+#             ids.append(id)
+#         self.task_tree = frecklet.get_task_tree()
+#         self.task_map = frecklet.get_task_map()
+#
+#         self.hierarchy = get_task_hierarchy(
+#             self.task_tree, used_ids=ids, task_map=self.task_map, context=self.context
+#         )
+#
+#         # output(hierarchy, output_type="yaml", ignore_aliases=True)
+#
+#     def create_tasklist(self, vars={}):
+#
+#         frecklecutable = Frecklecutable(
+#             name=self.frecklet_name, frecklet=self.frecklet, context=self.context
+#         )
+#
+#         tasklists = frecklecutable.process_tasklist(vars, process_user_input=True)
+#
+#         task_list = tasklists[0]["task_list"]
+#         task_list = cleanup_tasklist(task_list)
+#
+#         return task_list
+#
+#     def create_rendered_hierarchy(self, vars={}):
+#
+#         task_list = self.create_tasklist(vars=vars)
+#         ids = []
+#
+#         task_map = copy.deepcopy(self.task_map)
+#
+#         for t in task_list:
+#             id = t["meta"]["__id__"]
+#             ids.append(id)
+#             task_map[id] = t
+#
+#         hierarchy = get_task_hierarchy(
+#             self.task_tree, used_ids=ids, task_map=task_map, context=self.context
+#         )
+#         return hierarchy
+#
+#     def create_rendered(self, vars={}, render_markdown=False):
+#
+#         hierarchy = self.create_rendered_hierarchy(vars)
+#
+#         show = {"details": False}
+#
+#         extra = {"task_hierarchy": hierarchy}
+#
+#         rendered = render_frecklet(
+#             frecklet_name=self.frecklet_name,
+#             frecklet=self.frecklet,
+#             show=show,
+#             template_name="frecklet_overview.md.j2",
+#             extra_vars=extra,
+#         )
+#         # rendered = render_frecklet(frecklet_name=self.frecklet_name, frecklet=self.frecklet, show=show, template_name="frecklet_debug.md.j2", extra_vars=extra)
+#
+#         if render_markdown:
+#             # rendered = mdvl.main(rendered, no_print=True)[0]
+#             rendered = mdv.main(rendered, no_colors=True, header_nrs="1-")
+#
+#         return rendered
+#
+#     def print_rendered(self, vars={}):
+#
+#         rendered = self.create_rendered(vars, render_markdown=True)
+#         click.echo(rendered)
+#
+#     def create_description(self):
+#
+#         # self.print_task_hierarchy(self.hierarchy, task_map=self.task_map)
+#
+#         show = {"details": True}
+#
+#         extra = {"task_hierarchy": self.hierarchy}
+#
+#         rendered = render_frecklet(
+#             frecklet_name=self.frecklet_name,
+#             frecklet=self.frecklet,
+#             show=show,
+#             template_name="frecklet_overview.md.j2",
+#             extra_vars=extra,
+#         )
+#         # rendered = render_frecklet(frecklet_name=self.frecklet_name, frecklet=self.frecklet, show=show, template_name="frecklet_debug.md.j2", extra_vars=extra)
+#
+#         render = True
+#         if render:
+#             # rendered = mdvl.main(rendered, no_print=True)[0]
+#             rendered = mdv.main(rendered, no_colors=True, header_nrs="1-")
+#
+#         return rendered
+#
+#     def describe(self):
+#
+#         result = self.create_description()
+#         click.echo(result)
+#
+#     def print_task_hierarchy(self, hierarchy, task_map, level=0):
+#
+#         for id, children in hierarchy.items():
+#             f = task_map[id]
+#             f_name = f[FRECKLET_NAME]["command"]
+#             desc = f.get("task", {}).get("msg", None)
+#             task_type = f[FRECKLET_NAME]["type"]
+#             if desc is None:
+#                 try:
+#                     md = self.context.get_frecklet_metadata(f_name)
+#                     desc = md.get("doc", {}).get("short_help", None)
+#                 except (FrecklesConfigException):
+#                     pass
+#
+#                 if desc is None:
+#                     desc = "frecklet: {}".format(f_name)
+#             padding = "  " * level
+#             # desc = "{}: {}".format(f_name, desc)
+#             msg = "{}{}".format(padding, desc)
+#             if task_type != "frecklet":
+#                 msg = "{} (frecklet: {}/{})".format(msg, task_type, f_name)
+#             else:
+#                 msg = "{} (frecklet: {})".format(msg, f_name)
+#
+#             self.print_task_hierarchy(children, task_map, level=level + 1)

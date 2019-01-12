@@ -195,8 +195,43 @@ def cleanup_tasklist(tasklist):
 
         final.append(t)
 
+    # final = remove_idempotent_duplicates(final)
+
     return final
 
+def remove_idempotent_duplicates(tasklist):
+
+    temp = []
+    compare_list = []
+    for t in tasklist:
+
+        idempotent = t.get(TASK_INSTANCE_NAME, {}).get("idempotent", False)
+        if not idempotent:
+            temp.append(t)
+            continue
+
+        tf = copy.copy(t[FRECKLET_NAME])
+        tf.pop("_task_id", None)
+        tf.pop("_task_list_id", None)
+        control = copy.copy(t.get(TASK_INSTANCE_NAME, {}))
+
+        control.pop("skip", None)
+
+        t_compare = {
+            FRECKLET_NAME: tf,
+            TASK_INSTANCE_NAME: control,
+            "vars": t["vars"],
+        }
+
+        if t_compare in compare_list:
+            import pp, sys
+            pp(t_compare.keys())
+            # sys.exit()
+            continue
+
+        compare_list.append(t_compare)
+        temp.append(t)
+    return temp
 
 def needs_elevated_permissions(tasklist):
 
@@ -362,8 +397,11 @@ class Frecklecutable(object):
                 temp.append(t)
             tl = temp
 
-        remove_idempotent = True
-        if remove_idempotent:
+        # this doesn't work properly yet
+        remove_idempotent = False
+        # if user input is not processed, we can't know which tasks are the same
+        # because vars have not been resolved
+        if process_user_input and remove_idempotent:
             temp = []
             compare_list = []
             for t in tl:
@@ -388,6 +426,12 @@ class Frecklecutable(object):
                 }
 
                 if t_compare in compare_list:
+                    import pp
+                    print("============================================")
+                    pp(compare_list)
+                    print("-------------------------------------------")
+                    pp(t_compare)
+                    print("-------------------------------------------")
                     continue
 
                 compare_list.append(t_compare)

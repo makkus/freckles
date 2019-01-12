@@ -120,7 +120,8 @@ def validate_var(key_name, value, schema, password_coerced=True):
         schema["type"] = "string"
 
     s = {key_name: schema}
-    if value is not None:
+
+    if value is not None and value != [None]:
         d = {key_name: value}
     else:
         d = {}
@@ -326,7 +327,7 @@ def add_arguments(result_args, arg_path, arg_inherit_strategy="none"):
                     continue
                 parent_var = path_details["parent_var"]
 
-                if not parent_var:
+                if parent_var is None:
                     break
                 if temp_arg_name not in parent_var:
                     break
@@ -528,11 +529,11 @@ def create_arg_tree_for_task(task_item, task_cache={}):
             parent_tree = create_arg_tree_for_task(task_item["parent"])
             parent_var = task_item["parent"]["vars"].get(key, None)
             temp_var = parent_var
-            if not parent_var:
+            if parent_var is None:
                 parent_var = task_item["parent"].get("aux_vars", {}).get(key, None)
                 temp_var = parent_var
 
-            if not parent_var:
+            if parent_var is None:
                 parent_var_template_keys = []
             else:
 

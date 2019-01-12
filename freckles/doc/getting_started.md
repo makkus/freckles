@@ -20,7 +20,7 @@ curl https://freckles.sh | sudo bash
 
 Both of those will install *freckles* self-contained under ``$HOME/.local/share/inaugurate/`` and add its location to the ``PATH`` variable (in ``$HOME/.profile`` - for details and config options check the [inaugurate homepage](https://gitlab.com/frkl/inaugurate#how-does-this-work-what-does-it-do)). 
 
-To have the *freckles* commands available in your shell session, we either have to logout and re-login to our session, orsource the ``.profile`` file:
+To have the *freckles* commands available in your shell session, we either have to logout and re-login to our session, or source the ``.profile`` file:
 
 ```console
 source ~/.profile

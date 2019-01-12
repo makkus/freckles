@@ -111,10 +111,10 @@ FRECKLES_CONFIG_SCHEMA = {
 }
 
 FRECKLES_CONTROL_CONFIG_SCHEMA = {
-    "host": {
+    "target": {
         "type": "string",
         "default": "boolean",
-        "__doc__": {"short_help": "the host to run the command on"},
+        "__doc__": {"short_help": "the target to run the command on"},
     },
     "port": {
         "type": "integer",
@@ -236,7 +236,7 @@ FRECKLES_CNF_PROFILES = {
 
 FRECKLES_RUN_CONTROL_PROFILES = {
     "default": {
-        "host": "localhost",
+        "target": "localhost",
         "no_run": False,
         "output": "freckles",
         "run_callback_config": {"profile": "default"},
