@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
+import shutil
 import uuid
 from collections import OrderedDict
 
@@ -579,6 +580,8 @@ class FrecklesRunner(object):
         results = OrderedDict()
         result_callback = FrecklesResultCallback()
 
+        finished_run_folders = []
+
         try:
             # validated = self.frecklet.get_parameters().validate(vars)
 
@@ -637,8 +640,53 @@ class FrecklesRunner(object):
                     "name": self.frecklecutable.name,
                 }
 
+                env_dir = run_properties.get("env_dir", None)
+                if env_dir is not None:
+                    finished_run_folders.append(env_dir)
+
         finally:
             if callback_adapter is not None:
                 callback_adapter.task_finished(parent_task)
 
+        run_folder_strategy = run_config.get_config_value("keep_run_folders")
+        if run_folder_strategy > 0:
+            if run_folder_strategy > 1:
+                log.warning(
+                    "Keeping more than 1 run folder not supported yet, doing nothing..."
+                )
+            else:
+                cleanup_run_folder_parents(
+                    finished_run_folders, keep_run_folders=run_folder_strategy
+                )
+
+        # add finished marker files
+        for env_dir in finished_run_folders:
+            finished_marker_file = os.path.join(env_dir, ".freckles_run_finished")
+            open(finished_marker_file, "a").close()
+
+        if run_folder_strategy == 0:
+            cleanup_run_folder_parents(
+                finished_run_folders, keep_run_folders=run_folder_strategy
+            )
+
         return results
+
+
+def cleanup_run_folder_parents(run_folders, keep_run_folders):
+
+    parent_folders = {}
+    for f in run_folders:
+        parent_folder = os.path.abspath(os.path.join(os.path.realpath(f), os.pardir))
+        finished_run_folders = []
+        for c in os.listdir(parent_folder):
+            full = os.path.join(parent_folder, c)
+            marker = os.path.realpath(os.path.join(full, ".freckles_run_finished"))
+            if os.path.exists(marker):
+                finished_run_folders.append(full)
+        parent_folders[parent_folder] = finished_run_folders
+
+    if keep_run_folders in [0, 1]:
+
+        for finished in parent_folders.values():
+            for f in finished:
+                shutil.rmtree(f)

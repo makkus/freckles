@@ -146,6 +146,11 @@ FRECKLES_CONTROL_CONFIG_SCHEMA = {
         "type": "boolean",
         "__doc__": {"short_help": "whether this run needs elevated permissions"},
     },
+    "keep_run_folders": {
+        "type": "integer",
+        "__doc__": {"short_help": "how many run folders to keep (per connector)"},
+        "default": 1,
+    },
 }
 
 REPO_MANAGER_CONFIG_SCHEMA = {
@@ -218,18 +223,11 @@ FRECKLET_PATH_DEFAULT_READER_PROFILE = {
 }
 FRECKLES_CNF_PROFILES = {
     "default": {
-        # "convert_ansible_template_markers": False,
         "context_repos": DEFAULT_FRECKLES_REPOS,
-        # "allow_dynamic_frecklets": False,
-        # "guess_args_for_roles": False,
-        # "require_absolute_path": True,
         "allowed_adapters": ["freckles", "nsbl", "templig"],
-        # "current_run_folder": FRECKLES_CURRENT_RUN_SYMLINK,
-        # "run_folder": FRECKLES_RUN_DIR,
         "ignore_invalid_repos": True,
         "allow_remote": False,
         "allow_community": True,
-        # "freckelize_target_dir": DEFAULT_FRECKELIZE_DIR,
     },
     "empty": {"context_repos": []},
 }
