@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """Generic configuration class."""
-import copy
 import logging
 
-import click
-import mdv
 from ruamel.yaml import YAML
 
 from freckles.defaults import FRECKLET_NAME
 from freckles.exceptions import FrecklesConfigException
-from freckles.frecklecutable import Frecklecutable, cleanup_tasklist
 from freckles.utils.doc_templating import DOC_JINJA_ENV
 from frutils import readable
 

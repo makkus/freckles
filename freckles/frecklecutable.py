@@ -199,6 +199,7 @@ def cleanup_tasklist(tasklist):
 
     return final
 
+
 def remove_idempotent_duplicates(tasklist):
 
     temp = []
@@ -217,14 +218,11 @@ def remove_idempotent_duplicates(tasklist):
 
         control.pop("skip", None)
 
-        t_compare = {
-            FRECKLET_NAME: tf,
-            TASK_INSTANCE_NAME: control,
-            "vars": t["vars"],
-        }
+        t_compare = {FRECKLET_NAME: tf, TASK_INSTANCE_NAME: control, "vars": t["vars"]}
 
         if t_compare in compare_list:
-            import pp, sys
+            import pp
+
             pp(t_compare.keys())
             # sys.exit()
             continue
@@ -232,6 +230,7 @@ def remove_idempotent_duplicates(tasklist):
         compare_list.append(t_compare)
         temp.append(t)
     return temp
+
 
 def needs_elevated_permissions(tasklist):
 
@@ -427,6 +426,7 @@ class Frecklecutable(object):
 
                 if t_compare in compare_list:
                     import pp
+
                     print("============================================")
                     pp(compare_list)
                     print("-------------------------------------------")
