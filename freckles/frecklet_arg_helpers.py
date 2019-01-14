@@ -8,7 +8,7 @@ from ruamel.yaml.comments import CommentedMap
 from frutils import dict_merge, get_template_keys, replace_strings_in_obj
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
-from .defaults import DEFAULT_FRECKLES_JINJA_ENV, TASK_KEY_NAME, FRECKLET_KEY_NAME
+from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_KEY_NAME
 from .exceptions import FrecklesConfigException
 
 log = logging.getLogger("freckles")
