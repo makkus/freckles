@@ -6,7 +6,7 @@ from jinja2 import PackageLoader
 from jinja2.nativetypes import NativeEnvironment
 from ruamel.yaml.comments import CommentedMap
 
-from freckles.defaults import FRECKLET_NAME
+from freckles.defaults import TASK_KEY_NAME
 from freckles.utils.doc_utils import get_task_plan_string, describe_tasklist_string
 from frutils import dict_merge, JINJA_DELIMITER_PROFILES, readable, readable_yaml
 
@@ -78,7 +78,7 @@ def create_doc_env(freckles_obj, jinja_env=None):
         result = []
         for t in task_list:
             temp = CommentedMap()
-            temp[FRECKLET_NAME] = t[FRECKLET_NAME]
+            temp[TASK_KEY_NAME] = t[TASK_KEY_NAME]
             if "task" in t.keys() and t["task"]:
                 tt = copy.copy(t["task"])
                 tt.pop("msg", None)
@@ -105,7 +105,7 @@ def create_doc_env(freckles_obj, jinja_env=None):
 
             for t in tl:
                 temp = CommentedMap()
-                temp[FRECKLET_NAME] = t[FRECKLET_NAME]
+                temp[TASK_KEY_NAME] = t[TASK_KEY_NAME]
                 task = t.get("task", None)
                 if task:
                     tt = copy.copy(task)

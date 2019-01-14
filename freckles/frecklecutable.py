@@ -11,7 +11,7 @@ from ruamel.yaml.comments import CommentedSeq, CommentedMap
 
 from frutils import get_template_keys, replace_strings_in_obj
 from .context import FrecklesContext
-from .defaults import FRECKLET_NAME, TASK_INSTANCE_NAME, DEFAULT_FRECKLES_JINJA_ENV
+from .defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME, DEFAULT_FRECKLES_JINJA_ENV
 from .exceptions import FrecklesConfigException
 
 log = logging.getLogger("freckles")
@@ -71,15 +71,15 @@ def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal
 
 def assemble_info(task, context):
 
-    command = task[FRECKLET_NAME]["command"]
+    command = task[TASK_KEY_NAME]["command"]
     f_name = command
-    f_type = task[TASK_INSTANCE_NAME]["type"]
+    f_type = task[FRECKLET_KEY_NAME]["type"]
 
-    msg = task.get(TASK_INSTANCE_NAME, {}).get("msg", None)
+    msg = task.get(FRECKLET_KEY_NAME, {}).get("msg", None)
     if msg and msg.startswith("[") and msg.endswith("]"):
         msg = msg[1:-1].strip()
 
-    desc = task.get(TASK_INSTANCE_NAME, {}).get("desc", None)
+    desc = task.get(FRECKLET_KEY_NAME, {}).get("desc", None)
 
     if f_type == "frecklet":
 
@@ -143,7 +143,7 @@ def remove_none_values(input):
 
 def is_disabled(task):
 
-    skip = task.get(TASK_INSTANCE_NAME, {}).get("skip", [])
+    skip = task.get(FRECKLET_KEY_NAME, {}).get("skip", [])
 
     # print("---")
     # print(task["meta"]["__name__"])
@@ -171,7 +171,7 @@ def cleanup_tasklist(tasklist):
 
         input_clean = remove_none_values(copy.deepcopy(input))
 
-        clean_omit_values(task[FRECKLET_NAME], none_value_keys)
+        clean_omit_values(task[TASK_KEY_NAME], none_value_keys)
         clean_omit_values(task["vars"], none_value_keys)
 
         r = replace_strings_in_obj(
@@ -206,19 +206,19 @@ def remove_idempotent_duplicates(tasklist):
     compare_list = []
     for t in tasklist:
 
-        idempotent = t.get(TASK_INSTANCE_NAME, {}).get("idempotent", False)
+        idempotent = t.get(FRECKLET_KEY_NAME, {}).get("idempotent", False)
         if not idempotent:
             temp.append(t)
             continue
 
-        tf = copy.copy(t[FRECKLET_NAME])
+        tf = copy.copy(t[TASK_KEY_NAME])
         tf.pop("_task_id", None)
         tf.pop("_task_list_id", None)
-        control = copy.copy(t.get(TASK_INSTANCE_NAME, {}))
+        control = copy.copy(t.get(FRECKLET_KEY_NAME, {}))
 
         control.pop("skip", None)
 
-        t_compare = {FRECKLET_NAME: tf, TASK_INSTANCE_NAME: control, "vars": t["vars"]}
+        t_compare = {TASK_KEY_NAME: tf, FRECKLET_KEY_NAME: control, "vars": t["vars"]}
 
         if t_compare in compare_list:
             import pp
@@ -235,7 +235,7 @@ def remove_idempotent_duplicates(tasklist):
 def needs_elevated_permissions(tasklist):
 
     for task in tasklist:
-        become = task[FRECKLET_NAME].get("become", False) or task[TASK_INSTANCE_NAME].get(
+        become = task[TASK_KEY_NAME].get("become", False) or task[FRECKLET_KEY_NAME].get(
             "elevated", False
         )
         if become:
@@ -389,7 +389,7 @@ class Frecklecutable(object):
         if remove_skipped:
             temp = []
             for t in tl:
-                skip = t.get(TASK_INSTANCE_NAME, {}).get("skip", False)
+                skip = t.get(FRECKLET_KEY_NAME, {}).get("skip", False)
                 if isinstance(skip, bool) and skip:
                     continue
 
@@ -404,23 +404,23 @@ class Frecklecutable(object):
             temp = []
             compare_list = []
             for t in tl:
-                idempotent = t.get(TASK_INSTANCE_NAME, {}).get("idempotent", False)
+                idempotent = t.get(FRECKLET_KEY_NAME, {}).get("idempotent", False)
                 if not idempotent:
                     temp.append(t)
                     continue
 
-                tf = copy.copy(t[FRECKLET_NAME])
+                tf = copy.copy(t[TASK_KEY_NAME])
                 tf.pop("_task_id", None)
                 tf.pop("_task_list_id", None)
-                control = copy.copy(t.get(TASK_INSTANCE_NAME, {}))
+                control = copy.copy(t.get(FRECKLET_KEY_NAME, {}))
 
                 if not process_user_input:
                     # we can't know whether it'll be skipped or not, but in either case we only need the first time
                     control.pop("skip", None)
 
                 t_compare = {
-                    FRECKLET_NAME: tf,
-                    TASK_INSTANCE_NAME: control,
+                    TASK_KEY_NAME: tf,
+                    FRECKLET_KEY_NAME: control,
                     "vars": t["vars"],
                 }
 
@@ -434,9 +434,9 @@ class Frecklecutable(object):
 
         unknowns = []
         for item in tl:
-            task_type = item[TASK_INSTANCE_NAME].get("type", "unknown")
+            task_type = item[FRECKLET_KEY_NAME].get("type", "unknown")
             if task_type == "unknown":
-                unknowns.append(item[TASK_INSTANCE_NAME]["name"])
+                unknowns.append(item[FRECKLET_KEY_NAME]["name"])
 
         if unknowns:
             raise FrecklesConfigException(
@@ -449,9 +449,9 @@ class Frecklecutable(object):
         task_list_index = 0
         for index, task in enumerate(tl):
 
-            task[FRECKLET_NAME]["_task_id"] = index
+            task[TASK_KEY_NAME]["_task_id"] = index
 
-            task_type = task[TASK_INSTANCE_NAME]["type"]
+            task_type = task[FRECKLET_KEY_NAME]["type"]
             adapter_task = self.context.adapter_map.get(task_type, None)
             if adapter_task is None:
                 raise FrecklesConfigException(
@@ -464,7 +464,7 @@ class Frecklecutable(object):
             if current_adapter != adapter_task:
                 # new frecklecutable run
                 for t in current_task_list:
-                    t[FRECKLET_NAME]["_task_list_id"] = task_list_index
+                    t[TASK_KEY_NAME]["_task_list_id"] = task_list_index
                 task_lists[task_list_index] = {
                     "task_list": current_task_list,
                     "adapter": current_adapter,
@@ -478,7 +478,7 @@ class Frecklecutable(object):
 
         if current_task_list:
             for t in current_task_list:
-                t[FRECKLET_NAME]["_task_list_id"] = task_list_index
+                t[TASK_KEY_NAME]["_task_list_id"] = task_list_index
             task_lists[task_list_index] = {
                 "task_list": current_task_list,
                 "adapter": current_adapter,

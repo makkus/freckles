@@ -5,7 +5,7 @@ import logging
 
 from ruamel.yaml import YAML
 
-from freckles.defaults import FRECKLET_NAME, TASK_INSTANCE_NAME
+from freckles.defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME
 from freckles.exceptions import FrecklesConfigException
 from freckles.utils.doc_templating import DOC_JINJA_ENV
 from frutils import readable
@@ -94,9 +94,9 @@ def render_frecklet(
 
 def get_desc(task_details, context, use_frecklet_name=True):
 
-    command = task_details[FRECKLET_NAME]["command"]
+    command = task_details[TASK_KEY_NAME]["command"]
     f_name = command
-    f_type = task_details[TASK_INSTANCE_NAME]["type"]
+    f_type = task_details[FRECKLET_KEY_NAME]["type"]
 
     desc = None
     if not use_frecklet_name:

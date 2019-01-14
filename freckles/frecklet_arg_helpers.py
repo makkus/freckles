@@ -8,7 +8,7 @@ from ruamel.yaml.comments import CommentedMap
 from frutils import dict_merge, get_template_keys, replace_strings_in_obj
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
-from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_NAME, TASK_INSTANCE_NAME
+from .defaults import DEFAULT_FRECKLES_JINJA_ENV, TASK_KEY_NAME, FRECKLET_KEY_NAME
 from .exceptions import FrecklesConfigException
 
 log = logging.getLogger("freckles")
@@ -63,9 +63,9 @@ def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
             # skip = task_item.get("skip", None)
 
             if (
-                "skip" in task_item.get(TASK_INSTANCE_NAME, {}).keys()
+                "skip" in task_item.get(FRECKLET_KEY_NAME, {}).keys()
                 or "skip"
-                in task_item.get(TASK_INSTANCE_NAME, {})
+                in task_item.get(FRECKLET_KEY_NAME, {})
                 .get("inherited_keys", {})
                 .keys()
             ):

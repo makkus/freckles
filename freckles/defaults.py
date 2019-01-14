@@ -8,8 +8,8 @@ from frkl import VarsType
 from frutils import JINJA_DELIMITER_PROFILES, jinja2_filters
 from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 
-FRECKLET_NAME = "frecklet"
-TASK_INSTANCE_NAME = "task"
+TASK_KEY_NAME = "task"
+FRECKLET_KEY_NAME = "frecklet"
 FRECKLETS_KEY = "frecklets"
 
 MODULE_FOLDER = os.path.join(os.path.dirname(__file__))
