@@ -82,9 +82,13 @@ def fill_defaults(task_item):
         "name" not in task_item[TASK_INSTANCE_NAME].keys()
         and "command" not in task_item[FRECKLET_NAME].keys()
     ):
+        ti = {}
+        ti[FRECKLET_NAME] = task_item[FRECKLET_NAME]
+        ti[TASK_INSTANCE_NAME] = task_item[TASK_INSTANCE_NAME]
+
         raise FrecklesConfigException(
             "Neither 'task/command' nor 'frecklet/name' key in task config: {}".format(
-                task_item
+                ti
             )
         )
 
