@@ -52,7 +52,7 @@ def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal
 
             d = {"children": temp_childs, "level": level, "info": info}
             if minimal:
-                d["child"] = task_map[id]["frecklet"]["command"]
+                d["child"] = task_map[id][FRECKLET_KEY_NAME]["name"]
             else:
                 d["child"] = task_map[id]
             result.append(d)
@@ -61,7 +61,7 @@ def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal
                 continue
             d = {"children": [], "level": level, "info": info}
             if minimal:
-                d["child"] = task_map[id]["frecklet"]["command"]
+                d["child"] = task_map[id][FRECKLET_KEY_NAME]["name"]
             else:
                 d["child"] = task_map[id]
             result.append(d)

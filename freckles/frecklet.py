@@ -229,6 +229,11 @@ class InheritedTaskKeyProcessor(ConfigProcessor):
                     "skip", []
                 ).extend(parent_key)
 
+        if "skip" in new_config.get(FRECKLET_KEY_NAME).keys():
+            skip_value = new_config[FRECKLET_KEY_NAME]["skip"]
+            if not isinstance(skip_value, (list, tuple, CommentedSeq)):
+                new_config[FRECKLET_KEY_NAME]["skip"] = [skip_value]
+
         return new_config
 
 
@@ -295,17 +300,21 @@ class AugmentingTaskProcessor(ConfigProcessor):
         else:
             frecklet_level = self.parent_metadata["meta"]["__frecklet_level__"] + 1
 
-        task_val = new_config.get(FRECKLET_KEY_NAME, None)
+        task_val = new_config.get(TASK_KEY_NAME, None)
         if task_val is None:
             task_val = {}
             new_config[FRECKLET_KEY_NAME] = task_val
-        frecklet_val = new_config[TASK_KEY_NAME]
-        task_type = task_val.get("type", None)
+        frecklet_val = new_config[FRECKLET_KEY_NAME]
+        if frecklet_val is None:
+            frecklet_val = {}
+            new_config[FRECKLET_KEY_NAME] = frecklet_val
+        task_type = frecklet_val.get("type", None)
+
         if task_type is None:
             task_type = "frecklet"
             frecklet_val["type"] = task_type
         # the adapter also needs to know about the task type
-        frecklet_val["type"] = task_type
+        task_val["type"] = task_type
 
         if task_type != "frecklet":
             # TODO: only do that if it has an 'impl' tag?
