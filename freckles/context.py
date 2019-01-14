@@ -105,6 +105,7 @@ class FreckletAdapterIndex(LuItemIndex):
 
         return None
 
+
 def load_profile_from_disk(profile_name):
 
     abs_path = os.path.abspath(
