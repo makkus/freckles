@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from freckles.defaults import FRECKLET_NAME
+from freckles.defaults import FRECKLET_NAME, TASK_INSTANCE_NAME
 from freckles.freckles_runner import FrecklesRunner
 
 from .adapters import FrecklesAdapter
@@ -69,7 +69,7 @@ class FrecklesCallbackAdapter(object):
 
         details = {}
         # details["task_id"] = task[FRECKLET_NAME]["_task_id"]
-        details["name"] = task[FRECKLET_NAME]["name"]
+        details["name"] = task[TASK_INSTANCE_NAME]["name"]
         self.output_callback.task_started(details)
 
     def add_command_result(self, result_dict):

@@ -73,7 +73,7 @@ def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
                 continue
             else:
                 # TODO: attach task information
-                log.warning("Invalid task item: {}".format(task_item[FRECKLET_NAME]))
+                log.warning("Invalid task item: {}".format(task_item))
                 log.debug(e, exc_info=True)
                 log.debug(
                     "Issue with task item: {}".format(task_item["meta"]["__name__"])

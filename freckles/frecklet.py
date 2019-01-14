@@ -41,9 +41,9 @@ log = logging.getLogger("freckles")
 DEFAULT_KEY_KEY = "default-key"
 FRECKLET_FORMAT = {
     CHILD_MARKER_NAME: FRECKLETS_KEY,
-    DEFAULT_LEAF_NAME: FRECKLET_NAME,
+    DEFAULT_LEAF_NAME: TASK_INSTANCE_NAME,
     DEFAULT_LEAFKEY_NAME: "name",
-    OTHER_KEYS_NAME: ["args", "doc", "frecklet_meta", "meta", TASK_INSTANCE_NAME],
+    OTHER_KEYS_NAME: ["args", "doc", "frecklet_meta", "meta", TASK_INSTANCE_NAME, FRECKLET_NAME],
     KEY_MOVE_MAP_NAME: {"*": ("vars", "default")},
     "use_context": True,
 }
@@ -72,20 +72,26 @@ def generate_tasks_format(frecklet_index):
 
 def fill_defaults(task_item):
 
+    if TASK_INSTANCE_NAME not in task_item.keys():
+        task_item[TASK_INSTANCE_NAME] = {}
+
+    if FRECKLET_NAME not in task_item.keys():
+        task_item[FRECKLET_NAME] = {}
+
     if (
-        "name" not in task_item[FRECKLET_NAME].keys()
+        "name" not in task_item[TASK_INSTANCE_NAME].keys()
         and "command" not in task_item[FRECKLET_NAME].keys()
     ):
         raise FrecklesConfigException(
-            "Neither 'command' nor 'name' key in task config: {}".format(
-                task_item[FRECKLET_NAME]
+            "Neither 'task/command' nor 'frecklet/name' key in task config: {}".format(
+                task_item
             )
         )
 
-    if "name" not in task_item[FRECKLET_NAME].keys():
-        task_item[FRECKLET_NAME]["name"] = task_item[FRECKLET_NAME]["command"]
+    if "name" not in task_item[TASK_INSTANCE_NAME].keys():
+        task_item[TASK_INSTANCE_NAME]["name"] = task_item[FRECKLET_NAME]["command"]
     elif "command" not in task_item[FRECKLET_NAME].keys():
-        task_item[FRECKLET_NAME]["command"] = task_item[FRECKLET_NAME]["name"]
+        task_item[FRECKLET_NAME]["command"] = task_item[TASK_INSTANCE_NAME]["name"]
 
 
 DEFAULT_ARG_SCHEMA = {"type": "string", "required": True, "doc": {"help": "n/a"}}
@@ -125,7 +131,7 @@ class TaskTypePrefixProcessor(ConfigProcessor):
         new_config = self.current_input_config
 
         command_name = new_config[FRECKLET_NAME].get("command", None)
-        task_type = new_config[FRECKLET_NAME].get("type", None)
+        task_type = new_config[TASK_INSTANCE_NAME].get("type", None)
 
         if "::" in command_name:
 
@@ -139,21 +145,21 @@ class TaskTypePrefixProcessor(ConfigProcessor):
             task_type, command_name = command_name.split("::", 1)
 
             new_config[FRECKLET_NAME]["command"] = command_name
-            new_config[FRECKLET_NAME]["type"] = task_type
+            new_config[TASK_INSTANCE_NAME]["type"] = task_type
 
         become = new_config[FRECKLET_NAME].get("become", None)
 
         if task_type and task_type.isupper() and become is None:
             new_config[FRECKLET_NAME]["become"] = True
-            new_config[FRECKLET_NAME]["type"] = task_type.lower()
+            new_config[TASK_INSTANCE_NAME]["type"] = task_type.lower()
 
         if command_name.isupper() and become is None:
             new_config[FRECKLET_NAME]["become"] = True
             new_config[FRECKLET_NAME]["command"] = command_name.lower()
-            name = new_config[FRECKLET_NAME].get("name")
+            name = new_config[TASK_INSTANCE_NAME].get("name")
             if name.isupper():
                 name = name.lower()
-                new_config[FRECKLET_NAME]["name"] = name
+                new_config[TASK_INSTANCE_NAME]["name"] = name
 
         return new_config
 
@@ -236,7 +242,7 @@ FRECKLET_SCHEMA = {
         "type": "list",
         "schema": {
             "type": "dict",
-            "schema": {FRECKLET_NAME: {"type": "dict"}, "vars": {"type": "dict"}},
+            "schema": {FRECKLET_NAME: {"type": "dict"}, "vars": {"type": "dict"}, TASK_INSTANCE_NAME: {"type": "dict"}},
         },
     },
 }
@@ -278,18 +284,24 @@ class AugmentingTaskProcessor(ConfigProcessor):
     def process_current_config(self):
 
         new_config = self.current_input_config
-        frecklet_name = new_config[FRECKLET_NAME]["command"]
+        frecklet_name = new_config[TASK_INSTANCE_NAME]["name"]
 
         if not self.parent_metadata:
             frecklet_level = 0
         else:
             frecklet_level = self.parent_metadata["meta"]["__frecklet_level__"] + 1
 
+        task_val = new_config.get(TASK_INSTANCE_NAME, None)
+        if task_val is None:
+            task_val = {}
+            new_config[TASK_INSTANCE_NAME] = task_val
         frecklet_val = new_config[FRECKLET_NAME]
-        task_type = frecklet_val.get("type", None)
+        task_type = task_val.get("type", None)
         if task_type is None:
             task_type = "frecklet"
             frecklet_val["type"] = task_type
+        # the adapter also needs to know about the task type
+        frecklet_val["type"] = task_type
 
         if task_type != "frecklet":
             # TODO: only do that if it has an 'impl' tag?
@@ -324,10 +336,6 @@ class AugmentingTaskProcessor(ConfigProcessor):
         if vars is None:
             vars = {}
             new_config["vars"] = vars
-        task_val = new_config.get(TASK_INSTANCE_NAME, None)
-        if task_val is None:
-            task_val = {}
-            new_config[TASK_INSTANCE_NAME] = task_val
         if "skip" in task_val.keys():
             skip_value = task_val["skip"]
             if not isinstance(skip_value, (list, tuple, CommentedSeq)):
@@ -405,7 +413,7 @@ class AugmentingTaskProcessor(ConfigProcessor):
             yield new_config
             return
 
-        child_name = new_config[FRECKLET_NAME].get("name", None)
+        child_name = new_config[TASK_INSTANCE_NAME].get("name", None)
         if child_name is None:
             raise FrecklesConfigException(
                 "No 'name' key found in processed task metadata: {}".format(new_config)
@@ -455,7 +463,7 @@ class Frecklet(LuItem):
 
         task = frecklet_metadata.get(FRECKLET_NAME, None)
         if task is None:
-            raise FrecklesConfigException("No 'task' key in frecklet metadata.")
+            raise FrecklesConfigException("No {} key in frecklet metadata.".format(FRECKLET_NAME))
 
         result = {}
 

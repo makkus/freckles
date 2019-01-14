@@ -73,13 +73,13 @@ def assemble_info(task, context):
 
     command = task[FRECKLET_NAME]["command"]
     f_name = command
-    f_type = task[FRECKLET_NAME]["type"]
+    f_type = task[TASK_INSTANCE_NAME]["type"]
 
-    msg = task.get("task", {}).get("msg", None)
+    msg = task.get(TASK_INSTANCE_NAME, {}).get("msg", None)
     if msg and msg.startswith("[") and msg.endswith("]"):
         msg = msg[1:-1].strip()
 
-    desc = task.get("task", {}).get("desc", None)
+    desc = task.get(TASK_INSTANCE_NAME, {}).get("desc", None)
 
     if f_type == "frecklet":
 
@@ -235,8 +235,8 @@ def remove_idempotent_duplicates(tasklist):
 def needs_elevated_permissions(tasklist):
 
     for task in tasklist:
-        become = task[FRECKLET_NAME].get("become", False) or task[FRECKLET_NAME].get(
-            "needs_become", False
+        become = task[FRECKLET_NAME].get("become", False) or task[TASK_INSTANCE_NAME].get(
+            "elevated", False
         )
         if become:
             return True
@@ -434,9 +434,9 @@ class Frecklecutable(object):
 
         unknowns = []
         for item in tl:
-            task_type = item[FRECKLET_NAME].get("type", "unknown")
+            task_type = item[TASK_INSTANCE_NAME].get("type", "unknown")
             if task_type == "unknown":
-                unknowns.append(item[FRECKLET_NAME]["name"])
+                unknowns.append(item[TASK_INSTANCE_NAME]["name"])
 
         if unknowns:
             raise FrecklesConfigException(
@@ -451,7 +451,7 @@ class Frecklecutable(object):
 
             task[FRECKLET_NAME]["_task_id"] = index
 
-            task_type = task[FRECKLET_NAME]["type"]
+            task_type = task[TASK_INSTANCE_NAME]["type"]
             adapter_task = self.context.adapter_map.get(task_type, None)
             if adapter_task is None:
                 raise FrecklesConfigException(
