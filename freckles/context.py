@@ -105,43 +105,6 @@ class FreckletAdapterIndex(LuItemIndex):
 
         return None
 
-    # def calculate_control_vars(self):
-    #
-    #     result = {}
-    #
-    #     no_run = self.current_control_vars.get("no_run", None)
-    #
-    #     if no_run is None:
-    #         if "no_run" not in self.context.cnf.config_dict.keys():
-    #             no_run = False
-    #         else:
-    #             no_run = self.context.cnf.config_dict["no_run"]
-    #     else:
-    #         no_run = no_run
-    #
-    #     result["no_run"] = no_run
-    #
-    #     host = self.current_control_vars.get("host", None)
-    #     if host is not None:
-    #         result["host"] = host
-    #
-    #     output_format = self.current_control_vars.get("output", None)
-    #     if output_format is None:
-    #         output_format = "default"
-    #     result["run_callback"] = output_format
-    #
-    #     elevated = self.current_control_vars.get("elevated", None)
-    #     if elevated is not None:
-    #         if elevated == "elevated":
-    #             result["elevated"] = True
-    #         elif elevated == "not_elevated":
-    #             result["elevated"] = False
-    #         else:
-    #             log.warn("Invalid value for 'elevated' key: {}".format(elevated))
-    #
-    #     return result
-
-
 def load_profile_from_disk(profile_name):
 
     abs_path = os.path.abspath(
@@ -590,16 +553,20 @@ class FrecklesContext(object):
                         result.append(n)
 
         if tag_blacklist:
+
             temp = []
             for r in result:
-                frecklet = self.index.get_pkg(r)
-                tags = frecklet.meta.get("tags", [])
-                if not tags and "__empty__" in tag_blacklist:
-                    temp.append(r)
-                    continue
-                for dt in tag_blacklist:
-                    if dt in tags:
+                try:
+                    frecklet = self.index.get_pkg(r)
+                    tags = frecklet.meta.get("tags", [])
+                    if not tags and "__empty__" in tag_blacklist:
                         temp.append(r)
+                        continue
+                    for dt in tag_blacklist:
+                        if dt in tags:
+                            temp.append(r)
+                except (Exception) as e:
+                    log.warning("Can't parse frecklet '{}', ignoring: {}".format(r, e))
 
             for t in temp:
                 result.remove(t)

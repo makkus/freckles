@@ -147,6 +147,14 @@ class TaskTypePrefixProcessor(ConfigProcessor):
             new_config[FRECKLET_NAME]["become"] = True
             new_config[FRECKLET_NAME]["type"] = task_type.lower()
 
+        if command_name.isupper() and become is None:
+            new_config[FRECKLET_NAME]["become"] = True
+            new_config[FRECKLET_NAME]["command"] = command_name.lower()
+            name = new_config[FRECKLET_NAME].get("name")
+            if name.isupper():
+                name = name.lower()
+                new_config[FRECKLET_NAME]["name"] = name
+
         return new_config
 
 

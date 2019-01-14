@@ -143,7 +143,7 @@ class HostConfigContextPlugin(CnfPlugin):
             else:
                 connection_type = "ssh"
 
-        overlay = {"user": user, "connection_type": connection_type, "host": hostname}
+        overlay = {"user": user, "connection_type": connection_type, "target": hostname}
         if passwordless_sudo is not None:
             overlay["passwordless_sudo"] = passwordless_sudo
         if port is not None:
