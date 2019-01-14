@@ -5,4 +5,4 @@ args:
 
 frecklets:
   - grand-child-1:
-      task::skip: "{{:: skip ::}}"
+      frecklet::skip: "{{:: skip ::}}"

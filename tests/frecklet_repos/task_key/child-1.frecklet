@@ -1,4 +1,4 @@
 frecklets:
   - grand-child-1:
-      task::skip: True
+      frecklet::skip: True
 

@@ -4,9 +4,9 @@ args:
     type: string
 frecklets:
   - frecklet:
-      command: debug
+      name: debug
       type: ansible-module
-      __msg__: grand-child 3
+      msg: grand-child 3
     vars:
       msg: "{{:: grand_child_3_var_1 ::}}"
 
