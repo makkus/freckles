@@ -161,8 +161,8 @@ def cleanup_tasklist(tasklist):
 
     replaced = []
     for task in tasklist:
-        input = copy.copy(task["input"])
 
+        input = copy.copy(task["input"])
         none_value_keys = []
 
         for k, v in input.items():
@@ -170,12 +170,17 @@ def cleanup_tasklist(tasklist):
                 none_value_keys.append(k)
 
         input_clean = remove_none_values(copy.deepcopy(input))
+        min_task = copy.deepcopy(task)
+        # min_task = {}
+        # min_task["vars"] = copy.copy(task["vars"])
+        # min_task[TASK_KEY_NAME] = copy.copy(task[TASK_KEY_NAME])
+        # min_task[FRECKLET_KEY_NAME] = copy.copy(task[FRECKLET_KEY_NAME])
 
-        clean_omit_values(task[TASK_KEY_NAME], none_value_keys)
-        clean_omit_values(task["vars"], none_value_keys)
+        clean_omit_values(min_task[TASK_KEY_NAME], none_value_keys)
+        clean_omit_values(min_task["vars"], none_value_keys)
 
         r = replace_strings_in_obj(
-            task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+            min_task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
 
         # also remove None values after filters were applied

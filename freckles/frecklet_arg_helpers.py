@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 from ruamel.yaml.comments import CommentedMap
 
-from frutils import dict_merge, get_template_keys, replace_strings_in_obj
+from frutils import dict_merge, get_template_keys, replace_strings_in_obj, readable_yaml, reindent
 from frutils.exceptions import ParametersException
 from frutils.parameters import FrutilsNormalizer
 from .defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLET_KEY_NAME
@@ -70,10 +70,18 @@ def create_vars_for_task_item(task_item, user_input, base_args, frecklet):
                 .keys()
             ):
                 log.debug("Invalid var, assuming this task will be skipped later on.")
+                log.debug(e)
                 continue
             else:
                 # TODO: attach task information
-                log.warning("Invalid task item: {}".format(task_item))
+                # temp = copy.copy(task_item[FRECKLET_KEY_NAME])
+                # temp.pop("desc", None)
+                # pretty = readable_yaml(temp)
+                temp = task_item["frecklet_meta"]["name"]
+                log.warning("Invalid task item: {}".format(temp))
+                # print(var_name)
+                # import pp
+                # pp(var_details)
                 log.debug(e, exc_info=True)
                 log.debug(
                     "Issue with task item: {}".format(task_item["meta"]["__name__"])
@@ -215,6 +223,12 @@ def create_var_value(var_name, var_details, input):
 
     arg = var_details["arg"]
 
+    print("XXXXX")
+    print(var_name)
+    # import pp
+    # pp(input)
+    # pp(var_details)
+
     if "parent" in var_details.keys():
 
         if "parent_var" not in var_details.keys():
@@ -244,10 +258,17 @@ def create_var_value(var_name, var_details, input):
             result = {var_name: input.get(var_name, None)}
 
     try:
+        print(var_name)
+        import pp
+        pp(arg)
+        print(input)
+        print(result)
         validated = validate_var(var_name, result.get(var_name, None), arg)
         return {var_name: validated}
 
     except (ParametersException) as pe:
+        print("YYY")
+        print(pe)
         log.debug("Invalid input for '{}': {}".format(var_name, input))
         log.debug(pe, exc_info=1)
         raise pe
@@ -307,43 +328,47 @@ def add_arguments(result_args, arg_path, arg_inherit_strategy="none"):
         result_args[arg_name] = {"path": arg_path}
 
         arg_type = p[1]["arg"].get("type", "unknown")
-        if arg_type != "unknown":
+        # if arg_type != "unknown":
 
-            arg = copy.deepcopy(p[1]["arg"])
-            level = p[1]["meta"]["__frecklet_level__"]
-            if level > 0:
-                arg.setdefault("cli")["param_type"] = "option"
+        arg = copy.deepcopy(p[1]["arg"])
+        level = p[1]["meta"]["__frecklet_level__"]
+        if level > 0:
+            arg.setdefault("cli")["param_type"] = "option"
 
-        else:
-            temp_arg_name = arg_name
-            arg = None
-            # here we try whether we can auto-determine the arg schema,
-            # based on the childs of this arg
-            for path in arg_path:
-                path_arg_name = path[0]
-                path_details = path[1]
-                path_level = path_details["meta"]["__frecklet_level__"]
-                if path_level == 0:
-                    continue
-                parent_var = path_details["parent_var"]
-
-                if parent_var is None:
-                    break
-                if temp_arg_name not in parent_var:
-                    break
-
-                if parent_var != "{{{{:: {} ::}}}}".format(temp_arg_name):
-                    break
-
-                arg_temp = path_details["arg"]
-                type_temp = arg_temp.get("type", "unknown")
-                if type_temp != "unknown":
-                    arg = copy.deepcopy(arg_temp)
-                    arg.setdefault("cli", {})["param_type"] = "option"
-
-                    break
-                else:
-                    temp_arg_name = path_arg_name
+        # else:
+        #     temp_arg_name = arg_name
+        #     arg = None
+        #     # here we try whether we can auto-determine the arg schema,
+        #     # based on the childs of this arg
+        #     if arg_inherit_strategy == "parent":
+        #         for path in arg_path:
+        #             path_arg_name = path[0]
+        #             path_details = path[1]
+        #             path_level = path_details["meta"]["__frecklet_level__"]
+        #             if path_level == 0:
+        #                 continue
+        #             parent_var = path_details["parent_var"]
+        #
+        #             if parent_var is None:
+        #                 break
+        #             print("PARENT")
+        #             print(temp_arg_name)
+        #             print(parent_var)
+        #             if temp_arg_name not in parent_var:
+        #                 break
+        #
+        #             if parent_var != "{{{{:: {} ::}}}}".format(temp_arg_name):
+        #                 break
+        #
+        #             arg_temp = path_details["arg"]
+        #             type_temp = arg_temp.get("type", "unknown")
+        #             if type_temp != "unknown":
+        #                 arg = copy.deepcopy(arg_temp)
+        #                 arg.setdefault("cli", {})["param_type"] = "option"
+        #
+        #                 break
+        #             else:
+        #                 temp_arg_name = path_arg_name
 
             if arg is None:
                 arg = get_default_arg()

@@ -444,7 +444,7 @@ class FrecklesContext(object):
                         "No such frecklet or invalid metadata."
                     )
 
-                frecklet_metadata
+                # frecklet_metadata
         else:
             log.debug(
                 "Invalid object type: {}".format(frecklet_path_or_name_or_metadata)
