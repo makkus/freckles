@@ -1,5 +1,7 @@
+---
 title: Installation
-nav_priority: 2
+url_path_prio: 2
+---
 
 There are a few different ways to bootstrap *freckles*. Depending on the state of your box, your proficiency and your general trust in random people on the internet, you can choose one of the methods below.
 

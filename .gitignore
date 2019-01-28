@@ -105,3 +105,4 @@ ENV/
 .pytest_cache
 .idea
 **/.vagrant/
+pip-wheel-metadata/

@@ -1,5 +1,7 @@
+---
 title: Glossary
-nav_priority: 2000
+url_path_prio: 2000
+---
 
 adapter
 :    *freckles* can execute tasks using different backends (shell, Ansible, etc.). An adapter implements an interface

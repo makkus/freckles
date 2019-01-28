@@ -1,6 +1,8 @@
+---
 title: Overview
-nav_priority: 0
+url_path_prio: 0
 draft: true
+---
 
 Welcome to the *freckles* documentation.
 

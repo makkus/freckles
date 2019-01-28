@@ -1,5 +1,7 @@
+---
 title: The evolution of a frecklet
-nav_priority: 100
+url_path_prio: 100
+---
 
 This page lists the different ways to describe tasks items and their metadata within a *frecklet*. From the shortest, most minimal way to the most flexible and descriptive.
 

@@ -1,5 +1,7 @@
-nav_priority: 1
+---
+url_path_prio: 1
 title: Getting started
+---
 
 ## Bootstrapping *freckles* {: .section-title}
 
@@ -82,7 +84,7 @@ Options:
 
 <div class="section-block" markdown="1">
 
-Let's get a list of all the *frecklets* that are supported out of the box, use the ``--help-frecklets`` flag (this might take a few seconds to process the current context):
+Let's get a list of all the *frecklets* that are supported out of the box, use the ``--help-frecklets`` flag (this might take a few seconds, to process the current context):
 
 ```console
 $ frecklecute --help-frecklets
@@ -108,7 +110,7 @@ Commands:
   ...
 ```
 
-The same list of *frecklets* can also be found online: [frecklets](/frecklets).
+The same list of *frecklets* can also be found online: [frecklets](https://freckles.io/contexts/default/overview/).
 
 If you want to see all tasks that are related to one (or several) search terms, use:
 
@@ -264,7 +266,7 @@ You might very well be happy enough to be able to run any of the prepared *freck
 
 But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file (let's call it ``hello-world.frecklet``), and assemble the tasks you need done.
 
-In our example, let's install a webserver, configure it properly for our task, and let it serve a single, static html page. For that we use the [``nginx-vhost-config``](https://TODO), [``webserver-prepared``](/frecklet-index/default/webserver-prepared) and [``file-exists-with-content``](/frecklet-index/default/file-exists-with-content) *frecklets*:
+In our example, let's install a webserver, configure it properly for our task, and let it serve a single, static html page. For that we use the [``nginx-vhost-config``](https://TODO), [``webserver-prepared``](/frecklet-index/default/webserver-prepared) and [``file-has-content``](/frecklet-index/default/file-has-content) *frecklets*:
 
 ```yaml
 - nginx-vhost-config:
@@ -273,7 +275,7 @@ In our example, let's install a webserver, configure it properly for our task, a
     become: true
 - webserver-prepared:                  # by default, nginx is used
     document_root: /var/www/html
-- file-exists-with-content:
+- file-has-content:
     owner: www-data
     path: /var/www/html/index.html
     become: true

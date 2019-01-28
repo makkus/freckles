@@ -1,4 +1,6 @@
+---
 title: Context & resources
+---
 
 # Context, resources, and repositories
 

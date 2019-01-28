@@ -1,5 +1,7 @@
-nav_priority: 3
-title: frecklets
+---
+url_path_prio: 30
+title: Frecklets
+---
 
 *frecklets* are basically [elastic configuration](https://frkl.io/blog/to_write) files. They configure a list of tasks, in an as minimal way as possible. Or, conversely, as elaborately as necessary.
 

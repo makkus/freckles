@@ -1,5 +1,7 @@
+---
 title: The anatomy of a frecklet
-nav_priority: 2000
+url_path_prio: 2000
+---
 
 ## example: creating a user
 
