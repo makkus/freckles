@@ -30,7 +30,7 @@ from .defaults import (
     DEFAULT_FRECKLES_ALIASES,
 )
 from .exceptions import FrecklesConfigException, FrecklesPermissionException
-from .frecklet import Frecklet
+
 from .repo_management import RepoManager
 
 yaml = YAML(typ="safe")

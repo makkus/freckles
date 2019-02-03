@@ -11,6 +11,9 @@ from luci.readers import PICK_ALL_FILES_FUNCTION_PATH_AS_PKG_NAME
 TASK_KEY_NAME = "task"
 FRECKLET_KEY_NAME = "frecklet"
 FRECKLETS_KEY = "frecklets"
+VARS_KEY = "vars"
+ARGS_KEY = "args"
+META_KEY = "meta"
 
 MODULE_FOLDER = os.path.join(os.path.dirname(__file__))
 EXTERNAL_FOLDER = os.path.join(MODULE_FOLDER, "external")
@@ -82,6 +85,7 @@ DEFAULT_FRECKLES_ALIASES = {
     "user": {FRECKLETS_KEY: [USER_FRECKLETS_FOLDER]},
     "community": {FRECKLETS_KEY: [COMMUNITY_REPO_URL]},
 }
+
 
 FRECKLES_CONFIG_SCHEMA = {
     "allow_dynamic_frecklets": {
@@ -253,4 +257,9 @@ FRECKLES_CLICK_CEREBUS_ARG_MAP = {
     "dict": VarsType(),
     "password": str,
     # "list": list
+}
+
+FRECKLES_DEFAULT_ARG_SCHEMA = {
+    "required": True,
+    "empty": False
 }
