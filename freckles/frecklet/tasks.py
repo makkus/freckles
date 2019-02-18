@@ -7,7 +7,7 @@ from freckles.exceptions import FrecklesConfigException, FreckletException
 from frkl import FrklProcessor, Frkl
 from frkl.defaults import CHILD_MARKER_NAME, DEFAULT_LEAF_NAME, DEFAULT_LEAFKEY_NAME, OTHER_KEYS_NAME, KEY_MOVE_MAP_NAME
 from frkl.processors import ConfigProcessor
-from frutils import add_key_to_dict, get_template_keys
+from frutils import add_key_to_dict, get_template_keys, special_dict_to_dict
 from ting.ting_attributes import ValueAttribute, TingAttribute
 
 
@@ -164,7 +164,7 @@ class TaskTreeAttribute(TingAttribute):
 
     def requires(self):
 
-        return ["tasklist"]
+        return ["tasklist_detailed"]
 
     def get_attribute(self, ting, attribute_name=None):
 
@@ -180,7 +180,7 @@ class TaskTreeAttribute(TingAttribute):
 
         parent_id = counter.current_count
 
-        for task in ting.tasklist:
+        for task in ting.tasklist_detailed:
 
             task_name = task["task"][FRECKLET_KEY_NAME]["name"]
             task_type = task["task"][FRECKLET_KEY_NAME].get("type", "frecklet")
@@ -198,85 +198,8 @@ class TaskTreeAttribute(TingAttribute):
             task_tree.create_node(identifier=counter.current_count, tag="{}:{}".format(task_type, task_name), data=task, parent=parent_id)
             self._build_tree(task_tree=task_tree, ting=task_ting, counter=counter)
 
-DEFAULT_ARG = {
-    "required": True,
-    "empty": False
-}
 
-# class FreckletTask(object):
-#
-#     def __init__(self, config):
-#
-#         self.config = config
-#         self._args_all = config.get(ARGS_KEY, {})
-#         self._args_imports = self._args_all.pop("_import")
-#         self._args = None
-#         self._frecklet = config.get(FRECKLET_KEY_NAME)
-#         self._vars = config.get(VARS_KEY, {})
-#         self._meta = config.get(META_KEY, {})
-#         self._task = config.get(TASK_KEY_NAME, {})
-#
-#         self._template_keys = None
-#
-#     # @property
-#     # def args(self):
-#     #     if self._args is None:
-#     #         self._args = {}
-#     #         for arg_name, arg in self._args_all.items():
-#     #             if arg_name in self.template_keys:
-#     #                 self._args[arg_name] = arg
-#     #             else:
-#     #                 self._args[arg_name] = DEFAULT_ARG
-#     #     return self._args
-#
-#     @property
-#     def name(self):
-#         return self.frecklet["name"]
-#
-#     @property
-#     def type(self):
-#         return self.frecklet.get("type", "frecklet")
-#
-#     @property
-#     def idempotent(self):
-#         return self.frecklet.get("idempotent", False)
-#
-#     @property
-#     def elevated(self):
-#         return self.frecklet.get("elevated", False)
-#
-#     @property
-#     def frecklet(self):
-#         return self._frecklet
-#
-#     @property
-#     def meta(self):
-#         return self._meta
-#
-#     @property
-#     def vars(self):
-#         return self._vars
-#
-#     @property
-#     def task(self):
-#         return self._task
-#
-#     @property
-#     def template_keys(self):
-#
-#         if self._template_keys is not None:
-#             return self._template_keys
-#
-#         temp_dict = {
-#             FRECKLET_KEY_NAME: self.frecklet,
-#             TASK_KEY_NAME: self.task,
-#             VARS_KEY: self.vars,
-#         }
-#         self._template_keys = get_template_keys(temp_dict, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-#         return self._template_keys
-
-
-class TaskListAttribute(TingAttribute):
+class TaskListDetailedAttribute(TingAttribute):
 
     FRECKLET_FORMAT = {
         CHILD_MARKER_NAME: FRECKLETS_KEY,
@@ -305,7 +228,7 @@ class TaskListAttribute(TingAttribute):
 
     def provides(self):
 
-        return ["tasklist"]
+        return ["tasklist_detailed"]
 
     def requires(self):
 
@@ -314,9 +237,66 @@ class TaskListAttribute(TingAttribute):
     def get_attribute(self, ting, attribute_name=None):
 
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
-        chain = TaskListAttribute.PROCESS_CHAIN + [AddRootFreckletProcessor(ting=ting)]
+        chain = TaskListDetailedAttribute.PROCESS_CHAIN + [AddRootFreckletProcessor(ting=ting)]
 
         f = Frkl(ting._metadata_raw, chain)
-        tasklist = f.process()
+        tasklist_detailed = f.process()
+
+        return tasklist_detailed
+
+
+def prettyfiy_task(task_detailed):
+
+    t = {}
+    t[FRECKLET_KEY_NAME] = task_detailed[FRECKLET_KEY_NAME]
+    if TASK_KEY_NAME in task_detailed.keys():
+        t[TASK_KEY_NAME] = task_detailed[TASK_KEY_NAME]
+    if VARS_KEY in task_detailed.keys():
+        t[VARS_KEY] = task_detailed[VARS_KEY]
+
+    tks = get_template_keys(t, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+    args = {}
+    for tk in tks:
+        temp = task_detailed[ARGS_KEY][tk]
+        args[tk] = special_dict_to_dict(temp)
+    t[ARGS_KEY] = args
+
+    return t
+
+class TaskListAttribute(TingAttribute):
+
+    def provides(self):
+        return ["tasklist"]
+
+    def requires(self):
+
+        return ["tasklist_detailed"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        tasklist = []
+        for td_node in ting.tasklist_detailed:
+            td = td_node["task"]
+            t = prettyfiy_task(td)
+            tasklist.append(t)
+
+        return tasklist
+
+class TaskListResolvedAttribute(TingAttribute):
+
+    def provides(self):
+        return ["tasklist_resolved"]
+
+    def requires(self):
+
+        return ["task_tree"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        tasklist = []
+        for td_node in ting.task_tree.leaves():
+            td = td_node.data["task"]
+            t = prettyfiy_task(td)
+            tasklist.append(t)
 
         return tasklist

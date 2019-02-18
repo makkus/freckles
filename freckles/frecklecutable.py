@@ -1,498 +1,375 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import copy
 import logging
 import os
 from collections import OrderedDict
 
-from ruamel.yaml.comments import CommentedSeq, CommentedMap
+import click
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
+from treelib import Tree
 
-from frutils import get_template_keys, replace_strings_in_obj
-from .context import FrecklesContext
-from .defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME, DEFAULT_FRECKLES_JINJA_ENV
-from .exceptions import FrecklesConfigException
+from freckles.defaults import FRECKLET_KEY_NAME, VARS_KEY, TASK_KEY_NAME, DEFAULT_FRECKLES_JINJA_ENV, \
+    FRECKLES_DEFAULT_ARG_SCHEMA
+from freckles.exceptions import FrecklesVarException
+from freckles.output_callback import DefaultCallback, TaskDetail, FrecklesRun, FrecklesResultCallback
+from frutils import replace_strings_in_obj, get_template_keys
+from frutils.parameters import FrutilsNormalizer
 
 log = logging.getLogger("freckles")
 
+class FrecklecutableMixin(object):
 
-def get_task_hierarchy(root_tasks, used_ids, task_map, context, level=0, minimal=False):
+    def __init__(self, *args, **kwargs):
+        pass
 
-    result = []
+    def create_frecklecutable(self, context):
+        return Frecklecutable(frecklet=self, context=context)
 
-    for id, childs in root_tasks.items():
+def is_duplicate_task(new_task, idempotency_cache):
 
-        info = assemble_info(task_map[id], context=context)
-        # f_name = task_map[id]["frecklet"]["command"]
-        # f_type = task_map[id]["frecklet"]["type"]
-        # if f_type == "frecklet":
-        #     md = context.get_frecklet_metadata(f_name)
-        #     doc = md["doc"]
-        # else:
-        #     f = task_map[id]["frecklet"]
-        #     v = task_map[id].get("vars", {})
-        #     t_dict = {"frecklet": f}
-        #     if v:
-        #         t_dict["vars"] = v
-        #     doc = readable(t_dict, out="yaml", ignore_aliases=True)
+        if not new_task[FRECKLET_KEY_NAME].get("idempotent", False):
+            return False
 
-        if childs:
-            temp_childs = get_task_hierarchy(
-                childs,
-                used_ids=used_ids,
-                task_map=task_map,
-                context=context,
-                level=level + 1,
-                minimal=minimal,
-            )
+        temp  = {}
+        temp[FRECKLET_KEY_NAME] = copy.copy(new_task[FRECKLET_KEY_NAME])
+        temp[FRECKLET_KEY_NAME].pop("msg", None)
+        temp[FRECKLET_KEY_NAME].pop("desc", None)
+        temp[FRECKLET_KEY_NAME].pop("skip", None)
 
-            if not temp_childs:
-                continue
+        temp[TASK_KEY_NAME] = copy.copy(new_task[TASK_KEY_NAME])
+        temp[VARS_KEY] = copy.copy(new_task[VARS_KEY])
 
-            d = {"children": temp_childs, "level": level, "info": info}
-            if minimal:
-                d["child"] = task_map[id][FRECKLET_KEY_NAME]["name"]
-            else:
-                d["child"] = task_map[id]
-            result.append(d)
+        if temp in idempotency_cache:
+            return True
         else:
-            if id not in used_ids:
-                continue
-            d = {"children": [], "level": level, "info": info}
-            if minimal:
-                d["child"] = task_map[id][FRECKLET_KEY_NAME]["name"]
-            else:
-                d["child"] = task_map[id]
-            result.append(d)
+            idempotency_cache.append(temp)
+            return False
 
-    return result
-
-
-def assemble_info(task, context):
-
-    command = task[TASK_KEY_NAME]["command"]
-    f_name = command
-    f_type = task[FRECKLET_KEY_NAME]["type"]
-
-    msg = task.get(FRECKLET_KEY_NAME, {}).get("msg", None)
-    if msg and msg.startswith("[") and msg.endswith("]"):
-        msg = msg[1:-1].strip()
-
-    desc = task.get(FRECKLET_KEY_NAME, {}).get("desc", None)
-
-    if f_type == "frecklet":
-
-        try:
-            md = context.get_frecklet_metadata(f_name)
-            doc = md.get("doc", None)
-        except (FrecklesConfigException):
-            pass
-    else:
-        doc = None
-
-    return {
-        "command": command,
-        "frecklet_name": f_name,
-        "doc": doc,
-        "frecklet_type": f_type,
-        "msg": msg,
-        "desc": desc,
-    }
-
-
-def clean_omit_values(d, non_value_keys):
-
-    if isinstance(d, (list, tuple, CommentedSeq)):
-
-        for item in d:
-            clean_omit_values(item, non_value_keys=non_value_keys)
-
-    elif isinstance(d, (dict, OrderedDict, CommentedMap)):
-
-        for key in list(d):
-            val = d[key]
-            if isinstance(val, (dict, OrderedDict, CommentedMap, list, tuple)):
-                clean_omit_values(val, non_value_keys=non_value_keys)
-            else:
-                t_keys = get_template_keys(val, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-                if len(t_keys) == 1:
-                    t = list(t_keys)[0]
-                    if t in non_value_keys:
-                        del d[key]
-
-
-def remove_none_values(input):
+def remove_none_values(input, args=None, convert_empty_to_none=False):
 
     if isinstance(input, (list, tuple, set, CommentedSeq)):
         result = []
         for item in input:
-            temp = remove_none_values(item)
-            result.append(temp)
+            temp = remove_none_values(item, convert_empty_to_none=convert_empty_to_none)
+            if temp:
+                result.append(temp)
         return result
     elif isinstance(input, (dict, OrderedDict, CommentedMap)):
         result = CommentedMap()
         for k, v in input.items():
             if v is not None:
-                temp = remove_none_values(v)
-                result[k] = temp
+                temp = remove_none_values(v, convert_empty_to_none=convert_empty_to_none)
+                if not temp:
+                    if convert_empty_to_none:
+                        temp = None
+                        result[k] = temp
+                else:
+                    result[k] = temp
+
         return result
     else:
         return input
 
 
-def is_disabled(task):
-
-    skip = task.get(FRECKLET_KEY_NAME, {}).get("skip", [])
-
-    # print("---")
-    # print(task["meta"]["__name__"])
-    # print(skip)
-
-    for s in skip:
-
-        if s is True:
-            return True
-
-    return False
-
-
-def cleanup_tasklist(tasklist):
-
-    replaced = []
-    for task in tasklist:
-
-        input = copy.copy(task["input"])
-        none_value_keys = []
-
-        for k, v in input.items():
-            if v is None:
-                none_value_keys.append(k)
-
-        input_clean = remove_none_values(copy.deepcopy(input))
-        min_task = copy.deepcopy(task)
-        # min_task = {}
-        # min_task["vars"] = copy.copy(task["vars"])
-        # min_task[TASK_KEY_NAME] = copy.copy(task[TASK_KEY_NAME])
-        # min_task[FRECKLET_KEY_NAME] = copy.copy(task[FRECKLET_KEY_NAME])
-
-        clean_omit_values(min_task[TASK_KEY_NAME], none_value_keys)
-        clean_omit_values(min_task["vars"], none_value_keys)
-
-        r = replace_strings_in_obj(
-            min_task, input_clean, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-        )
-
-        # also remove None values after filters were applied
-        r = remove_none_values(r)
-
-        replaced.append(r)
-
-    # filter disabled tasks
-    final = []
-    for t in replaced:
-        # import sys, pp
-        # pp(replaced)
-        # sys.exit()
-        if is_disabled(t):
-            log.debug("Skipping task: {}".format(t))
-            continue
-
-        final.append(t)
-
-    # final = remove_idempotent_duplicates(final)
-
-    return final
-
-
-def remove_idempotent_duplicates(tasklist):
-
-    temp = []
-    compare_list = []
-    for t in tasklist:
-
-        idempotent = t.get(FRECKLET_KEY_NAME, {}).get("idempotent", False)
-        if not idempotent:
-            temp.append(t)
-            continue
-
-        tf = copy.copy(t[TASK_KEY_NAME])
-        tf.pop("_task_id", None)
-        tf.pop("_task_list_id", None)
-        control = copy.copy(t.get(FRECKLET_KEY_NAME, {}))
-
-        control.pop("skip", None)
-
-        t_compare = {TASK_KEY_NAME: tf, FRECKLET_KEY_NAME: control, "vars": t["vars"]}
-
-        if t_compare in compare_list:
-            import pp
-
-            pp(t_compare.keys())
-            # sys.exit()
-            continue
-
-        compare_list.append(t_compare)
-        temp.append(t)
-    return temp
-
-
-def needs_elevated_permissions(tasklist):
-
-    for task in tasklist:
-        become = task[TASK_KEY_NAME].get("become", False) or task[FRECKLET_KEY_NAME].get(
-            "elevated", False
-        )
-        if become:
-            return True
-
-    return False
-
-
 class Frecklecutable(object):
-    @classmethod
-    def create_from_file_or_name(cls, frecklet_path_or_name, vars=None, context=None):
 
-        if context is None:
-            context = FrecklesContext.create_context()
+    def __init__(self, frecklet, context):
 
-        name = os.path.splitext(os.path.basename(frecklet_path_or_name))[0]
-        frecklet = context.create_frecklet(frecklet_path_or_name)
+        self._frecklet = frecklet
+        self._context = context
 
-        return Frecklecutable(name, frecklet, vars=vars, context=context)
+    @property
+    def frecklet(self):
+        return self._frecklet
 
-    def __init__(self, name, frecklet, vars=None, context=None):
+    @property
+    def context(self):
+        return self._context
 
-        self.name = name
-
-        if context is None:
-            context = FrecklesContext.create_context()
-
-        self.context = context
-        if vars is None:
-            vars = {}
-
-        # for k, v in frecklet.args.items():
-        #     v.setdefault("__meta__", {})["root_frecklet"] = True
-        self.frecklet = frecklet
-
-        # self.tasklist_cache = {}  # not used currently
-        self.tasklist_cache_no_user_input = None
-        self.task_hierarchy = None
-
-    def generate_click_parameters(self, default_vars=None):
-        # frecklet = copy.deepcopy(self.frecklet)
-        params = self.frecklet.generate_click_parameters(default_vars=default_vars)
-        return params
-
-    def postprocess_click_input(self, user_input):
-
-        processed = self.frecklet.postprocess_click_input(user_input)
-        return processed
-
-    def get_doc(self):
-
-        return self.frecklet.get_doc()
-
-    def get_help_string(self):
-
-        return self.frecklet.get_help_string()
-
-    def get_short_help_string(self, list_item_format=False):
-
-        return self.frecklet.get_short_help_string(list_item_format=list_item_format)
-
-    def get_task_hierarchy(self, vars=None, minimal=False):
-        """
-        Get the task hierarchy for the frecklet.
-
-        If vars is None, the 'pure' frecklet tasklist will be used. Otherwise the tasklist will be rendered with the provided
-        user input (or the empty dict).
+    def _retrieve_var_value_from_inventory(self, inventory, var_value, template_keys=None):
+        """Retrieves all template keys contained in a value from the inventory.
 
         Args:
-            vars: the (empty or non-empty) user_input, or None
-
+            var_value: the value of a var
         Returns:
-            dict: the task hierarchy
+            dict: a dict with keyname/inventory_value pairs
         """
 
-        if vars is None:
-            if self.task_hierarchy:
-                return self.task_hierarchy
+        if template_keys is None:
+            template_keys = get_template_keys(var_value, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
 
-        process = True
-        if vars is None:
-            process = False
 
-        tasklists = self.process_tasklist(vars, process_user_input=process)
+        if not template_keys:
+            return {}
 
-        result = []
-        for tl_id, tasklist_details in tasklists.items():
-
-            ids = []
-
-            if vars is not None:
-                # we replace the task items with the rendered one
-                task_map = copy.deepcopy(self.frecklet.get_task_map())
-            else:
-                task_map = self.frecklet.get_task_map()
-
-            for t in tasklist_details["task_list"]:
-                id = t["meta"]["__id__"]
-                ids.append(id)
-                if vars is not None:
-                    task_map[id] = t
-
-            task_hierarchy = get_task_hierarchy(
-                self.frecklet.get_task_tree(),
-                used_ids=ids,
-                task_map=task_map,
-                context=self.context,
-                minimal=minimal,
-            )
-            result.append(
-                {"id": tl_id, "hierarchy": task_hierarchy, "details": tasklist_details}
-            )
-
-        if vars is None:
-            self.task_hierarchy = result
+        result = {}
+        for tk in template_keys:
+            val = inventory.retrieve_value(tk)
+            result[tk] = val
 
         return result
 
-    def process_tasklist(self, vars=None, process_user_input=True):
-        """
-        Processes a tasklist.
-
-        You can choose to not process user input, in case this is run for documentation generation purposes.
+    def _replace_templated_var_value(self, var_value, repl_dict=None, inventory=None):
+        """Replace a templated (or not) var value using a replacement dict or the inventory.
 
         Args:
-            vars: the user input
-            process_user_input: whether to process user input
-
+            var_value: the value of a var
+            repl_dict: the key/value pairs to use for the templating
         Returns:
-            list: a list of processed task-lists
+            The processed object.
         """
 
-        # frecklet = copy.deepcopy(self.frecklet)
-        # for k, v in frecklet.args.items():
-        #     v.setdefault("__meta__", {})["root_frecklet"] = True
-        #     frecklet.meta["__frecklet_level__"] = 0
+        if repl_dict is None:
+            repl_dict = self._retrieve_var_value_from_inventory(inventory=inventory, var_value=var_value)
 
-        if process_user_input:
-            tl = None
-        else:
-            tl = self.tasklist_cache_no_user_input
+        processed = replace_strings_in_obj(var_value, replacement_dict=repl_dict, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
 
-        if tl is None:
-            tl = self.frecklet.render_tasklist(
-                vars, process_user_input=process_user_input
-            )
-            if not process_user_input:
-                self.tasklist_cache_no_user_input = tl
+        return processed
 
-        remove_skipped = False
-        if remove_skipped:
-            temp = []
-            for t in tl:
-                skip = t.get(FRECKLET_KEY_NAME, {}).get("skip", False)
-                if isinstance(skip, bool) and skip:
+    def _generate_schema(self, var_value_map, args, template_keys=None):
+
+        if template_keys is None:
+
+            template_keys = get_template_keys(var_value_map, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+
+        schema = {}
+        for key in template_keys:
+            schema[key] = copy.copy(args.get(key, FRECKLES_DEFAULT_ARG_SCHEMA))
+            schema[key].pop("doc", None)
+            schema[key].pop("cli", None)
+
+        return schema
+
+    def _validate_processed_vars(self, var_value_map, schema, allow_unknown=False, purge_unknown=True, task_path=None, vars_pre_clean=None, task=None):
+
+        validator = FrutilsNormalizer(schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown)
+
+        valid = validator.validated(var_value_map)
+        if valid is None:
+            if vars_pre_clean is None:
+                vars_pre_clean = var_value_map
+            raise FrecklesVarException(self.frecklet, error=validator.errors, task_path=task_path, vars=vars_pre_clean, task=task)
+
+        return valid
+
+    def process_tasks(self, inventory):
+        """Calculates the tasklist for a given inventory."""
+
+        processed_tree = self._calculate_task_plan(inventory=inventory)
+
+        task_nodes = processed_tree.leaves()
+        result = []
+        task_id = 0
+        for t in task_nodes:
+
+            if t.data["processed"][FRECKLET_KEY_NAME].get("skip", False):
+                continue
+
+            task = t.data["processed"]
+            task[FRECKLET_KEY_NAME]["_task_id"] = task_id
+            task_id = task_id + 1
+            # vars = t.data["args"]
+            # print(vars)
+            # output(task, output_type="yaml")
+            result.append(task)
+
+        return result
+
+    def _calculate_task_plan(self, inventory):
+
+        task_tree = self.frecklet.task_tree
+        processed_tree = Tree()
+
+        root_frecklet = task_tree.get_node(0)
+
+        task_path = []
+
+        for tn in task_tree.all_nodes():
+            task_id = tn.identifier
+            if task_id == 0:
+
+                processed_tree.create_node(identifier=0, tag=task_tree.get_node(0).tag, data={"frecklet": root_frecklet.data, "inventory": inventory})
+                continue
+
+
+            task_node = tn.data["task"]
+
+            task_name = task_node[FRECKLET_KEY_NAME]["name"]
+
+            args = task_tree.get_node(task_id).data["root_frecklet"].args
+            parent_id = task_tree.parent(task_id).identifier
+            if parent_id == 0:
+                parent = {}
+                template_keys = task_tree.get_node(0).data.template_keys
+                repl_vars = {}
+                for tk in template_keys:
+                    v = inventory.retrieve_value(tk)
+                    if v is not None:
+                        repl_vars[tk] = v
+                task_path = []
+            else:
+                parent = processed_tree.get_node(parent_id).data
+                repl_vars = parent["processed_vars"]
+
+            # level = task_tree.level(task_id)
+            # padding = "    " * level
+            # print("{}vars:".format(padding))
+            # print(readable(repl_vars, out="yaml", indent=(level*4)+4).rstrip())
+            # print("{}task:".format(padding))
+            # print("{}    name: {}".format(padding, task_name))
+
+            task_path.append(task_name)
+
+            if parent.get("processed", {}).get(FRECKLET_KEY_NAME, {}).get("skip", False):
+                processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+                                           data={"frecklet": root_frecklet.data, "inventory": inventory, "processed_vars": {},
+                                                 "processed": {FRECKLET_KEY_NAME: {"skip": True}}}, parent=parent_id)
+                continue
+
+            # output(task_node, output_type="yaml")
+            vars = copy.copy(task_node.get(VARS_KEY, {}))
+            frecklet = copy.copy(task_node[FRECKLET_KEY_NAME])
+            task = copy.copy(task_node.get(TASK_KEY_NAME, {}))
+
+            # first we get our target variable, as this will most likley determine the value of the var later on
+            target = frecklet.get("target", None)
+            if target is not None:
+                template_keys = get_template_keys(target, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                if template_keys:
+                    target_value = self._replace_templated_var_value(var_value=target, repl_dict=repl_vars,
+                                                                 inventory=inventory)
+                else:
+                    target_value = target
+                # TODO: 'resolve' target
+                # TODO: validate target schema
+                frecklet["target"] = target_value
+
+            # then we check if we can skip the task. For that we already need the target variable ready, as it might
+            # be used for variable selection
+            skip = frecklet.get("skip", None)
+            if skip is not None:
+                skip_value = self._replace_templated_var_value(var_value=skip, repl_dict=repl_vars, inventory=inventory)
+                frecklet["skip"] = skip_value
+                if isinstance(skip_value, bool) and skip_value:
+                    processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+                                               data={"frecklet": root_frecklet.data, "inventory": inventory, "processed_vars": {},
+                                                     "processed": {FRECKLET_KEY_NAME: {"skip": True}}}, parent=parent_id)
                     continue
 
-                temp.append(t)
-            tl = temp
 
-        # this doesn't work properly yet
-        remove_idempotent = False
-        # if user input is not processed, we can't know which tasks are the same
-        # because vars have not been resolved
-        if process_user_input and remove_idempotent:
-            temp = []
-            compare_list = []
-            for t in tl:
-                idempotent = t.get(FRECKLET_KEY_NAME, {}).get("idempotent", False)
-                if not idempotent:
-                    temp.append(t)
-                    continue
+            # now we replace the whole rest of the task
 
-                tf = copy.copy(t[TASK_KEY_NAME])
-                tf.pop("_task_id", None)
-                tf.pop("_task_list_id", None)
-                control = copy.copy(t.get(FRECKLET_KEY_NAME, {}))
-
-                if not process_user_input:
-                    # we can't know whether it'll be skipped or not, but in either case we only need the first time
-                    control.pop("skip", None)
-
-                t_compare = {
-                    TASK_KEY_NAME: tf,
-                    FRECKLET_KEY_NAME: control,
-                    "vars": t["vars"],
+            if not task_tree.get_node(task_id).is_leaf():
+                vars_processed = self._replace_templated_var_value(var_value=vars, repl_dict=repl_vars,
+                                                                   inventory=inventory)
+                vars_processed_cleaned = remove_none_values(vars_processed, args=args)
+                schema = self._generate_schema(var_value_map=vars, args=args, template_keys=None)
+                validated = self._validate_processed_vars(var_value_map=vars_processed_cleaned, schema=schema, task_path=task_path, vars_pre_clean=vars_processed, task=task_node)
+                processed = {
+                    FRECKLET_KEY_NAME: frecklet,
+                    TASK_KEY_NAME: task
                 }
+                processed = self._replace_templated_var_value(var_value=processed, repl_dict=repl_vars,
+                                                              inventory=inventory)
+                processed = remove_none_values(processed, convert_empty_to_none=False)
+                processed[VARS_KEY] = validated
+                processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+                                           data={"frecklet": root_frecklet.data, "inventory": inventory,
+                                                 "processed_vars": validated, "processed": processed}, parent=parent_id)
+            else:
 
-                if t_compare in compare_list:
-                    continue
+                task = {
+                    FRECKLET_KEY_NAME: frecklet,
+                    TASK_KEY_NAME: task,
+                    VARS_KEY: vars
+                }
+                template_keys = get_template_keys(task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                schema = self._generate_schema(var_value_map=task, args=args, template_keys=template_keys)
+                val_map = {}
+                for tk in template_keys:
+                    val = repl_vars.get(tk, None)
+                    if val is not None:
+                        val_map[tk] = val
 
-                compare_list.append(t_compare)
-                temp.append(t)
+                validated_val_map = self._validate_processed_vars(var_value_map=val_map, schema=schema, task_path=task_path, vars_pre_clean=repl_vars, task=task_node)
 
-            tl = temp
+                task_processed = self._replace_templated_var_value(var_value=task, repl_dict=validated_val_map,
+                                                                   inventory=inventory)
+                task_processed = remove_none_values(task_processed, args=args)
 
-        unknowns = []
-        for item in tl:
-            task_type = item[FRECKLET_KEY_NAME].get("type", "unknown")
-            if task_type == "unknown":
-                unknowns.append(item[FRECKLET_KEY_NAME]["name"])
+                processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+                                           data={"frecklet": root_frecklet.data, "inventory": inventory,
+                                                 "processed": task_processed}, parent=parent_id)
 
-        if unknowns:
-            raise FrecklesConfigException(
-                "One or more task items with unknown task type: {}".format(unknowns)
-            )
+        return processed_tree
 
+
+    def run(self, inventory, run_config, run_vars):
+
+        frecklet_name = self.frecklet.id
+        log.debug("Running frecklecutable: {}".format(frecklet_name))
+
+        tasks = self.process_tasks(inventory=inventory)
+
+        current_tasklist = []
+        idempotent_cache = []
         current_adapter = None
-        task_lists = OrderedDict()
-        current_task_list = []
-        task_list_index = 0
-        for index, task in enumerate(tl):
 
-            task[TASK_KEY_NAME]["_task_id"] = index
+        for task in tasks:
+            tt = task[FRECKLET_KEY_NAME]["type"]
 
-            task_type = task[FRECKLET_KEY_NAME]["type"]
-            adapter_task = self.context.adapter_map.get(task_type, None)
-            if adapter_task is None:
-                raise FrecklesConfigException(
-                    "No adapter for task type '{}': {}".format(task_type, task)
-                )
+            adapter = self.context._adapter_tasktype_map.get(tt, None)
+
+            if adapter is None:
+                raise Exception("No adapter registered for task type: {}".format(tt))
+            if len(adapter) > 1:
+                raise Exception("Multiple adapters registered for task type '{}', that is not supported yet.".format(tt))
+
+            adapter = adapter[0]
 
             if current_adapter is None:
-                current_adapter = adapter_task
+                current_adapter = adapter
 
-            if current_adapter != adapter_task:
-                # new frecklecutable run
-                for t in current_task_list:
-                    t[TASK_KEY_NAME]["_task_list_id"] = task_list_index
-                task_lists[task_list_index] = {
-                    "task_list": current_task_list,
-                    "adapter": current_adapter,
-                    "name": self.name,
+            if current_adapter != adapter:
+                raise Exception("Multiple adapters for a single frecklet, this is not supported yet: {} / {}".format(current_adapter, adapter))
+
+            if is_duplicate_task(task, idempotent_cache):
+                log.debug("Idempotent, duplicate task, ignoring: {}".format(task[FRECKLET_KEY_NAME]["name"]))
+                continue
+            current_tasklist.append(task)
+
+        adapter = self.context._adapters[current_adapter]
+
+        callback = DefaultCallback()
+        result_callback = FrecklesResultCallback()
+        parent_task = TaskDetail(frecklet_name, "run", task_parent=None)
+        callback.task_started(parent_task)
+        task_details = TaskDetail(
+                    task_name=frecklet_name,
+                    task_type="frecklecutable",
+                    task_parent=parent_task,
+                )
+        callback.task_started(task_details)
+
+        secure_vars = {}
+
+        try:
+            run_properties = adapter.run(tasklist=current_tasklist, run_vars=run_vars, run_config=run_config, secure_vars=secure_vars, output_callback=callback, result_callback=result_callback, parent_task=task_details)
+
+            callback.task_finished(task_details, success=True)
+            callback.task_finished(parent_task, success=True)
+
+            result = {
+                    "run_properties": run_properties,
+                    "task_list": current_tasklist,
+                    "result": result_callback.result,
+                    "adapter": adapter,
+                    "name": frecklet_name,
                 }
-                current_adapter = adapter_task
-                current_task_list = []
-                task_list_index = task_list_index + 1
 
-            current_task_list.append(task)
+            run_result = FrecklesRun(0, result)
+            return run_result
 
-        if current_task_list:
-            for t in current_task_list:
-                t[TASK_KEY_NAME]["_task_list_id"] = task_list_index
-            task_lists[task_list_index] = {
-                "task_list": current_task_list,
-                "adapter": current_adapter,
-                "name": self.name,
-            }
+        except (Exception) as e:
+            click.echo("frecklecutable run failed: {}".format(e))
+            log.debug(e)
 
-        if process_user_input:
-            for tl_id, details in task_lists.items():
-                t = cleanup_tasklist(details["task_list"])
-                details["task_list"] = t
-
-        return task_lists

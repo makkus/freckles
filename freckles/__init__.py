@@ -10,7 +10,7 @@ __version__ = "1.0.0b1"
 
 import click
 from .freckles import Freckles  # noqa
-# from .frecklet import Frecklet  # noqa
+from .frecklecutable import Frecklecutable  # noqa
 
 
 def print_version(ctx, param, value):

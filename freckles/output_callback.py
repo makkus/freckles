@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import logging
 import sys
+import uuid
 from abc import abstractmethod, ABCMeta
+from collections import OrderedDict
 
 import click
 import colorama
+import pprintpp
 import stevedore
 from colorama import Fore, Style
 from stevedore import ExtensionManager
 
-from frutils import readable_yaml
+from frutils import readable_yaml, dict_merge
 
 colorama.init()
 
@@ -79,6 +82,88 @@ def load_callback(callback_name, callback_config=None):
     )
 
     return mgr.driver
+
+class TaskDetail(object):
+    def __init__(
+        self,
+        task_name,
+        task_type,
+        task_parent,
+        msg=None,
+        ignore_errors=False,
+        detail_level=0,
+        task_title=None,
+        **kwargs
+    ):
+
+        self.task_name = task_name
+        self.task_type = task_type
+        self.task_id = uuid.uuid4()
+        self.task_parent = task_parent
+        self.msg = msg
+        self.ignore_errors = ignore_errors
+        self.detail_level = detail_level
+        self.task_details = kwargs
+
+        self.task_title = task_title
+
+        self.success = True
+        self.skipped = True
+        self.changed = False
+
+        self.result_data = {}
+        self.debug_data = {}
+
+    def set_success(self, success):
+
+        if not success:
+            self.success = False
+            if not self.ignore_errors:
+                if self.task_parent is not None:
+                    self.task_parent.set_success(False)
+
+    def set_skipped(self, skipped):
+
+        if not skipped:
+            self.skipped = False
+            if self.task_parent is not None:
+                self.task_parent.set_skipped(False)
+
+    def set_changed(self, changed):
+
+        if changed:
+            self.changed = True
+            if self.task_parent is not None:
+                self.task_parent.set_changed(True)
+
+    def get_task_title(self):
+
+        if self.task_title is not None:
+            return self.task_title
+
+        return self.task_name
+
+    def __repr__(self):
+
+        return pprintpp.pformat(self.__dict__)
+
+class FrecklesRun(object):
+    def __init__(self, run_id, result_dict):
+
+        self.run_id = run_id
+        self.result_dict = result_dict
+
+        self.adapter = self.result_dict["adapter"]
+        self.frecklet_name = self.result_dict["name"]
+        self.outcome = self.result_dict["result"]
+        self.run_properties = self.result_dict["run_properties"]
+        self.task_list = self.result_dict["task_list"]
+
+    def __str__(self):
+
+        return readable_yaml({"name": self.frecklet_name, "run_properties": self.run_properties, "task_list": self.task_list})
+
+
 
 
 class FrecklesCallback(object):
@@ -1022,3 +1107,41 @@ class DefaultCallback(FrecklesCallback):
 #     def finish_up(self):
 #
 #         pass
+RESULT_STRATEGIES = ["merge", "update", "append", "ordered_merge", "ordered_update"]
+
+
+class FrecklesResultCallback(object):
+    """ Class to gather results of a frecklecute run.
+
+    Args:
+        add_strategy:
+    """
+
+    def __init__(self, result_strategy="merge"):
+
+        if result_strategy not in RESULT_STRATEGIES:
+            raise Exception(
+                "result_stragegy '{}' not supported.".format(result_strategy)
+            )
+
+        self.result_strategy = result_strategy
+        if result_strategy == "append":
+            self.result = []
+        else:
+            if "ordered" in result_strategy:
+                self.result = OrderedDict()
+            else:
+                self.result = {}
+
+    def add_result(self, overlay_dict):
+
+        if "merge" in self.result_strategy:
+            dict_merge(self.result, overlay_dict, copy_dct=False)
+        elif "update" in self.result_strategy:
+            self.result.update(overlay_dict)
+        else:
+            self.result.append(overlay_dict)
+
+    def finish_up(self):
+
+        pass

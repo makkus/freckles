@@ -1,163 +1,11 @@
-import copy
-
 import click
-from six import string_types
 
-from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV
+from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
 from freckles.exceptions import FreckletException
 from frutils import get_template_keys, dict_merge
-from frutils.doc import Doc
 from frutils.parameters import VarsTypeSimple
-from ting.ting_attributes import ValueAttribute, TingAttribute
+from ting.ting_attributes import TingAttribute, Arg
 from ting.ting_cast import MultiCacheResult
-
-
-class ArgsAttribute(ValueAttribute):
-
-    def __init__(self):
-
-        super(ArgsAttribute, self).__init__(
-            target_attr_name="args", source_attr_name="_metadata_raw"
-        )
-
-    def get_attribute(self, ting, attribute_name=None):
-
-        result = ValueAttribute.get_attribute(
-            self, ting, attribute_name=attribute_name
-        )
-
-        _import = result.pop("_import", None)
-
-        if _import is None:
-            return result
-
-        if isinstance(_import, string_types):
-            _import = [_import]
-
-        for i in _import:
-            if "::" in i:
-                frecklet_name, arg_name = i.split("::", 1)
-            else:
-                frecklet_name = i
-                arg_name = None
-
-            other_frecklet = ting._meta_parent_repo.get(frecklet_name, None)
-            if other_frecklet is None:
-                raise FreckletException("Could not find frecklet '{}' for arg import in '{}'".format(frecklet_name, ting.id))
-
-            other_args = other_frecklet.args
-
-            if arg_name is not None:
-                if arg_name not in other_args.keys():
-                    raise FreckletException("recklet '{}' does not have arg '{}' for import into '{}'".format(frecklet_name, arg_name, ting.id))
-                other_args = {arg_name: other_args[arg_name]}
-
-        result = dict_merge(other_args, result, copy_dct=True)
-        return result
-
-    # def provides(self):
-    #
-    #     return ["args", "args_raw"]
-
-class FreckletArg(object):
-
-    FRECKLET_DEFAULT_ARG = {
-        "required": True,
-        "empty": False
-    }
-
-    @classmethod
-    def from_keys(cls, keys, args):
-        result = {}
-        for key in keys:
-
-            arg_dict = args[key]
-            arg = FreckletArg(key, arg_dict)
-            result[key] = arg
-
-        return result
-
-    def __init__(self, key, arg_dict):
-
-        self._key = key
-        self._arg_dict = arg_dict
-        temp = dict_merge(FreckletArg.FRECKLET_DEFAULT_ARG, arg_dict, copy_dct=True)
-        doc_dict = temp.pop("doc", None)
-        self._cli = temp.pop("cli", {})
-        aliases = temp.pop("aliases", None)
-        if not aliases:
-            aliases = [self._key]
-        if isinstance(aliases, string_types):
-            aliases = [aliases]
-        self._aliases = aliases
-        self._doc = Doc(doc_dict=doc_dict)
-        self._schema = temp
-        self._process_path = []
-        self._child_args = []
-        self._var_template = None
-
-    def __str__(self):
-
-        return "[FreckletArg: key={}, var_template={}, childs={}]".format(self.key, self._var_template, self._child_args)
-
-    def __repr__(self):
-
-        return self.__str__()
-
-    @property
-    def aliases(self):
-        return self._aliases
-
-    @property
-    def var_template(self):
-        return self._var_template
-
-    @var_template.setter
-    def var_template(self, var_template):
-        self._var_template = var_template
-
-    @property
-    def child_args(self):
-        return self._child_args
-
-    def add_child(self, child):
-        self._child_args.append(child)
-
-    @property
-    def required(self):
-        return self._schema["required"]
-
-    @property
-    def key(self):
-        return self._key
-
-    @property
-    def doc(self):
-        return self._doc
-
-    @property
-    def schema(self):
-        return self._schema
-
-    @property
-    def cli(self):
-        return self._cli
-
-    @property
-    def type(self):
-        return self.schema["type"]
-
-    @property
-    def empty(self):
-        return self.schema["empty"]
-
-    @property
-    def default(self):
-        return self.schema.get("default", None)
-
-    @property
-    def coerce(self):
-        return self.schema.get("coerce", None)
 
 
 class CliArgumentsAttribute(TingAttribute):
@@ -339,15 +187,8 @@ class RequiredVariablesAttribute(TingAttribute):
             available_args = current_node.data["task"]["args"]
 
         args = {}
-        import pp
-        print("===========================")
-        print(current_args)
+
         for key, arg in current_args.items():
-            print('----------')
-            print(key)
-            print(arg)
-            print(arg.schema)
-            print(vars)
 
             if key not in vars.keys():
 
@@ -367,7 +208,7 @@ class RequiredVariablesAttribute(TingAttribute):
                         # print("USING CHILD ARG")
                         new_arg = arg
                     else:
-                        new_arg = FreckletArg(key, arg_config)
+                        new_arg = Arg(key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
                         new_arg.add_child(arg)
                         new_arg.var_template = parent_var
 
@@ -380,10 +221,10 @@ class RequiredVariablesAttribute(TingAttribute):
                             if tk == key:
                                 new_arg = arg
                             else:
-                                new_arg = FreckletArg(key, {})
+                                new_arg = Arg(key, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
                                 new_arg.add_child(arg)
                         else:
-                            new_arg = FreckletArg(key, arg_config)
+                            new_arg = Arg(key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
                             new_arg.add_child(arg)
 
                         new_arg.var_template = parent_var
@@ -404,8 +245,7 @@ class RequiredVariablesAttribute(TingAttribute):
 
         available_args = root_node.data["root_frecklet"].args
         template_keys = root_node.data["root_frecklet"].template_keys
-
-        args = FreckletArg.from_keys(template_keys, available_args)
+        args = Arg.from_keys(template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
         rest_path = reversed(path_to_leaf[0:-1])
 
         return self.resolve_required_vars(current_args=args, rest_path=rest_path, last_node=root_node, tree=tree)

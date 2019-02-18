@@ -1,6 +1,9 @@
+import abc
 import logging
 
-from freckles.frecklecutable_new import TEST_INVENTORY
+import six
+
+from frutils import dict_merge
 from ting.ting_attributes import TingAttribute
 from ting.ting_cast import TingCast
 from ting.tings import TingTings, DictTings
@@ -43,21 +46,34 @@ class VarCast(TingCast):
         )
 
 
-inv_1_dict = {
-    "name": "markus"
-}
+@six.add_metaclass(abc.ABCMeta)
+class Inventory(object):
 
-inv_2_dict = {
-    "name": "theresa"
-}
+    def __init__(self):
+        pass
 
-cast_1 = VarCast(prefix="inv_1")
-cast_2 = VarCast(prefix="inv_2")
-INV_1 = DictTings("inv_1", data=inv_1_dict, ting_cast=cast_1, indexes=["var_path"], key_name="var", meta_name="value")
-INV_2 = DictTings("inv_2", data=inv_2_dict, ting_cast=cast_2, indexes=["var_path"], key_name="var", meta_name="value")
+    @abc.abstractmethod
+    def retrieve_value(self, var_name, **task_context):
+
+        pass
 
 
-class Inventory(TingTings):
+
+class VarsInventory(Inventory):
+
+    def __init__(self, *vars):
+
+        self.vars_list = vars
+
+        self.vars = {}
+        for v in self.vars_list:
+            dict_merge(self.vars, v, copy_dct=False)
+
+    def retrieve_value(self, var_name, **task_context):
+
+        return self.vars.get(var_name, None)
+
+class TingsInventory(TingTings):
 
     # DEFAULT_TING_CAST = VarCast
 
