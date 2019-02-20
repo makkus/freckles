@@ -1,6 +1,6 @@
-from freckles.defaults import FRECKLES_CONFIG_DIR
-from freckles.freckles_context import CnfProfiles, FrecklesContext
-from freckles.schemas import PROFILE_LOAD_CONFIG_SCHEMA, FRECKLES_DEFAULT_CONFIG_SCHEMA
+from .defaults import FRECKLES_CONFIG_DIR
+from .freckles_context import CnfProfiles, FrecklesContext
+from .schemas import PROFILE_LOAD_CONFIG_SCHEMA, FRECKLES_DEFAULT_CONFIG_SCHEMA
 from frutils.config.cnf import Cnf
 
 
