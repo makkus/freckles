@@ -1,10 +1,4 @@
-import os
-from collections import Sequence
-
-from six import string_types
-
-from freckles.defaults import MIXED_CONTENT_TYPE
-from frutils import is_url_or_abbrev, dict_merge
+from frutils import dict_merge
 
 # schema to load '*.context' files in $HOME/.config/freckles
 PROFILE_LOAD_CONFIG_SCHEMA = {
@@ -22,25 +16,25 @@ PROFILE_LOAD_CONFIG_SCHEMA = {
         "empty": True,
         "schema": {"type": "string"},
         "required": False,
-        "target_key": "folder_load_ignore_file_postfixes"
+        "target_key": "folder_load_ignore_file_postfixes",
     },
     "profile_load_file_match_regex": {
         "type": "string",
         "required": False,
         "target_key": "folder_load_file_match_regex",
-        "default": "\.context$",
+        "default": "\\.context$",
     },
     "profile_load_use_subfolders": {
         "type": "boolean",
         "default": False,
         "required": False,
-        "target_key": "folder_load_use_subfolders"
+        "target_key": "folder_load_use_subfolders",
     },
     "profile_load_ignore_hidden_files": {
         "type": "boolean",
         "default": True,
         "required": False,
-        "target_key": "frecklet_load_use_subfolders"
+        "target_key": "frecklet_load_use_subfolders",
     },
 }
 
@@ -55,8 +49,9 @@ FRECKLES_CONTEXT_SCHEMA = {
 
 The freckles community repositories are a collection of community-created and curated frecklets and resources.
 
-TODO: list all repository urls        
-""",},
+TODO: list all repository urls
+""",
+    },
     "adapters": {
         "type": "list",
         "default": ["nsbl"],
@@ -64,31 +59,22 @@ TODO: list all repository urls
     },
     "repos": {
         "empty": False,
-        "default": [
-            "default",
-            "user",
-        ],
+        "default": ["default", "user"],
         "type": "list",
-        "schema": {
-            "type": "string",
-        },
+        "schema": {"type": "string"},
     },
     "resources": {
         "empty": True,
         "default": {},
         "type": "dict",
-        "keyschema": {
-            "type": "string"
-        },
-        "valueschema": {
-            "type": "dict"
-        }
+        "keyschema": {"type": "string"},
+        "valueschema": {"type": "dict"},
     },
     "allow_remote": {
         "type": "boolean",
         "default": False,
         "doc": "Whether to allow remote repositories and resources.",
-    }
+    },
 }
 
 # Schema to contain all the settings that can only be set in the 'default' context. Mainly used to give the user
@@ -98,12 +84,13 @@ FRECKLES_PERMISSION_SCHEMA = {
         "type": "boolean",
         "default": False,
         "doc": "Accept the license and acknowledge to not use the publicly licensed version of 'freckles' in combination with non-free software.",
-    },
+    }
 }
 
 # Merged schema, contains all high-level permission variables, as well as the default context config ones.
-FRECKLES_DEFAULT_CONFIG_SCHEMA = dict_merge(FRECKLES_CONTEXT_SCHEMA, FRECKLES_PERMISSION_SCHEMA, copy_dct=True)
-
+FRECKLES_DEFAULT_CONFIG_SCHEMA = dict_merge(
+    FRECKLES_CONTEXT_SCHEMA, FRECKLES_PERMISSION_SCHEMA, copy_dct=True
+)
 
 
 # FRECKLES_CONFIG_SCHEMA = {

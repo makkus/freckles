@@ -1,11 +1,10 @@
+import logging
 import subprocess
 import sys
 
 import click
 from plumbum import local
 from six import string_types
-import logging
-
 
 from frutils.frutils_cli import check_local_executable
 
@@ -223,7 +222,6 @@ def get_host_details(host_string):
 
 
 class FrecklesRunTarget(object):
-
     def __init__(self, target_or_target_dict):
 
         if isinstance(target_or_target_dict, string_types):

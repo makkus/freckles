@@ -20,12 +20,11 @@ class CliArgumentsAttribute(TingAttribute):
         # "list": list
     }
 
-    DEFAULT_CLI_SCHEMA = {
-        "show_default": True,
-        "param_type": "option",
-    }
+    DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
-    def __init__(self, target_attr_name="cli_arguments", source_attr_name="required_vars"):
+    def __init__(
+        self, target_attr_name="cli_arguments", source_attr_name="required_vars"
+    ):
 
         self.target_attr_name = target_attr_name
         self.source_attr_name = source_attr_name
@@ -57,7 +56,9 @@ class CliArgumentsAttribute(TingAttribute):
         if not var.cli.get("enabled", True):
             return None
 
-        option_properties = dict_merge(CliArgumentsAttribute.DEFAULT_CLI_SCHEMA, var.cli, copy_dct=True)
+        option_properties = dict_merge(
+            CliArgumentsAttribute.DEFAULT_CLI_SCHEMA, var.cli, copy_dct=True
+        )
 
         param_type = option_properties.pop("param_type")
 
@@ -84,7 +85,9 @@ class CliArgumentsAttribute(TingAttribute):
         # setting type
         cerberus_type = var.type
 
-        replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(cerberus_type, None)
+        replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
+            cerberus_type, None
+        )
         if replacement is not None:
             if replacement == bool:
                 if "is_flag" not in option_properties.keys():
@@ -96,7 +99,9 @@ class CliArgumentsAttribute(TingAttribute):
         elif cerberus_type == "list":
             arg_schema = var.schema.get("schema", {})
             schema_type = arg_schema.get("type", "string")
-            replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(schema_type, click.STRING)
+            replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
+                schema_type, click.STRING
+            )
             option_properties["type"] = replacement
             if param_type == "option":
                 option_properties["multiple"] = True
@@ -119,8 +124,8 @@ class CliArgumentsAttribute(TingAttribute):
 
         return p
 
-class RequiredVariablesAttribute(TingAttribute):
 
+class RequiredVariablesAttribute(TingAttribute):
     def __init__(self, target_attr_name="required_vars"):
 
         self.target_attr_name = target_attr_name
@@ -140,9 +145,10 @@ class RequiredVariablesAttribute(TingAttribute):
         required_vars_tree = {}
         for path in paths_to_leaves:
             leaf_node_id = path[-1]
-            args = self.get_required_vars_from_path(path_to_leaf=path, tree=task_tree, ting=ting)
+            args = self.get_required_vars_from_path(
+                path_to_leaf=path, tree=task_tree, ting=ting
+            )
             required_vars_tree[leaf_node_id] = args
-
 
         required_vars = self.consolidate_vars(required_vars_tree, ting)
 
@@ -152,7 +158,6 @@ class RequiredVariablesAttribute(TingAttribute):
         }
         return MultiCacheResult(**result)
 
-
     def consolidate_vars(self, required_vars_tree, ting):
 
         result = {}
@@ -161,7 +166,9 @@ class RequiredVariablesAttribute(TingAttribute):
             for arg_name, arg in args.items():
 
                 if arg in result.keys():
-                    raise FreckletException("Duplicate arg '{}' in frecklet '{}'".format(arg_name, ting.id))
+                    raise FreckletException(
+                        "Duplicate arg '{}' in frecklet '{}'".format(arg_name, ting.id)
+                    )
 
                 result[arg_name] = arg
 
@@ -193,7 +200,12 @@ class RequiredVariablesAttribute(TingAttribute):
             if key not in vars.keys():
 
                 if arg.required and arg.default is None:
-                    raise FreckletException("Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(current_node.tag, tree.get_node(0).tag, key, last_node.tag), tree.get_node(0).tag)
+                    raise FreckletException(
+                        "Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(
+                            current_node.tag, tree.get_node(0).tag, key, last_node.tag
+                        ),
+                        tree.get_node(0).tag,
+                    )
 
                 # means we don't have to worry about this key, as it is not used and not required
                 continue
@@ -208,34 +220,47 @@ class RequiredVariablesAttribute(TingAttribute):
                         # print("USING CHILD ARG")
                         new_arg = arg
                     else:
-                        new_arg = Arg(key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+                        new_arg = Arg(
+                            key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                        )
                         new_arg.add_child(arg)
                         new_arg.var_template = parent_var
 
                     args[key] = new_arg
                 else:
-                    template_keys = get_template_keys(parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                    template_keys = get_template_keys(
+                        parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                    )
                     for tk in template_keys:
                         arg_config = available_args.get(tk, None)
                         if arg_config is None:
                             if tk == key:
                                 new_arg = arg
                             else:
-                                new_arg = Arg(key, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+                                new_arg = Arg(
+                                    key, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                                )
                                 new_arg.add_child(arg)
                         else:
-                            new_arg = Arg(key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+                            new_arg = Arg(
+                                key,
+                                arg_config,
+                                default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                            )
                             new_arg.add_child(arg)
 
                         new_arg.var_template = parent_var
                         args[tk] = new_arg
 
         if current_node_id != 0:
-            return self.resolve_required_vars(current_args=args, rest_path=rest_path, last_node=current_node, tree=tree)
+            return self.resolve_required_vars(
+                current_args=args,
+                rest_path=rest_path,
+                last_node=current_node,
+                tree=tree,
+            )
         else:
             return args
-
-
 
     def get_required_vars_from_path(self, path_to_leaf, tree, ting):
 
@@ -245,9 +270,11 @@ class RequiredVariablesAttribute(TingAttribute):
 
         available_args = root_node.data["root_frecklet"].args
         template_keys = root_node.data["root_frecklet"].template_keys
-        args = Arg.from_keys(template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+        args = Arg.from_keys(
+            template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+        )
         rest_path = reversed(path_to_leaf[0:-1])
 
-        return self.resolve_required_vars(current_args=args, rest_path=rest_path, last_node=root_node, tree=tree)
-
-
+        return self.resolve_required_vars(
+            current_args=args, rest_path=rest_path, last_node=root_node, tree=tree
+        )

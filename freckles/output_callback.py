@@ -83,6 +83,7 @@ def load_callback(callback_name, callback_config=None):
 
     return mgr.driver
 
+
 class TaskDetail(object):
     def __init__(
         self,
@@ -147,6 +148,7 @@ class TaskDetail(object):
 
         return pprintpp.pformat(self.__dict__)
 
+
 class FrecklesRun(object):
     def __init__(self, run_id, result_dict):
 
@@ -161,9 +163,13 @@ class FrecklesRun(object):
 
     def __str__(self):
 
-        return readable_yaml({"name": self.frecklet_name, "run_properties": self.run_properties, "task_list": self.task_list})
-
-
+        return readable_yaml(
+            {
+                "name": self.frecklet_name,
+                "run_properties": self.run_properties,
+                "task_list": self.task_list,
+            }
+        )
 
 
 class FrecklesCallback(object):

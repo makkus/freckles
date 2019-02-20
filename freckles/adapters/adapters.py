@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import abc
-import copy
 import logging
 import sys
 
 import six
 from stevedore import driver
-from stevedore.extension import ExtensionManager
 
 from frutils.config.cnf import Cnf
 
 log = logging.getLogger("freckles")
+
 
 # extensions
 # ------------------------------------------------------------------------
@@ -37,9 +36,8 @@ def create_adapter(adapter_name, cnf):
         namespace="freckles.adapters",
         name=adapter_name,
         invoke_on_load=True,
-        invoke_args=(adapter_name, cnf, ),
+        invoke_args=(adapter_name, cnf),
     )
-
 
     return mgr.driver
 
@@ -49,7 +47,9 @@ class FrecklesAdapter(object):
     def __init__(self, adapter_name, cnf):
 
         self._name = adapter_name
-        self._cnf_interpreter = cnf.add_interpreter("adapter_config_{}".format(adapter_name), self.get_config_schema())
+        self._cnf_interpreter = cnf.add_interpreter(
+            "adapter_config_{}".format(adapter_name), self.get_config_schema()
+        )
         self.resource_folder_map = None
 
     @property
@@ -90,7 +90,6 @@ class FrecklesAdapter(object):
 
         self.resource_folder_map = resource_folders
 
-
     @abc.abstractmethod
     def get_supported_task_types(self):
         """Return a list of supported frecklet types to run."""
@@ -98,17 +97,45 @@ class FrecklesAdapter(object):
         pass
 
     @abc.abstractmethod
-    def _run(self, tasklist, run_vars, run_cnf, secure_vars, output_callback, result_callback, parent_task):
+    def _run(
+        self,
+        tasklist,
+        run_vars,
+        run_cnf,
+        secure_vars,
+        output_callback,
+        result_callback,
+        parent_task,
+    ):
 
         pass
 
-    def run(self, tasklist, run_vars, run_config, secure_vars, output_callback, result_callback, parent_task):
+    def run(
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        secure_vars,
+        output_callback,
+        result_callback,
+        parent_task,
+    ):
 
         cnf = Cnf(run_config)
 
-        run_cnf = cnf.add_interpreter("adapter_{}_run_config".format(self.name), schema=self.get_run_config_schema())
+        run_cnf = cnf.add_interpreter(
+            "adapter_{}_run_config".format(self.name),
+            schema=self.get_run_config_schema(),
+        )
 
-        result = self._run(tasklist=tasklist, run_vars=run_vars, run_cnf=run_cnf, secure_vars=secure_vars, output_callback=output_callback, result_callback=result_callback, parent_task=parent_task)
+        result = self._run(
+            tasklist=tasklist,
+            run_vars=run_vars,
+            run_cnf=run_cnf,
+            secure_vars=secure_vars,
+            output_callback=output_callback,
+            result_callback=result_callback,
+            parent_task=parent_task,
+        )
 
         return result
-

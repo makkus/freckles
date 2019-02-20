@@ -3,6 +3,7 @@
 import os
 
 from jinja2.nativetypes import NativeEnvironment
+
 from frutils import JINJA_DELIMITER_PROFILES, jinja2_filters
 
 # ---------------------------------------------------------------
@@ -17,10 +18,7 @@ META_KEY = "meta"
 MIXED_CONTENT_TYPE = "hodgepodge"
 ACCEPT_FRECKLES_LICENSE_KEYNAME = "accept_freckles_license"
 
-FRECKLES_DEFAULT_ARG_SCHEMA = {
-    "required": True,
-    "empty": False
-}
+FRECKLES_DEFAULT_ARG_SCHEMA = {"required": True, "empty": False}
 
 # ---------------------------------------------------------------
 # folder / filesystem defaults
@@ -49,5 +47,3 @@ FRECKLES_CACHE_BASE = os.path.join(FRECKLES_SHARE_DIR, "cache")
 DEFAULT_FRECKLES_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["freckles"])
 for filter_name, filter_details in jinja2_filters.ALL_FRUTIL_FILTERS.items():
     DEFAULT_FRECKLES_JINJA_ENV.filters[filter_name] = filter_details["func"]
-
-

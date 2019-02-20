@@ -1,5 +1,3 @@
-import collections
-import copy
 import json
 import logging
 import os
@@ -8,18 +6,21 @@ from collections import Mapping, Iterable
 from six import string_types
 
 from freckles.adapters.adapters import create_adapter
-from freckles.defaults import MIXED_CONTENT_TYPE, FRECKLET_KEY_NAME, TASK_KEY_NAME, VARS_KEY
-from freckles.frecklecutable import is_duplicate_task
+from freckles.defaults import (
+    MIXED_CONTENT_TYPE,
+)
 from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
-from freckles.frecklet.vars import Inventory
-from freckles.output_callback import DefaultCallback, TaskDetail
 from freckles.schemas import FRECKLES_CONTEXT_SCHEMA
 from frutils import dict_merge
 from frutils.config.cnf import Cnf
-from ting.ting_attributes import TingAttribute, FrontmatterAndContentAttribute, DictContentAttribute, \
-    FileStringContentAttribute, ValueAttribute
+from ting.ting_attributes import (
+    FrontmatterAndContentAttribute,
+    DictContentAttribute,
+    FileStringContentAttribute,
+    ValueAttribute,
+)
 from ting.ting_cast import TingCast
-from ting.tings import TingTings, Tings
+from ting.tings import TingTings
 
 log = logging.getLogger("freckles")
 
@@ -44,15 +45,26 @@ class CnfProfileTingCast(TingCast):
 
     CNF_PROFILE_ATTRIBUTES = [
         FileStringContentAttribute(target_attr_name="ting_content"),
-        FrontmatterAndContentAttribute(content_name="content", source_attr_name="ting_content"),
+        FrontmatterAndContentAttribute(
+            content_name="content", source_attr_name="ting_content"
+        ),
         ValueAttribute("config_dict", source_attr_name="content"),
         # CnfTingAttribute(),
-        DictContentAttribute(source_attr_name="content", dict_name="config_dict", default={}, copy_default=True),
+        DictContentAttribute(
+            source_attr_name="content",
+            dict_name="config_dict",
+            default={},
+            copy_default=True,
+        ),
     ]
 
     def __init__(self):
 
-        super(CnfProfileTingCast, self).__init__(class_name="CnfProfile", ting_attributes=CnfProfileTingCast.CNF_PROFILE_ATTRIBUTES, ting_id_attr="filename_no_ext")
+        super(CnfProfileTingCast, self).__init__(
+            class_name="CnfProfile",
+            ting_attributes=CnfProfileTingCast.CNF_PROFILE_ATTRIBUTES,
+            ting_id_attr="filename_no_ext",
+        )
 
 
 class CnfProfiles(TingTings):
@@ -80,15 +92,25 @@ class CnfProfiles(TingTings):
         if "root_config" not in cnf.get_interpreter_names():
             raise Exception("No root_config profile interpreter in cnf.")
 
-        if "default_profile" in cnf.get_interpreter("root_config").get_interpreter_names():
+        if (
+            "default_profile"
+            in cnf.get_interpreter("root_config").get_interpreter_names()
+        ):
             # not sure if this is necessary, might take that out later
-            raise Exception("Configuration already contains a 'default_profile' interpreter.")
+            raise Exception(
+                "Configuration already contains a 'default_profile' interpreter."
+            )
 
         self._root_config = cnf.get_interpreter("root_config")
 
         self._default_profile_values = None
 
-        super(CnfProfiles, self).__init__(repo_name=repo_name, tingsets=tingsets, load_config=load_config, indexes=["filename_no_ext"])
+        super(CnfProfiles, self).__init__(
+            repo_name=repo_name,
+            tingsets=tingsets,
+            load_config=load_config,
+            indexes=["filename_no_ext"],
+        )
 
     @property
     def root_config(self):
@@ -108,7 +130,9 @@ class CnfProfiles(TingTings):
 
         license_accepted = default_config.get("accept_freckles_license", False)
         if not license_accepted:
-            raise Exception("The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.")
+            raise Exception(
+                "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
+            )
 
         self._default_profile_values = dict(default_config)
         for k, v in self._root_config.config.items():
@@ -118,8 +142,6 @@ class CnfProfiles(TingTings):
         return self._default_profile_values
 
     def license_accepted(self):
-
-
 
         if "default" not in self.keys():
             return False
@@ -134,7 +156,9 @@ class CnfProfiles(TingTings):
             return self.default_profile_dict
 
         if not self.license_accepted() and profile_name != "default":
-            raise Exception("The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.")
+            raise Exception(
+                "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
+            )
 
         result = self.get(profile_name)
 
@@ -161,7 +185,11 @@ class CnfProfiles(TingTings):
                 if not self.license_accepted() and profile == "default":
                     profile = self.default_profile_dict
                 elif not self.license_accepted() and profile in self.keys():
-                    raise Exception("The initial freckles configuration is locked, so can't open context configuration '{}'. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.".format(profile))
+                    raise Exception(
+                        "The initial freckles configuration is locked, so can't open context configuration '{}'. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.".format(
+                            profile
+                        )
+                    )
                 elif self.license_accepted() and profile in self.get_profile_names():
                     profile = self._get_profile_dict(profile)
                 elif not profile.startswith("{") and "=" in profile:
@@ -176,21 +204,37 @@ class CnfProfiles(TingTings):
                         try:
                             value = int(value)
                         except (Exception):
-                            raise Exception("Can't assemble profile configuration, unknown type for: {}".format(value))
+                            raise Exception(
+                                "Can't assemble profile configuration, unknown type for: {}".format(
+                                    value
+                                )
+                            )
                     profile = {key, value}
                 elif profile.startswith("{"):
                     # trying to read json
                     try:
                         profile = json.loads(profile)
                     except (Exception):
-                        raise Exception("Can't assemble profile configuration, don't know how to handle: {}".format(profile))
+                        raise Exception(
+                            "Can't assemble profile configuration, don't know how to handle: {}".format(
+                                profile
+                            )
+                        )
                 else:
-                    raise Exception("Can't create profile configuration, invalid config: {}.".format(profile))
+                    raise Exception(
+                        "Can't create profile configuration, invalid config: {}.".format(
+                            profile
+                        )
+                    )
 
             if isinstance(profile, Mapping):
                 dict_merge(result, dict(profile), copy_dct=False)
             else:
-                raise Exception("Can't assemble profile configuration, unknown type '{}' for value '{}'".format(type(profile), profile))
+                raise Exception(
+                    "Can't assemble profile configuration, unknown type '{}' for value '{}'".format(
+                        type(profile), profile
+                    )
+                )
 
         if extra_repos:
             if isinstance(extra_repos, string_types):
@@ -212,9 +256,7 @@ class CnfProfiles(TingTings):
             return sorted(names)
 
 
-
 class FrecklesContext(object):
-
     def __init__(self, context_name, cnf):
 
         self._context_name = context_name
@@ -245,7 +287,6 @@ class FrecklesContext(object):
                 map[rt] = folders
 
             adapter.set_resource_folder_map(map)
-
 
     def _create_resources_repo_list(self):
 
@@ -282,7 +323,9 @@ class FrecklesContext(object):
                             resource_type = MIXED_CONTENT_TYPE
                             url = u
 
-                        resources_list.append({"url": url, "type": resource_type, "alias": repo})
+                        resources_list.append(
+                            {"url": url, "type": resource_type, "alias": repo}
+                        )
 
         return resources_list
 
@@ -299,7 +342,7 @@ class FrecklesContext(object):
 
     @property
     def cnf(self):
-        return  self._cnf
+        return self._cnf
 
     @property
     def context_name(self):
@@ -321,24 +364,38 @@ class FrecklesContext(object):
             if "alias" in f.keys():
                 alias = f["alias"]
             else:
-                alias = os.path.basename(url).split('.')[0]
+                alias = os.path.basename(url).split(".")[0]
             i = 1
             while alias in used_aliases:
-                i = i+1
+                i = i + 1
                 alias = "{}_{}".format(alias, i)
 
             used_aliases.append(alias)
-            folder_index_conf.append({"repo_name": alias, "folder_url": url, "loader": "frecklet_files"})
+            folder_index_conf.append(
+                {"repo_name": alias, "folder_url": url, "loader": "frecklet_files"}
+            )
 
         for a_name, a in self._adapters.items():
 
             extra_frecklets_adapter = a.get_extra_frecklets()
             if not extra_frecklets_adapter:
                 continue
-            folder_index_conf.append({"repo_name": "extra_frecklets_adapter_{}".format(a_name), "loader": "frecklet_dicts", "data": extra_frecklets_adapter, "key_name": "frecklet_name", "meta_name": "_metadata_raw"})
+            folder_index_conf.append(
+                {
+                    "repo_name": "extra_frecklets_adapter_{}".format(a_name),
+                    "loader": "frecklet_dicts",
+                    "data": extra_frecklets_adapter,
+                    "key_name": "frecklet_name",
+                    "meta_name": "_metadata_raw",
+                }
+            )
 
-
-        self._frecklet_index = TingTings.from_config("frecklets", folder_index_conf, FRECKLET_LOAD_CONFIG, indexes=["frecklet_name"])
+        self._frecklet_index = TingTings.from_config(
+            "frecklets",
+            folder_index_conf,
+            FRECKLET_LOAD_CONFIG,
+            indexes=["frecklet_name"],
+        )
         return self._frecklet_index
 
     def get_frecklet(self, frecklet_name):
@@ -353,11 +410,14 @@ class FrecklesContext(object):
 
         frecklet = self.frecklet_index.get(frecklet_name, None)
         if frecklet is None:
-            raise Exception("No frecklet named '{}' in context '{}'".format(frecklet_name, self._context_name))
+            raise Exception(
+                "No frecklet named '{}' in context '{}'".format(
+                    frecklet_name, self._context_name
+                )
+            )
 
         frecklecutable = frecklet.create_frecklecutable(context=self)
         return frecklecutable
-
 
     # def run(self, frecklet_name, inventory):
     #
@@ -442,13 +502,3 @@ class FrecklesContext(object):
     #
     #     import pp
     #     pp(result)
-
-
-
-
-
-
-
-
-
-

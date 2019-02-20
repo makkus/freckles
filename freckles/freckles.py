@@ -5,24 +5,38 @@ from frutils.config.cnf import Cnf
 
 
 class Freckles(object):
-
-    def __init__(self, use_community=False, default_context_config=None, extra_repos=None):
+    def __init__(
+        self, use_community=False, default_context_config=None, extra_repos=None
+    ):
 
         init_dict = {}
         init_dict["use_community"] = use_community
         self._root_config = cnf = Cnf(init_dict)
-        profile_load_config = self._root_config.add_interpreter("profile_load", PROFILE_LOAD_CONFIG_SCHEMA)
+        profile_load_config = self._root_config.add_interpreter(
+            "profile_load", PROFILE_LOAD_CONFIG_SCHEMA
+        )
         self._root_config.add_interpreter("root_config", FRECKLES_DEFAULT_CONFIG_SCHEMA)
 
-        self._cnf_profiles = CnfProfiles.from_folders('cnf_profiles', FRECKLES_CONFIG_DIR, load_config=profile_load_config, cnf=cnf)
+        self._cnf_profiles = CnfProfiles.from_folders(
+            "cnf_profiles",
+            FRECKLES_CONFIG_DIR,
+            load_config=profile_load_config,
+            cnf=cnf,
+        )
 
         self._contexts = {}
         self._current_context = None
         if default_context_config is None:
             default_context_config = "default"
-        self.create_context(context_name="default", context_config=default_context_config, extra_repos=extra_repos)
+        self.create_context(
+            context_name="default",
+            context_config=default_context_config,
+            extra_repos=extra_repos,
+        )
 
-    def create_context(self, context_name, context_config, set_current=False, extra_repos=None):
+    def create_context(
+        self, context_name, context_config, set_current=False, extra_repos=None
+    ):
 
         if not context_name:
             raise Exception("Context name can't be empty")
@@ -33,7 +47,9 @@ class Freckles(object):
         if not context_config:
             raise Exception("Context configuration can't be empty.")
 
-        context_config = self._cnf_profiles.create_profile_cnf(context_config, extra_repos=extra_repos)
+        context_config = self._cnf_profiles.create_profile_cnf(
+            context_config, extra_repos=extra_repos
+        )
         context = FrecklesContext(context_name=context_name, cnf=context_config)
 
         self._contexts[context_name] = context
@@ -55,7 +71,6 @@ class Freckles(object):
             raise Exception("No context with name '{}' available.".format(context_name))
 
         self._current_context = context_name
-
 
     def get_context(self, context_name=None):
 
@@ -81,7 +96,6 @@ class Freckles(object):
         ctx = self.get_context(context_name)
         return ctx.frecklet_index
 
-
     def get_frecklet(self, frecklet_name, context_name=None):
 
         ctx = self.get_context(context_name)
@@ -91,5 +105,3 @@ class Freckles(object):
 
         ctx = self.get_context(context_name)
         return ctx.create_frecklecutable(frecklet_name)
-
-

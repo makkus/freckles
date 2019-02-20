@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from freckles.defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME
 from freckles.freckles_runner import FrecklesRunner
 
+from freckles.defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME
 from .adapters import FrecklesAdapter
 
 

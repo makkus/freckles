@@ -1,17 +1,30 @@
-from treelib import Tree
 import logging
 
-from freckles.defaults import TASK_KEY_NAME, FRECKLET_KEY_NAME, ARGS_KEY, VARS_KEY, META_KEY, \
-    DEFAULT_FRECKLES_JINJA_ENV, FRECKLETS_KEY
+from treelib import Tree
+
+from freckles.defaults import (
+    TASK_KEY_NAME,
+    FRECKLET_KEY_NAME,
+    ARGS_KEY,
+    VARS_KEY,
+    DEFAULT_FRECKLES_JINJA_ENV,
+    FRECKLETS_KEY,
+)
 from freckles.exceptions import FrecklesConfigException, FreckletException
 from frkl import FrklProcessor, Frkl
-from frkl.defaults import CHILD_MARKER_NAME, DEFAULT_LEAF_NAME, DEFAULT_LEAFKEY_NAME, OTHER_KEYS_NAME, KEY_MOVE_MAP_NAME
+from frkl.defaults import (
+    CHILD_MARKER_NAME,
+    DEFAULT_LEAF_NAME,
+    DEFAULT_LEAFKEY_NAME,
+    OTHER_KEYS_NAME,
+    KEY_MOVE_MAP_NAME,
+)
 from frkl.processors import ConfigProcessor
 from frutils import add_key_to_dict, get_template_keys, special_dict_to_dict
 from ting.ting_attributes import ValueAttribute, TingAttribute
 
-
 log = logging.getLogger("freckles")
+
 
 class FreckletsAttribute(ValueAttribute):
     def __init__(self):
@@ -22,10 +35,9 @@ class FreckletsAttribute(ValueAttribute):
 
     def get_attribute(self, ting, attribute_name=None):
 
-        result = ValueAttribute.get_attribute(
-            self, ting, attribute_name=attribute_name
-        )
+        result = ValueAttribute.get_attribute(self, ting, attribute_name=attribute_name)
         return result
+
 
 def fill_defaults(task_item):
 
@@ -130,7 +142,6 @@ class MoveEmbeddedTaskKeysProcessor(ConfigProcessor):
 
 
 class AddRootFreckletProcessor(ConfigProcessor):
-
     def __init__(self, **init_params):
 
         self.ting = init_params["ting"]
@@ -157,7 +168,6 @@ class NodeCounter(object):
 
 
 class TaskTreeAttribute(TingAttribute):
-
     def provides(self):
 
         return ["task_tree"]
@@ -187,15 +197,30 @@ class TaskTreeAttribute(TingAttribute):
 
             if task_type != "frecklet":
                 counter.up()
-                task_tree.create_node(identifier=counter.current_count, tag="{}:{}".format(task_type, task_name), data=task, parent=parent_id)
+                task_tree.create_node(
+                    identifier=counter.current_count,
+                    tag="{}:{}".format(task_type, task_name),
+                    data=task,
+                    parent=parent_id,
+                )
                 continue
 
             task_ting = ting._meta_parent_repo.get(task_name)
             if task_ting is None:
-                raise FreckletException("Can't build frecklet '{}': no child named '{}' available".format(ting.id, task_name), frecklet=ting.id)
+                raise FreckletException(
+                    "Can't build frecklet '{}': no child named '{}' available".format(
+                        ting.id, task_name
+                    ),
+                    frecklet=ting.id,
+                )
 
             counter.up()
-            task_tree.create_node(identifier=counter.current_count, tag="{}:{}".format(task_type, task_name), data=task, parent=parent_id)
+            task_tree.create_node(
+                identifier=counter.current_count,
+                tag="{}:{}".format(task_type, task_name),
+                data=task,
+                parent=parent_id,
+            )
             self._build_tree(task_tree=task_tree, ting=task_ting, counter=counter)
 
 
@@ -225,7 +250,6 @@ class TaskListDetailedAttribute(TingAttribute):
         # TaskPathProcessor(index=self.index)
     ]
 
-
     def provides(self):
 
         return ["tasklist_detailed"]
@@ -237,7 +261,9 @@ class TaskListDetailedAttribute(TingAttribute):
     def get_attribute(self, ting, attribute_name=None):
 
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
-        chain = TaskListDetailedAttribute.PROCESS_CHAIN + [AddRootFreckletProcessor(ting=ting)]
+        chain = TaskListDetailedAttribute.PROCESS_CHAIN + [
+            AddRootFreckletProcessor(ting=ting)
+        ]
 
         f = Frkl(ting._metadata_raw, chain)
         tasklist_detailed = f.process()
@@ -263,8 +289,8 @@ def prettyfiy_task(task_detailed):
 
     return t
 
-class TaskListAttribute(TingAttribute):
 
+class TaskListAttribute(TingAttribute):
     def provides(self):
         return ["tasklist"]
 
@@ -282,8 +308,8 @@ class TaskListAttribute(TingAttribute):
 
         return tasklist
 
-class TaskListResolvedAttribute(TingAttribute):
 
+class TaskListResolvedAttribute(TingAttribute):
     def provides(self):
         return ["tasklist_resolved"]
 
