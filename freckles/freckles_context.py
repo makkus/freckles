@@ -5,12 +5,12 @@ from collections import Mapping, Iterable
 
 from six import string_types
 
-from freckles.adapters.adapters import create_adapter
-from freckles.defaults import (
+from .adapters.adapters import create_adapter
+from .defaults import (
     MIXED_CONTENT_TYPE,
 )
-from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
-from freckles.schemas import FRECKLES_CONTEXT_SCHEMA
+from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
+from .schemas import FRECKLES_CONTEXT_SCHEMA
 from frutils import dict_merge
 from frutils.config.cnf import Cnf
 from ting.ting_attributes import (

@@ -6,15 +6,15 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
-from freckles.defaults import (
+from .defaults import (
     FRECKLET_KEY_NAME,
     VARS_KEY,
     TASK_KEY_NAME,
     DEFAULT_FRECKLES_JINJA_ENV,
     FRECKLES_DEFAULT_ARG_SCHEMA,
 )
-from freckles.exceptions import FrecklesVarException
-from freckles.output_callback import (
+from .exceptions import FrecklesVarException
+from .output_callback import (
     DefaultCallback,
     TaskDetail,
     FrecklesRun,
