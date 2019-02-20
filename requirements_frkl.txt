@@ -7,6 +7,7 @@ click-log>=0.3.2
 # dev dependencies
 git+https://gitlab.com/frkl/frutils.git
 git+https://gitlab.com/frkl/frkl.git
-git+https://gitlab.com/frkl/luci.git
+git+https://gitlab.com/frkl/ting.git
+git+https://gitlab.com/frkl/templing.git
 git+https://gitlab.com/freckles-io/freckles-adapter-nsbl.git
 
