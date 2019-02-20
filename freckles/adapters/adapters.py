@@ -77,6 +77,10 @@ class FrecklesAdapter(object):
 
         pass
 
+    def get_extra_frecklets(self):
+
+        return []
+
     @abc.abstractmethod
     def get_supported_resource_types(self):
 

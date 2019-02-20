@@ -260,22 +260,29 @@ class FrecklesContext(object):
         # move resource repos
         for repo in repo_list:
 
-            if "::" in repo:
-                resource_type, url = repo.split("::", 1)
-            else:
-                resource_type = MIXED_CONTENT_TYPE
-                url = repo
-
-
             if os.path.sep in repo:
+
+                if "::" in repo:
+                    resource_type, url = repo.split("::", 1)
+                else:
+                    resource_type = MIXED_CONTENT_TYPE
+                    url = repo
+
                 r = {"url": url, "type": resource_type}
                 resources_list.append(r)
             else:
                 # it's an alias
                 for a in self._adapters.values():
                     r = a.get_folders_for_alias(repo)
+
                     for u in r:
-                        resources_list.append({"url": u, "type": resource_type, "alias": repo})
+                        if "::" in u:
+                            resource_type, url = u.split("::", 1)
+                        else:
+                            resource_type = MIXED_CONTENT_TYPE
+                            url = u
+
+                        resources_list.append({"url": url, "type": resource_type, "alias": repo})
 
         return resources_list
 
@@ -323,6 +330,14 @@ class FrecklesContext(object):
             used_aliases.append(alias)
             folder_index_conf.append({"repo_name": alias, "folder_url": url, "loader": "frecklet_files"})
 
+        for a_name, a in self._adapters.items():
+
+            extra_frecklets_adapter = a.get_extra_frecklets()
+            if not extra_frecklets_adapter:
+                continue
+            folder_index_conf.append({"repo_name": "extra_frecklets_adapter_{}".format(a_name), "loader": "frecklet_dicts", "data": extra_frecklets_adapter, "key_name": "frecklet_name", "meta_name": "_metadata_raw"})
+
+
         self._frecklet_index = TingTings.from_config("frecklets", folder_index_conf, FRECKLET_LOAD_CONFIG, indexes=["frecklet_name"])
         return self._frecklet_index
 
@@ -331,8 +346,6 @@ class FrecklesContext(object):
         return self.frecklet_index.get(frecklet_name)
 
     def get_frecklet_names(self, **kwargs):
-
-        print(kwargs)
 
         return self.frecklet_index.keys()
 

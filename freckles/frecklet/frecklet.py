@@ -7,11 +7,10 @@ from freckles.frecklet.tasks import FreckletsAttribute, TaskListDetailedAttribut
     TaskListResolvedAttribute
 from ting.ting_attributes import (
     ValueAttribute,
-    TingAttribute, FileStringContentAttribute, DictContentAttribute, ArgsAttribute)
+    TingAttribute, FileStringContentAttribute, DictContentAttribute, ArgsAttribute, DocAttribute)
 from frutils import get_template_keys
-from frutils.doc import Doc
 from ting.ting_cast import TingCast
-from ting.tings import TingTings, FileTings
+from ting.tings import TingTings
 
 log = logging.getLogger("freckles")
 
@@ -32,23 +31,6 @@ class FreckletsTemplateKeysAttribute(TingAttribute):
         return template_keys
 
 
-class DocAttribute(ValueAttribute):
-    def __init__(self):
-
-        super(DocAttribute, self).__init__(
-            target_attr_name="doc", source_attr_name="_metadata_raw"
-        )
-
-    def get_attribute(self, ting, attribute_name=None):
-
-        result = ValueAttribute.get_attribute(
-            self, ting, attribute_name=attribute_name
-        )
-
-        doc = Doc(result)
-        return doc
-
-
 class FreckletMetaAttribute(ValueAttribute):
     def __init__(self):
 
@@ -66,12 +48,6 @@ class FreckletMetaAttribute(ValueAttribute):
 FRECKLET_LOAD_CONFIG = {
     "class_name": "Frecklet",
     "attributes": [
-        {
-            "DictContentAttribute": {
-                "dict_name": "_metadata_raw",
-                "source_attr_name": "ting_content",
-            }
-        },
         { "ArgsAttribute": {
             "source_attr_name": "_metadata_raw",
             "target_attr_name": "args",
@@ -101,6 +77,12 @@ FRECKLET_LOAD_CONFIG = {
                 "folder_load_file_match_regex": "\\.frecklet$",
             },
             "attributes": [
+                {
+                    "DictContentAttribute": {
+                        "dict_name": "_metadata_raw",
+                        "source_attr_name": "ting_content",
+                    }
+                },
                 "FileStringContentAttribute",
                 {
                     "MirrorAttribute": {
@@ -108,6 +90,13 @@ FRECKLET_LOAD_CONFIG = {
                         "target_attr_name": "frecklet_name"
                     }
                 }
+            ]
+        },
+        "frecklet_dicts": {
+            "class": "ting.tings.DictTings",
+            "load_config": {},
+            "attributes": [
+
             ]
         }
     },

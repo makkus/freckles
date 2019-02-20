@@ -25,23 +25,24 @@ class CliArgumentsAttribute(TingAttribute):
         "param_type": "option",
     }
 
-    def __init__(self):
+    def __init__(self, target_attr_name="cli_arguments", source_attr_name="required_vars"):
 
-        pass
+        self.target_attr_name = target_attr_name
+        self.source_attr_name = source_attr_name
 
     def provides(self):
 
-        return ["cli_arguments"]
+        return [self.target_attr_name]
 
     def requires(self):
 
-        return ["required_vars"]
+        return [self.source_attr_name]
 
     def get_attribute(self, ting, attribute_name=None):
 
         # TODO: validate
 
-        required_vars = ting.required_vars
+        required_vars = getattr(ting, self.source_attr_name)
 
         result = []
         for var in required_vars.values():
@@ -118,20 +119,19 @@ class CliArgumentsAttribute(TingAttribute):
 
         return p
 
-
 class RequiredVariablesAttribute(TingAttribute):
 
-    def __init__(self):
+    def __init__(self, target_attr_name="required_vars"):
 
-        pass
+        self.target_attr_name = target_attr_name
 
     def provides(self):
 
-        return ["required_vars", "required_vars_tree"]
+        return [self.target_attr_name, "{}_tree".format(self.target_attr_name)]
 
     def requires(self):
 
-        return ["_metadata_raw", "task_tree"]
+        return ["task_tree"]
 
     def get_attribute(self, ting, attribute_name=None):
 
@@ -147,8 +147,8 @@ class RequiredVariablesAttribute(TingAttribute):
         required_vars = self.consolidate_vars(required_vars_tree, ting)
 
         result = {
-            "required_vars_tree": required_vars_tree,
-            "required_vars": required_vars,
+            "{}_tree".format(self.target_attr_name): required_vars_tree,
+            self.target_attr_name: required_vars,
         }
         return MultiCacheResult(**result)
 

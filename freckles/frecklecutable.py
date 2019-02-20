@@ -12,6 +12,7 @@ from freckles.defaults import FRECKLET_KEY_NAME, VARS_KEY, TASK_KEY_NAME, DEFAUL
 from freckles.exceptions import FrecklesVarException
 from freckles.output_callback import DefaultCallback, TaskDetail, FrecklesRun, FrecklesResultCallback
 from frutils import replace_strings_in_obj, get_template_keys
+from frutils.frutils_cli import output
 from frutils.parameters import FrutilsNormalizer
 
 log = logging.getLogger("freckles")
@@ -122,7 +123,6 @@ class Frecklecutable(object):
             repl_dict = self._retrieve_var_value_from_inventory(inventory=inventory, var_value=var_value)
 
         processed = replace_strings_in_obj(var_value, replacement_dict=repl_dict, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-
         return processed
 
     def _generate_schema(self, var_value_map, args, template_keys=None):
@@ -142,13 +142,11 @@ class Frecklecutable(object):
     def _validate_processed_vars(self, var_value_map, schema, allow_unknown=False, purge_unknown=True, task_path=None, vars_pre_clean=None, task=None):
 
         validator = FrutilsNormalizer(schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown)
-
         valid = validator.validated(var_value_map)
         if valid is None:
             if vars_pre_clean is None:
                 vars_pre_clean = var_value_map
             raise FrecklesVarException(self.frecklet, error=validator.errors, task_path=task_path, vars=vars_pre_clean, task=task)
-
         return valid
 
     def process_tasks(self, inventory):
@@ -184,10 +182,12 @@ class Frecklecutable(object):
         task_path = []
 
         for tn in task_tree.all_nodes():
+
             task_id = tn.identifier
             if task_id == 0:
 
                 processed_tree.create_node(identifier=0, tag=task_tree.get_node(0).tag, data={"frecklet": root_frecklet.data, "inventory": inventory})
+
                 continue
 
 
@@ -208,7 +208,7 @@ class Frecklecutable(object):
                 task_path = []
             else:
                 parent = processed_tree.get_node(parent_id).data
-                repl_vars = parent["processed_vars"]
+                repl_vars = parent["processed"].get("vars", {})
 
             # level = task_tree.level(task_id)
             # padding = "    " * level
@@ -216,8 +216,6 @@ class Frecklecutable(object):
             # print(readable(repl_vars, out="yaml", indent=(level*4)+4).rstrip())
             # print("{}task:".format(padding))
             # print("{}    name: {}".format(padding, task_name))
-
-            task_path.append(task_name)
 
             if parent.get("processed", {}).get(FRECKLET_KEY_NAME, {}).get("skip", False):
                 processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
@@ -229,6 +227,22 @@ class Frecklecutable(object):
             vars = copy.copy(task_node.get(VARS_KEY, {}))
             frecklet = copy.copy(task_node[FRECKLET_KEY_NAME])
             task = copy.copy(task_node.get(TASK_KEY_NAME, {}))
+
+
+            skip = frecklet.get("skip", None)
+
+
+            # print('=======================')
+            # print("FRECKLET")
+            # output(frecklet, output_type="yaml")
+            # output(task, output_type="yaml")
+            # output(vars, output_type="yaml")
+            # print("PARENT")
+            # import pp
+            # pp(parent)
+            # print("REPL")
+            # pp(repl_vars)
+            # print('---------------------------')
 
             # first we get our target variable, as this will most likley determine the value of the var later on
             target = frecklet.get("target", None)
@@ -245,7 +259,6 @@ class Frecklecutable(object):
 
             # then we check if we can skip the task. For that we already need the target variable ready, as it might
             # be used for variable selection
-            skip = frecklet.get("skip", None)
             if skip is not None:
                 skip_value = self._replace_templated_var_value(var_value=skip, repl_dict=repl_vars, inventory=inventory)
                 frecklet["skip"] = skip_value
@@ -253,52 +266,67 @@ class Frecklecutable(object):
                     processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
                                                data={"frecklet": root_frecklet.data, "inventory": inventory, "processed_vars": {},
                                                      "processed": {FRECKLET_KEY_NAME: {"skip": True}}}, parent=parent_id)
+
+                    # print("SKIPPPPED")
                     continue
 
 
             # now we replace the whole rest of the task
 
-            if not task_tree.get_node(task_id).is_leaf():
-                vars_processed = self._replace_templated_var_value(var_value=vars, repl_dict=repl_vars,
-                                                                   inventory=inventory)
-                vars_processed_cleaned = remove_none_values(vars_processed, args=args)
-                schema = self._generate_schema(var_value_map=vars, args=args, template_keys=None)
-                validated = self._validate_processed_vars(var_value_map=vars_processed_cleaned, schema=schema, task_path=task_path, vars_pre_clean=vars_processed, task=task_node)
-                processed = {
-                    FRECKLET_KEY_NAME: frecklet,
-                    TASK_KEY_NAME: task
-                }
-                processed = self._replace_templated_var_value(var_value=processed, repl_dict=repl_vars,
-                                                              inventory=inventory)
-                processed = remove_none_values(processed, convert_empty_to_none=False)
-                processed[VARS_KEY] = validated
-                processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
-                                           data={"frecklet": root_frecklet.data, "inventory": inventory,
-                                                 "processed_vars": validated, "processed": processed}, parent=parent_id)
-            else:
 
-                task = {
-                    FRECKLET_KEY_NAME: frecklet,
-                    TASK_KEY_NAME: task,
-                    VARS_KEY: vars
-                }
-                template_keys = get_template_keys(task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
-                schema = self._generate_schema(var_value_map=task, args=args, template_keys=template_keys)
-                val_map = {}
-                for tk in template_keys:
-                    val = repl_vars.get(tk, None)
-                    if val is not None:
-                        val_map[tk] = val
 
-                validated_val_map = self._validate_processed_vars(var_value_map=val_map, schema=schema, task_path=task_path, vars_pre_clean=repl_vars, task=task_node)
+            # if not task_tree.get_node(task_id).is_leaf():
+            #     print("NOT LEAF")
+            #     print(vars)
+            #     vars_processed = self._replace_templated_var_value(var_value=vars, repl_dict=repl_vars,
+            #                                                        inventory=inventory)
+            #     vars_processed_cleaned = remove_none_values(vars_processed, args=args)
+            #     schema = self._generate_schema(var_value_map=vars, args=args, template_keys=None)
+            #
+            #     validated = self._validate_processed_vars(var_value_map=vars_processed_cleaned, schema=schema,
+            #                                                   task_path=task_path, vars_pre_clean=vars_processed,
+            #                                                   task=task_node)
+            #
+            #
+            #     processed = {
+            #         FRECKLET_KEY_NAME: frecklet,
+            #         TASK_KEY_NAME: task
+            #     }
+            #     processed = self._replace_templated_var_value(var_value=processed, repl_dict=repl_vars,
+            #                                                   inventory=inventory)
+            #     processed = remove_none_values(processed, convert_empty_to_none=False)
+            #     processed[VARS_KEY] = validated
+            #
+            #     processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+            #                                data={"frecklet": root_frecklet.data, "inventory": inventory,
+            #                                      "processed": processed}, parent=parent_id)
+            # else:
 
-                task_processed = self._replace_templated_var_value(var_value=task, repl_dict=validated_val_map,
-                                                                   inventory=inventory)
-                task_processed = remove_none_values(task_processed, args=args)
+            task = {
+                FRECKLET_KEY_NAME: frecklet,
+                TASK_KEY_NAME: task,
+                VARS_KEY: vars
+            }
 
-                processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
-                                           data={"frecklet": root_frecklet.data, "inventory": inventory,
-                                                 "processed": task_processed}, parent=parent_id)
+
+            template_keys = get_template_keys(task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+            schema = self._generate_schema(var_value_map=task, args=args, template_keys=template_keys)
+            val_map = {}
+            for tk in template_keys:
+                val = repl_vars.get(tk, None)
+                if val is not None:
+                    val_map[tk] = val
+
+            validated_val_map = self._validate_processed_vars(var_value_map=val_map, schema=schema, task_path=task_path, vars_pre_clean=repl_vars, task=task_node)
+
+            task_processed = self._replace_templated_var_value(var_value=task, repl_dict=validated_val_map,
+                                                               inventory=inventory)
+            task_processed = remove_none_values(task_processed, args=args)
+
+
+            processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
+                                       data={"frecklet": root_frecklet.data, "inventory": inventory,
+                                             "processed": task_processed}, parent=parent_id)
 
         return processed_tree
 
