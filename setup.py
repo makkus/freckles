@@ -13,6 +13,7 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "frkl==1.0.0b1",
+    "ting==0.1.0",
     "colorama==0.4.1",
     "termcolor==1.1.0",
     "terminaltables==3.1.0",
