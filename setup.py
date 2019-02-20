@@ -12,7 +12,7 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    # "luci==1.0.0b1",
+    "frutils==1.0.0b1",
     "colorama==0.4.1",
     "termcolor==1.1.0",
     "terminaltables==3.1.0",
