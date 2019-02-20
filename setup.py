@@ -51,10 +51,10 @@ setup(
         # "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
         # "freckelize=freckles.freckelize.freckelize_cli:cli",
         # ],
-        "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
-        "freckles.adapters": [
-            "freckles=freckles.adapters.freckles_adapter:FrecklesChildAdapter"
-        ],
+        # "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
+        # "freckles.adapters": [
+        #     "freckles=freckles.adapters.freckles_adapter:FrecklesChildAdapter"
+        # ],
         # "freckfreckfreck.plugins": [
         #     "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
         #     "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
