@@ -7,7 +7,6 @@ import os
 import pytest
 
 # from freckles.frecklecute_cli import cli
-from frutils.config import Cnf
 
 THIS_DIR = os.path.dirname(__file__)
 FRECKLES_TEST_RUN_DIR = os.path.expanduser("/tmp/freckle_tests/archive/run")
@@ -25,6 +24,11 @@ TEST_CNF_PROFILES = {
     },
     "empty": {"context_repos": []},
 }
+
+
+def test_command_line_interface():
+    """Test the CLI."""
+    assert True
 
 #
 # @pytest.fixture(scope="class")
