@@ -8,6 +8,8 @@ from ting.ting_attributes import (
     ValueAttribute,
     TingAttribute,
 )
+from .tasks import *  # noqa
+from .arguments import *  # noqa
 
 log = logging.getLogger("freckles")
 
