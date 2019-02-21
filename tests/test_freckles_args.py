@@ -4,7 +4,7 @@
 """Tests for `freckles` package."""
 import os
 
-import pytest
+import pytest # noqa
 
 # from freckles.frecklecute_cli import cli
 
