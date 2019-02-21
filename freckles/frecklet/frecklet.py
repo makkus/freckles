@@ -2,10 +2,7 @@ import logging
 
 from freckles.defaults import FRECKLETS_KEY, DEFAULT_FRECKLES_JINJA_ENV
 from freckles.frecklecutable import FrecklecutableMixin
-from .arguments import (
-    RequiredVariablesAttribute,
-    CliArgumentsAttribute,
-)
+from .arguments import RequiredVariablesAttribute, CliArgumentsAttribute
 from .tasks import (
     FreckletsAttribute,
     TaskListDetailedAttribute,

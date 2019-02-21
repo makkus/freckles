@@ -8,10 +8,9 @@ class Freckles(object):
     def __init__(
         self, use_community=False, default_context_config=None, extra_repos=None
     ):
-
         init_dict = {}
         init_dict["use_community"] = use_community
-        self._root_config = cnf = Cnf(init_dict)
+        self._root_config = Cnf(init_dict)
         profile_load_config = self._root_config.add_interpreter(
             "profile_load", PROFILE_LOAD_CONFIG_SCHEMA
         )
@@ -21,7 +20,7 @@ class Freckles(object):
             "cnf_profiles",
             FRECKLES_CONFIG_DIR,
             load_config=profile_load_config,
-            cnf=cnf,
+            cnf=self._root_config,
         )
 
         self._contexts = {}
@@ -48,7 +47,11 @@ class Freckles(object):
             raise Exception("Context configuration can't be empty.")
 
         context_config = self._cnf_profiles.create_profile_cnf(
-            context_config, extra_repos=extra_repos
+            context_config,
+            extra_repos=extra_repos,
+            use_community=self._root_config.get_interpreter_value(
+                "root_config", "use_community"
+            ),
         )
         context = FrecklesContext(context_name=context_name, cnf=context_config)
 
@@ -86,6 +89,7 @@ class Freckles(object):
     def frecklets(self):
 
         ctx = self.get_context()
+
         return ctx.frecklet_index
 
     def get_frecklet_index(self, context_name=None):

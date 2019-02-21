@@ -6,6 +6,7 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
+from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
     VARS_KEY,
@@ -21,7 +22,6 @@ from .output_callback import (
     FrecklesResultCallback,
 )
 from frutils import replace_strings_in_obj, get_template_keys
-from frutils.parameters import FrutilsNormalizer
 
 log = logging.getLogger("freckles")
 
@@ -170,7 +170,7 @@ class Frecklecutable(object):
         task=None,
     ):
 
-        validator = FrutilsNormalizer(
+        validator = TingValidator(
             schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
         valid = validator.validated(var_value_map)

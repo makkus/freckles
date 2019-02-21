@@ -1,17 +1,25 @@
 import json
 import logging
 import os
+import time
 from collections import Mapping, Iterable
 
+import click
+from plumbum import local
 from six import string_types
 
+from freckles.exceptions import FrecklesConfigException
+from frkl.utils import expand_string_to_git_details
 from .adapters.adapters import create_adapter
-from .defaults import (
-    MIXED_CONTENT_TYPE,
-)
+from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE
 from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from .schemas import FRECKLES_CONTEXT_SCHEMA
-from frutils import dict_merge
+from frutils import (
+    dict_merge,
+    is_url_or_abbrev,
+    DEFAULT_URL_ABBREVIATIONS_REPO,
+    calculate_cache_location_for_url,
+)
 from frutils.config.cnf import Cnf
 from ting.ting_attributes import (
     FrontmatterAndContentAttribute,
@@ -167,7 +175,9 @@ class CnfProfiles(TingTings):
 
         return result.config_dict
 
-    def create_profile_cnf(self, profile_configs, extra_repos=None):
+    def create_profile_cnf(
+        self, profile_configs, extra_repos=None, use_community=False
+    ):
 
         if isinstance(profile_configs, (string_types, Mapping)):
             profile_configs = [profile_configs]
@@ -239,7 +249,11 @@ class CnfProfiles(TingTings):
         if extra_repos:
             if isinstance(extra_repos, string_types):
                 extra_repos = [extra_repos]
-            result["repos"] = result["repos"] + extra_repos
+            else:
+                extra_repos = list(extra_repos)
+            result["repos"] = list(result["repos"]) + extra_repos
+
+        result["use_community"] = use_community
 
         return Cnf(config_dict=result)
 
@@ -265,6 +279,7 @@ class FrecklesContext(object):
         # self._folder_load_config = cnf.add_interpreter("frecklet_load", FRECKLET_LOAD_CONFIG_SCHEMA)
 
         self._frecklet_index = None
+        self._pull_cache = {}
 
         # from config
 
@@ -276,7 +291,12 @@ class FrecklesContext(object):
             for tt in adapter.get_supported_task_types():
                 self._adapter_tasktype_map.setdefault(tt, []).append(adapter_name)
 
-        self._resource_repo_list = self._create_resources_repo_list()
+        repo_list = self._create_resources_repo_list()
+
+        self._resource_repo_list = self.augment_repos(repo_list)
+
+        self.ensure_local_repos(self._resource_repo_list)
+
         # now set all resource folders for every supported adapter
         for adapter in self._adapters.values():
 
@@ -287,6 +307,168 @@ class FrecklesContext(object):
                 map[rt] = folders
 
             adapter.set_resource_folder_map(map)
+
+    def ensure_local_repos(self, repo_list):
+
+        to_download = []
+        for repo in repo_list:
+
+            r = self.check_repo(repo)
+            if r is not None:
+                to_download.append(r)
+
+        for repo in to_download:
+
+            self.download_repo(repo, url_cache=self._pull_cache)
+
+    def download_repo(self, repo, url_cache=None):
+
+        force_update = self._context_config.get("always_update_remote_repos")
+        exists = os.path.exists(repo["path"])
+        if exists and not force_update:
+            return
+
+        branch = None
+        if repo.get("branch", None) is not None:
+            branch = repo["branch"]
+        url = repo["url"]
+
+        if url_cache is not None:
+            if branch is None:
+                cache_key = url
+            else:
+                cache_key = "{}_{}".format(url, branch)
+
+        if not exists:
+
+            click.echo("- cloning repo: {}...".format(repo["url"]))
+            git = local["git"]
+            cmd = ["clone"]
+            if branch is not None:
+                cmd.append("-b")
+                cmd.append(branch)
+            cmd.append(url)
+            cmd.append(repo["path"])
+            rc, stdout, stderr = git.run(cmd)
+
+            if rc != 0:
+                raise FrecklesConfigException(
+                    "Could not clone repository '{}': {}".format(url, stderr)
+                )
+
+            if url_cache is not None:
+                url_cache[cache_key] = time.time()
+
+        else:
+            if url_cache is not None and cache_key in url_cache.keys():
+                log.debug("Not pulling again: {}".format(url))
+                return
+
+            # TODO: check if remote/branch is right?
+            click.echo("- pulling from remote: {}...".format(url))
+            git = local["git"]
+            cmd = ["pull", "origin"]
+            if branch is not None:
+                cmd.append(branch)
+            with local.cwd(repo["path"]):
+                rc, stdout, stderr = git.run(cmd)
+
+                if rc != 0:
+                    raise FrecklesConfigException(
+                        "Could not pull repository '{}': {}".format(url, stderr)
+                    )
+            if url_cache is not None:
+                url_cache[cache_key] = time.time()
+
+    def check_repo(self, repo):
+
+        if not repo["remote"]:
+
+            if not os.path.exists(repo["path"]):
+                if self._context_config.get("ignore_nonexistent_repos"):
+                    log.warning(
+                        "Local repo '{}' empty, ignoring...".format(repo["path"])
+                    )
+                else:
+                    raise Exception(
+                        "Local repo '{}' does not exists, exiting...".format(
+                            repo["path"]
+                        )
+                    )
+
+            return None
+
+        # remote repo
+        if not self._context_config.get("allow_remote"):
+
+            if repo.get("alias", None) != "community" or not self._context_config.get(
+                "use_community"
+            ):
+                raise Exception(
+                    "Remote repos not allowed in config, can't load repo '{}'. Exiting...".format(
+                        repo["url"]
+                    )
+                )
+
+        return repo
+
+    def augment_repos(self, repo_list):
+
+        result = []
+
+        for repo in repo_list:
+
+            r = self.augment_repo(repo)
+            result.append(r)
+
+        return result
+
+    def augment_repo(self, repo_orig):
+
+        repo_desc = {}
+
+        if "type" not in repo_orig.keys():
+            repo_orig["type"] = MIXED_CONTENT_TYPE
+
+        url = repo_orig["url"]
+
+        if is_url_or_abbrev(url):
+
+            git_details = expand_string_to_git_details(
+                url, default_abbrevs=DEFAULT_URL_ABBREVIATIONS_REPO
+            )
+            full = git_details["url"]
+            if full != url:
+                abbrev = url
+            else:
+                abbrev = None
+
+            basename = os.path.basename(full)
+            if basename.endswith(".git"):
+                basename = basename[0:-4]
+            branch = git_details.get("branch", "master")
+
+            postfix = os.path.join(branch, basename)
+            cache_location = calculate_cache_location_for_url(full, postfix=postfix)
+            cache_location = os.path.join(FRECKLES_CACHE_BASE, cache_location)
+
+            repo_desc["path"] = cache_location
+            repo_desc["url"] = full
+            if branch is not None:
+                repo_desc["branch"] = branch
+            repo_desc["remote"] = True
+            if abbrev is not None:
+                repo_desc["abbrev"] = abbrev
+
+        else:
+            repo_desc["path"] = url
+            repo_desc["remote"] = False
+
+        if "alias" in repo_orig.keys():
+            repo_desc["alias"] = repo_orig["alias"]
+
+        repo_desc["type"] = repo_orig["type"]
+        return repo_desc
 
     def _create_resources_repo_list(self):
 
@@ -301,6 +483,10 @@ class FrecklesContext(object):
         # move resource repos
         for repo in repo_list:
 
+            temp_path = os.path.realpath(os.path.expanduser(repo))
+            if os.path.exists(temp_path) and os.path.isdir(temp_path):
+                repo = temp_path
+
             if os.path.sep in repo:
 
                 if "::" in repo:
@@ -312,6 +498,7 @@ class FrecklesContext(object):
                 r = {"url": url, "type": resource_type}
                 resources_list.append(r)
             else:
+                temp_list = []
                 # it's an alias
                 for a in self._adapters.values():
                     r = a.get_folders_for_alias(repo)
@@ -323,9 +510,18 @@ class FrecklesContext(object):
                             resource_type = MIXED_CONTENT_TYPE
                             url = u
 
-                        resources_list.append(
+                        temp_list.append(
                             {"url": url, "type": resource_type, "alias": repo}
                         )
+
+                if not temp_list:
+                    log.warning(
+                        "No repository folders found for alias '{}', ignoring...".format(
+                            repo
+                        )
+                    )
+                else:
+                    resources_list.extend(temp_list)
 
         return resources_list
 
@@ -360,7 +556,7 @@ class FrecklesContext(object):
         used_aliases = []
 
         for f in frecklet_folders:
-            url = f["url"]
+            url = f["path"]
             if "alias" in f.keys():
                 alias = f["alias"]
             else:

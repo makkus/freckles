@@ -75,6 +75,16 @@ TODO: list all repository urls
         "default": False,
         "doc": "Whether to allow remote repositories and resources.",
     },
+    "ignore_nonexistent_repos": {
+        "type": "boolean",
+        "default": True,
+        "doc": "Whether to ignore non-existent local repos or fail if one such is encountered.",
+    },
+    "always_update_remote_repos": {
+        "type": "boolean",
+        "default": True,
+        "doc": "Whether to always update remote repos, even if they are already checked out.",
+    },
 }
 
 # Schema to contain all the settings that can only be set in the 'default' context. Mainly used to give the user
