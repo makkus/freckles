@@ -54,7 +54,7 @@ TODO: list all repository urls
     },
     "adapters": {
         "type": "list",
-        "default": ["nsbl"],
+        "default": ["nsbl", "templing"],
         "doc": "A list of freckles adapters to use in this context.",
     },
     "repos": {
