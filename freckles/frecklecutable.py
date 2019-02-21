@@ -6,6 +6,7 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
+from frutils import replace_strings_in_obj, get_template_keys
 from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
@@ -21,7 +22,6 @@ from .output_callback import (
     FrecklesRun,
     FrecklesResultCallback,
 )
-from frutils import replace_strings_in_obj, get_template_keys
 
 log = logging.getLogger("freckles")
 
@@ -55,27 +55,21 @@ def is_duplicate_task(new_task, idempotency_cache):
         return False
 
 
-def remove_none_values(input, args=None, convert_empty_to_none=False):
+def remove_none_values(input, args=None):
 
     if isinstance(input, (list, tuple, set, CommentedSeq)):
         result = []
         for item in input:
-            temp = remove_none_values(item, convert_empty_to_none=convert_empty_to_none)
-            if temp:
+            temp = remove_none_values(item)
+            if temp is not None and temp != "":
                 result.append(temp)
         return result
     elif isinstance(input, (dict, OrderedDict, CommentedMap)):
         result = CommentedMap()
         for k, v in input.items():
             if v is not None:
-                temp = remove_none_values(
-                    v, convert_empty_to_none=convert_empty_to_none
-                )
-                if not temp:
-                    if convert_empty_to_none:
-                        temp = None
-                        result[k] = temp
-                else:
+                temp = remove_none_values(v)
+                if temp is not None and temp != "":
                     result[k] = temp
 
         return result

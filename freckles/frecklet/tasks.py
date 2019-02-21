@@ -30,7 +30,7 @@ class FreckletsAttribute(ValueAttribute):
     def __init__(self):
 
         super(FreckletsAttribute, self).__init__(
-            target_attr_name="frecklets", source_attr_name="_metadata_raw"
+            target_attr_name="frecklets", source_attr_name="_metadata"
         )
 
     def get_attribute(self, ting, attribute_name=None):
@@ -265,7 +265,7 @@ class TaskListDetailedAttribute(TingAttribute):
             AddRootFreckletProcessor(ting=ting)
         ]
 
-        f = Frkl(ting._metadata_raw, chain)
+        f = Frkl(ting._metadata, chain)
         tasklist_detailed = f.process()
 
         return tasklist_detailed

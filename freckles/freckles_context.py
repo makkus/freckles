@@ -8,12 +8,7 @@ import click
 from plumbum import local
 from six import string_types
 
-from .exceptions import FrecklesConfigException
 from frkl.utils import expand_string_to_git_details
-from .adapters.adapters import create_adapter
-from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE
-from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
-from .schemas import FRECKLES_CONTEXT_SCHEMA
 from frutils import (
     dict_merge,
     is_url_or_abbrev,
@@ -29,6 +24,11 @@ from ting.ting_attributes import (
 )
 from ting.ting_cast import TingCast
 from ting.tings import TingTings
+from .adapters.adapters import create_adapter
+from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE
+from .exceptions import FrecklesConfigException
+from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
+from .schemas import FRECKLES_CONTEXT_SCHEMA
 
 log = logging.getLogger("freckles")
 

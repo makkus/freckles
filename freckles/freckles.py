@@ -1,7 +1,7 @@
+from frutils.config.cnf import Cnf
 from .defaults import FRECKLES_CONFIG_DIR
 from .freckles_context import CnfProfiles, FrecklesContext
 from .schemas import PROFILE_LOAD_CONFIG_SCHEMA, FRECKLES_DEFAULT_CONFIG_SCHEMA
-from frutils.config.cnf import Cnf
 
 
 class Freckles(object):
