@@ -385,6 +385,7 @@ class FrecklesContext(object):
         if not repo["remote"]:
 
             if not os.path.exists(repo["path"]):
+
                 if self._context_config.get("ignore_nonexistent_repos"):
                     log.warning(
                         "Local repo '{}' empty, ignoring...".format(repo["path"])
@@ -514,7 +515,7 @@ class FrecklesContext(object):
                             {"url": url, "type": resource_type, "alias": repo}
                         )
 
-                if not temp_list:
+                if not temp_list and not repo == "user":
                     log.warning(
                         "No repository folders found for alias '{}', ignoring...".format(
                             repo
