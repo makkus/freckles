@@ -8,7 +8,7 @@ import click
 from plumbum import local
 from six import string_types
 
-from freckles.exceptions import FrecklesConfigException
+from .exceptions import FrecklesConfigException
 from frkl.utils import expand_string_to_git_details
 from .adapters.adapters import create_adapter
 from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE
