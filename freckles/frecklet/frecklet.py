@@ -1,3 +1,4 @@
+import copy
 import logging
 from collections import Sequence, Mapping
 
@@ -130,6 +131,9 @@ FRECKLET_LOAD_CONFIG = {
         },
     },
 }
+
+FRECKLET_LOAD_CONFIG_FILE = copy.deepcopy(FRECKLET_LOAD_CONFIG)
+FRECKLET_LOAD_CONFIG_FILE["loaders"]["frecklet_files"]["load_config"] = {}
 
 
 # class FreckletCast(TingCast):
