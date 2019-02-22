@@ -50,6 +50,7 @@ class FrecklesAdapter(object):
         self._cnf_interpreter = cnf.add_interpreter(
             "adapter_config_{}".format(adapter_name), self.get_config_schema()
         )
+
         self.resource_folder_map = None
 
     @property
