@@ -7,6 +7,9 @@ from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
 from ting.ting_cast import MultiCacheResult
 
+import logging
+
+log = logging.getLogger("freckles")
 
 class CliArgumentsAttribute(TingAttribute):
 
@@ -44,14 +47,14 @@ class CliArgumentsAttribute(TingAttribute):
         required_vars = getattr(ting, self.source_attr_name)
 
         result = []
-        for var in required_vars.values():
-            parameter = self.create_parameter(var)
+        for var_name, var in required_vars.items():
+            parameter = self.create_parameter(var_name, var)
             if parameter is not None:
                 result.append(parameter)
 
         return result
 
-    def create_parameter(self, var):
+    def create_parameter(self, var_name, var):
 
         if not var.cli.get("enabled", True):
             return None
@@ -106,7 +109,8 @@ class CliArgumentsAttribute(TingAttribute):
             if param_type == "option":
                 option_properties["multiple"] = True
             else:
-                option_properties["nargs"] = -1
+                if "nargs" not in option_properties.keys() and "default" not in option_properties.keys():
+                    option_properties["nargs"] = -1
         else:
             raise Exception("Type '{}' not implemented yet.".format(cerberus_type))
 
@@ -119,6 +123,7 @@ class CliArgumentsAttribute(TingAttribute):
                 "nargs" in option_properties.keys()
                 and "default" in option_properties.keys()
             ):
+                log.warning("Removing 'nargs' property from argument '{}' ('nargs' & 'default' are not allowed together)".format(var_name))
                 option_properties.pop("nargs")
             p = click.Argument(**option_properties)
 
