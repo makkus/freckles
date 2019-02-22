@@ -5,10 +5,7 @@ from collections import Sequence, Mapping
 from freckles.defaults import FRECKLETS_KEY, DEFAULT_FRECKLES_JINJA_ENV
 from freckles.frecklecutable import FrecklecutableMixin
 from frutils import get_template_keys
-from ting.ting_attributes import (
-    ValueAttribute,
-    TingAttribute,
-)
+from ting.ting_attributes import ValueAttribute, TingAttribute
 from .tasks import *  # noqa
 from .arguments import *  # noqa
 

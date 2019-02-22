@@ -11,6 +11,7 @@ import logging
 
 log = logging.getLogger("freckles")
 
+
 class CliArgumentsAttribute(TingAttribute):
 
     CLICK_CEREBUS_ARG_MAP = {
@@ -109,7 +110,10 @@ class CliArgumentsAttribute(TingAttribute):
             if param_type == "option":
                 option_properties["multiple"] = True
             else:
-                if "nargs" not in option_properties.keys() and "default" not in option_properties.keys():
+                if (
+                    "nargs" not in option_properties.keys()
+                    and "default" not in option_properties.keys()
+                ):
                     option_properties["nargs"] = -1
         else:
             raise Exception("Type '{}' not implemented yet.".format(cerberus_type))
@@ -123,7 +127,11 @@ class CliArgumentsAttribute(TingAttribute):
                 "nargs" in option_properties.keys()
                 and "default" in option_properties.keys()
             ):
-                log.warning("Removing 'nargs' property from argument '{}' ('nargs' & 'default' are not allowed together)".format(var_name))
+                log.warning(
+                    "Removing 'nargs' property from argument '{}' ('nargs' & 'default' are not allowed together)".format(
+                        var_name
+                    )
+                )
                 option_properties.pop("nargs")
             p = click.Argument(**option_properties)
 
