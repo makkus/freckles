@@ -84,7 +84,7 @@ FRECKLET_LOAD_CONFIG = {
                 "source_attr_name": "_metadata",
                 "target_attr_name": "args",
                 "index_attr_name": "_meta_parent_repo",
-                "validate_list_attr": "template_keys",
+                # "validate_list_attr": "template_keys",
             }
         },
         {"DocAttribute": {"source_attr_name": "_metadata"}},
@@ -93,7 +93,12 @@ FRECKLET_LOAD_CONFIG = {
         "FreckletsAttribute",
         "TaskListDetailedAttribute",
         "TaskTreeAttribute",
-        "RequiredVariablesAttribute",
+        {
+            "RequiredVariablesAttribute": {
+                "target_attr_name": "required_vars",
+                "default_argument_description": {"required": True, "empty": False},
+            }
+        },
         "FreckletsTemplateKeysAttribute",
         "CliArgumentsAttribute",
         "TaskListAttribute",

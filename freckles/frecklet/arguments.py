@@ -67,10 +67,13 @@ class CliArgumentsAttribute(TingAttribute):
         param_type = option_properties.pop("param_type")
 
         option_properties["required"] = var.required
+
         if var.default is not None:
             option_properties["default"] = var.default
 
+        auto_param_decls = False
         if "param_decls" not in option_properties.keys():
+            auto_param_decls = True
             if param_type == "option":
                 decls = []
                 for a in var.aliases:
@@ -94,9 +97,18 @@ class CliArgumentsAttribute(TingAttribute):
         )
         if replacement is not None:
             if replacement == bool:
+                option_properties["type"] = None
+                option_properties["default"] = None
                 if "is_flag" not in option_properties.keys():
                     option_properties["is_flag"] = True
                     # we don't add the type here, otherwise click fails for whatever reason
+
+                if "param_decls" not in option_properties.keys() or auto_param_decls:
+
+                    temp = var.key.replace("_", "-")
+                    option_properties["param_decls"] = [
+                        "--{}/--no-{}".format(temp, temp)
+                    ]
             else:
                 option_properties["type"] = replacement
 
@@ -139,9 +151,12 @@ class CliArgumentsAttribute(TingAttribute):
 
 
 class RequiredVariablesAttribute(TingAttribute):
-    def __init__(self, target_attr_name="required_vars"):
+    def __init__(
+        self, target_attr_name="required_vars", default_argument_description=None
+    ):
 
         self.target_attr_name = target_attr_name
+        self.default_argument_description = default_argument_description
 
     def provides(self):
 
@@ -169,6 +184,7 @@ class RequiredVariablesAttribute(TingAttribute):
             "{}_tree".format(self.target_attr_name): required_vars_tree,
             self.target_attr_name: required_vars,
         }
+
         return MultiCacheResult(**result)
 
     def consolidate_vars(self, required_vars_tree, ting):
@@ -196,6 +212,7 @@ class RequiredVariablesAttribute(TingAttribute):
 
         if current_node_id == 0:
             vars = {}
+
             for key in current_args.keys():
                 vars[key] = "{{{{:: {} ::}}}}".format(key)
         else:
@@ -226,7 +243,6 @@ class RequiredVariablesAttribute(TingAttribute):
                 parent_var = vars[key]
                 # print("PARENT VAR: {}".format(parent_var))
                 if parent_var == "{{{{:: {} ::}}}}".format(key):
-                    # print("MATCH")
                     # this means the var is just being carried forward, from the point of view of the parent frecklet task
                     arg_config = available_args.get(key, None)
                     if arg_config is None:
@@ -266,6 +282,7 @@ class RequiredVariablesAttribute(TingAttribute):
                         args[tk] = new_arg
 
         if current_node_id != 0:
+
             return self.resolve_required_vars(
                 current_args=args,
                 rest_path=rest_path,
@@ -273,6 +290,33 @@ class RequiredVariablesAttribute(TingAttribute):
                 tree=tree,
             )
         else:
+
+            root_task = last_node.data["task"]
+            tks = get_template_keys(root_task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+
+            root_tks = {}
+            for tk in tks:
+                if tk in args.keys():
+                    continue
+
+                # add a template key that is under either 'frecklet' or 'task' of the root task of a frecklet
+                arg = available_args.get(tk, None)
+                if arg is None:
+                    if self.default_argument_description is None:
+                        f_name = current_node.data.id
+                        raise Exception(
+                            "No argument description for argument '{}' in frecklet '{}'".format(
+                                tk, f_name
+                            )
+                        )
+                    else:
+                        arg = self.default_argument_description
+
+                arg = Arg(tk, arg, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+                root_tks[tk] = arg
+
+            dict_merge(args, root_tks, copy_dct=False)
+
             return args
 
     def get_required_vars_from_path(self, path_to_leaf, tree, ting):
