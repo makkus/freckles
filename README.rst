@@ -30,6 +30,8 @@ freckles
 
 **DevOps for the rest of us!**
 
+**NOTE**: Currently this is not yet in a state to be used, and documentation might be out of date or incorrect. This will change real soon, so please check back here every now and then, or ping me for details.
+
 A framework for composable, declarative scripting.
 
 **freckles** helps you save time by automating tasks you usually don't automate (unless you already do -- in which case you might still be
