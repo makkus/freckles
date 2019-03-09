@@ -21,6 +21,7 @@ requirements = [
     "passlib==1.7.1",
     "treelib==1.5.3"
     # "templig==1.0.0b1"
+    "pymdown-extensions==6.0",
 ]
 
 setup_requirements = ["pytest-runner"]
