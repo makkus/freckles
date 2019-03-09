@@ -1,8 +1,10 @@
 <h2 class="section-title" id="variables">Variables</h2>
 
-{{%= if params.get_required_vars() or params.get_optional_vars() =%}}
 <div class="section-block">
     <div class="table-responsive">
+        {% set vars_required = frecklet.vars_required %}
+        {% set vars_optional = frecklet.vars_optional %}
+
         <table class="table">
             <thead>
             <tr>
@@ -13,24 +15,26 @@
             </tr>
             </thead>
             <tbody>
-            {{%= for param in params.get_required_vars() + params.get_optional_vars() =%}}
-            {{%= set _help = param.doc.get_help() =%}}
-            {{%= set _req = ' **Required**' if param.scheme.get("required", True) else '' =%}}
+            {% for l in [vars_required, vars_optional] %}
+            {% for name, param in l.items() %}
+            {% set _help = param._doc.get_help() %}
+            {% set _req = ' **Required**' if param._schema.get("required", True) else '' %}
             <tr>
-                <th style="white-space: nowrap;"><h3 id="var_{{== param.name ==}}"><code>{{==
-                    param.name
-                    ==}}</code></h3></th>
-                <td>{{== param.scheme.get("type", "n/a") ==}}</td>
-                <td>{{== param.scheme.get("default", "--") ==}}</td>
-                {{%= if _req =%}}
-                <td>{{== (_help + _req) | from_markdown ==}}</td>
-                {{%= else =%}}
-                <td>{{== _help | from_markdown ==}}</td>
-                {{%= endif =%}}
+                <th style="white-space: nowrap;"><h3 id="var_{{ param.name }}"><code>{{
+                    name
+                    }}</code></h3></th>
+                <td>{{ param._schema.get("type", "n/a") }}</td>
+                <td>{{ param._schema.get("default", "--") }}</td>
+                {% if _req %}
+                <td>{{ (_help + _req) | from_markdown }}</td>
+                {% else %}
+                <td>{{ _help | from_markdown }}</td>
+                {% endif %}
             </tr>
-            {{%= endfor =%}}
+            {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-{{%= endif =%}}
+

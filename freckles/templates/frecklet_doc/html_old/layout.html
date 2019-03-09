@@ -1,0 +1,68 @@
+{{%= set examples = frecklet_name | frecklet_examples =%}}
+
+{{%= if examples =%}}
+<p>Example:</p>
+{{%= if examples[0].get("vars", {}) =%}}
+{{== ('# '+ examples[0].title + '\n- ' + frecklet_name + ':\n' + (examples[0].get("vars", {}) | to_yaml(indent=4))) | to_code_block('yaml') | from_markdown ==}}
+{{%= else =%}}
+{{== ('# '+ examples[0].title + '\n- ' + frecklet_name) | to_code_block('yaml') | from_markdown ==}}
+{{%= endif =%}}
+{{%= endif =%}}
+
+{{%= set help = frecklet_name | frecklet_help(default=None, use_short_help=False) =%}}
+{{%= if help =%}}
+<section class="doc-section">
+    <h2 class="section-title" id="description">Description</h2>
+    <div class="section-block">
+        {{== help | from_markdown ==}}
+    </div>
+</section>
+{{%= endif =%}}
+
+{{%= set further_reading = frecklet_name | frecklet_further_reading =%}}
+{{%= if further_reading =%}}
+<section class="doc-section">
+    <h2 class="section-title" id="resources">Resources</h2>
+    <div class="section-block">
+        <ul>
+            {{%= for d, l in further_reading.items() =%}}
+            <li><a href="{{== l ==}}">{{== d | from_markdown ==}}</a></li>
+            {{%= endfor =%}}
+        </ul>
+    </div>
+</section>
+{{%= endif =%}}
+
+{{%= set params = frecklet_name | frecklet_parameters =%}}
+{{%= if params.param_list =%}}
+<section class="doc-section">
+    {{%= include 'frecklet_doc/html/variables.html' =%}}
+</section>
+{{%= endif =%}}
+
+{{%= set long_help = frecklet_name | frecklet_long_help =%}}
+{{%= if long_help =%}}
+<section class="doc-section">
+    <h2 class="section-title" id="details">Details</h2>
+    <div class="section-block">
+        {{== long_help | from_markdown ==}}
+    </div>
+</section>
+{{%= endif =%}}
+
+{{%= if examples =%}}
+<section class="doc-section">
+    {{%= include "frecklet_doc/html/examples.html" =%}}
+</section>
+{{%= endif =%}}
+
+<section class="doc-section">
+    {{%= include "frecklet_doc/html/task_list.html" =%}}
+</section>
+
+<section class="doc-section">
+    {{%= include "frecklet_doc/html/command-line.html" =%}}
+</section>
+<section class="doc-section">
+    {{%= include "frecklet_doc/html/source_code.html" =%}}
+</section>
