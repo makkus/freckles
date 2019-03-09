@@ -189,19 +189,21 @@ FRECKLET_LOAD_CONFIG = {
         "TaskTreeAttribute",
         {
             "VariablesAttribute": {
-                "target_attr_name": "vars",
+                "target_attr_name": "vars_frecklet",
                 "default_argument_description": {"required": True, "empty": False},
             }
         },
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_required",
+                "source_attr_name": "vars_frecklet",
                 "required": True,
             }
         },
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_optional",
+                "source_attr_name": "vars_frecklet",
                 "required": False,
             }
         },

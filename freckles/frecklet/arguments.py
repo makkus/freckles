@@ -28,7 +28,7 @@ class CliArgumentsAttribute(TingAttribute):
 
     DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
-    def __init__(self, target_attr_name="cli_arguments", source_attr_name="vars"):
+    def __init__(self, target_attr_name="cli_arguments", source_attr_name="vars_frecklet"):
 
         self.target_attr_name = target_attr_name
         self.source_attr_name = source_attr_name
@@ -160,7 +160,7 @@ class CliArgumentsAttribute(TingAttribute):
 
 class VariablesFilterAttribute(TingAttribute):
     def __init__(
-        self, source_attr_name="vars", target_attr_name="vars_required", required=True
+        self, source_attr_name="vars_frecklet", target_attr_name="vars_required", required=True
     ):
 
         self.source_attr_name = source_attr_name
@@ -192,7 +192,7 @@ class VariablesFilterAttribute(TingAttribute):
 
 
 class VariablesAttribute(TingAttribute):
-    def __init__(self, target_attr_name="vars", default_argument_description=None):
+    def __init__(self, target_attr_name="vars_frecklet", default_argument_description=None):
 
         self.target_attr_name = target_attr_name
         self.default_argument_description = default_argument_description
