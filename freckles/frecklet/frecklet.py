@@ -1,9 +1,11 @@
 import copy
 import logging
+import os
 from collections import Sequence, Mapping
 
 from freckles.defaults import FRECKLETS_KEY, DEFAULT_FRECKLES_JINJA_ENV
 from freckles.frecklecutable import FrecklecutableMixin
+from freckles.frecklet.doc import render_html
 from frutils import get_template_keys
 from ting.ting_attributes import ValueAttribute, TingAttribute
 from .tasks import *  # noqa
@@ -76,6 +78,100 @@ class FreckletMetaAttribute(ValueAttribute):
         return result
 
 
+class FreckletHtmlAttribute(TingAttribute):
+
+    def __init__(self):
+
+        pass
+
+    def provides(self):
+
+        return ["html"]
+
+    def requires(self):
+
+        return []
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        html = render_html(ting)
+
+        return html
+
+class PagelingMetadataAttribute(TingAttribute):
+
+    def __init__(self):
+
+        pass
+
+    def provides(self):
+
+        return ["pageling_metadata"]
+
+    def requires(self):
+
+        return ["wrapped"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        frecklet = ting.wrapped
+        result = {}
+        result["title"] = frecklet.id
+        result["is_draft"] = frecklet.meta.get("draft", False)
+
+        return result
+
+
+class PagelingContentAttribute(TingAttribute):
+
+    def __init__(self):
+
+        pass
+
+    def provides(self):
+
+        return ["pageling_content"]
+
+    def requires(self):
+
+        return ["wrapped"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        frecklet = ting.wrapped
+        return str(frecklet.doc)
+
+class PagelingNavPathAttribute(TingAttribute):
+
+    def __init__(self):
+
+        pass
+
+    def provides(self):
+
+        return ["tree_path"]
+
+    def requires(self):
+
+        return ["wrapped"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        frecklet = ting.wrapped
+        if hasattr(frecklet, "rel_path_no_ext"):
+            rel_path = frecklet.rel_path_no_ext
+        else:
+            rel_path = "misc/{}".format(frecklet.id)
+
+        tokens = rel_path.split(os.path.sep)
+
+        if len(tokens) == 1:
+            return "/" + tokens[0]
+        else:
+            return "/" + tokens[0] + "/" + tokens[-1]
+
+
+
 FRECKLET_LOAD_CONFIG = {
     "class_name": "Frecklet",
     "attributes": [
@@ -92,11 +188,24 @@ FRECKLET_LOAD_CONFIG = {
         "FreckletAugmentMetadataAttribute",
         "FreckletsAttribute",
         "TaskListDetailedAttribute",
+        "FreckletHtmlAttribute",
         "TaskTreeAttribute",
         {
-            "RequiredVariablesAttribute": {
-                "target_attr_name": "required_vars",
+            "VariablesAttribute": {
+                "target_attr_name": "vars",
                 "default_argument_description": {"required": True, "empty": False},
+            }
+        },
+        {
+            "VariablesFilterAttribute": {
+                "target_attr_name": "vars_required",
+                "required": True
+            }
+        },
+        {
+            "VariablesFilterAttribute": {
+                "target_attr_name": "vars_optional",
+                "required": False
             }
         },
         "FreckletsTemplateKeysAttribute",

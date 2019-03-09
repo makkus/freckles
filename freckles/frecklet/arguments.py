@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import click
 
 from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
@@ -27,7 +29,7 @@ class CliArgumentsAttribute(TingAttribute):
     DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
     def __init__(
-        self, target_attr_name="cli_arguments", source_attr_name="required_vars"
+        self, target_attr_name="cli_arguments", source_attr_name="vars"
     ):
 
         self.target_attr_name = target_attr_name
@@ -45,10 +47,10 @@ class CliArgumentsAttribute(TingAttribute):
 
         # TODO: validate
 
-        required_vars = getattr(ting, self.source_attr_name)
+        vars = getattr(ting, self.source_attr_name)
 
         result = []
-        for var_name, var in required_vars.items():
+        for var_name, var in vars.items():
             parameter = self.create_parameter(var_name, var)
             if parameter is not None:
                 result.append(parameter)
@@ -150,9 +152,44 @@ class CliArgumentsAttribute(TingAttribute):
         return p
 
 
-class RequiredVariablesAttribute(TingAttribute):
+class VariablesFilterAttribute(TingAttribute):
+
+    def __init__(self, source_attr_name="vars", target_attr_name="vars_required", required=True):
+
+        self.source_attr_name = source_attr_name
+        self.target_attr_name = target_attr_name
+        self.required = required
+
+    def requires(self):
+
+        return [self.source_attr_name]
+
+    def provides(self):
+
+        return [self.target_attr_name]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        vars = getattr(ting, self.source_attr_name)
+        result = OrderedDict()
+        for var_name, arg_obj in vars.items():
+
+            import pp
+            pp(arg_obj.__dict__)
+
+            req = arg_obj.schema.get("required", True)
+
+            if req and self.required:
+                result[var_name] = arg_obj
+            elif not req and not self.required:
+                result[var_name] = arg_obj
+
+        return result
+
+
+class VariablesAttribute(TingAttribute):
     def __init__(
-        self, target_attr_name="required_vars", default_argument_description=None
+        self, target_attr_name="vars", default_argument_description=None
     ):
 
         self.target_attr_name = target_attr_name
@@ -170,27 +207,27 @@ class RequiredVariablesAttribute(TingAttribute):
 
         task_tree = ting.task_tree
         paths_to_leaves = task_tree.paths_to_leaves()
-        required_vars_tree = {}
+        vars_tree = {}
         for path in paths_to_leaves:
             leaf_node_id = path[-1]
-            args = self.get_required_vars_from_path(
+            args = self.get_vars_from_path(
                 path_to_leaf=path, tree=task_tree, ting=ting
             )
-            required_vars_tree[leaf_node_id] = args
+            vars_tree[leaf_node_id] = args
 
-        required_vars = self.consolidate_vars(required_vars_tree, ting)
+        vars = self.consolidate_vars(vars_tree, ting)
 
         result = {
-            "{}_tree".format(self.target_attr_name): required_vars_tree,
-            self.target_attr_name: required_vars,
+            "{}_tree".format(self.target_attr_name): vars_tree,
+            self.target_attr_name: vars,
         }
 
         return MultiCacheResult(**result)
 
-    def consolidate_vars(self, required_vars_tree, ting):
+    def consolidate_vars(self, vars_tree, ting):
 
         result = {}
-        for args in required_vars_tree.values():
+        for args in vars_tree.values():
 
             for arg_name, arg in args.items():
 
@@ -203,7 +240,7 @@ class RequiredVariablesAttribute(TingAttribute):
 
         return result
 
-    def resolve_required_vars(self, current_args, rest_path, last_node, tree):
+    def resolve_vars(self, current_args, rest_path, last_node, tree):
 
         current_node_id = next(rest_path)
 
@@ -283,7 +320,7 @@ class RequiredVariablesAttribute(TingAttribute):
 
         if current_node_id != 0:
 
-            return self.resolve_required_vars(
+            return self.resolve_vars(
                 current_args=args,
                 rest_path=rest_path,
                 last_node=current_node,
@@ -319,7 +356,7 @@ class RequiredVariablesAttribute(TingAttribute):
 
             return args
 
-    def get_required_vars_from_path(self, path_to_leaf, tree, ting):
+    def get_vars_from_path(self, path_to_leaf, tree, ting):
 
         root = path_to_leaf[-1]
         root_node = tree.get_node(root)
@@ -332,6 +369,6 @@ class RequiredVariablesAttribute(TingAttribute):
         )
         rest_path = reversed(path_to_leaf[0:-1])
 
-        return self.resolve_required_vars(
+        return self.resolve_vars(
             current_args=args, rest_path=rest_path, last_node=root_node, tree=tree
         )
