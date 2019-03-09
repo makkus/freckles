@@ -69,7 +69,7 @@ class FreckletMetaAttribute(ValueAttribute):
     def __init__(self):
 
         super(FreckletMetaAttribute, self).__init__(
-            target_attr_name="meta", source_attr_name="_metadata"
+            target_attr_name="meta_frecklet", source_attr_name="_metadata", default={}
         )
 
     def get_attribute(self, ting, attribute_name=None):
