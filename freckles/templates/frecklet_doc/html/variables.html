@@ -18,7 +18,7 @@
             {% for l in [vars_required, vars_optional] %}
             {% for name, param in l.items() %}
             {% set _help = param._doc.get_help() %}
-            {% set _req = ' **Required**' if param._schema.get("required", True) else '' %}
+            {% set _req = ' **Required**' if param.required else '' %}
             <tr>
                 <th style="white-space: nowrap;"><h3 id="var_{{ param.name }}"><code>{{
                     name

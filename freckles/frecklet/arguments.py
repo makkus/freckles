@@ -53,9 +53,18 @@ class CliArgumentsAttribute(TingAttribute):
             if parameter is not None:
                 result.append(parameter)
 
-        return result
+        required = []
+        optional = []
+        for p in result:
+            if p.required:
+                required.append(p)
+            else:
+                optional.append(p)
+
+        return required + optional
 
     def create_parameter(self, var_name, var):
+
 
         if not var.cli.get("enabled", True):
             return None
@@ -66,10 +75,10 @@ class CliArgumentsAttribute(TingAttribute):
 
         param_type = option_properties.pop("param_type")
 
-        option_properties["required"] = var.required
-
         if var.default is not None:
             option_properties["default"] = var.default
+
+        option_properties["required"] = var.required
 
         auto_param_decls = False
         if "param_decls" not in option_properties.keys():
@@ -173,11 +182,7 @@ class VariablesFilterAttribute(TingAttribute):
         result = OrderedDict()
         for var_name, arg_obj in vars.items():
 
-            import pp
-
-            pp(arg_obj.__dict__)
-
-            req = arg_obj.schema.get("required", True)
+            req = arg_obj.required
 
             if req and self.required:
                 result[var_name] = arg_obj
@@ -234,7 +239,11 @@ class VariablesAttribute(TingAttribute):
 
                 result[arg_name] = arg
 
-        return result
+        ordered = OrderedDict()
+        for k in sorted(result.keys()):
+            ordered[k] = result[k]
+
+        return ordered
 
     def resolve_vars(self, current_args, rest_path, last_node, tree):
 

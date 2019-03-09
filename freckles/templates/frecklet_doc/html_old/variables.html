@@ -15,12 +15,12 @@
             <tbody>
             {{%= for param in params.get_required_vars() + params.get_optional_vars() =%}}
             {{%= set _help = param.doc.get_help() =%}}
-            {{%= set _req = ' **Required**' if param.scheme.get("required", True) else '' =%}}
+            {{%= set _req = ' **Required**' if param.required else '' =%}}
             <tr>
                 <th style="white-space: nowrap;"><h3 id="var_{{== param.name ==}}"><code>{{==
                     param.name
                     ==}}</code></h3></th>
-                <td>{{== param.scheme.get("type", "n/a") ==}}</td>
+                <td>{{== param.type.get("type", "n/a") ==}}</td>
                 <td>{{== param.scheme.get("default", "--") ==}}</td>
                 {{%= if _req =%}}
                 <td>{{== (_help + _req) | from_markdown ==}}</td>
