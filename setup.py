@@ -19,7 +19,7 @@ requirements = [
     "terminaltables==3.1.0",
     "Pygments==2.3.1",
     "passlib==1.7.1",
-    "treelib==1.5.3"
+    "treelib==1.5.3",
     # "templig==1.0.0b1"
     "pymdown-extensions==6.0",
 ]
