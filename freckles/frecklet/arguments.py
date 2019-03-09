@@ -28,9 +28,7 @@ class CliArgumentsAttribute(TingAttribute):
 
     DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
-    def __init__(
-        self, target_attr_name="cli_arguments", source_attr_name="vars"
-    ):
+    def __init__(self, target_attr_name="cli_arguments", source_attr_name="vars"):
 
         self.target_attr_name = target_attr_name
         self.source_attr_name = source_attr_name
@@ -153,8 +151,9 @@ class CliArgumentsAttribute(TingAttribute):
 
 
 class VariablesFilterAttribute(TingAttribute):
-
-    def __init__(self, source_attr_name="vars", target_attr_name="vars_required", required=True):
+    def __init__(
+        self, source_attr_name="vars", target_attr_name="vars_required", required=True
+    ):
 
         self.source_attr_name = source_attr_name
         self.target_attr_name = target_attr_name
@@ -175,6 +174,7 @@ class VariablesFilterAttribute(TingAttribute):
         for var_name, arg_obj in vars.items():
 
             import pp
+
             pp(arg_obj.__dict__)
 
             req = arg_obj.schema.get("required", True)
@@ -188,9 +188,7 @@ class VariablesFilterAttribute(TingAttribute):
 
 
 class VariablesAttribute(TingAttribute):
-    def __init__(
-        self, target_attr_name="vars", default_argument_description=None
-    ):
+    def __init__(self, target_attr_name="vars", default_argument_description=None):
 
         self.target_attr_name = target_attr_name
         self.default_argument_description = default_argument_description
@@ -210,9 +208,7 @@ class VariablesAttribute(TingAttribute):
         vars_tree = {}
         for path in paths_to_leaves:
             leaf_node_id = path[-1]
-            args = self.get_vars_from_path(
-                path_to_leaf=path, tree=task_tree, ting=ting
-            )
+            args = self.get_vars_from_path(path_to_leaf=path, tree=task_tree, ting=ting)
             vars_tree[leaf_node_id] = args
 
         vars = self.consolidate_vars(vars_tree, ting)

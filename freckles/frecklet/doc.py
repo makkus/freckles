@@ -10,9 +10,12 @@ from frutils import readable
 
 log = logging.getLogger("freckles")
 
+
 def create_doc_jinja_env():
 
-    template_dir = os.path.join(os.path.dirname(__file__), "..", "templates", "frecklet_doc", "html")
+    template_dir = os.path.join(
+        os.path.dirname(__file__), "..", "templates", "frecklet_doc", "html"
+    )
     jinja_env = Environment(loader=FileSystemLoader(template_dir))
 
     extensions = [
@@ -35,6 +38,7 @@ def create_doc_jinja_env():
     markdown_renderer = Markdown(
         extensions=extensions, extension_configs=extension_configs
     )
+
     def to_code_block_filter(obj, format=None):
 
         if format is None:
@@ -65,8 +69,6 @@ def create_doc_jinja_env():
         cli_help = dummy.get_help(ctx)
         return cli_help
 
-
-
     jinja_env.filters["from_markdown"] = markdown_renderer.convert
     jinja_env.filters["to_code_block"] = to_code_block_filter
     jinja_env.filters["to_yaml"] = to_yaml_filter
@@ -77,11 +79,11 @@ def create_doc_jinja_env():
 
 DOC_JINJA_ENV = create_doc_jinja_env()
 
+
 def render_html(frecklet):
     extra_vars = None
     if extra_vars is None:
         extra_vars = {}
-
 
     repl_dict = {
         "frecklet_name": frecklet.id,
@@ -95,6 +97,7 @@ def render_html(frecklet):
         rendered = template.render(**repl_dict)
     except (Exception) as e:
         import traceback
+
         traceback.print_exc()
         raise e
 

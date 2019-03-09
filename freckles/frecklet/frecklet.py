@@ -79,7 +79,6 @@ class FreckletMetaAttribute(ValueAttribute):
 
 
 class FreckletHtmlAttribute(TingAttribute):
-
     def __init__(self):
 
         pass
@@ -98,8 +97,8 @@ class FreckletHtmlAttribute(TingAttribute):
 
         return html
 
-class PagelingMetadataAttribute(TingAttribute):
 
+class PagelingMetadataAttribute(TingAttribute):
     def __init__(self):
 
         pass
@@ -123,7 +122,6 @@ class PagelingMetadataAttribute(TingAttribute):
 
 
 class PagelingContentAttribute(TingAttribute):
-
     def __init__(self):
 
         pass
@@ -141,8 +139,8 @@ class PagelingContentAttribute(TingAttribute):
         frecklet = ting.wrapped
         return str(frecklet.doc)
 
-class PagelingNavPathAttribute(TingAttribute):
 
+class PagelingNavPathAttribute(TingAttribute):
     def __init__(self):
 
         pass
@@ -169,7 +167,6 @@ class PagelingNavPathAttribute(TingAttribute):
             return "/" + tokens[0]
         else:
             return "/" + tokens[0] + "/" + tokens[-1]
-
 
 
 FRECKLET_LOAD_CONFIG = {
@@ -199,13 +196,13 @@ FRECKLET_LOAD_CONFIG = {
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_required",
-                "required": True
+                "required": True,
             }
         },
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_optional",
-                "required": False
+                "required": False,
             }
         },
         "FreckletsTemplateKeysAttribute",
