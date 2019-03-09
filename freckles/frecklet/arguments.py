@@ -65,7 +65,6 @@ class CliArgumentsAttribute(TingAttribute):
 
     def create_parameter(self, var_name, var):
 
-
         if not var.cli.get("enabled", True):
             return None
 
