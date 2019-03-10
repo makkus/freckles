@@ -239,7 +239,7 @@ class TaskListDetailedAttribute(TingAttribute):
             TASK_KEY_NAME,
         ],
         KEY_MOVE_MAP_NAME: {"*": ("vars", "default")},
-        "use_context": True,
+        "use_context": False,
     }
 
     PROCESS_CHAIN = [
@@ -265,7 +265,7 @@ class TaskListDetailedAttribute(TingAttribute):
             AddRootFreckletProcessor(ting=ting)
         ]
 
-        f = Frkl(ting._metadata, chain)
+        f = Frkl([ting._metadata], chain)
         tasklist_detailed = f.process()
 
         return tasklist_detailed
