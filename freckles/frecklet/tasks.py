@@ -233,7 +233,7 @@ class TaskListDetailedAttribute(TingAttribute):
         OTHER_KEYS_NAME: [
             "args",
             "doc",
-            "frecklet_meta",
+            #"frecklet_meta",
             "meta",
             FRECKLET_KEY_NAME,
             TASK_KEY_NAME,
