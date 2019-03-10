@@ -82,10 +82,7 @@ DOC_JINJA_ENV = create_doc_jinja_env()
 
 def render_html(frecklet):
 
-    repl_dict = {
-        "frecklet_name": frecklet.id,
-        "frecklet": frecklet,
-    }
+    repl_dict = {"frecklet_name": frecklet.id, "frecklet": frecklet}
 
     template = DOC_JINJA_ENV.get_template("layout.html")
 
