@@ -242,14 +242,6 @@ class TaskListDetailedAttribute(TingAttribute):
         "use_context": False,
     }
 
-    PROCESS_CHAIN = [
-        FrklProcessor(**FRECKLET_FORMAT),
-        CommandNameProcessor(),
-        TaskTypePrefixProcessor(),
-        MoveEmbeddedTaskKeysProcessor(),
-        # TaskPathProcessor(index=self.index)
-    ]
-
     def provides(self):
 
         return ["tasklist_detailed"]
@@ -261,9 +253,14 @@ class TaskListDetailedAttribute(TingAttribute):
     def get_attribute(self, ting, attribute_name=None):
 
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
-        chain = TaskListDetailedAttribute.PROCESS_CHAIN + [
-            AddRootFreckletProcessor(ting=ting)
-        ]
+        chain = [
+            FrklProcessor(**TaskListDetailedAttribute.FRECKLET_FORMAT),
+            CommandNameProcessor(),
+            TaskTypePrefixProcessor(),
+            MoveEmbeddedTaskKeysProcessor(),
+            # TaskPathProcessor(index=self.index),
+            AddRootFreckletProcessor(ting=ting),
+            ]
 
         f = Frkl([ting._metadata], chain)
         tasklist_detailed = f.process()
