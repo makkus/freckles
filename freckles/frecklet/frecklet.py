@@ -93,9 +93,12 @@ class FreckletHtmlAttribute(TingAttribute):
 
     def get_attribute(self, ting, attribute_name=None):
 
-        html = render_html(ting)
+        try:
+            html = render_html(ting)
+            return html
+        except (Exception) as e:
 
-        return html
+            return "<p>Can't render frecklet {}: {}".format(ting.id, e)
 
 
 class PagelingMetadataAttribute(TingAttribute):

@@ -575,6 +575,7 @@ class FrecklesContext(object):
         for a_name, a in self._adapters.items():
 
             extra_frecklets_adapter = a.get_extra_frecklets()
+            # print(extra_frecklets_adapter)
             if not extra_frecklets_adapter:
                 continue
             folder_index_conf.append(
