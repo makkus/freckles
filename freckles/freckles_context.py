@@ -602,7 +602,7 @@ class FrecklesContext(object):
 
         return self.frecklet_index.get(frecklet_name)
 
-    def get_frecklet_names(self, **kwargs):
+    def get_frecklet_names(self):
 
         return self.frecklet_index.keys()
 
