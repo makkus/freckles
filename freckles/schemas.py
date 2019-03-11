@@ -80,10 +80,15 @@ TODO: list all repository urls
         "default": True,
         "doc": "Whether to ignore non-existent local repos or fail if one such is encountered.",
     },
-    "always_update_remote_repos": {
-        "type": "boolean",
-        "default": True,
-        "doc": "Whether to always update remote repos, even if they are already checked out.",
+    # "always_update_remote_repos": {
+    #     "type": "boolean",
+    #     "default": True,
+    #     "doc": "Whether to always update remote repos, even if they are already checked out.",
+    # },
+    "remote_cache_valid_time": {
+        "type": "integer",
+        "default": 36000,
+        "doc": "Update remote repos if their last checkout was longer ago than this threshold.",
     },
 }
 

@@ -25,7 +25,7 @@ from ting.ting_attributes import (
 from ting.ting_cast import TingCast
 from ting.tings import TingTings
 from .adapters.adapters import create_adapter
-from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE
+from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE, FRECKLES_RUN_INFO_FILE
 from .exceptions import FrecklesConfigException
 from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from .schemas import FRECKLES_CONTEXT_SCHEMA
@@ -283,6 +283,17 @@ class FrecklesContext(object):
         self._frecklet_index = None
         self._pull_cache = {}
 
+        if os.path.exists(FRECKLES_RUN_INFO_FILE):
+            with open(FRECKLES_RUN_INFO_FILE) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    if line.startswith("#") or line.startswith("/"):
+                        continue
+                    name, var = line.partition("=")[::2]
+                    self._pull_cache[name.strip()] = float(var)
+
         # from config
 
         self._adapters = {}
@@ -321,25 +332,28 @@ class FrecklesContext(object):
 
         for repo in to_download:
 
-            self.download_repo(repo, url_cache=self._pull_cache)
+            self.download_repo(repo)
 
-    def download_repo(self, repo, url_cache=None):
+    def update_pull_cache(self, path):
 
-        force_update = self._context_config.get("always_update_remote_repos")
+        self._pull_cache[path] = time.time()
+        with open(FRECKLES_RUN_INFO_FILE, "w") as f:
+            for key, value in self._pull_cache.items():
+                f.write("{} = {}\n".format(key, value))
+
+    def download_repo(self, repo):
+
         exists = os.path.exists(repo["path"])
-        if exists and not force_update:
-            return
 
         branch = None
         if repo.get("branch", None) is not None:
             branch = repo["branch"]
         url = repo["url"]
 
-        if url_cache is not None:
-            if branch is None:
-                cache_key = url
-            else:
-                cache_key = "{}_{}".format(url, branch)
+        if branch is None:
+            cache_key = url
+        else:
+            cache_key = "{}_{}".format(url, branch)
 
         if not exists:
 
@@ -358,13 +372,21 @@ class FrecklesContext(object):
                     "Could not clone repository '{}': {}".format(url, stderr)
                 )
 
-            if url_cache is not None:
-                url_cache[cache_key] = time.time()
+            self.update_pull_cache(cache_key)
 
         else:
-            if url_cache is not None and cache_key in url_cache.keys():
-                log.debug("Not pulling again: {}".format(url))
-                return
+
+            if cache_key in self._pull_cache.keys():
+
+                last_time = self._pull_cache[cache_key]
+
+                valid = self._context_config.get("remote_cache_valid_time")
+
+                now = time.time()
+
+                if now - last_time < valid:
+                    log.debug("Not pulling again: {}".format(url))
+                    return
 
             # TODO: check if remote/branch is right?
             click.echo("- pulling from remote: {}...".format(url))
@@ -379,8 +401,7 @@ class FrecklesContext(object):
                     raise FrecklesConfigException(
                         "Could not pull repository '{}': {}".format(url, stderr)
                     )
-            if url_cache is not None:
-                url_cache[cache_key] = time.time()
+            self.update_pull_cache(cache_key)
 
     def check_repo(self, repo):
 
