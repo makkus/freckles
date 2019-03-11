@@ -140,6 +140,12 @@ class CliArgumentsAttribute(TingAttribute):
         else:
             raise Exception("Type '{}' not implemented yet.".format(cerberus_type))
 
+        if var.secret:
+            if "default" not in option_properties.keys():
+                if option_properties["required"]:
+                    option_properties["default"] = "ask"
+                    option_properties["show_default"] = True
+
         if param_type == "option":
             option_properties["help"] = var.doc.get_short_help()
             p = click.Option(**option_properties)

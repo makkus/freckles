@@ -6,7 +6,6 @@ import six
 from frutils import dict_merge
 from ting.ting_attributes import TingAttribute
 from ting.ting_cast import TingCast
-from ting.tings import TingTings
 
 log = logging.getLogger("freckles")
 
@@ -46,46 +45,77 @@ class VarCast(TingCast):
 
 @six.add_metaclass(abc.ABCMeta)
 class Inventory(object):
-    def __init__(self):
-        pass
+    def __init__(self, args=None):
+
+        self.args = args
 
     @abc.abstractmethod
     def retrieve_value(self, var_name, **task_context):
 
         pass
 
+    def retrive_arg_schema(self, var_name, **task_context):
+
+        if not self.args:
+            return None
+
+        return self.args.get(var_name, None)
+
+    def get_secret_args(self):
+
+        if self.args is None:
+            return None
+
+        result = []
+
+        for arg_name, arg in self.args.items():
+            if arg.secret:
+                result.append(arg)
+
+        return result
+
 
 class VarsInventory(Inventory):
-    def __init__(self, *vars):
+    def __init__(self, *vars, args=None):
+
+        super(VarsInventory, self).__init__(args=args)
 
         self.vars_list = vars
 
-        self.vars = {}
+        self._vars = {}
         for v in self.vars_list:
             dict_merge(self.vars, v, copy_dct=False)
 
     def retrieve_value(self, var_name, **task_context):
 
-        return self.vars.get(var_name, None)
+        return self._vars.get(var_name, None)
+
+    def set_value(self, var_name, new_value, **task_context):
+
+        self._vars[var_name] = new_value
+
+    @property
+    def vars(self):
+        return self._vars
 
 
-class TingsInventory(TingTings):
-
-    # DEFAULT_TING_CAST = VarCast
-
-    def __init__(self, repo_name, tingsets, load_config=None, **kwargs):
-
-        super(Inventory, self).__init__(
-            repo_name=repo_name,
-            tingsets=tingsets,
-            load_config=load_config,
-            indexes=["var_path"],
-        )
-
-    def retrieve_value(self, var_name, **task_context):
-
-        var = self.vars.get(var_name, None)
-        if var is None:
-            return None
-
-        return var.get_value(**task_context)
+# class TingsInventory(TingTings):
+#
+#     # DEFAULT_TING_CAST = VarCast
+#
+#     def __init__(self, repo_name, tingsets, load_config=None, **kwargs):
+#
+#         super(Inventory, self).__init__(
+#             repo_name=repo_name,
+#             tingsets=tingsets,
+#             load_config=load_config,
+#             indexes=["var_path"],
+#         )
+#
+#     def retrieve_value(self, var_name, **task_context):
+#
+#         var = self.vars.get(var_name, None)
+#         if var is None:
+#             return None
+#
+#         return var.get_value(**task_context)

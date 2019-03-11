@@ -6,11 +6,7 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
-from frutils import (
-    replace_strings_in_obj,
-    get_template_keys,
-    dict_merge,
-)
+from frutils import replace_strings_in_obj, get_template_keys, dict_merge
 from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
@@ -18,6 +14,7 @@ from .defaults import (
     TASK_KEY_NAME,
     DEFAULT_FRECKLES_JINJA_ENV,
     FRECKLES_DEFAULT_ARG_SCHEMA,
+    PASSWORD_ASK_MARKER,
 )
 from .exceptions import FrecklesVarException
 from .output_callback import (
@@ -395,6 +392,20 @@ class Frecklecutable(object):
         return processed_tree
 
     def run(self, inventory, run_config, run_vars):
+
+        secret_args = inventory.get_secret_args()
+        if secret_args is not None:
+
+            for arg in secret_args:
+
+                v = inventory.retrieve_value(arg.key)
+
+                if v == PASSWORD_ASK_MARKER:
+                    new_val = click.prompt(
+                        "Please provide secret value for '{}'".format(arg.key),
+                        hide_input=True,
+                    )
+                    inventory.set_value(arg.key, new_val)
 
         frecklet_name = self.frecklet.id
         log.debug("Running frecklecutable: {}".format(frecklet_name))

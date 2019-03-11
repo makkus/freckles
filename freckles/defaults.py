@@ -40,7 +40,7 @@ FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
 )
 FRECKLES_CACHE_BASE = os.path.join(FRECKLES_SHARE_DIR, "cache")
 
-
+PASSWORD_ASK_MARKER = "ask"
 # ---------------------------------------------------------------
 # jinja-related defaults
 
