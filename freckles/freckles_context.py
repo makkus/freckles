@@ -219,7 +219,8 @@ class CnfProfiles(TingTings):
                                     value
                                 )
                             )
-                    profile = {key, value}
+                    profile = {key: value}
+
                 elif profile.startswith("{"):
                     # trying to read json
                     try:
@@ -238,6 +239,7 @@ class CnfProfiles(TingTings):
                     )
 
             if isinstance(profile, Mapping):
+
                 dict_merge(result, dict(profile), copy_dct=False)
             else:
                 raise Exception(

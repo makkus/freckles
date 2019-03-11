@@ -6,7 +6,11 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
-from frutils import replace_strings_in_obj, get_template_keys, dict_merge
+from frutils import (
+    replace_strings_in_obj,
+    get_template_keys,
+    dict_merge,
+)
 from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
@@ -146,12 +150,17 @@ class Frecklecutable(object):
             )
 
         schema = {}
+        secret_keys = set()
+
         for key in template_keys:
             schema[key] = copy.copy(args.get(key, FRECKLES_DEFAULT_ARG_SCHEMA))
             schema[key].pop("doc", None)
             schema[key].pop("cli", None)
+            secret = schema[key].pop("secret", False)
+            if secret is True:
+                secret_keys.add(key)
 
-        return schema
+        return schema, secret_keys
 
     def _validate_processed_vars(
         self,
@@ -188,6 +197,7 @@ class Frecklecutable(object):
         task_nodes = processed_tree.leaves()
         result = []
         task_id = 0
+
         for t in task_nodes:
 
             if t.data["processed"][FRECKLET_KEY_NAME].get("skip", False):
@@ -240,9 +250,13 @@ class Frecklecutable(object):
                     if v is not None:
                         repl_vars[tk] = v
                 task_path = []
+                parent_secret_keys = set()
             else:
                 parent = processed_tree.get_node(parent_id).data
                 repl_vars = parent["processed"].get("vars", {})
+                parent_secret_keys = parent["processed"][FRECKLET_KEY_NAME].get(
+                    "secret_vars", set()
+                )
 
             # level = task_tree.level(task_id)
             # padding = "    " * level
@@ -328,42 +342,16 @@ class Frecklecutable(object):
                     continue
 
             # now we replace the whole rest of the task
-
-            # if not task_tree.get_node(task_id).is_leaf():
-            #     print("NOT LEAF")
-            #     print(vars)
-            #     vars_processed = self._replace_templated_var_value(var_value=vars, repl_dict=repl_vars,
-            #                                                        inventory=inventory)
-            #     vars_processed_cleaned = remove_none_values(vars_processed, args=args)
-            #     schema = self._generate_schema(var_value_map=vars, args=args, template_keys=None)
-            #
-            #     validated = self._validate_processed_vars(var_value_map=vars_processed_cleaned, schema=schema,
-            #                                                   task_path=task_path, vars_pre_clean=vars_processed,
-            #                                                   task=task_node)
-            #
-            #
-            #     processed = {
-            #         FRECKLET_KEY_NAME: frecklet,
-            #         TASK_KEY_NAME: task
-            #     }
-            #     processed = self._replace_templated_var_value(var_value=processed, repl_dict=repl_vars,
-            #                                                   inventory=inventory)
-            #     processed = remove_none_values(processed, convert_empty_to_none=False)
-            #     processed[VARS_KEY] = validated
-            #
-            #     processed_tree.create_node(identifier=task_id, tag=task_tree.get_node(task_id).tag,
-            #                                data={"frecklet": root_frecklet.data, "inventory": inventory,
-            #                                      "processed": processed}, parent=parent_id)
-            # else:
-
             task = {FRECKLET_KEY_NAME: frecklet, TASK_KEY_NAME: task, VARS_KEY: vars}
 
             template_keys = get_template_keys(
                 task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
             )
-            schema = self._generate_schema(
+            schema, secret_keys = self._generate_schema(
                 var_value_map=task, args=args, template_keys=template_keys
             )
+
+            secret_keys.update(parent_secret_keys)
             val_map = {}
             for tk in template_keys:
                 val = repl_vars.get(tk, None)
@@ -378,10 +366,20 @@ class Frecklecutable(object):
                 task=task_node,
             )
 
+            new_secret_keys = set()
+            for var_name, var in task.get(VARS_KEY, {}).items():
+
+                tk = get_template_keys(var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                intersection = secret_keys.intersection(tk)
+                if intersection:
+                    new_secret_keys.add(var_name)
+
             task_processed = self._replace_templated_var_value(
                 var_value=task, repl_dict=validated_val_map, inventory=inventory
             )
             task_processed = remove_none_values(task_processed, args=args)
+
+            task_processed[FRECKLET_KEY_NAME]["secret_vars"] = list(new_secret_keys)
 
             processed_tree.create_node(
                 identifier=task_id,
@@ -453,15 +451,12 @@ class Frecklecutable(object):
         )
         callback.task_started(task_details)
 
-        secure_vars = {}
-
         run_config = dict_merge(self.context.cnf.config, run_config, copy_dct=True)
         try:
             run_properties = adapter.run(
                 tasklist=current_tasklist,
                 run_vars=run_vars,
                 run_config=run_config,
-                secure_vars=secure_vars,
                 output_callback=callback,
                 result_callback=result_callback,
                 parent_task=task_details,

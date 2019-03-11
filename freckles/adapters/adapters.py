@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import abc
+import copy
 import logging
 import sys
 
@@ -99,14 +100,7 @@ class FrecklesAdapter(object):
 
     @abc.abstractmethod
     def _run(
-        self,
-        tasklist,
-        run_vars,
-        run_cnf,
-        secure_vars,
-        output_callback,
-        result_callback,
-        parent_task,
+        self, tasklist, run_vars, run_cnf, output_callback, result_callback, parent_task
     ):
 
         pass
@@ -116,7 +110,6 @@ class FrecklesAdapter(object):
         tasklist,
         run_vars,
         run_config,
-        secure_vars,
         output_callback,
         result_callback,
         parent_task,
@@ -129,11 +122,12 @@ class FrecklesAdapter(object):
             schema=self.get_run_config_schema(),
         )
 
+        tasklist = copy.deepcopy(tasklist)
+
         result = self._run(
             tasklist=tasklist,
             run_vars=run_vars,
             run_cnf=run_cnf,
-            secure_vars=secure_vars,
             output_callback=output_callback,
             result_callback=result_callback,
             parent_task=parent_task,
