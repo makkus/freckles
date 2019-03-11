@@ -45,9 +45,8 @@ class VarCast(TingCast):
 
 @six.add_metaclass(abc.ABCMeta)
 class Inventory(object):
-    def __init__(self, args=None):
-
-        self.args = args
+    def __init__(self):
+        pass
 
     @abc.abstractmethod
     def retrieve_value(self, var_name, **task_context):
@@ -76,9 +75,9 @@ class Inventory(object):
 
 
 class VarsInventory(Inventory):
-    def __init__(self, *vars, args=None):
+    def __init__(self, *vars):
 
-        super(VarsInventory, self).__init__(args=args)
+        super(VarsInventory, self).__init__()
 
         self.vars_list = vars
 

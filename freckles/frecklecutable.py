@@ -393,9 +393,13 @@ class Frecklecutable(object):
 
     def run(self, inventory, run_config, run_vars):
 
-        secret_args = inventory.get_secret_args()
-        if secret_args is not None:
+        secret_args = []
 
+        for arg_name, arg in self.frecklet.vars_frecklet.items():
+            if arg.secret:
+                secret_args.append(arg)
+
+        if secret_args:
             for arg in secret_args:
 
                 v = inventory.retrieve_value(arg.key)
