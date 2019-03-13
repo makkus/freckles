@@ -6,7 +6,7 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
-from frutils import replace_strings_in_obj, get_template_keys, dict_merge
+from frutils import replace_strings_in_obj, get_template_keys
 from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
@@ -466,7 +466,7 @@ class Frecklecutable(object):
         )
         callback.task_started(task_details)
 
-        run_config = dict_merge(self.context.cnf.config, run_config, copy_dct=True)
+        # run_config = dict_merge(self.context.cnf.config, run_config, copy_dct=True)
         try:
             run_properties = adapter.run(
                 tasklist=current_tasklist,

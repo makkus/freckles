@@ -1,15 +1,11 @@
 import copy
-import logging
 import os
 from collections import Sequence, Mapping
 
-from freckles.defaults import FRECKLETS_KEY, DEFAULT_FRECKLES_JINJA_ENV
 from freckles.frecklecutable import FrecklecutableMixin
-from freckles.frecklet.doc import render_html
-from frutils import get_template_keys
-from ting.ting_attributes import ValueAttribute, TingAttribute
-from .tasks import *  # noqa
+from freckles.frecklet.doc import render_html, render_markdown
 from .arguments import *  # noqa
+from .tasks import *  # noqa
 
 log = logging.getLogger("freckles")
 
@@ -101,6 +97,33 @@ class FreckletHtmlAttribute(TingAttribute):
             return "<p>Can't render frecklet {}: {}".format(ting.id, e)
 
 
+class FreckletMarkdownAttribute(TingAttribute):
+    def __init__(self):
+
+        pass
+
+    def provides(self):
+
+        return ["markdown"]
+
+    def requires(self):
+
+        return []
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        try:
+            markdown = render_markdown(ting)
+            return markdown
+        except (Exception) as e:
+
+            import traceback
+
+            traceback.print_exc()
+
+            return "Can't render frecklet {}: {}".format(ting.id, e)
+
+
 class PagelingMetadataAttribute(TingAttribute):
     def __init__(self):
 
@@ -189,6 +212,7 @@ FRECKLET_LOAD_CONFIG = {
         "FreckletsAttribute",
         "TaskListDetailedAttribute",
         "FreckletHtmlAttribute",
+        "FreckletMarkdownAttribute",
         "TaskTreeAttribute",
         {
             "VariablesAttribute": {

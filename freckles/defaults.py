@@ -17,6 +17,7 @@ ARGS_KEY = "args"
 META_KEY = "meta"
 MIXED_CONTENT_TYPE = "hodgepodge"
 ACCEPT_FRECKLES_LICENSE_KEYNAME = "accept_freckles_license"
+USE_COMMUNITY_KEYNAME = "use_community"
 
 FRECKLES_DEFAULT_ARG_SCHEMA = {"required": True, "empty": False}
 

@@ -42,16 +42,16 @@ PROFILE_LOAD_CONFIG_SCHEMA = {
 # Default freckles context configuration schema. This contains all configuration  pertaining to a single freckles
 # context, like which repositories to use, which adapters, etc.
 FRECKLES_CONTEXT_SCHEMA = {
-    "use_community": {
-        "type": "boolean",
-        "default": False,
-        "doc": """Whether to allow the freckles community repositories.
-
-The freckles community repositories are a collection of community-created and curated frecklets and resources.
-
-TODO: list all repository urls
-""",
-    },
+    #     "use_community": {
+    #         "type": "boolean",
+    #         "default": False,
+    #         "doc": """Whether to allow the freckles community repositories.
+    #
+    # The freckles community repositories are a collection of community-created and curated frecklets and resources.
+    #
+    # TODO: list all repository urls
+    # """,
+    #     },
     "adapters": {
         "type": "list",
         "default": ["nsbl", "templing"],
@@ -62,14 +62,33 @@ TODO: list all repository urls
         "default": ["default", "user"],
         "type": "list",
         "schema": {"type": "string"},
+        "doc": {
+            "short_help": "A list of repositories containing frecklets and/or associated resources.",
+            "help": """"A list of repositories containing frecklets and/or associated resources.
+
+The value of this option is of the 'list' type, the items can either be plain paths or urls, in which case freckles will look for all types of resources included in them (which might be time-consuming), or pre-pended with a '[resource-type]::' string, in which case freckles will only look for the specified resource type.
+
+There are 3 special repository aliases that can be used instead of a path:
+
+- 'default': the default frecklets and resources included with each freckles adapter
+- 'community': the default community frecklets and resources (check: https://gitlab.com/frecklets )
+- 'user': user specific frecklets and resources (adapter-dependent, usually a sub-directory of ~/.config/freckles/
+""",
+            "examples": [
+                {
+                    "title": "Use 'default' and 'community' repos.",
+                    "vars": {"repos": ["default", "community"]},
+                }
+            ],
+        },
     },
-    "resources": {
-        "empty": True,
-        "default": {},
-        "type": "dict",
-        "keyschema": {"type": "string"},
-        "valueschema": {"type": "dict"},
-    },
+    # "resources": {
+    #     "empty": True,
+    #     "default": {},
+    #     "type": "dict",
+    #     "keyschema": {"type": "string"},
+    #     "valueschema": {"type": "dict"},
+    # },
     "allow_remote": {
         "type": "boolean",
         "default": False,
@@ -87,7 +106,7 @@ TODO: list all repository urls
     # },
     "remote_cache_valid_time": {
         "type": "integer",
-        "default": 36000,
+        "default": 3600,
         "doc": "Update remote repos if their last checkout was longer ago than this threshold.",
     },
 }

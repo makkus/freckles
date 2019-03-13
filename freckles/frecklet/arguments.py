@@ -1,3 +1,4 @@
+import logging
 from collections import OrderedDict
 
 import click
@@ -8,8 +9,6 @@ from frutils import get_template_keys, dict_merge
 from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
 from ting.ting_cast import MultiCacheResult
-
-import logging
 
 log = logging.getLogger("freckles")
 

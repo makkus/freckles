@@ -9,7 +9,9 @@ class Freckles(object):
         self, use_community=False, default_context_config=None, extra_repos=None
     ):
         init_dict = {}
-        init_dict["use_community"] = use_community
+        if use_community:
+            init_dict.setdefault("repos", ["default", "user", "community"])
+
         self._root_config = Cnf(init_dict)
         profile_load_config = self._root_config.add_interpreter(
             "profile_load", PROFILE_LOAD_CONFIG_SCHEMA
@@ -33,6 +35,11 @@ class Freckles(object):
             extra_repos=extra_repos,
         )
 
+        if "default" in self._cnf_profiles:
+            self.license_accepted = self._cnf_profiles.license_accepted()
+        else:
+            self.license_accepted = False
+
     def create_context(
         self, context_name, context_config, set_current=False, extra_repos=None
     ):
@@ -47,11 +54,7 @@ class Freckles(object):
             raise Exception("Context configuration can't be empty.")
 
         context_config = self._cnf_profiles.create_profile_cnf(
-            context_config,
-            extra_repos=extra_repos,
-            use_community=self._root_config.get_interpreter_value(
-                "root_config", "use_community"
-            ),
+            context_config, extra_repos=extra_repos
         )
         context = FrecklesContext(context_name=context_name, cnf=context_config)
 

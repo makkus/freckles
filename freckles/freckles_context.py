@@ -6,6 +6,7 @@ from collections import Mapping, Iterable
 
 import click
 from plumbum import local
+from ruamel.yaml import YAML
 from six import string_types
 
 from frkl.utils import expand_string_to_git_details
@@ -14,6 +15,7 @@ from frutils import (
     is_url_or_abbrev,
     DEFAULT_URL_ABBREVIATIONS_REPO,
     calculate_cache_location_for_url,
+    readable,
 )
 from frutils.config.cnf import Cnf
 from ting.ting_attributes import (
@@ -25,12 +27,21 @@ from ting.ting_attributes import (
 from ting.ting_cast import TingCast
 from ting.tings import TingTings
 from .adapters.adapters import create_adapter
-from .defaults import MIXED_CONTENT_TYPE, FRECKLES_CACHE_BASE, FRECKLES_RUN_INFO_FILE
+from .defaults import (
+    MIXED_CONTENT_TYPE,
+    FRECKLES_CACHE_BASE,
+    FRECKLES_RUN_INFO_FILE,
+    FRECKLES_CONFIG_PROFILES_DIR,
+    ACCEPT_FRECKLES_LICENSE_KEYNAME,
+    FRECKLES_SHARE_DIR,
+)
 from .exceptions import FrecklesConfigException
 from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from .schemas import FRECKLES_CONTEXT_SCHEMA
 
 log = logging.getLogger("freckles")
+
+yaml = YAML()
 
 # class CnfTingAttribute(TingAttribute):
 #     """Creates a :class:`Cnf` attribute from the dict value of the 'config_dict' attribute."""
@@ -175,9 +186,7 @@ class CnfProfiles(TingTings):
 
         return result.config_dict
 
-    def create_profile_cnf(
-        self, profile_configs, extra_repos=None, use_community=False
-    ):
+    def create_profile_cnf(self, profile_configs, extra_repos=None):
 
         if isinstance(profile_configs, (string_types, Mapping)):
             profile_configs = [profile_configs]
@@ -255,8 +264,6 @@ class CnfProfiles(TingTings):
                 extra_repos = list(extra_repos)
             result["repos"] = list(result["repos"]) + extra_repos
 
-        result["use_community"] = use_community
-
         return Cnf(config_dict=result)
 
     def get_profile_names(self):
@@ -272,8 +279,33 @@ class CnfProfiles(TingTings):
             return sorted(names)
 
 
+def startup_housekeeping():
+
+    if not os.path.exists(FRECKLES_CONFIG_PROFILES_DIR):
+        os.makedirs(FRECKLES_CONFIG_PROFILES_DIR)
+    else:
+        if not os.path.isdir(os.path.realpath(FRECKLES_CONFIG_PROFILES_DIR)):
+            raise Exception(
+                "Freckles config location exists and is not a directory: '{}'".format(
+                    FRECKLES_CONFIG_PROFILES_DIR
+                )
+            )
+
+    if not os.path.exists(FRECKLES_SHARE_DIR):
+        os.makedirs(FRECKLES_SHARE_DIR)
+    else:
+        if not os.path.isdir(os.path.realpath(FRECKLES_SHARE_DIR)):
+            raise Exception(
+                "Freckles runtime data folder exists and is not a directory: '{}'".format(
+                    FRECKLES_SHARE_DIR
+                )
+            )
+
+
 class FrecklesContext(object):
     def __init__(self, context_name, cnf):
+
+        startup_housekeeping()
 
         self._context_name = context_name
         self._cnf = cnf
@@ -425,9 +457,7 @@ class FrecklesContext(object):
         # remote repo
         if not self._context_config.get("allow_remote"):
 
-            if repo.get("alias", None) != "community" or not self._context_config.get(
-                "use_community"
-            ):
+            if repo.get("alias", None) != "community":
                 raise Exception(
                     "Remote repos not allowed in config, can't load repo '{}'. Exiting...".format(
                         repo["url"]
@@ -496,13 +526,9 @@ class FrecklesContext(object):
 
     def _create_resources_repo_list(self):
 
-        use_community = self._context_config.config.get("use_community")
         repo_list = self._context_config.config.get("repos")
 
         resources_list = []
-
-        if use_community and "community" not in repo_list:
-            repo_list = repo_list + ["community"]
 
         # move resource repos
         for repo in repo_list:
@@ -640,86 +666,30 @@ class FrecklesContext(object):
         frecklecutable = frecklet.create_frecklecutable(context=self)
         return frecklecutable
 
-    # def run(self, frecklet_name, inventory):
-    #
-    #     log.debug("Running frecklecutable: {}".format(frecklet_name))
-    #
-    #     fx = self.create_frecklecutable(frecklet_name=frecklet_name)
-    #     tasks = fx.process_tasks(inventory=inventory)
-    #
-    #     current_tasklist = []
-    #     idempotent_cache = []
-    #     current_adapter = None
-    #
-    #     for task in tasks:
-    #         tt = task[FRECKLET_KEY_NAME]["type"]
-    #
-    #         adapter = self._adapter_tasktype_map.get(tt, None)
-    #
-    #         if adapter is None:
-    #             raise Exception("No adapter registered for task type: {}".format(tt))
-    #         if len(adapter) > 1:
-    #             raise Exception("Multiple adapters registered for task type '{}', that is not supported yet.".format(tt))
-    #
-    #         adapter = adapter[0]
-    #
-    #         if current_adapter is None:
-    #             current_adapter = adapter
-    #
-    #         if current_adapter != adapter:
-    #             raise Exception("Multiple adapters for a single frecklet, this is not supported yet: {} / {}".format(current_adapter, adapter))
-    #
-    #         if is_duplicate_task(task, idempotent_cache):
-    #             log.debug("Idempotent, duplicate task, ignoring: {}".format(task[FRECKLET_KEY_NAME]["name"]))
-    #             continue
-    #         current_tasklist.append(task)
-    #
-    #     adapter = self._adapters[current_adapter]
-    #
-    #     callback = DefaultCallback()
-    #     parent_task = TaskDetail(frecklet_name, "run", task_parent=None)
-    #     callback.task_started(parent_task)
-    #     task_details = TaskDetail(
-    #                 task_name=frecklet_name,
-    #                 task_type="frecklecutable",
-    #                 task_parent=parent_task,
-    #             )
-    #     callback.task_started(task_details)
-    #
-    #     run_vars = {
-    #         "__freckles_run__": {
-    #             # "sudo_pass": "vagrant",
-    #             # "ssh_pass": "vagrant",
-    #             "pwd": os.getcwd(),
-    #         }
-    #     }
-    #     secure_vars = {}
-    #
-    #     run_config = {
-    #         # "current_run_folder"
-    #         # "add_timestamp_to_env"
-    #         # "allow_remote"
-    #         "connection_type": "local",
-    #         "ssh_port": 22,
-    #         "callback": "freckles_callback",
-    #         # "convert_ansible_template_markers"
-    #         "elevated": True,
-    #         # "force_run_folder"
-    #         # "generate_role_frecklets"
-    #         # "generate_tasklist_frecklets"
-    #         # "guess_args_for_roles"
-    #         "target": "localhost",
-    #         "minimal_facts_only": False,
-    #         "no_run": False,
-    #         "output": "freckles",
-    #         # "run_folder"
-    #         # "show_tasks_with_password_in_log"
-    #         # "user":
-    #
-    #     }
-    #
-    #
-    #     result = adapter.run(tasklist=current_tasklist, run_vars=run_vars, run_config=run_config, secure_vars=secure_vars, output_callback=callback, result_callback=None, parent_task=task_details)
-    #
-    #     import pp
-    #     pp(result)
+    def unlock_config(self, user_accepts=False, use_community=False, save=True):
+
+        if not user_accepts:
+            raise Exception(
+                "Need user acceptance of freckles license to unlock configuration."
+            )
+
+        target = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "default.context")
+
+        if os.path.exists(target):
+            with open(target, "r") as f:
+                current_content = yaml.load(f)
+        else:
+            current_content = self.cnf.config
+
+        current_content[ACCEPT_FRECKLES_LICENSE_KEYNAME] = user_accepts
+        repos = current_content.setdefault("repos", [])
+        if "community" not in repos:
+            repos.append("community")
+
+        if save:
+            with open(target, "w") as f:
+                f.write(
+                    readable(
+                        current_content, out="yaml", sort_keys=True, ignore_aliases=True
+                    )
+                )

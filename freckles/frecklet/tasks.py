@@ -151,6 +151,20 @@ class AddRootFreckletProcessor(ConfigProcessor):
         new_config = self.current_input_config
         return {"root_frecklet": self.ting, "task": new_config}
 
+        # return {"task": new_config}
+
+
+class CleanupFreckletProcessor(ConfigProcessor):
+    def __init__(self, **init_params):
+
+        pass
+
+    def process_current_config(self):
+
+        new_config = self.current_input_config
+        new_config["task"].pop("doc", None)
+        return new_config
+
 
 class NodeCounter(object):
     def __init__(self):
@@ -260,6 +274,7 @@ class TaskListDetailedAttribute(TingAttribute):
             MoveEmbeddedTaskKeysProcessor(),
             # TaskPathProcessor(index=self.index),
             AddRootFreckletProcessor(ting=ting),
+            CleanupFreckletProcessor(),
         ]
 
         f = Frkl([ting._metadata], chain)

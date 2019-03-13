@@ -8,8 +8,6 @@ import sys
 import six
 from stevedore import driver
 
-from frutils.config.cnf import Cnf
-
 log = logging.getLogger("freckles")
 
 
@@ -45,11 +43,14 @@ def create_adapter(adapter_name, cnf):
 
 @six.add_metaclass(abc.ABCMeta)
 class FrecklesAdapter(object):
-    def __init__(self, adapter_name, cnf):
+    def __init__(self, adapter_name, cnf, config_schema, run_config_schema):
 
         self._name = adapter_name
         self._cnf_interpreter = cnf.add_interpreter(
-            "adapter_config_{}".format(adapter_name), self.get_config_schema()
+            "adapter_config_{}".format(adapter_name), config_schema
+        )
+        self._run_cnf_interpreter = cnf.add_interpreter(
+            "adapter_run_config_{}".format(adapter_name), run_config_schema
         )
 
         self.resource_folder_map = None
@@ -62,13 +63,13 @@ class FrecklesAdapter(object):
     def name(self):
         return self._name
 
-    @abc.abstractmethod
-    def get_config_schema(self):
-        pass
-
-    @abc.abstractmethod
-    def get_run_config_schema(self):
-        pass
+    # @abc.abstractmethod
+    # def get_config_schema(self):
+    #     pass
+    #
+    # @abc.abstractmethod
+    # def get_run_config_schema(self):
+    #     pass
 
     # @abc.abstractmethod
     # def get_supported_task_types(self):
@@ -115,19 +116,14 @@ class FrecklesAdapter(object):
         parent_task,
     ):
 
-        cnf = Cnf(run_config)
-
-        run_cnf = cnf.add_interpreter(
-            "adapter_{}_run_config".format(self.name),
-            schema=self.get_run_config_schema(),
-        )
+        final_run_config = self._run_cnf_interpreter.overlay(run_config)
 
         tasklist = copy.deepcopy(tasklist)
 
         result = self._run(
             tasklist=tasklist,
             run_vars=run_vars,
-            run_cnf=run_cnf,
+            run_cnf=final_run_config,
             output_callback=output_callback,
             result_callback=result_callback,
             parent_task=parent_task,
