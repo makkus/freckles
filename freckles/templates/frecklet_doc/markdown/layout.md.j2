@@ -1,36 +1,24 @@
-{{%= set help = frecklet_name | frecklet_help(default=None, use_short_help=False) =%}}
-{{%= if help =%}}
+{% set doc = frecklet.doc %}
+{% set help = doc.get_help(default=None, use_short_help=False) %}
+{% set examples = doc.get_examples() %}
+{% set further_reading = doc.get_further_reading() %}
+{% if help %}
 ## Description
-{{== help ==}}
-{{%= endif =%}}
+{{ help }}
+{% endif %}
 
-{{%= set further_reading = frecklet_name | frecklet_further_reading =%}}
-{{%= if further_reading =%}}
+{% if further_reading %}
 ## Resources
-{{%= for d, l in further_reading.items() =%}}
-  - [{{== d ==}}]({{== l ==}})
-{{%= endfor =%}}
-{{%= endif =%}}
+{% for d, l in further_reading.items() %}
+  - [{{ d }}]({{ l }})
+{% endfor %}
+{% endif %}
 
-{{%= set params = frecklet_name | frecklet_parameters =%}}
-{{%= if params.param_list =%}}
-{{%= include 'frecklet_doc/markdown/parameters.md.j2' =%}}
-{{%= endif =%}}
+{% set vars = frecklet.vars_frecklet %}
+{% if vars %}
+{% include 'variables.md.j2' %}
+{% endif %}
 
-{{%= include "frecklet_doc/markdown/command-line.md.j2" =%}}
-
-{{%= set long_help = frecklet_name | frecklet_long_help =%}}
-{{%= if long_help =%}}
-## Details
-{{ long_help }}
-{{%= endif =%}}
-
-{{%= set examples = frecklet_name | frecklet_examples =%}}
-{{%= if examples =%}}
-{{%= include "frecklet_doc/markdown/examples.md.j2" =%}}
-{{%= endif =%}}
-
-{{%= include "frecklet_doc/markdown/task_list.md.j2" =%}}
-
-
-{{%= include "frecklet_doc/markdown/source_code.md.j2" =%}}
+{% if examples %}
+{% include 'examples.md.j2' %}
+{% endif %}
