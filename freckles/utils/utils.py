@@ -34,7 +34,8 @@ def print_frecklet_list(frecklet_dict):
     max_rest = 20
 
     data = []
-    for f_name, f in frecklet_dict.items():
+    for f_name in sorted(frecklet_dict.keys()):
+        f = frecklet_dict[f_name]
         desc = f.doc.get_short_help(list_item_format=True)
         if rest_width > max_rest:
             desc = "\n".join(textwrap.wrap(desc, rest_width))
