@@ -494,3 +494,5 @@ class Frecklecutable(object):
         except (Exception) as e:
             click.echo("frecklecutable run failed: {}".format(e))
             log.debug(e)
+            import traceback
+            traceback.print_exc()

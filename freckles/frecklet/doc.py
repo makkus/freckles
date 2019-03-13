@@ -33,6 +33,8 @@ extension_configs = {
     # }
 }
 
+# extensions = []
+extension_configs = {}
 markdown_renderer = Markdown(extensions=extensions, extension_configs=extension_configs)
 
 
