@@ -16,7 +16,7 @@ requirements = [
     "ting==1.0.0b1",
     "colorama==0.4.1",
     "termcolor==1.1.0",
-    "tabulate==0.8.3"
+    "tabulate==0.8.3",
     "Pygments==2.3.1",
     "passlib==1.7.1",
     "treelib==1.5.3",
