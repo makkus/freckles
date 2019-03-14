@@ -457,6 +457,20 @@ class Frecklecutable(object):
 
         adapter = self.context._adapters[current_adapter]
 
+        # preparing execution environment...
+        prep_version = self._context._run_info.get(
+            "prepared_execution_environments", {}
+        ).get(current_adapter, None)
+
+        new_prep_version = adapter.prepare_execution_environment(prep_version)
+
+        if new_prep_version is not None and prep_version != new_prep_version:
+
+            self._context._run_info.setdefault("prepared_execution_environments", {})[
+                current_adapter
+            ] = new_prep_version
+            self._context.save_run_info_file()
+
         callback = DefaultCallback()
         result_callback = FrecklesResultCallback()
         parent_task = TaskDetail(frecklet_name, "run", task_parent=None)
@@ -495,4 +509,5 @@ class Frecklecutable(object):
             click.echo("frecklecutable run failed: {}".format(e))
             log.debug(e)
             import traceback
+
             traceback.print_exc()

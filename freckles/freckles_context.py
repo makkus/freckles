@@ -313,25 +313,19 @@ class FrecklesContext(object):
         # self._folder_load_config = cnf.add_interpreter("frecklet_load", FRECKLET_LOAD_CONFIG_SCHEMA)
 
         self._frecklet_index = None
-        self._pull_cache = {}
+        self._run_info = {}
 
         if os.path.exists(FRECKLES_RUN_INFO_FILE):
             with open(FRECKLES_RUN_INFO_FILE) as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    if line.startswith("#") or line.startswith("/"):
-                        continue
-                    name, var = line.partition("=")[::2]
-                    self._pull_cache[name.strip()] = float(var)
+
+                self._run_info = yaml.load(f)
 
         # from config
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
         for adapter_name in self._context_config.config.get("adapters"):
-            adapter = create_adapter(adapter_name, self._cnf)
+            adapter = create_adapter(adapter_name, self._cnf, self)
             self._adapters[adapter_name] = adapter
             for tt in adapter.get_supported_task_types():
                 self._adapter_tasktype_map.setdefault(tt, []).append(adapter_name)
@@ -362,16 +356,31 @@ class FrecklesContext(object):
             if r is not None:
                 to_download.append(r)
 
+        if to_download:
+            click.echo("- preparing execution context")
+
         for repo in to_download:
 
             self.download_repo(repo)
 
     def update_pull_cache(self, path):
 
-        self._pull_cache[path] = time.time()
+        self._run_info.setdefault("pull_cache", {})[path] = time.time()
+        self.save_run_info_file()
+
+    def save_run_info_file(self, new_data=None):
+        """Save the run info file, optionally merge it with new data beforehand.
+
+        Args:
+            new_data (dict): new data to be merged on top of current dict, will be ignored if None
+
+        """
+
+        if new_data is not None:
+            self._run_info = dict_merge(self._run_info, new_data, copy_dct=False)
+
         with open(FRECKLES_RUN_INFO_FILE, "w") as f:
-            for key, value in self._pull_cache.items():
-                f.write("{} = {}\n".format(key, value))
+            yaml.dump(self._run_info, f)
 
     def download_repo(self, repo):
 
@@ -389,7 +398,7 @@ class FrecklesContext(object):
 
         if not exists:
 
-            click.echo("- cloning repo: {}...".format(repo["url"]))
+            click.echo("  - cloning repo: {}...".format(repo["url"]))
             git = local["git"]
             cmd = ["clone"]
             if branch is not None:
@@ -408,20 +417,21 @@ class FrecklesContext(object):
 
         else:
 
-            if cache_key in self._pull_cache.keys():
+            if cache_key in self._run_info.get("pull_cache", {}).keys():
 
-                last_time = self._pull_cache[cache_key]
+                last_time = self._run_info["pull_cache"][cache_key]
 
                 valid = self._context_config.get("remote_cache_valid_time")
 
                 now = time.time()
 
                 if now - last_time < valid:
+                    click.echo("  - using cached repo: {}".format(url))
                     log.debug("Not pulling again: {}".format(url))
                     return
 
             # TODO: check if remote/branch is right?
-            click.echo("- pulling from remote: {}...".format(url))
+            click.echo("  - pulling remote: {}...".format(url))
             git = local["git"]
             cmd = ["pull", "origin"]
             if branch is not None:

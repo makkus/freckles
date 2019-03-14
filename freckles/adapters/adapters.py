@@ -13,7 +13,7 @@ log = logging.getLogger("freckles")
 
 # extensions
 # ------------------------------------------------------------------------
-def create_adapter(adapter_name, cnf):
+def create_adapter(adapter_name, cnf, context):
     """Loading a dictlet finder extension.
 
     Returns:
@@ -35,7 +35,7 @@ def create_adapter(adapter_name, cnf):
         namespace="freckles.adapters",
         name=adapter_name,
         invoke_on_load=True,
-        invoke_args=(adapter_name, cnf),
+        invoke_args=(adapter_name, cnf, context),
     )
 
     return mgr.driver
@@ -43,9 +43,10 @@ def create_adapter(adapter_name, cnf):
 
 @six.add_metaclass(abc.ABCMeta)
 class FrecklesAdapter(object):
-    def __init__(self, adapter_name, cnf, config_schema, run_config_schema):
+    def __init__(self, adapter_name, cnf, context, config_schema, run_config_schema):
 
         self._name = adapter_name
+        self._context = context
         self._cnf_interpreter = cnf.add_interpreter(
             "adapter_config_{}".format(adapter_name), config_schema
         )
@@ -98,6 +99,19 @@ class FrecklesAdapter(object):
         """Return a list of supported frecklet types to run."""
 
         pass
+
+    def prepare_execution_environment(self, version):
+        """Prepares all external dependencies that are needed for this adapter to successfully run an execution.
+
+        Will be invoked with a version number, so the adapter can decide whether to do the whole thing again or not.
+
+        Should throw an exception if it fails.
+
+        Returns:
+            int: a version indicator
+        """
+
+        return 0
 
     @abc.abstractmethod
     def _run(

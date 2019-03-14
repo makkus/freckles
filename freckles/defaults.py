@@ -35,6 +35,10 @@ FRECKLES_SHARE_DIR = os.path.join(
     os.path.expanduser("~"), ".local", "share", "freckles"
 )
 FRECKLES_RUN_INFO_FILE = os.path.join(FRECKLES_SHARE_DIR, ".run_info")
+
+FRECKLES_CONDA_ENV_PATH = os.path.join(FRECKLES_SHARE_DIR, "envs", "conda")
+FRECKLES_VENV_ENV_PATH = os.path.join(FRECKLES_SHARE_DIR, "envs", "venv")
+
 FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(

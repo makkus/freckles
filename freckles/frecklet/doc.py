@@ -1,6 +1,7 @@
 import copy
 import logging
 import os
+import sys
 import textwrap
 
 import click
@@ -8,11 +9,13 @@ import tabulate
 from click import Context
 from jinja2 import Environment, FileSystemLoader
 from markdown import Markdown
+from six import string_types
 
-from frutils import readable, reindent, get_terminal_size
+from frutils import readable, reindent, get_terminal_size, StringYAML
 
 log = logging.getLogger("freckles")
 
+yaml = StringYAML()
 
 DOC_JINJA_ENV_CACHE = {}
 
@@ -91,7 +94,17 @@ def vars_markdown_table(vars, vars_optional=None):
     for var_name, var in vars.items():
         v_type = var.schema.get("type", "n/a")
         v_default = var.schema.get("default", "")
-        if terminal < 120:
+        if not isinstance(v_default, string_types):
+            if isinstance(v_default, bool):
+                # not sure why this doesn't produce good output otherwise
+                if v_default:
+                    v_default = "true"
+                else:
+                    v_default = "false"
+            else:
+                v_default = yaml.dump(v_default)
+
+        if terminal < 60:
             v_default = "\n".join(textwrap.wrap(v_default, 18))
         v_help = var.doc.get_short_help(list_item_format=True)
         req = var.schema.get("required")
@@ -121,15 +134,9 @@ MARKDOWN_TEMPLATE_FILTERS = {
 }
 
 
-def create_doc_jinja_env(name, template_dir=None, template_filters=None):
+def create_doc_jinja_env(name, template_dir, template_filters=None):
 
     global DOC_JINJA_ENV_CACHE
-
-    if template_dir is None:
-
-        template_dir = os.path.join(
-            os.path.dirname(__file__), "..", "templates", "frecklet_doc", "markdown"
-        )
 
     if DOC_JINJA_ENV_CACHE.get(name, None) is None:
         jinja_env = Environment(loader=FileSystemLoader(template_dir))
@@ -159,9 +166,14 @@ def render_html(frecklet):
 
     repl_dict = {"frecklet_name": frecklet.id, "frecklet": frecklet}
 
-    template_dir = os.path.join(
-        os.path.dirname(__file__), "..", "templates", "frecklet_doc", "html"
-    )
+    if not hasattr(sys, "frozen"):
+        template_dir = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "frecklet_doc", "html"
+        )
+    else:
+        template_dir = os.path.join(
+            sys._MEIPASS, "freckles", "templates", "frecklet_doc", "html"
+        )
     template = create_doc_jinja_env(
         "html_doc_frecklet",
         template_dir=template_dir,
@@ -182,9 +194,16 @@ def render_html(frecklet):
 def render_markdown(frecklet):
 
     repl_dict = {"frecklet_name": frecklet.id, "frecklet": frecklet}
-    template_dir = os.path.join(
-        os.path.dirname(__file__), "..", "templates", "frecklet_doc", "markdown"
-    )
+
+    if not hasattr(sys, "frozen"):
+        template_dir = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "frecklet_doc", "markdown"
+        )
+    else:
+        template_dir = os.path.join(
+            sys._MEIPASS, "freckles", "templates", "frecklet_doc", "markdown"
+        )
+
     template = create_doc_jinja_env(
         "markdown_doc_frecklet",
         template_dir=template_dir,
