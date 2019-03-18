@@ -1,3 +1,4 @@
+from freckles.defaults import FRECKLES_RUN_DIR, FRECKLES_CURRENT_RUN_SYMLINK
 from frutils import dict_merge
 
 # schema to load '*.context' files in $HOME/.config/freckles
@@ -106,8 +107,41 @@ There are 3 special repository aliases that can be used instead of a path:
     # },
     "remote_cache_valid_time": {
         "type": "integer",
-        "default": 3600 * 24,
+        "default": (3600 * 24),
         "doc": "Update remote repos if their last checkout was longer ago than this threshold.",
+    },
+    "run_folder": {
+        "type": "string",
+        "default": FRECKLES_RUN_DIR,
+        "doc": {"short_help": "the target for the generated run environment"},
+        # "target_key": "target",
+    },
+    "current_run_folder": {
+        "type": "string",
+        "default": FRECKLES_CURRENT_RUN_SYMLINK,
+        "doc": {"short_help": "target of a symlink the current run environment"},
+    },
+    "force_run_folder": {
+        "type": "boolean",
+        "default": True,
+        "target_key": "force",
+        "doc": {
+            "short_help": "overwrite a potentially already existing run environment"
+        },
+    },
+    "add_timestamp_to_env": {
+        "type": "boolean",
+        "default": True,
+        "doc": {
+            "short_help": "whether to add a timestamp to the run environment folder name"
+        },
+    },
+    "add_adapter_name_to_env": {
+        "type": "boolean",
+        "default": True,
+        "doc": {
+            "short_help": "whether to add the adapter name to the run environment folder name"
+        },
     },
 }
 

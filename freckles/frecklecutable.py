@@ -420,29 +420,31 @@ class Frecklecutable(object):
         idempotent_cache = []
         current_adapter = None
 
+        all_resources = {}
+
         for task in tasks:
             tt = task[FRECKLET_KEY_NAME]["type"]
 
-            adapter = self.context._adapter_tasktype_map.get(tt, None)
+            adapter_name = self.context._adapter_tasktype_map.get(tt, None)
 
-            if adapter is None:
+            if adapter_name is None:
                 raise Exception("No adapter registered for task type: {}".format(tt))
-            if len(adapter) > 1:
+            if len(adapter_name) > 1:
                 raise Exception(
                     "Multiple adapters registered for task type '{}', that is not supported yet.".format(
                         tt
                     )
                 )
 
-            adapter = adapter[0]
+            adapter_name = adapter_name[0]
 
             if current_adapter is None:
-                current_adapter = adapter
+                current_adapter = adapter_name
 
-            if current_adapter != adapter:
+            if current_adapter != adapter_name:
                 raise Exception(
                     "Multiple adapters for a single frecklet, this is not supported yet: {} / {}".format(
-                        current_adapter, adapter
+                        current_adapter, adapter_name
                     )
                 )
 
@@ -455,7 +457,25 @@ class Frecklecutable(object):
                 continue
             current_tasklist.append(task)
 
+            adapter = self.context._adapters[adapter_name]
+            resources = adapter.get_resources(task)
+
+            sup = adapter.get_supported_resource_types()
+            for resource_type, paths in resources.items():
+
+                if resource_type not in sup:
+                    raise Exception(
+                        "Invalid resource type '{}' for adapter '{}'".format(
+                            resource_type, adapter_name.name
+                        )
+                    )
+                current = all_resources.setdefault(resource_type, [])
+                for path in paths:
+                    if path not in current:
+                        current.append(path)
+
         adapter = self.context._adapters[current_adapter]
+        run_env_properties = self.context.create_run_environment(all_resources, adapter)
 
         # preparing execution environment...
         prep_version = self._context._run_info.get(
@@ -486,6 +506,7 @@ class Frecklecutable(object):
                 tasklist=current_tasklist,
                 run_vars=run_vars,
                 run_config=run_config,
+                run_env=run_env_properties,
                 output_callback=callback,
                 result_callback=result_callback,
                 parent_task=task_details,

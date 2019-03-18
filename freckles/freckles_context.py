@@ -1,6 +1,8 @@
+from datetime import datetime
 import json
 import logging
 import os
+import shutil
 import time
 from collections import Mapping, Iterable
 
@@ -425,6 +427,9 @@ class FrecklesContext(object):
 
                 now = time.time()
 
+                print("TIME DIFFERENCE: {}".format(now - last_time))
+                print("VALID: {}".format(valid))
+
                 if now - last_time < valid:
                     click.echo("  - using cached repo: {}".format(url))
                     log.debug("Not pulling again: {}".format(url))
@@ -703,3 +708,67 @@ class FrecklesContext(object):
                         current_content, out="yaml", sort_keys=True, ignore_aliases=True
                     )
                 )
+
+    def create_run_environment(self, all_resources, adapter):
+
+        result = {}
+        cnf = self.cnf.get_interpreter("context")
+
+        run_folder = cnf.get("run_folder")
+        force = cnf.get("force")
+        add_timestamp = cnf.get("add_timestamp_to_env")
+        adapter_name = cnf.get("add_adapter_name_to_env")
+        symlink = cnf.get("current_run_folder")
+
+        env_dir = os.path.expanduser(run_folder)
+        if adapter_name:
+            dirname, basename = os.path.split(env_dir)
+            env_dir = os.path.join(dirname, "{}_{}".format(basename, adapter.name))
+
+        if add_timestamp:
+            start_date = datetime.now()
+            date_string = start_date.strftime("%y%m%d_%H_%M_%S")
+            dirname, basename = os.path.split(env_dir)
+            env_dir = os.path.join(dirname, "{}_{}".format(basename, date_string))
+
+        if os.path.exists(env_dir):
+            if not force:
+                raise Exception("Run folder '{}' already exists.".format(env_dir))
+            else:
+                shutil.rmtree(env_dir)
+
+        os.makedirs(env_dir)
+        result["env_dir"] = env_dir
+
+        if symlink:
+            link_path = os.path.expanduser(symlink)
+            if os.path.exists(link_path) or os.path.islink(link_path):
+                os.unlink(link_path)
+            link_parent = os.path.abspath(os.path.join(link_path, os.pardir))
+            try:
+                os.makedirs(link_parent)
+            except (Exception):
+                pass
+
+            os.symlink(env_dir, link_path)
+
+            result["env_dir_link"] = link_path
+
+        resource_path = os.path.join(env_dir, "resources")
+        os.mkdir(resource_path)
+        result["resource_path"] = resource_path
+
+        for r_type, r_paths in all_resources.items():
+
+            r_target = os.path.join(resource_path, r_type)
+            os.mkdir(r_target)
+
+            for path in r_paths:
+                basename = os.path.basename(path)
+                target = os.path.join(r_target, basename)
+                if os.path.isdir(os.path.realpath(path)):
+                    shutil.copytree(path, target)
+                else:
+                    shutil.copyfile(path, target)
+
+        return result

@@ -100,6 +100,11 @@ class FrecklesAdapter(object):
 
         pass
 
+    def get_resources(self, task):
+        """Return a map of paths to all resources that are necessary for this task."""
+
+        return {}
+
     def prepare_execution_environment(self, version):
         """Prepares all external dependencies that are needed for this adapter to successfully run an execution.
 
@@ -125,6 +130,7 @@ class FrecklesAdapter(object):
         tasklist,
         run_vars,
         run_config,
+        run_env,
         output_callback,
         result_callback,
         parent_task,
@@ -138,6 +144,7 @@ class FrecklesAdapter(object):
             tasklist=tasklist,
             run_vars=run_vars,
             run_cnf=final_run_config,
+            run_env=run_env,
             output_callback=output_callback,
             result_callback=result_callback,
             parent_task=parent_task,
