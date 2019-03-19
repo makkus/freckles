@@ -100,15 +100,13 @@ class FrecklesAdapter(object):
 
         pass
 
-    def get_resources(self, task):
+    def get_resources_for_task(self, task):
         """Return a map of paths to all resources that are necessary for this task."""
 
         return {}
 
-    def prepare_execution_environment(self, version):
+    def prepare_execution_requirements(self, parent_task, callback):
         """Prepares all external dependencies that are needed for this adapter to successfully run an execution.
-
-        Will be invoked with a version number, so the adapter can decide whether to do the whole thing again or not.
 
         Should throw an exception if it fails.
 
@@ -116,16 +114,16 @@ class FrecklesAdapter(object):
             int: a version indicator
         """
 
-        return 0
+        pass
 
     @abc.abstractmethod
-    def _run(
+    def run(
         self, tasklist, run_vars, run_cnf, output_callback, result_callback, parent_task
     ):
 
         pass
 
-    def run(
+    def _run(
         self,
         tasklist,
         run_vars,
@@ -140,7 +138,7 @@ class FrecklesAdapter(object):
 
         tasklist = copy.deepcopy(tasklist)
 
-        result = self._run(
+        result = self.run(
             tasklist=tasklist,
             run_vars=run_vars,
             run_cnf=final_run_config,
