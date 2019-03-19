@@ -3,12 +3,19 @@ import copy
 import os
 
 from freckles.adapters import FrecklesAdapter
-from freckles.adapters.shell.processors import ShellScriptTemplateProcessor, ShellScriptProcessor
+from freckles.adapters.shell.processors import (
+    ShellScriptTemplateProcessor,
+    ShellScriptProcessor,
+)
 from freckles.adapters.shell.shell_runner import ShellRunner
-from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLETS_KEY, TASK_KEY_NAME, VARS_KEY, FRECKLET_KEY_NAME
-from freckles.exceptions import FrecklesConfigException
+from freckles.defaults import (
+    DEFAULT_FRECKLES_JINJA_ENV,
+    FRECKLETS_KEY,
+    TASK_KEY_NAME,
+    VARS_KEY,
+    FRECKLET_KEY_NAME,
+)
 from frutils import dict_merge
-from frutils.frutils_cli import output
 from ting.tings import TingTings
 
 SHELL_CONFIG_SCHEMA = {}
@@ -69,7 +76,7 @@ SCRIPTLING_LOAD_CONFIG = {
                 "metadata_name": "meta",
                 "content_name": "scriptling_content",
                 "source_attr_name": "ting_content",
-                "metadata_strategies": ["comments"]
+                "metadata_strategies": ["comments"],
             }
         },
         {"FileStringContentAttribute": {"target_attr_name": "ting_content"}},
@@ -88,14 +95,14 @@ SCRIPTLING_LOAD_CONFIG = {
             "ValueAttribute": {
                 "target_attr_name": TASK_KEY_NAME,
                 "source_attr_name": "meta",
-                "default": {}
+                "default": {},
             }
         },
         {
             "ValueAttribute": {
                 "target_attr_name": FRECKLET_KEY_NAME,
                 "source_attr_name": "meta",
-                "default": {}
+                "default": {},
             }
         },
         {
@@ -112,7 +119,6 @@ SCRIPTLING_LOAD_CONFIG = {
                 "jinja_env": DEFAULT_FRECKLES_JINJA_ENV,
             }
         },
-
         # {
         #     "CliArgsAttribute": {
         #         "target_attr_name": "cli_args",
@@ -131,25 +137,22 @@ SCRIPTLING_LOAD_CONFIG = {
     "loaders": {
         "script_files": {
             "class": "ting.tings.FileTings",
-            "load_config": {
-                "folder_load_file_match_regex": "(\\.sh\\.j2$|\\.sh$)"
-            },
+            "load_config": {"folder_load_file_match_regex": "(\\.sh\\.j2$|\\.sh$)"},
             "attributes": [
                 "FileStringContentAttribute",
                 {
                     "MirrorAttribute": {
                         "source_attr_name": "filename_no_ext",
-                        "target_attr_name": "scriptling_name"
+                        "target_attr_name": "scriptling_name",
                     }
-                }
-            ]
+                },
+            ],
         }
-    }
-
+    },
 }
 
-class ScriptlingContext(object):
 
+class ScriptlingContext(object):
     def __init__(self, context_name, cnf, repos):
 
         self._context_name = context_name
@@ -186,13 +189,12 @@ class ScriptlingContext(object):
             "shell-scripts",
             folder_index_conf,
             SCRIPTLING_LOAD_CONFIG,
-            indexes=["scriptling_name"]
+            indexes=["scriptling_name"],
         )
         return self._scriptling_index
 
 
 class FrecklesAdapterShell(FrecklesAdapter):
-
     def __init__(self, name, cnf, context):
 
         super(FrecklesAdapterShell, self).__init__(
@@ -207,7 +209,6 @@ class FrecklesAdapterShell(FrecklesAdapter):
         self._processors = {}
         # self.processors["script-template"] = ShellScriptTemplateProcessor(self)
         # self.processors["exodus-binary"] = ShellExodusTemplateProcessor(self)
-
 
     def get_processor(self, proc_name):
 
@@ -226,8 +227,6 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         return self._processors[proc_name]
 
-
-
     @property
     def shell_adapter_contex(self):
 
@@ -242,27 +241,25 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         pass
 
-
     def get_folders_for_alias(self, alias):
 
         return []
 
     def get_supported_resource_types(self):
 
-        return [
-            "scripts",
-        ]
+        return ["scripts"]
 
     def get_supported_task_types(self):
 
-        return [
-            "scriptling", "scriptling-template"
-        ]
+        return ["scriptling", "scriptling-template"]
 
     def get_extra_frecklets(self):
 
         result = {}
-        for scriptling_name, scriptling in self.shell_adapter_contex.scriptling_index.items():
+        for (
+            scriptling_name,
+            scriptling,
+        ) in self.shell_adapter_contex.scriptling_index.items():
 
             frecklet = {}
             frecklet["args"] = scriptling.meta.get("args", {})
@@ -274,12 +271,13 @@ class FrecklesAdapterShell(FrecklesAdapter):
                 f_type = "scriptling"
 
             f_dict = copy.deepcopy(scriptling.frecklet)
-            dict_merge(f_dict, {"type": f_type, "name": scriptling_name}, copy_dct=False)
+            dict_merge(
+                f_dict, {"type": f_type, "name": scriptling_name}, copy_dct=False
+            )
             f = {
                 FRECKLET_KEY_NAME: f_dict,
                 TASK_KEY_NAME: scriptling.task,
-                VARS_KEY: {
-                }
+                VARS_KEY: {},
             }
 
             f[TASK_KEY_NAME]["script"] = scriptling.scriptling_content
@@ -297,8 +295,16 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         pass
 
-    def run(self, tasklist, run_vars, run_cnf, run_env, output_callback, result_callback, parent_task):
-
+    def run(
+        self,
+        tasklist,
+        run_vars,
+        run_cnf,
+        run_env,
+        output_callback,
+        result_callback,
+        parent_task,
+    ):
 
         # import pp
         # output(tasklist, output_type="yaml")
@@ -327,8 +333,7 @@ class FrecklesAdapterShell(FrecklesAdapter):
             shell_tasks.append(processed)
 
         run_properties = runner.render_environment(
-            run_env_dir=shell_run_dir,
-            tasklist=shell_tasks,
+            run_env_dir=shell_run_dir, tasklist=shell_tasks
         )
 
         run_properties = runner.run(
@@ -336,8 +341,7 @@ class FrecklesAdapterShell(FrecklesAdapter):
             run_properties=run_properties,
             output_callback=output_callback,
             result_callback=result_callback,
-            parent_task=parent_task
+            parent_task=parent_task,
         )
 
         return run_properties
-

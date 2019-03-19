@@ -4,7 +4,6 @@ from collections import Sequence, Mapping
 
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
-from .arguments import *  # noqa
 from .tasks import *  # noqa
 
 log = logging.getLogger("freckles")

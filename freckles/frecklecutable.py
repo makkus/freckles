@@ -17,12 +17,7 @@ from .defaults import (
     PASSWORD_ASK_MARKER,
 )
 from .exceptions import FrecklesVarException
-from .output_callback import (
-    DefaultCallback,
-    TaskDetail,
-    FrecklesRun,
-    FrecklesResultCallback,
-)
+from .output_callback import TaskDetail, FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
 
@@ -482,15 +477,16 @@ class Frecklecutable(object):
         run_env_properties = self.context.create_run_environment(adapter)
 
         # preparing execution environment...
-        self._context._run_info.get(
-            "prepared_execution_environments", {}
-        ).get(current_adapter, None)
-
+        self._context._run_info.get("prepared_execution_environments", {}).get(
+            current_adapter, None
+        )
 
         prepare_task = TaskDetail(
-            task_name="prepare execution environment for adapter: '{}'".format(adapter_name),
+            task_name="prepare execution environment for adapter: '{}'".format(
+                adapter_name
+            ),
             task_type="internal",
-            task_parent=None
+            task_parent=None,
         )
         self._callback.task_started(prepare_task)
         try:
@@ -501,7 +497,6 @@ class Frecklecutable(object):
             raise e
 
         click.echo()
-
 
         result_callback = FrecklesResultCallback()
         parent_task = TaskDetail(frecklet_name, "run", task_parent=None)

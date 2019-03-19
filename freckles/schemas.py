@@ -1,5 +1,5 @@
-from .defaults import FRECKLES_RUN_DIR, FRECKLES_CURRENT_RUN_SYMLINK
 from frutils import dict_merge
+from .defaults import FRECKLES_RUN_DIR, FRECKLES_CURRENT_RUN_SYMLINK
 
 # schema to load '*.context' files in $HOME/.config/freckles
 PROFILE_LOAD_CONFIG_SCHEMA = {

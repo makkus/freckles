@@ -1,12 +1,11 @@
-from datetime import datetime
 import json
 import logging
 import os
 import shutil
 import time
 from collections import Mapping, Iterable
+from datetime import datetime
 
-import click
 from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
@@ -363,9 +362,7 @@ class FrecklesContext(object):
         if to_download:
 
             task_detail = TaskDetail(
-                task_name="prepare context",
-                task_type="internal",
-                task_parent=None,
+                task_name="prepare context", task_type="internal", task_parent=None
             )
 
             self.callback.task_started(task_detail)
@@ -411,7 +408,11 @@ class FrecklesContext(object):
             cache_key = "{}_{}".format(url, branch)
 
         if not exists:
-            clone_task = TaskDetail(task_name="cloning repo: {}".format(repo["url"]), task_type="internal", task_parent=task_parent)
+            clone_task = TaskDetail(
+                task_name="cloning repo: {}".format(repo["url"]),
+                task_type="internal",
+                task_parent=task_parent,
+            )
             self.callback.task_started(clone_task)
             # click.echo("  - cloning repo: {}...".format(repo["url"]))
             git = local["git"]
@@ -435,7 +436,11 @@ class FrecklesContext(object):
 
         else:
 
-            pull_task = TaskDetail(task_name="pulling remote: {}".format(url), task_type="internal", task_parent=task_parent)
+            pull_task = TaskDetail(
+                task_name="pulling remote: {}".format(url),
+                task_type="internal",
+                task_parent=task_parent,
+            )
             if cache_key in self._run_info.get("pull_cache", {}).keys():
 
                 last_time = self._run_info["pull_cache"][cache_key]

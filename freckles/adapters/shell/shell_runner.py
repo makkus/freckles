@@ -2,12 +2,9 @@
 
 import logging
 import os
-import shutil
 import stat
 import sys
-from datetime import datetime
 
-from cookiecutter.main import cookiecutter
 from jinja2 import Environment, FileSystemLoader
 from plumbum import SshMachine, local
 
@@ -18,34 +15,24 @@ from freckles.output_callback import TaskDetail
 log = logging.getLogger("freckles")
 
 
-
 class ShellRunner(object):
     def __init__(self):
 
         if not hasattr(sys, "frozen"):
-            template_dir = os.path.join(
-                MODULE_FOLDER, "templates", "shell_adapter")
+            template_dir = os.path.join(MODULE_FOLDER, "templates", "shell_adapter")
         else:
             template_dir = os.path.join(
-                sys._MEIPASS, "freckles", "templates", "shell_adapter")
+                sys._MEIPASS, "freckles", "templates", "shell_adapter"
+            )
 
         self.jinja_env = Environment(loader=FileSystemLoader(template_dir))
 
-
-    def render_environment(
-        self,
-        run_env_dir,
-        tasklist,
-        skip_exodus=True,
-    ):
+    def render_environment(self, run_env_dir, tasklist, skip_exodus=True):
 
         # making the run environment user accessible only
         os.chmod(run_env_dir, 0o0700)
 
-        result = {
-            "run_dir": run_env_dir,
-            "run_dir_name": os.path.basename(run_env_dir)
-        }
+        result = {"run_dir": run_env_dir, "run_dir_name": os.path.basename(run_env_dir)}
 
         working_dir = os.path.join(run_env_dir, "working_dir")
         os.mkdir(working_dir)
@@ -104,7 +91,6 @@ class ShellRunner(object):
 
         result["tasklist"] = tasklist
 
-
         repl_dict = {
             "extra_paths": extra_paths,
             "functions": functions,
@@ -113,14 +99,13 @@ class ShellRunner(object):
         rendered = template.render(repl_dict)
 
         run_script = os.path.join(run_env_dir, "run.sh")
-        with open(run_script, 'w') as rs:
+        with open(run_script, "w") as rs:
             rs.write(rendered)
 
         # make run.sh executable
         st = os.stat(run_script)
         os.chmod(run_script, st.st_mode | stat.S_IEXEC)
         result["run_script"] = run_script
-
 
         return result
 
@@ -210,7 +195,7 @@ class ShellRunner(object):
                 if stdout.startswith("STARTING_TASK["):
                     index = stdout.index("]")
                     task_id = int(stdout[14:index])
-                    current_msg = stdout[index + 2 :].strip()
+                    current_msg = stdout[index + 2:].strip()
                     # print(stdout)
                     if task_id > current_task_id:
                         # print("starting: {}".format(msg))
@@ -229,10 +214,10 @@ class ShellRunner(object):
                     # print("finished")
                     index = stdout.index("]")
                     task_id = int(stdout[14:index])
-                    rc = int(stdout[index + 2 :])
+                    rc = int(stdout[index + 2:])
                     success = rc == 0
-                    stdout="\n".join(current_task_stdout)
-                    stderr="\n".join(current_task_stderr)
+                    stdout = "\n".join(current_task_stdout)
+                    stderr = "\n".join(current_task_stderr)
                     msg = ""
                     if stdout and not stderr:
                         msg = "stdout:\n{}".format(stdout)
@@ -246,7 +231,7 @@ class ShellRunner(object):
                         success=success,
                         changed=True,
                         skipped=False,
-                        msg=msg
+                        msg=msg,
                     )
                     current_task_stdout = []
                     current_task_stderr = []
@@ -272,13 +257,14 @@ class ShellRunner(object):
                     task_type="delete",
                     task_parent=current_task,
                 )
-                callback_adapter.add_command_started(td)
+                output_callback.task_started(td)
                 delete = machine["rm"]
                 rc, stdout, stderr = delete.run(
                     ["-r", os.path.join("/tmp", run_properties["env_dir_name"])]
                 )
-                callback_adapter.add_command_result(
-                    td, rc, stdout=stdout, stderr=stderr
+                success = rc == 0
+                output_callback.task_finished(
+                    td, success=success
                 )
             machine.close()
 

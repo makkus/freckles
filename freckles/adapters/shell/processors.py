@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import abc
-import copy
 import logging
 
 import six
-from slugify import slugify
 
-from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, TASK_KEY_NAME, VARS_KEY, FRECKLET_KEY_NAME
-from freckles.exceptions import FrecklesConfigException
-from frutils import replace_string
+from freckles.defaults import TASK_KEY_NAME, VARS_KEY, FRECKLET_KEY_NAME
 
 log = logging.getLogger("freckles")
+
 
 @six.add_metaclass(abc.ABCMeta)
 class ShellTaskTypeProcessor(object):
@@ -24,9 +21,7 @@ class ShellTaskTypeProcessor(object):
         pass
 
 
-
 class ShellCommandProcessor(ShellTaskTypeProcessor):
-
     def __init__(self):
 
         super(ShellCommandProcessor, self).__init__()
@@ -66,8 +61,8 @@ class ShellCommandProcessor(ShellTaskTypeProcessor):
             "functions": {},
         }
 
-class ShellScriptProcessor(ShellTaskTypeProcessor):
 
+class ShellScriptProcessor(ShellTaskTypeProcessor):
     def __init__(self, scriptling_index):
         super(ShellScriptProcessor, self).__init__()
         self.scriptling_index = scriptling_index
@@ -80,7 +75,11 @@ class ShellScriptProcessor(ShellTaskTypeProcessor):
         for f in functions:
             scriptling = self.scriptling_index.get(f)
             if scriptling.template_keys_content:
-                raise Exception("Can't use scriptling '{}' as function (from: {}) as it has templated content.".format(f, scriptling_name))
+                raise Exception(
+                    "Can't use scriptling '{}' as function (from: {}) as it has templated content.".format(
+                        f, scriptling_name
+                    )
+                )
 
             if f in result.keys():
                 continue
@@ -88,7 +87,6 @@ class ShellScriptProcessor(ShellTaskTypeProcessor):
             result[f] = scriptling.scriptling_content
             child_functions = scriptling.task.get("functions", [])
             self.get_all_dependency_functions(child_functions, scriptling.id, result)
-
 
         return result
 
@@ -125,7 +123,6 @@ class ShellScriptProcessor(ShellTaskTypeProcessor):
 
 
 class ShellScriptTemplateProcessor(ShellTaskTypeProcessor):
-
     def __init__(self):
         super(ShellScriptTemplateProcessor, self).__init__()
 
