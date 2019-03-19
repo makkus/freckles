@@ -10,7 +10,7 @@ from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
-from freckles.output_callback import DefaultCallback, TaskDetail
+from .output_callback import DefaultCallback, TaskDetail
 from frkl.utils import expand_string_to_git_details
 from frutils import (
     dict_merge,
