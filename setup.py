@@ -22,6 +22,8 @@ requirements = [
     "treelib==1.5.3",
     # "templig==1.0.0b1"
     "pymdown-extensions==6.0",
+    "python-slugify==2.0.0",
+    "exodus-bundler==2.0.2",
 ]
 
 setup_requirements = ["pytest-runner"]
@@ -75,6 +77,9 @@ setup(
             "dummy=freckles.output_callback:DummyCallback",
             "simple=freckles.output_callback:SimpleCallback"
             # "spinner=freckles.callbacks:SpinnerCallback"
+        ],
+        "freckles.adapters": [
+            "shell=freckles.adapters.shell.freckles_adapter_shell:FrecklesAdapterShell"
         ],
     },
     install_requires=requirements,

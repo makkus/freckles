@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# ------------------------------------------------------------
+# Bash script template for the freckles shell script connector
+#
+# If run outside freckles, those environment variables can be adjusted:
+#
+# ECHO_TASK_START=false
+# ECHO_TASK_FINISH=false
+#
+#
+# Copyright 2018 by Markus Binsteiner
+# licensed under the Parity Public License 6.0.0
+# ------------------------------------------------------------
+
+
+# ----------------------------------------------------
+# freckly init stuff
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then source "$HOME/.nix-profile/etc/profile.d/nix.sh"; fi
+
+# additional bin paths
+{% for path in extra_paths %}
+if [ -d "{{ path }}" ]; then
+    export PATH="{{ path }}:$PATH"
+fi
+{% endfor %}
+
+if [ -f "$THIS_DIR/exodus-binaries/bundle.sh" ]; then
+    $THIS_DIR/exodus-binaries/bundle.sh $THIS_DIR/exodus-binaries
+    export PATH="$THIS_DIR/exodus-binaries/bin:$PATH"
+fi
+
+export PATH="$THIS_DIR/executables:$PATH"
+cd "${THIS_DIR}/working_dir"
+
+# ----------------------------------------------------
+
+function start_task
+{
+
+    if [ "$ECHO_TASK_START" = true ]; then
+        echo "STARTING_TASK[${1}]: ${2}"
+    fi
+
+}
+
+function task_finished
+{
+
+    if [ "$ECHO_TASK_FINISHED" = true ]; then
+        echo "FINISHED_TASK[${1}]: ${2}"
+    fi
+
+}
+
+{% if functions %}
+# ----------------------------------------------------
+# functions
+
+{% for f_name, f in functions.items() %}
+function {{ f_name }} {
+
+{{ f | indent(4, True) }}
+
+}
+{% endfor %}
+
+# ----------------------------------------------------
+{% endif %}
+
+# start script
+# ----------------------------------------------------
+
+{% for task in tasklist %}
+# {{ task._name }}
+start_task "{{ task._id }}" "{{ task._msg }}"
+{% for command in task.commands %}
+{{ command | join(' ') }}
+{% endfor %}
+task_finished "{{ task._id }}" "$?"
+
+{% endfor %}

@@ -83,6 +83,7 @@ class Frecklecutable(object):
 
         self._frecklet = frecklet
         self._context = context
+        self._callback = context.callback
 
     @property
     def frecklet(self):
@@ -420,7 +421,7 @@ class Frecklecutable(object):
         idempotent_cache = []
         current_adapter = None
 
-        all_resources = {}
+        # all_resources = {}
 
         for task in tasks:
             tt = task[FRECKLET_KEY_NAME]["type"]
@@ -457,63 +458,73 @@ class Frecklecutable(object):
                 continue
             current_tasklist.append(task)
 
-            adapter = self.context._adapters[adapter_name]
-            resources = adapter.get_resources(task)
-
-            sup = adapter.get_supported_resource_types()
-            for resource_type, paths in resources.items():
-
-                if resource_type not in sup:
-                    raise Exception(
-                        "Invalid resource type '{}' for adapter '{}'".format(
-                            resource_type, adapter_name.name
-                        )
-                    )
-                current = all_resources.setdefault(resource_type, [])
-                for path in paths:
-                    if path not in current:
-                        current.append(path)
+            # adapter = self.context._adapters[adapter_name]
+            # resources = adapter.get_resources_for_task(task)
+            #
+            # if not resources:
+            #     resources = {}
+            #
+            # sup = adapter.get_supported_resource_types()
+            # for resource_type, paths in resources.items():
+            #
+            #     if resource_type not in sup:
+            #         raise Exception(
+            #             "Invalid resource type '{}' for adapter '{}'".format(
+            #                 resource_type, adapter_name.name
+            #             )
+            #         )
+            #     current = all_resources.setdefault(resource_type, [])
+            #     for path in paths:
+            #         if path not in current:
+            #             current.append(path)
 
         adapter = self.context._adapters[current_adapter]
-        run_env_properties = self.context.create_run_environment(all_resources, adapter)
+        run_env_properties = self.context.create_run_environment(adapter)
 
         # preparing execution environment...
-        prep_version = self._context._run_info.get(
+        self._context._run_info.get(
             "prepared_execution_environments", {}
         ).get(current_adapter, None)
 
-        new_prep_version = adapter.prepare_execution_environment(prep_version)
 
-        if new_prep_version is not None and prep_version != new_prep_version:
+        prepare_task = TaskDetail(
+            task_name="prepare execution environment for adapter: '{}'".format(adapter_name),
+            task_type="internal",
+            task_parent=None
+        )
+        self._callback.task_started(prepare_task)
+        try:
+            adapter.prepare_execution_requirements(prepare_task, self._callback)
+            self._callback.task_finished(prepare_task)
+        except (Exception) as e:
+            self._callback.task_finished(prepare_task, success=False, msg=str(e))
+            raise e
 
-            self._context._run_info.setdefault("prepared_execution_environments", {})[
-                current_adapter
-            ] = new_prep_version
-            self._context.save_run_info_file()
+        click.echo()
 
-        callback = DefaultCallback()
+
         result_callback = FrecklesResultCallback()
         parent_task = TaskDetail(frecklet_name, "run", task_parent=None)
-        callback.task_started(parent_task)
+        self._callback.task_started(parent_task)
         task_details = TaskDetail(
             task_name=frecklet_name, task_type="frecklecutable", task_parent=parent_task
         )
-        callback.task_started(task_details)
+        self._callback.task_started(task_details)
 
         # run_config = dict_merge(self.context.cnf.config, run_config, copy_dct=True)
         try:
-            run_properties = adapter.run(
+            run_properties = adapter._run(
                 tasklist=current_tasklist,
                 run_vars=run_vars,
                 run_config=run_config,
                 run_env=run_env_properties,
-                output_callback=callback,
+                output_callback=self._callback,
                 result_callback=result_callback,
                 parent_task=task_details,
             )
 
-            callback.task_finished(task_details, success=True)
-            callback.task_finished(parent_task, success=True)
+            self._callback.task_finished(task_details, success=True)
+            self._callback.task_finished(parent_task, success=True)
 
             result = {
                 "run_properties": run_properties,

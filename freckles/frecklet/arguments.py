@@ -380,6 +380,7 @@ class VariablesAttribute(TingAttribute):
 
         available_args = root_node.data["root_frecklet"].args
         template_keys = root_node.data["root_frecklet"].template_keys
+
         args = Arg.from_keys(
             template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
         )

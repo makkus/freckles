@@ -11,6 +11,7 @@ from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
+from freckles.output_callback import DefaultCallback, TaskDetail
 from frkl.utils import expand_string_to_git_details
 from frutils import (
     dict_merge,
@@ -323,6 +324,7 @@ class FrecklesContext(object):
                 self._run_info = yaml.load(f)
 
         # from config
+        self._callback = DefaultCallback(profile="verbose")
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
@@ -359,11 +361,21 @@ class FrecklesContext(object):
                 to_download.append(r)
 
         if to_download:
-            click.echo("- preparing execution context")
 
-        for repo in to_download:
+            task_detail = TaskDetail(
+                task_name="prepare context",
+                task_type="internal",
+                task_parent=None,
+            )
 
-            self.download_repo(repo)
+            self.callback.task_started(task_detail)
+            # click.echo("- preparing execution context")
+
+            for repo in to_download:
+
+                self.download_repo(repo, task_parent=task_detail)
+
+            self.callback.task_finished(task_detail, success=True)
 
     def update_pull_cache(self, path):
 
@@ -384,7 +396,7 @@ class FrecklesContext(object):
         with open(FRECKLES_RUN_INFO_FILE, "w") as f:
             yaml.dump(self._run_info, f)
 
-    def download_repo(self, repo):
+    def download_repo(self, repo, task_parent):
 
         exists = os.path.exists(repo["path"])
 
@@ -399,8 +411,9 @@ class FrecklesContext(object):
             cache_key = "{}_{}".format(url, branch)
 
         if not exists:
-
-            click.echo("  - cloning repo: {}...".format(repo["url"]))
+            clone_task = TaskDetail(task_name="cloning repo: {}".format(repo["url"]), task_type="internal", task_parent=task_parent)
+            self.callback.task_started(clone_task)
+            # click.echo("  - cloning repo: {}...".format(repo["url"]))
             git = local["git"]
             cmd = ["clone"]
             if branch is not None:
@@ -411,14 +424,18 @@ class FrecklesContext(object):
             rc, stdout, stderr = git.run(cmd)
 
             if rc != 0:
+                self.callback.task_finished(clone_task, success=False)
                 raise FrecklesConfigException(
                     "Could not clone repository '{}': {}".format(url, stderr)
                 )
+            else:
+                self.callback.task_finished(clone_task, success=True, skipped=False)
 
             self.update_pull_cache(cache_key)
 
         else:
 
+            pull_task = TaskDetail(task_name="pulling remote: {}".format(url), task_type="internal", task_parent=task_parent)
             if cache_key in self._run_info.get("pull_cache", {}).keys():
 
                 last_time = self._run_info["pull_cache"][cache_key]
@@ -427,16 +444,14 @@ class FrecklesContext(object):
 
                 now = time.time()
 
-                print("TIME DIFFERENCE: {}".format(now - last_time))
-                print("VALID: {}".format(valid))
-
                 if now - last_time < valid:
-                    click.echo("  - using cached repo: {}".format(url))
+                    # click.echo("  - using cached repo: {}".format(url))
+                    self.callback.task_finished(pull_task, success=True, skipped=True)
                     log.debug("Not pulling again: {}".format(url))
                     return
 
             # TODO: check if remote/branch is right?
-            click.echo("  - pulling remote: {}...".format(url))
+            # click.echo("  - pulling remote: {}...".format(url))
             git = local["git"]
             cmd = ["pull", "origin"]
             if branch is not None:
@@ -445,9 +460,12 @@ class FrecklesContext(object):
                 rc, stdout, stderr = git.run(cmd)
 
                 if rc != 0:
+                    self.callback.task_finished(pull_task, success=False)
                     raise FrecklesConfigException(
                         "Could not pull repository '{}': {}".format(url, stderr)
                     )
+                else:
+                    self.callback.task_finished(pull_task, success=True, skipped=False)
             self.update_pull_cache(cache_key)
 
     def check_repo(self, repo):
@@ -610,6 +628,10 @@ class FrecklesContext(object):
         return self._context_name
 
     @property
+    def callback(self):
+        return self._callback
+
+    @property
     def frecklet_index(self):
 
         if self._frecklet_index is not None:
@@ -709,7 +731,7 @@ class FrecklesContext(object):
                     )
                 )
 
-    def create_run_environment(self, all_resources, adapter):
+    def create_run_environment(self, adapter):
 
         result = {}
         cnf = self.cnf.get_interpreter("context")
@@ -754,21 +776,21 @@ class FrecklesContext(object):
 
             result["env_dir_link"] = link_path
 
-        resource_path = os.path.join(env_dir, "resources")
-        os.mkdir(resource_path)
-        result["resource_path"] = resource_path
-
-        for r_type, r_paths in all_resources.items():
-
-            r_target = os.path.join(resource_path, r_type)
-            os.mkdir(r_target)
-
-            for path in r_paths:
-                basename = os.path.basename(path)
-                target = os.path.join(r_target, basename)
-                if os.path.isdir(os.path.realpath(path)):
-                    shutil.copytree(path, target)
-                else:
-                    shutil.copyfile(path, target)
+        # resource_path = os.path.join(env_dir, "resources")
+        # os.mkdir(resource_path)
+        # result["resource_path"] = resource_path
+        #
+        # for r_type, r_paths in all_resources.items():
+        #
+        #     r_target = os.path.join(resource_path, r_type)
+        #     os.mkdir(r_target)
+        #
+        #     for path in r_paths:
+        #         basename = os.path.basename(path)
+        #         target = os.path.join(r_target, basename)
+        #         if os.path.isdir(os.path.realpath(path)):
+        #             shutil.copytree(path, target)
+        #         else:
+        #             shutil.copyfile(path, target)
 
         return result

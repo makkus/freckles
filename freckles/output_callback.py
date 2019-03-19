@@ -187,6 +187,11 @@ class FrecklesCallback(object):
 
     def get_level_current_task(self):
 
+        if self.current_task is None:
+            return 0
+        if self.current_task.task_parent is None:
+            return 0
+
         if self.current_task.task_id == self.parent_task.task_id:
             return 0
 
@@ -227,6 +232,11 @@ class FrecklesCallback(object):
         self.current_task = details
 
         if self.parent_task is None:
+            self.parent_task = details
+            self.execution_started()
+        elif self.parent_task is not None and details.task_parent is None:
+            # self.task_finished(self.parent_task)
+
             self.parent_task = details
             self.execution_started()
 
@@ -579,7 +589,7 @@ class DefaultCallback(FrecklesCallback):
         level = self.get_level_current_task()
 
         if level == 0:
-            self.current_message = u"{}{} starting: {}'{}'{}".format(
+            self.current_message = u"{}{} starting: {}{}{}".format(
                 ARC_DOWN_RIGHT, HORIZONTAL, BOLD, task_name, UNBOLD
             )
             self.output(self.current_message)
