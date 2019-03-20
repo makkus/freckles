@@ -22,7 +22,6 @@ requirements = [
     "treelib==1.5.3",
     # "templig==1.0.0b1"
     "pymdown-extensions==6.0",
-    "python-slugify==2.0.0",
     "exodus-bundler==2.0.2",
 ]
 
