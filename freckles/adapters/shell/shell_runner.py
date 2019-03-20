@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import io
 import logging
 import os
 import stat
@@ -57,7 +57,7 @@ class ShellRunner(object):
                 if f_type == "string_content":
 
                     content = f_details["content"]
-                    with open(target, "w") as f:
+                    with io.open(target, "w", encoding="utf-8") as f:
                         f.write(content)
 
                     # make executable
@@ -99,7 +99,7 @@ class ShellRunner(object):
         rendered = template.render(repl_dict)
 
         run_script = os.path.join(run_env_dir, "run.sh")
-        with open(run_script, "w") as rs:
+        with io.open(run_script, "w", encoding="utf-8") as rs:
             rs.write(rendered)
 
         # make run.sh executable

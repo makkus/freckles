@@ -1,3 +1,4 @@
+import io
 import json
 import logging
 import os
@@ -319,7 +320,7 @@ class FrecklesContext(object):
         self._run_info = {}
 
         if os.path.exists(FRECKLES_RUN_INFO_FILE):
-            with open(FRECKLES_RUN_INFO_FILE) as f:
+            with io.open(FRECKLES_RUN_INFO_FILE, encoding="utf-8") as f:
 
                 self._run_info = yaml.load(f)
 
@@ -391,7 +392,7 @@ class FrecklesContext(object):
         if new_data is not None:
             self._run_info = dict_merge(self._run_info, new_data, copy_dct=False)
 
-        with open(FRECKLES_RUN_INFO_FILE, "w") as f:
+        with io.open(FRECKLES_RUN_INFO_FILE, "w", encoding="utf-8") as f:
             yaml.dump(self._run_info, f)
 
     def download_repo(self, repo, task_parent):
@@ -719,7 +720,7 @@ class FrecklesContext(object):
         target = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "default.context")
 
         if os.path.exists(target):
-            with open(target, "r") as f:
+            with io.open(target, "r", encoding="utf-8") as f:
                 current_content = yaml.load(f)
         else:
             current_content = self.cnf.config
@@ -730,7 +731,7 @@ class FrecklesContext(object):
             repos.append("community")
 
         if save:
-            with open(target, "w") as f:
+            with io.open(target, "w", encoding="utf-8") as f:
                 f.write(
                     readable(
                         current_content, out="yaml", sort_keys=True, ignore_aliases=True
