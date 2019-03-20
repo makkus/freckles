@@ -26,6 +26,7 @@ from ting.ting_attributes import (
     FileStringContentAttribute,
     ValueAttribute,
 )
+from .frecklet.arguments import *  # noqa
 from ting.ting_cast import TingCast
 from ting.tings import TingTings
 from .adapters.adapters import create_adapter
