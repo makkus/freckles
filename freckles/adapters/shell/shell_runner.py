@@ -10,7 +10,7 @@ from plumbum import SshMachine, local
 
 from freckles.defaults import MODULE_FOLDER
 from freckles.exceptions import FrecklesConfigException
-from freckles.output_callback import TaskDetail
+from frutils.tasks.tasks import TaskDetail
 
 log = logging.getLogger("freckles")
 
@@ -195,7 +195,7 @@ class ShellRunner(object):
                 if stdout.startswith("STARTING_TASK["):
                     index = stdout.index("]")
                     task_id = int(stdout[14:index])
-                    current_msg = stdout[index + 2:].strip()
+                    current_msg = stdout[index + 2 :].strip()  # noqa
                     # print(stdout)
                     if task_id > current_task_id:
                         # print("starting: {}".format(msg))
@@ -214,7 +214,7 @@ class ShellRunner(object):
                     # print("finished")
                     index = stdout.index("]")
                     task_id = int(stdout[14:index])
-                    rc = int(stdout[index + 2:])
+                    rc = int(stdout[index + 2 :]) # noqa
                     success = rc == 0
                     stdout = "\n".join(current_task_stdout)
                     stderr = "\n".join(current_task_stderr)
@@ -263,9 +263,7 @@ class ShellRunner(object):
                     ["-r", os.path.join("/tmp", run_properties["env_dir_name"])]
                 )
                 success = rc == 0
-                output_callback.task_finished(
-                    td, success=success
-                )
+                output_callback.task_finished(td, success=success)
             machine.close()
 
         return run_properties

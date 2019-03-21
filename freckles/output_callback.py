@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import sys
-import uuid
-from abc import abstractmethod, ABCMeta
 from collections import OrderedDict
 
 import click
 import colorama
-import pprintpp
-import stevedore
 from colorama import Fore, Style
-from stevedore import ExtensionManager
 
 from frutils import readable_yaml, dict_merge
+from frutils.tasks.tasks import TasksCallback
 
 colorama.init()
 
@@ -22,131 +18,9 @@ ALLOWED_STATUS = ["ok", "skipped", "changed", "failed"]
 
 
 # extensions
-def load_callback_classes():
-    """Loading a all callback extensions.
-
-    Returns:
-      ExtensionManager: the extension manager holding the extensions
-    """
-
-    log2 = logging.getLogger("stevedore")
-    out_hdlr = logging.StreamHandler(sys.stdout)
-    out_hdlr.setFormatter(
-        logging.Formatter("freckles connector plugin error -> %(message)s")
-    )
-    out_hdlr.setLevel(logging.DEBUG)
-    log2.addHandler(out_hdlr)
-    log2.setLevel(logging.INFO)
-
-    log.debug("Loading freckles connector...")
-
-    mgr = ExtensionManager(
-        namespace="freckles.callbacks",
-        invoke_on_load=False,
-        propagate_map_exceptions=True,
-    )
-
-    return mgr
 
 
 # ------------------------------------------------------------------------
-def load_callback(callback_name, callback_config=None):
-    """Loading a freckles callback extension.
-
-    Returns:
-      FrecklesCallback: the callback object
-    """
-
-    if callback_config is None:
-        callback_config = {}
-
-    log2 = logging.getLogger("stevedore")
-    out_hdlr = logging.StreamHandler(sys.stdout)
-    out_hdlr.setFormatter(
-        logging.Formatter("freckles connector plugin error -> %(message)s")
-    )
-    out_hdlr.setLevel(logging.DEBUG)
-    log2.addHandler(out_hdlr)
-    log2.setLevel(logging.INFO)
-
-    log.debug("Loading freckles callback...")
-
-    mgr = stevedore.driver.DriverManager(
-        namespace="freckles.callbacks",
-        name=callback_name,
-        invoke_on_load=True,
-        invoke_kwds=callback_config,
-    )
-    log.debug(
-        "Registered plugins: {}".format(", ".join(ext.name for ext in mgr.extensions))
-    )
-
-    return mgr.driver
-
-
-class TaskDetail(object):
-    def __init__(
-        self,
-        task_name,
-        task_type,
-        task_parent,
-        msg=None,
-        ignore_errors=False,
-        detail_level=0,
-        task_title=None,
-        **kwargs
-    ):
-
-        self.task_name = task_name
-        self.task_type = task_type
-        self.task_id = uuid.uuid4()
-        self.task_parent = task_parent
-        self.msg = msg
-        self.ignore_errors = ignore_errors
-        self.detail_level = detail_level
-        self.task_details = kwargs
-
-        self.task_title = task_title
-
-        self.success = True
-        self.skipped = True
-        self.changed = False
-
-        self.result_data = {}
-        self.debug_data = {}
-
-    def set_success(self, success):
-
-        if not success:
-            self.success = False
-            if not self.ignore_errors:
-                if self.task_parent is not None:
-                    self.task_parent.set_success(False)
-
-    def set_skipped(self, skipped):
-
-        if not skipped:
-            self.skipped = False
-            if self.task_parent is not None:
-                self.task_parent.set_skipped(False)
-
-    def set_changed(self, changed):
-
-        if changed:
-            self.changed = True
-            if self.task_parent is not None:
-                self.task_parent.set_changed(True)
-
-    def get_task_title(self):
-
-        if self.task_title is not None:
-            return self.task_title
-
-        return self.task_name
-
-    def __repr__(self):
-
-        return pprintpp.pformat(self.__dict__)
 
 
 class FrecklesRun(object):
@@ -170,154 +44,6 @@ class FrecklesRun(object):
                 "task_list": self.task_list,
             }
         )
-
-
-class FrecklesCallback(object):
-
-    __metaclass__ = ABCMeta
-
-    def __init__(self):
-
-        self.parent_task = None
-        self.current_task = None
-
-    def current_task_is_root(self):
-
-        return self.current_task.task_id == self.parent_task.task_id
-
-    def get_level_current_task(self):
-
-        if self.current_task is None:
-            return 0
-        if self.current_task.task_parent is None:
-            return 0
-
-        if self.current_task.task_id == self.parent_task.task_id:
-            return 0
-
-        start = self.current_task
-        i = 0
-        while start.task_id != self.parent_task.task_id:
-            i = i + 1
-            start = start.task_parent
-
-        return i
-
-    def is_in_parent_tree(self, task_id):
-        if task_id == self.parent_task:
-            return True
-        start = self.current_task
-        while start.task_id != task_id and start.task_id != self.parent_task.task_id:
-            start = start.task_parent
-            if start.task_id == task_id:
-                return True
-
-        return False
-
-    @abstractmethod
-    def add_system_message(self, message):
-
-        pass
-
-    def execution_started(self):
-
-        pass
-
-    def execution_finished(self):
-
-        pass
-
-    def task_started(self, details):
-
-        self.current_task = details
-
-        if self.parent_task is None:
-            self.parent_task = details
-            self.execution_started()
-        elif self.parent_task is not None and details.task_parent is None:
-            # self.task_finished(self.parent_task)
-
-            self.parent_task = details
-            self.execution_started()
-
-        self.task_started_action(details)
-
-    def task_finished(
-        self,
-        details,
-        success=True,
-        msg=None,
-        changed=False,
-        skipped=True,
-        result_data=None,
-    ):
-
-        if details is None:
-            log.warn("Empty task details")
-            return
-
-        if result_data is not None:
-            if result_data.get("debug", False):
-                details.debug_data = result_data["debug"]
-
-            if result_data.get("result", False):
-                details.result_data = result_data["result"]
-
-        details.msg = msg
-
-        if details.task_id == self.parent_task.task_id:
-            # no details about success etc
-            self.task_finished_action(details)
-        elif details.task_id == self.current_task.task_id:
-
-            self.current_task.set_success(success)
-            self.current_task.set_changed(changed)
-            self.current_task.set_skipped(skipped)
-
-            self.task_finished_action(self.current_task)
-            self.current_task = self.current_task.task_parent
-        else:
-            # check if id is of a parent, otherwise assume it was a task that wasn't explicitely started
-            if self.is_in_parent_tree(details.task_id):
-                # no details about success etc
-                start = self.current_task
-                while start.task_id != details.task_id:
-                    self.task_finished_action(start)
-                    start = start.task_parent
-                    self.current_task = start
-                self.task_finished_action(self.current_task)
-                self.current_task = start.task_parent
-                # self.task_finished_action(self.current_task)
-                # self.current_task = self.current_task.task_parent
-            else:
-                if details.task_parent is None:
-                    raise Exception("Invalid task.")
-
-                if details.task_parent.task_id == self.current_task.task_id:
-                    self.task_started(details)
-                    details.set_success(success)
-                    details.set_changed(changed)
-                    details.set_skipped(skipped)
-                    self.task_finished_action(details)
-                    self.current_task = details.task_parent
-
-                else:
-                    raise Exception("Invalid task, can't process.")
-
-        if details.task_id == self.parent_task.task_id:
-            self.execution_finished()
-
-            # self.task_finished_action(details)
-
-            # raise Exception("No matching task: {}".format(details))
-
-    @abstractmethod
-    def task_started_action(self, details):
-        pass
-
-    @abstractmethod
-    def task_finished_action(self, success, details):
-        pass
 
 
 CURSOR_UP_ONE = "\x1b[1A"
@@ -432,78 +158,7 @@ DISPLAY_PROFILES = {
 }
 
 
-class DummyCallback(FrecklesCallback):
-    def __init__(self, **kwargs):
-
-        super(DummyCallback, self).__init__()
-
-    def task_started(self, details):
-        pass
-
-    def task_finished(self, success, details):
-        pass
-
-    def task_update(self, msg):
-        pass
-
-    def finish_up(self):
-        pass
-
-
-class SimpleCallback(FrecklesCallback):
-    def __init__(self, **kwargs):
-
-        super(SimpleCallback, self).__init__()
-        self.display_system_messages = False
-        self.display_success = True
-        self.display_changed = False
-        self.display_skipped = False
-
-    def add_system_message(self, message):
-
-        if self.display_system_messages:
-
-            click.echo("MESSAGE: {}".format(message))
-
-    def task_started_action(self, details):
-
-        task_name = details.task_name
-        task_type = details.task_type
-        level = self.get_level_current_task()
-        padding = "  " * level
-        line = "{}{}: {}".format(padding, task_type, task_name)
-        click.echo(line)
-
-    def task_finished_action(self, details):
-
-        level = self.get_level_current_task()
-        padding = "  " * (level)
-        # click.echo(
-        #     "{}details: {} - {}".format(padding, details.task_name, details.task_type)
-        # )
-        click.echo("{}success: {}".format(padding, details.success))
-        if self.display_changed:
-            click.echo("{}changed: {}".format(padding, details.changed))
-        if self.display_skipped:
-            click.echo("{}skipped: {}".format(padding, details.skipped))
-        if details.debug_data:
-            click.echo("{}debug data:".format(padding))
-            readable = readable_yaml(details.debug_data, indent=(len(padding) + 2))
-            click.echo(readable)
-        if details.result_data:
-            click.echo("{}result data:".format(padding))
-            readable = readable_yaml(details.result_data, indent=(len(padding) + 2))
-            click.echo(readable)
-
-        click.echo()
-        # result_string = readable_yaml(result_data, indent=(level+2)*2)
-        # click.echo("{}result:".format(padding))
-        # click.echo(result_string)
-        # if msg is not None:
-        #     click.echo("{}msg: {}".format(padding, msg))
-
-
-class DefaultCallback(FrecklesCallback):
+class DefaultCallback(TasksCallback):
     """Default callback for freckles output.
 
     This is more complicated than it needed to be. Mainly because it's quite hard
@@ -563,7 +218,7 @@ class DefaultCallback(FrecklesCallback):
         if self.display_nothing:
             return
 
-        click.echo(line, nl=nl)
+        click.echo(line.encode("utf-8"), nl=nl)
 
     def delete_last_line(self):
 
@@ -742,7 +397,7 @@ class DefaultCallback(FrecklesCallback):
         pass
 
 
-# class DefaultCallbackOld(FrecklesCallback):
+# class DefaultCallbackOld(TasksCallback):
 #     """Default callback for freckles output.
 #
 #     This is more complicated than it needed to be. Mainly because it's quite hard

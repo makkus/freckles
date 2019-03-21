@@ -20,7 +20,6 @@ requirements = [
     "tabulate==0.8.3",
     "Pygments==2.3.1",
     "passlib==1.7.1",
-    "treelib==1.5.3",
     # "templig==1.0.0b1"
     "pymdown-extensions==6.0",
     "exodus-bundler==2.0.2",
@@ -47,35 +46,12 @@ setup(
     ],
     description="Elastic scripting",
     entry_points={
-        # "console_scripts": [
-        # "freckles=freckles.freckles_cli:cli",
-        # "frecklecute=freckles.frecklecute_cli:cli",
-        # "frecklet=freckles.frecklet_cli:cli",
-        # "freckfreckfreck=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-        # "fff=freckles.freckfreckfreck.freckfreckfreck_cli:cli",
-        # "freckelize=freckles.freckelize.freckelize_cli:cli",
-        # ],
-        # "luci.index_item_types": ["frecklet=freckles.frecklet:Frecklet"],
-        # "freckles.adapters": [
-        #     "freckles=freckles.adapters.freckles_adapter:FrecklesChildAdapter"
-        # ],
-        # "freckfreckfreck.plugins": [
-        #     "config=freckles.freckfreckfreck.fff_cnf_plugin:cnf",
-        #     "frecklet=freckles.freckfreckfreck.fff_frecklet_plugin:frecklet",
-        #     "doc=freckles.freckfreckfreck.fff_doc_plugin:doc",
-        #     "frecklets=freckles.freckfreckfreck.fff_frecklet_plugin:frecklets",
-        #     "repos=freckles.freckfreckfreck.fff_repos_plugin:repos",
-        #     "utils=freckles.freckfreckfreck.fff_utils_plugin:utils",
-        #     "filter=freckles.freckfreckfreck.fff_filter_plugin:filter",
-        # ],
         "freckelize.plugins": [
             "init=freckles.freckelize.freckelize_init_plugin:init_freckle",
             "update=freckles.freckelize.freckelize_init_plugin:update_freckle",
         ],
-        "freckles.callbacks": [
+        "frutil_tasks.callbacks": [
             "freckles=freckles.output_callback:DefaultCallback",
-            "dummy=freckles.output_callback:DummyCallback",
-            "simple=freckles.output_callback:SimpleCallback"
             # "spinner=freckles.callbacks:SpinnerCallback"
         ],
         "freckles.adapters": [

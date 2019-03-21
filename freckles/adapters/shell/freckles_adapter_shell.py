@@ -243,6 +243,8 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
     def get_folders_for_alias(self, alias):
 
+        if alias == "default":
+            return ["/home/markus/temp/scriptlings"]
         return []
 
     def get_supported_resource_types(self):

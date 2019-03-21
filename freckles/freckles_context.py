@@ -11,10 +11,10 @@ from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
-from .output_callback import DefaultCallback, TaskDetail
+from .output_callback import DefaultCallback
+from frutils.tasks.tasks import TaskDetail
 from frkl.utils import expand_string_to_git_details
 from frutils import (
-    dict_merge,
     is_url_or_abbrev,
     DEFAULT_URL_ABBREVIATIONS_REPO,
     calculate_cache_location_for_url,
@@ -326,6 +326,7 @@ class FrecklesContext(object):
 
         # from config
         self._callback = DefaultCallback(profile="verbose")
+        # self._callback = SimpleCallback()
 
         self._adapters = {}
         self._adapter_tasktype_map = {}

@@ -17,7 +17,8 @@ from .defaults import (
     PASSWORD_ASK_MARKER,
 )
 from .exceptions import FrecklesVarException
-from .output_callback import TaskDetail, FrecklesRun, FrecklesResultCallback
+from .output_callback import FrecklesRun, FrecklesResultCallback
+from frutils.tasks.tasks import TaskDetail
 
 log = logging.getLogger("freckles")
 
