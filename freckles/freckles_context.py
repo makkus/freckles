@@ -18,6 +18,7 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
+
 # from .output_callback import DefaultCallback
 from frutils.tasks.callback import load_callback
 from frutils.tasks.tasks import Tasks

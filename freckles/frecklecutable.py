@@ -483,7 +483,9 @@ class Frecklecutable(object):
         )
 
         prepare_tasks = Tasks(
-            "env_prepare_adapter_{}".format(adapter_name), callbacks=self._callbacks
+            "env_prepare_adapter_{}".format(adapter_name),
+            msg="preparing adapter: {}".format(adapter_name),
+            callbacks=self._callbacks,
         )
 
         prepare_root_task = prepare_tasks.start()
