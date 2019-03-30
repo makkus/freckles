@@ -293,7 +293,7 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         return result
 
-    def prepare_execution_requirements(self, parent_task, callback):
+    def prepare_execution_requirements(self, parent_task):
 
         pass
 
@@ -303,7 +303,6 @@ class FrecklesAdapterShell(FrecklesAdapter):
         run_vars,
         run_cnf,
         run_env,
-        output_callback,
         result_callback,
         parent_task,
     ):
@@ -341,7 +340,6 @@ class FrecklesAdapterShell(FrecklesAdapter):
         run_properties = runner.run(
             run_cnf=run_cnf,
             run_properties=run_properties,
-            output_callback=output_callback,
             result_callback=result_callback,
             parent_task=parent_task,
         )

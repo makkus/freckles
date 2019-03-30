@@ -8,7 +8,7 @@ import colorama
 from colorama import Fore, Style
 
 from frutils import readable_yaml, dict_merge
-from frutils.tasks.tasks import TasksCallback
+# from frutils.tasks.tasks import TasksCallback
 
 colorama.init()
 
@@ -157,244 +157,244 @@ DISPLAY_PROFILES = {
     },
 }
 
-
-class DefaultCallback(TasksCallback):
-    """Default callback for freckles output.
-
-    This is more complicated than it needed to be. Mainly because it's quite hard
-    to parse and display Ansible output in a nice, compact format.
-    """
-
-    def __init__(self, **kwargs):
-
-        super(DefaultCallback, self).__init__()
-
-        profile = kwargs.get("profile", None)
-
-        profile_dict = DISPLAY_PROFILES.get(profile, None)
-        if profile_dict is None:
-            log.debug(
-                "No callback profile '{}' available, using defaults...".format(profile)
-            )
-            profile_dict = DISPLAY_PROFILES["default"]
-
-        self.display_skipped = kwargs.get(
-            "display_skipped", profile_dict["display_skipped"]
-        )
-        self.display_unchanged = kwargs.get(
-            "display_unchanged", profile_dict["display_unchanged"]
-        )
-        self.display_messages_when_successful = kwargs.get(
-            "display_msg_when_successful", profile_dict["display_msg_when_successful"]
-        )
-        self.display_ok_status = kwargs.get(
-            "display_ok_status", profile_dict["display_ok_status"]
-        )
-        self.display_detail_level = kwargs.get(
-            "display_detail_level", profile_dict["display_detail_level"]
-        )
-        self.display_nothing = kwargs.get(
-            "display_nothing", profile_dict["display_nothing"]
-        )
-        self.display_run_parameters = kwargs.get(
-            "display_run_parameters", profile_dict["display_run_parameters"]
-        )
-        self.display_adapter_run_parameters = kwargs.get(
-            "display_adapter_run_parameters",
-            profile_dict["display_adapter_run_parameters"],
-        )
-        self.display_system_messages = kwargs.get(
-            "display_system_messages", profile_dict["display_system_messages"]
-        )
-
-    def add_system_message(self, message):
-
-        if self.display_system_messages:
-
-            click.echo("MESSAGE: {}".format(message))
-
-    def output(self, line, nl=True):
-
-        if self.display_nothing:
-            return
-
-        click.echo(line.encode("utf-8"), nl=nl)
-
-    def delete_last_line(self):
-
-        if self.display_nothing:
-            return
-
-        sys.stdout.write(CURSOR_UP_ONE)
-        sys.stdout.write(ERASE_LINE)
-
-    def execution_started(self):
-
-        pass
-
-    def execution_finished(self):
-
-        pass
-
-    def task_started_action(self, details):
-
-        task_name = details.task_name
-        # task_type = details.task_type
-
-        level = self.get_level_current_task()
-
-        if level == 0:
-            self.current_message = u"{}{} starting: {}{}{}".format(
-                ARC_DOWN_RIGHT, HORIZONTAL, BOLD, task_name, UNBOLD
-            )
-            self.output(self.current_message)
-            return
-
-        padding = u"{}  ".format(VERTICAL) * (level - 1)
-        msg = details.get_task_title()
-        self.current_message = u"{}{}{} {}".format(padding, VERTICAL_RIGHT, END, msg)
-        self.output(self.current_message)
-
-    def task_finished_action(self, details):
-
-        level = self.get_level_current_task()
-        padding = u"{}  ".format(VERTICAL) * (level - 1)
-
-        if details.success:
-            if details.skipped:
-                status = "skipped"
-            else:
-                status = "ok"
-        else:
-            status = "failed"
-
-        if not self.display_skipped and status == "skipped":
-            self.delete_last_line()
-            self.current_message = None
-            return
-
-        if not self.display_unchanged and (details.success and not details.changed):
-            self.delete_last_line()
-            self.current_message = None
-            return
-
-        # detail_level = details.detail_level
-        # if self.display_detail_level < detail_level and details.success:
-        #
-        #     self.delete_last_line()
-        #     self.current_message = None
-        #     return
-        if details.msg:
-            msg = details.msg
-
-            # TODO: make that more generic
-            if "Permission denied (publickey,password)" in msg:
-                msg = msg + (
-                    "\n\nBy default 'freckles' is trying to connect via ssh keys. Maybe try to use the '--ask-pass' flag to enable password authentication."
-                )
-
-            if not details.success or (
-                details.success and self.display_messages_when_successful
-            ):
-                first_line = True
-                for line in msg.strip().split("\n"):
-                    line = line.rstrip()
-                    if (
-                        first_line
-                        or line.startswith("stdout")
-                        or line.startswith("stderr")
-                    ):
-                        self.output(
-                            u"{}{}  {}{} {}".format(
-                                padding, VERTICAL, VERTICAL_RIGHT, END, line
-                            )
-                        )
-                        first_line = False
-                    else:
-                        self.output(
-                            u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
-                        )
-        if details.debug_data:
-            data = details.debug_data
-            data_lines = readable_yaml(data).strip().split("\n")
-            first_line = True
-            for line in data_lines:
-                line = line.rstrip()
-                if first_line:
-                    self.output(
-                        u"{}{}  {}{} {}".format(
-                            padding, VERTICAL, VERTICAL_RIGHT, END, line
-                        )
-                    )
-                    first_line = False
-                else:
-                    self.output(
-                        u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
-                    )
-
-        if details.result_data:
-            data = details.result_data
-
-            data_lines = readable_yaml(data).strip().split("\n")
-            first_line = True
-            for line in data_lines:
-                line = line.rstrip()
-                if first_line:
-                    self.output(
-                        u"{}{}  {}{} {}".format(
-                            padding, VERTICAL, VERTICAL_RIGHT, END, line
-                        )
-                    )
-                    first_line = False
-                else:
-                    self.output(
-                        u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
-                    )
-
-        if level == 0:
-            self.output(
-                u"{}{} {}".format(
-                    ARC_UP_RIGHT,
-                    HORIZONTAL,
-                    colorize_status(status, ignore_errors=details.ignore_errors),
-                )
-            )
-            return
-
-        self.output(
-            u"{}{}  {}{} {}".format(
-                padding,
-                VERTICAL,
-                ARC_UP_RIGHT,
-                END,
-                colorize_status(status, ignore_errors=details.ignore_errors),
-            )
-        )
-
-        # self.output(self.current_message)
-        self.current_message = None
-
-        # print(level)
-        # padding = "  " * (level)
-        # # click.echo(
-        # #     "{}details: {} - {}".format(padding, details.task_name, details.task_type)
-        # # )
-        # click.echo("{}success: {}".format(padding, details.success))
-        # if self.display_changed:
-        #     click.echo("{}changed: {}".format(padding, details.changed))
-        # if self.display_skipped:
-        #     click.echo("{}skipped: {}".format(padding, details.skipped))
-        # if details.debug_data:
-        #     click.echo("{}debug data:".format(padding))
-        #     readable = readable_yaml(details.debug_data, indent=(len(padding) + 2))
-        #     click.echo(readable)
-        # if details.result_data:
-        #     click.echo("{}result data:".format(padding))
-        #     readable = readable_yaml(details.result_data, indent=(len(padding)+2))
-        #     click.echo(readable)
-
-        # click.echo()
-        pass
+#
+# class DefaultCallback(TasksCallback):
+#     """Default callback for freckles output.
+#
+#     This is more complicated than it needed to be. Mainly because it's quite hard
+#     to parse and display Ansible output in a nice, compact format.
+#     """
+#
+#     def __init__(self, **kwargs):
+#
+#         super(DefaultCallback, self).__init__()
+#
+#         profile = kwargs.get("profile", None)
+#
+#         profile_dict = DISPLAY_PROFILES.get(profile, None)
+#         if profile_dict is None:
+#             log.debug(
+#                 "No callback profile '{}' available, using defaults...".format(profile)
+#             )
+#             profile_dict = DISPLAY_PROFILES["default"]
+#
+#         self.display_skipped = kwargs.get(
+#             "display_skipped", profile_dict["display_skipped"]
+#         )
+#         self.display_unchanged = kwargs.get(
+#             "display_unchanged", profile_dict["display_unchanged"]
+#         )
+#         self.display_messages_when_successful = kwargs.get(
+#             "display_msg_when_successful", profile_dict["display_msg_when_successful"]
+#         )
+#         self.display_ok_status = kwargs.get(
+#             "display_ok_status", profile_dict["display_ok_status"]
+#         )
+#         self.display_detail_level = kwargs.get(
+#             "display_detail_level", profile_dict["display_detail_level"]
+#         )
+#         self.display_nothing = kwargs.get(
+#             "display_nothing", profile_dict["display_nothing"]
+#         )
+#         self.display_run_parameters = kwargs.get(
+#             "display_run_parameters", profile_dict["display_run_parameters"]
+#         )
+#         self.display_adapter_run_parameters = kwargs.get(
+#             "display_adapter_run_parameters",
+#             profile_dict["display_adapter_run_parameters"],
+#         )
+#         self.display_system_messages = kwargs.get(
+#             "display_system_messages", profile_dict["display_system_messages"]
+#         )
+#
+#     def add_system_message(self, message):
+#
+#         if self.display_system_messages:
+#
+#             click.echo("MESSAGE: {}".format(message))
+#
+#     def output(self, line, nl=True):
+#
+#         if self.display_nothing:
+#             return
+#
+#         click.echo(line.encode("utf-8"), nl=nl)
+#
+#     def delete_last_line(self):
+#
+#         if self.display_nothing:
+#             return
+#
+#         sys.stdout.write(CURSOR_UP_ONE)
+#         sys.stdout.write(ERASE_LINE)
+#
+#     def execution_started(self):
+#
+#         pass
+#
+#     def execution_finished(self):
+#
+#         pass
+#
+#     def task_started_action(self, details):
+#
+#         task_name = details.task_name
+#         # task_type = details.task_type
+#
+#         level = self.get_level_current_task()
+#
+#         if level == 0:
+#             self.current_message = u"{}{} starting: {}{}{}".format(
+#                 ARC_DOWN_RIGHT, HORIZONTAL, BOLD, task_name, UNBOLD
+#             )
+#             self.output(self.current_message)
+#             return
+#
+#         padding = u"{}  ".format(VERTICAL) * (level - 1)
+#         msg = details.get_task_title()
+#         self.current_message = u"{}{}{} {}".format(padding, VERTICAL_RIGHT, END, msg)
+#         self.output(self.current_message)
+#
+#     def task_finished_action(self, details):
+#
+#         level = self.get_level_current_task()
+#         padding = u"{}  ".format(VERTICAL) * (level - 1)
+#
+#         if details.success:
+#             if details.skipped:
+#                 status = "skipped"
+#             else:
+#                 status = "ok"
+#         else:
+#             status = "failed"
+#
+#         if not self.display_skipped and status == "skipped":
+#             self.delete_last_line()
+#             self.current_message = None
+#             return
+#
+#         if not self.display_unchanged and (details.success and not details.changed):
+#             self.delete_last_line()
+#             self.current_message = None
+#             return
+#
+#         # detail_level = details.detail_level
+#         # if self.display_detail_level < detail_level and details.success:
+#         #
+#         #     self.delete_last_line()
+#         #     self.current_message = None
+#         #     return
+#         if details.msg:
+#             msg = details.msg
+#
+#             # TODO: make that more generic
+#             if "Permission denied (publickey,password)" in msg:
+#                 msg = msg + (
+#                     "\n\nBy default 'freckles' is trying to connect via ssh keys. Maybe try to use the '--ask-pass' flag to enable password authentication."
+#                 )
+#
+#             if not details.success or (
+#                 details.success and self.display_messages_when_successful
+#             ):
+#                 first_line = True
+#                 for line in msg.strip().split("\n"):
+#                     line = line.rstrip()
+#                     if (
+#                         first_line
+#                         or line.startswith("stdout")
+#                         or line.startswith("stderr")
+#                     ):
+#                         self.output(
+#                             u"{}{}  {}{} {}".format(
+#                                 padding, VERTICAL, VERTICAL_RIGHT, END, line
+#                             )
+#                         )
+#                         first_line = False
+#                     else:
+#                         self.output(
+#                             u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
+#                         )
+#         if details.debug_data:
+#             data = details.debug_data
+#             data_lines = readable_yaml(data).strip().split("\n")
+#             first_line = True
+#             for line in data_lines:
+#                 line = line.rstrip()
+#                 if first_line:
+#                     self.output(
+#                         u"{}{}  {}{} {}".format(
+#                             padding, VERTICAL, VERTICAL_RIGHT, END, line
+#                         )
+#                     )
+#                     first_line = False
+#                 else:
+#                     self.output(
+#                         u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
+#                     )
+#
+#         if details.result_data:
+#             data = details.result_data
+#
+#             data_lines = readable_yaml(data).strip().split("\n")
+#             first_line = True
+#             for line in data_lines:
+#                 line = line.rstrip()
+#                 if first_line:
+#                     self.output(
+#                         u"{}{}  {}{} {}".format(
+#                             padding, VERTICAL, VERTICAL_RIGHT, END, line
+#                         )
+#                     )
+#                     first_line = False
+#                 else:
+#                     self.output(
+#                         u"{}{}  {}  {}".format(padding, VERTICAL, VERTICAL, line)
+#                     )
+#
+#         if level == 0:
+#             self.output(
+#                 u"{}{} {}".format(
+#                     ARC_UP_RIGHT,
+#                     HORIZONTAL,
+#                     colorize_status(status, ignore_errors=details.ignore_errors),
+#                 )
+#             )
+#             return
+#
+#         self.output(
+#             u"{}{}  {}{} {}".format(
+#                 padding,
+#                 VERTICAL,
+#                 ARC_UP_RIGHT,
+#                 END,
+#                 colorize_status(status, ignore_errors=details.ignore_errors),
+#             )
+#         )
+#
+#         # self.output(self.current_message)
+#         self.current_message = None
+#
+#         # print(level)
+#         # padding = "  " * (level)
+#         # # click.echo(
+#         # #     "{}details: {} - {}".format(padding, details.task_name, details.task_type)
+#         # # )
+#         # click.echo("{}success: {}".format(padding, details.success))
+#         # if self.display_changed:
+#         #     click.echo("{}changed: {}".format(padding, details.changed))
+#         # if self.display_skipped:
+#         #     click.echo("{}skipped: {}".format(padding, details.skipped))
+#         # if details.debug_data:
+#         #     click.echo("{}debug data:".format(padding))
+#         #     readable = readable_yaml(details.debug_data, indent=(len(padding) + 2))
+#         #     click.echo(readable)
+#         # if details.result_data:
+#         #     click.echo("{}result data:".format(padding))
+#         #     readable = readable_yaml(details.result_data, indent=(len(padding)+2))
+#         #     click.echo(readable)
+#
+#         # click.echo()
+#         pass
 
 
 # class DefaultCallbackOld(TasksCallback):

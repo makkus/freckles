@@ -11,8 +11,9 @@ from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
-from .output_callback import DefaultCallback
-from frutils.tasks.tasks import TaskDetail
+# from .output_callback import DefaultCallback
+from frutils.tasks.callback import load_callback
+from frutils.tasks.tasks import TaskDetail, Tasks
 from frkl.utils import expand_string_to_git_details
 from frutils import (
     is_url_or_abbrev,
@@ -325,8 +326,23 @@ class FrecklesContext(object):
                 self._run_info = yaml.load(f)
 
         # from config
-        self._callback = DefaultCallback(profile="verbose")
+        # self._callback = DefaultCallback(profile="verbose")
         # self._callback = SimpleCallback()
+        self._callbacks = []
+        callback_config = self._context_config.config.get("callbacks")
+        for cc in callback_config:
+            if isinstance(cc, string_types):
+                c = load_callback(cc)
+            elif isinstance(cc, Mapping):
+                if len(cc) != 1:
+                    raise Exception("Invalid callback configuration, only one key allowed: {}".format(cc))
+                c_name = list(cc.keys())[0]
+                c_config = cc[c_name]
+                c = load_callback(c_name, callback_config=c_config)
+            else:
+                raise Exception("Invalid callback config: {}".format(cc))
+
+            self._callbacks.append(c)
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
@@ -363,19 +379,14 @@ class FrecklesContext(object):
                 to_download.append(r)
 
         if to_download:
-
-            task_detail = TaskDetail(
-                task_name="prepare context", task_type="internal", task_parent=None
-            )
-
-            self.callback.task_started(task_detail)
-            # click.echo("- preparing execution context")
+            sync_tasks = Tasks("preparing context", category="internal", callbacks=self._callbacks)
+            sync_root_task = sync_tasks.start()
 
             for repo in to_download:
 
-                self.download_repo(repo, task_parent=task_detail)
+                self.download_repo(repo, task_parent=sync_root_task)
 
-            self.callback.task_finished(task_detail, success=True)
+            sync_tasks.finish()
 
     def update_pull_cache(self, path):
 
@@ -411,13 +422,7 @@ class FrecklesContext(object):
             cache_key = "{}_{}".format(url, branch)
 
         if not exists:
-            clone_task = TaskDetail(
-                task_name="cloning repo: {}".format(repo["url"]),
-                task_type="internal",
-                task_parent=task_parent,
-            )
-            self.callback.task_started(clone_task)
-            # click.echo("  - cloning repo: {}...".format(repo["url"]))
+            clone_task = task_parent.add_subtask(task_name="clone {}".format(repo["url"]), msg="cloning repo: {}".format(repo["url"]), category="internal")
             git = local["git"]
             cmd = ["clone"]
             if branch is not None:
@@ -428,33 +433,26 @@ class FrecklesContext(object):
             rc, stdout, stderr = git.run(cmd)
 
             if rc != 0:
-                self.callback.task_finished(clone_task, success=False)
+                clone_task.finish(success=False)
                 raise FrecklesConfigException(
                     "Could not clone repository '{}': {}".format(url, stderr)
                 )
             else:
-                self.callback.task_finished(clone_task, success=True, skipped=False)
+                clone_task.finish(success=True, skipped=False)
 
             self.update_pull_cache(cache_key)
 
         else:
+            pull_task = task_parent.add_subtask(task_name="pull {}".format(url), msg="pulling remote: {}".format(url), category="internal")
 
-            pull_task = TaskDetail(
-                task_name="pulling remote: {}".format(url),
-                task_type="internal",
-                task_parent=task_parent,
-            )
             if cache_key in self._run_info.get("pull_cache", {}).keys():
-
                 last_time = self._run_info["pull_cache"][cache_key]
-
                 valid = self._context_config.get("remote_cache_valid_time")
-
                 now = time.time()
 
                 if now - last_time < valid:
                     # click.echo("  - using cached repo: {}".format(url))
-                    self.callback.task_finished(pull_task, success=True, skipped=True)
+                    pull_task.finish(success=True, skipped=True)
                     log.debug("Not pulling again: {}".format(url))
                     return
 
@@ -468,12 +466,12 @@ class FrecklesContext(object):
                 rc, stdout, stderr = git.run(cmd)
 
                 if rc != 0:
-                    self.callback.task_finished(pull_task, success=False)
+                    pull_task.finish(success=False)
                     raise FrecklesConfigException(
                         "Could not pull repository '{}': {}".format(url, stderr)
                     )
                 else:
-                    self.callback.task_finished(pull_task, success=True, skipped=False)
+                    pull_task.finish(success=True, skipped=False)
             self.update_pull_cache(cache_key)
 
     def check_repo(self, repo):
@@ -636,8 +634,8 @@ class FrecklesContext(object):
         return self._context_name
 
     @property
-    def callback(self):
-        return self._callback
+    def callbacks(self):
+        return self._callbacks
 
     @property
     def frecklet_index(self):

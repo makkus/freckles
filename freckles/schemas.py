@@ -43,16 +43,6 @@ PROFILE_LOAD_CONFIG_SCHEMA = {
 # Default freckles context configuration schema. This contains all configuration  pertaining to a single freckles
 # context, like which repositories to use, which adapters, etc.
 FRECKLES_CONTEXT_SCHEMA = {
-    #     "use_community": {
-    #         "type": "boolean",
-    #         "default": False,
-    #         "doc": """Whether to allow the freckles community repositories.
-    #
-    # The freckles community repositories are a collection of community-created and curated frecklets and resources.
-    #
-    # TODO: list all repository urls
-    # """,
-    #     },
     "adapters": {
         "type": "list",
         "default": ["nsbl", "templing"],
@@ -143,6 +133,16 @@ There are 3 special repository aliases that can be used instead of a path:
             "short_help": "whether to add the adapter name to the run environment folder name"
         },
     },
+    "callbacks": {
+        "type": "list",
+        "default": ["plain"],
+        "schema": {
+            "type": ["string", "dict"]
+        },
+        "doc": {
+            "short_help": "a list of callbacks to attach to a freckles run"
+        }
+    }
 }
 
 # Schema to contain all the settings that can only be set in the 'default' context. Mainly used to give the user

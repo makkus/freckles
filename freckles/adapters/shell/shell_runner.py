@@ -113,7 +113,7 @@ class ShellRunner(object):
         self,
         run_properties,
         run_cnf,
-        output_callback,
+        # output_callback,
         result_callback,
         parent_task,
         # callback_adapter,
@@ -154,20 +154,15 @@ class ShellRunner(object):
         if no_run:
             return run_properties
 
-        td = TaskDetail(hostname, task_type="shell", task_parent=parent_task)
-
-        output_callback.task_started(td)
-
         if remote:
             raise Exception("Not implemented yet")
             # copy execution environment
             td = TaskDetail(
                 "uploading execution environment", task_type="upload", task_parent=td
             )
-            output_callback.task_started(td)
+            upload_task = td.add_subtask("uploading execution environment", category="upload")
             machine.upload(run_dir, "/tmp")
-            output_callback.task_finished(td, success=True, changed=True, skipped=False)
-            td = td.task_parent
+            upload_task.finish(success=True, changed=True, skipped=False)
             run_script = os.path.join("/tmp", run_properties["run.sh"])
         else:
             run_script = run_properties["run_script"]
@@ -177,13 +172,12 @@ class ShellRunner(object):
         cmd = machine["bash"]
 
         # rc, stdout, stderr = cmd.run([run_script], retcode=None)
-        current_task = td
+        current_task = parent_task
         popen = cmd.popen(run_script)
 
         current_task_stdout = []
         current_task_stderr = []
         current_task_id = -1
-        current_msg = None
 
         log.debug("Reading command output...")
         for line in popen.iter_lines():
@@ -199,15 +193,19 @@ class ShellRunner(object):
                     # print(stdout)
                     if task_id > current_task_id:
                         # print("starting: {}".format(msg))
-                        td = TaskDetail(
+                        # td = TaskDetail(
+                        #     task_name=current_msg,
+                        #     task_type="script-command",
+                        #     task_parent=current_task,
+                        #     task_title=current_msg,
+                        #     freckles_task_id=task_id,
+                        # )
+                        current_task = current_task.add_subtask(
                             task_name=current_msg,
-                            task_type="script-command",
-                            task_parent=current_task,
-                            task_title=current_msg,
-                            freckles_task_id=task_id,
+                            category="script-command",
+                            reference=task_id
                         )
-                        output_callback.task_started(td)
-                        current_task = td
+                        # output_callback.task_started(td)
                         current_task_id = task_id
 
                 elif stdout.startswith("FINISHED_TASK["):
@@ -219,23 +217,30 @@ class ShellRunner(object):
                     stdout = "\n".join(current_task_stdout)
                     stderr = "\n".join(current_task_stderr)
                     msg = ""
-                    if stdout and not stderr:
-                        msg = "stdout:\n{}".format(stdout)
-                    elif stderr and not stdout:
-                        msg = "stderr:\n{}".format(stderr)
-                    elif stdout and stderr:
-                        msg = "stdout:\n{}\nstderr:\n{}".format(stdout, stderr)
+                    # if stdout and not stderr:
+                    #     msg = "stdout:\n{}".format(stdout)
+                    # elif stderr and not stdout:
+                    #     msg = "stderr:\n{}".format(stderr)
+                    # elif stdout and stderr:
+                    #     msg = "stdout:\n{}\nstderr:\n{}".format(stdout, stderr)
 
-                    output_callback.task_finished(
-                        current_task,
+                    current_task = current_task.finish(
                         success=success,
                         changed=True,
                         skipped=False,
-                        msg=msg,
+                        msg=stdout,
+                        error_msg=stderr
                     )
+                    # output_callback.task_finished(
+                    #     current_task,
+                    #     success=success,
+                    #     changed=True,
+                    #     skipped=False,
+                    #     msg=msg,
+                    # )
                     current_task_stdout = []
                     current_task_stderr = []
-                    current_task = current_task.task_parent
+                    # current_task = current_task.task_parent
                     current_msg = None
                 else:
                     if stdout and current_task_id is not None:
@@ -263,7 +268,7 @@ class ShellRunner(object):
                     ["-r", os.path.join("/tmp", run_properties["env_dir_name"])]
                 )
                 success = rc == 0
-                output_callback.task_finished(td, success=success)
+                output_callback.register_task_finished(td, success=success)
             machine.close()
 
         return run_properties

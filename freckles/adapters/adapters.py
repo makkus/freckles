@@ -129,7 +129,6 @@ class FrecklesAdapter(object):
         run_vars,
         run_config,
         run_env,
-        output_callback,
         result_callback,
         parent_task,
     ):
@@ -143,7 +142,6 @@ class FrecklesAdapter(object):
             run_vars=run_vars,
             run_cnf=final_run_config,
             run_env=run_env,
-            output_callback=output_callback,
             result_callback=result_callback,
             parent_task=parent_task,
         )

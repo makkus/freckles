@@ -18,7 +18,7 @@ from .defaults import (
 )
 from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
-from frutils.tasks.tasks import TaskDetail
+from frutils.tasks.tasks import Tasks
 
 log = logging.getLogger("freckles")
 
@@ -79,7 +79,7 @@ class Frecklecutable(object):
 
         self._frecklet = frecklet
         self._context = context
-        self._callback = context.callback
+        self._callbacks = context.callbacks
 
     @property
     def frecklet(self):
@@ -482,45 +482,40 @@ class Frecklecutable(object):
             current_adapter, None
         )
 
-        prepare_task = TaskDetail(
-            task_name="prepare execution environment for adapter: '{}'".format(
-                adapter_name
-            ),
-            task_type="internal",
-            task_parent=None,
-        )
-        self._callback.task_started(prepare_task)
+
+        prepare_tasks = Tasks("env_prepare_adapter_{}".format(adapter_name), callbacks=self._callbacks)
+
+        prepare_root_task = prepare_tasks.start()
+
         try:
-            adapter.prepare_execution_requirements(prepare_task, self._callback)
-            self._callback.task_finished(prepare_task)
+            adapter.prepare_execution_requirements(prepare_root_task)
+            prepare_root_task.finish(success=True)
         except (Exception) as e:
-            self._callback.task_finished(prepare_task, success=False, msg=str(e))
+            prepare_root_task.finish(success=False, error_msg=str(e))
             raise e
 
+        prepare_tasks.finish()
         click.echo()
 
         result_callback = FrecklesResultCallback()
-        parent_task = TaskDetail(frecklet_name, "run", task_parent=None)
-        self._callback.task_started(parent_task)
-        task_details = TaskDetail(
-            task_name=frecklet_name, task_type="frecklecutable", task_parent=parent_task
-        )
-        self._callback.task_started(task_details)
+        run_tasks = Tasks(title=frecklet_name, category="run", msg="running frecklet: {}".format(frecklet_name), callbacks=self._callbacks)
+        root_run_task = run_tasks.start()
 
-        # run_config = dict_merge(self.context.cnf.config, run_config, copy_dct=True)
+        # task_details = root_run_task.add_child(task_name=frecklet_name, category="frecklecutable")
+
         try:
             run_properties = adapter._run(
                 tasklist=current_tasklist,
                 run_vars=run_vars,
                 run_config=run_config,
                 run_env=run_env_properties,
-                output_callback=self._callback,
                 result_callback=result_callback,
-                parent_task=task_details,
+                parent_task=root_run_task,
             )
 
-            self._callback.task_finished(task_details, success=True)
-            self._callback.task_finished(parent_task, success=True)
+            run_tasks.finish()
+            # self._callback.task_finished(task_details, success=True)
+            # self._callback.task_finished(parent_task, success=True)
 
             result = {
                 "run_properties": run_properties,
@@ -534,6 +529,7 @@ class Frecklecutable(object):
             return run_result
 
         except (Exception) as e:
+            run_tasks.finish()
             click.echo("frecklecutable run failed: {}".format(e))
             log.debug(e)
             import traceback
