@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
-import sys
 from collections import OrderedDict
 
-import click
 import colorama
 from colorama import Fore, Style
 
 from frutils import readable_yaml, dict_merge
+
 # from frutils.tasks.tasks import TasksCallback
 
 colorama.init()

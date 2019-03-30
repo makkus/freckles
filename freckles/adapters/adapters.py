@@ -124,13 +124,7 @@ class FrecklesAdapter(object):
         pass
 
     def _run(
-        self,
-        tasklist,
-        run_vars,
-        run_config,
-        run_env,
-        result_callback,
-        parent_task,
+        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
     ):
 
         final_run_config = self._run_cnf_interpreter.overlay(run_config)

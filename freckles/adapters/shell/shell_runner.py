@@ -10,7 +10,6 @@ from plumbum import SshMachine, local
 
 from freckles.defaults import MODULE_FOLDER
 from freckles.exceptions import FrecklesConfigException
-from frutils.tasks.tasks import TaskDetail
 
 log = logging.getLogger("freckles")
 
@@ -120,7 +119,7 @@ class ShellRunner(object):
         delete_env=False,
     ):
 
-        run_dir = run_properties["run_dir"]
+        # run_dir = run_properties["run_dir"]
 
         hostname = run_cnf.get("host")
         connection_type = run_cnf.get("connection_type", None)
@@ -157,13 +156,15 @@ class ShellRunner(object):
         if remote:
             raise Exception("Not implemented yet")
             # copy execution environment
-            td = TaskDetail(
-                "uploading execution environment", task_type="upload", task_parent=td
-            )
-            upload_task = td.add_subtask("uploading execution environment", category="upload")
-            machine.upload(run_dir, "/tmp")
-            upload_task.finish(success=True, changed=True, skipped=False)
-            run_script = os.path.join("/tmp", run_properties["run.sh"])
+            # td = TaskDetail(
+            #     "uploading execution environment", task_type="upload", task_parent=td
+            # )
+            # upload_task = td.add_subtask(
+            #     "uploading execution environment", category="upload"
+            # )
+            # machine.upload(run_dir, "/tmp")
+            # upload_task.finish(success=True, changed=True, skipped=False)
+            # run_script = os.path.join("/tmp", run_properties["run.sh"])
         else:
             run_script = run_properties["run_script"]
 
@@ -203,7 +204,7 @@ class ShellRunner(object):
                         current_task = current_task.add_subtask(
                             task_name=current_msg,
                             category="script-command",
-                            reference=task_id
+                            reference=task_id,
                         )
                         # output_callback.task_started(td)
                         current_task_id = task_id
@@ -212,11 +213,11 @@ class ShellRunner(object):
                     # print("finished")
                     index = stdout.index("]")
                     task_id = int(stdout[14:index])
-                    rc = int(stdout[index + 2 :]) # noqa
+                    rc = int(stdout[index + 2 :])  # noqa
                     success = rc == 0
                     stdout = "\n".join(current_task_stdout)
                     stderr = "\n".join(current_task_stderr)
-                    msg = ""
+                    # msg = ""
                     # if stdout and not stderr:
                     #     msg = "stdout:\n{}".format(stdout)
                     # elif stderr and not stdout:
@@ -229,7 +230,7 @@ class ShellRunner(object):
                         changed=True,
                         skipped=False,
                         msg=stdout,
-                        error_msg=stderr
+                        error_msg=stderr,
                     )
                     # output_callback.task_finished(
                     #     current_task,
@@ -256,19 +257,21 @@ class ShellRunner(object):
         run_properties["signal_status"] = -1
 
         if remote:
-            if delete_env:
-                td = TaskDetail(
-                    "deleting execution environment",
-                    task_type="delete",
-                    task_parent=current_task,
-                )
-                output_callback.task_started(td)
-                delete = machine["rm"]
-                rc, stdout, stderr = delete.run(
-                    ["-r", os.path.join("/tmp", run_properties["env_dir_name"])]
-                )
-                success = rc == 0
-                output_callback.register_task_finished(td, success=success)
-            machine.close()
+            raise Exception("not implemented yet")
+            # if delete_env:
+            #     td = TaskDetail(
+            #         "deleting execution environment",
+            #         task_type="delete",
+            #         task_parent=current_task,
+            #     )
+            #     task_
+            #     output_callback.task_started(td)
+            #     delete = machine["rm"]
+            #     rc, stdout, stderr = delete.run(
+            #         ["-r", os.path.join("/tmp", run_properties["env_dir_name"])]
+            #     )
+            #     success = rc == 0
+            #     output_callback.register_task_finished(td, success=success)
+            # machine.close()
 
         return run_properties

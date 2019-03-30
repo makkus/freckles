@@ -7,6 +7,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
 from frutils import replace_strings_in_obj, get_template_keys
+from frutils.tasks.tasks import Tasks
 from ting.defaults import TingValidator
 from .defaults import (
     FRECKLET_KEY_NAME,
@@ -18,7 +19,6 @@ from .defaults import (
 )
 from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
-from frutils.tasks.tasks import Tasks
 
 log = logging.getLogger("freckles")
 
@@ -482,8 +482,9 @@ class Frecklecutable(object):
             current_adapter, None
         )
 
-
-        prepare_tasks = Tasks("env_prepare_adapter_{}".format(adapter_name), callbacks=self._callbacks)
+        prepare_tasks = Tasks(
+            "env_prepare_adapter_{}".format(adapter_name), callbacks=self._callbacks
+        )
 
         prepare_root_task = prepare_tasks.start()
 
@@ -498,7 +499,12 @@ class Frecklecutable(object):
         click.echo()
 
         result_callback = FrecklesResultCallback()
-        run_tasks = Tasks(title=frecklet_name, category="run", msg="running frecklet: {}".format(frecklet_name), callbacks=self._callbacks)
+        run_tasks = Tasks(
+            title=frecklet_name,
+            category="run",
+            msg="running frecklet: {}".format(frecklet_name),
+            callbacks=self._callbacks,
+        )
         root_run_task = run_tasks.start()
 
         # task_details = root_run_task.add_child(task_name=frecklet_name, category="frecklecutable")

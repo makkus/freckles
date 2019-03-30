@@ -1,6 +1,5 @@
 import io
 import json
-import logging
 import os
 import shutil
 import time
@@ -11,9 +10,6 @@ from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
-# from .output_callback import DefaultCallback
-from frutils.tasks.callback import load_callback
-from frutils.tasks.tasks import TaskDetail, Tasks
 from frkl.utils import expand_string_to_git_details
 from frutils import (
     is_url_or_abbrev,
@@ -22,13 +18,15 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
+# from .output_callback import DefaultCallback
+from frutils.tasks.callback import load_callback
+from frutils.tasks.tasks import Tasks
 from ting.ting_attributes import (
     FrontmatterAndContentAttribute,
     DictContentAttribute,
     FileStringContentAttribute,
     ValueAttribute,
 )
-from .frecklet.arguments import *  # noqa
 from ting.ting_cast import TingCast
 from ting.tings import TingTings
 from .adapters.adapters import create_adapter
@@ -41,6 +39,7 @@ from .defaults import (
     FRECKLES_SHARE_DIR,
 )
 from .exceptions import FrecklesConfigException
+from .frecklet.arguments import *  # noqa
 from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from .schemas import FRECKLES_CONTEXT_SCHEMA
 
@@ -335,7 +334,11 @@ class FrecklesContext(object):
                 c = load_callback(cc)
             elif isinstance(cc, Mapping):
                 if len(cc) != 1:
-                    raise Exception("Invalid callback configuration, only one key allowed: {}".format(cc))
+                    raise Exception(
+                        "Invalid callback configuration, only one key allowed: {}".format(
+                            cc
+                        )
+                    )
                 c_name = list(cc.keys())[0]
                 c_config = cc[c_name]
                 c = load_callback(c_name, callback_config=c_config)
@@ -379,7 +382,9 @@ class FrecklesContext(object):
                 to_download.append(r)
 
         if to_download:
-            sync_tasks = Tasks("preparing context", category="internal", callbacks=self._callbacks)
+            sync_tasks = Tasks(
+                "preparing context", category="internal", callbacks=self._callbacks
+            )
             sync_root_task = sync_tasks.start()
 
             for repo in to_download:
@@ -422,7 +427,11 @@ class FrecklesContext(object):
             cache_key = "{}_{}".format(url, branch)
 
         if not exists:
-            clone_task = task_parent.add_subtask(task_name="clone {}".format(repo["url"]), msg="cloning repo: {}".format(repo["url"]), category="internal")
+            clone_task = task_parent.add_subtask(
+                task_name="clone {}".format(repo["url"]),
+                msg="cloning repo: {}".format(repo["url"]),
+                category="internal",
+            )
             git = local["git"]
             cmd = ["clone"]
             if branch is not None:
@@ -443,7 +452,11 @@ class FrecklesContext(object):
             self.update_pull_cache(cache_key)
 
         else:
-            pull_task = task_parent.add_subtask(task_name="pull {}".format(url), msg="pulling remote: {}".format(url), category="internal")
+            pull_task = task_parent.add_subtask(
+                task_name="pull {}".format(url),
+                msg="pulling remote: {}".format(url),
+                category="internal",
+            )
 
             if cache_key in self._run_info.get("pull_cache", {}).keys():
                 last_time = self._run_info["pull_cache"][cache_key]
