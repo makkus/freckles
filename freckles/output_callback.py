@@ -7,8 +7,6 @@ from colorama import Fore, Style
 
 from frutils import readable_yaml, dict_merge
 
-# from frutils.tasks.tasks import TasksCallback
-
 colorama.init()
 
 log = logging.getLogger("freckles")
