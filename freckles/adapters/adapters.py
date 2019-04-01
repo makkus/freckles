@@ -105,7 +105,7 @@ class FrecklesAdapter(object):
 
         return {}
 
-    def prepare_execution_requirements(self, parent_task, callback):
+    def prepare_execution_requirements(self, run_config, parent_task):
         """Prepares all external dependencies that are needed for this adapter to successfully run an execution.
 
         Should throw an exception if it fails.

@@ -293,7 +293,7 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         return result
 
-    def prepare_execution_requirements(self, parent_task):
+    def prepare_execution_requirements(self, run_config, parent_task):
 
         pass
 

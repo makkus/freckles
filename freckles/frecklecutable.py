@@ -491,7 +491,9 @@ class Frecklecutable(object):
         prepare_root_task = prepare_tasks.start()
 
         try:
-            adapter.prepare_execution_requirements(prepare_root_task)
+            adapter.prepare_execution_requirements(
+                run_config=run_config, parent_task=prepare_root_task
+            )
             prepare_root_task.finish(success=True)
         except (Exception) as e:
             prepare_root_task.finish(success=False, error_msg=str(e))

@@ -135,7 +135,7 @@ There are 3 special repository aliases that can be used instead of a path:
     },
     "callbacks": {
         "type": "list",
-        "default": ["plain"],
+        "default": ["default"],
         "schema": {"type": ["string", "dict"]},
         "doc": {"short_help": "a list of callbacks to attach to a freckles run"},
     },

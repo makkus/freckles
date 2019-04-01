@@ -443,12 +443,12 @@ class FrecklesContext(object):
             rc, stdout, stderr = git.run(cmd)
 
             if rc != 0:
-                clone_task.finish(success=False)
+                clone_task.finish(success=False, changed=True, skipped=False)
                 raise FrecklesConfigException(
                     "Could not clone repository '{}': {}".format(url, stderr)
                 )
             else:
-                clone_task.finish(success=True, skipped=False)
+                clone_task.finish(success=True, skipped=False, changed=True)
 
             self.update_pull_cache(cache_key)
 

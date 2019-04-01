@@ -5,7 +5,7 @@
 # Shell script to gather basic facts about a machine.
 #
 # Copyright 2018 Markus Binsteiner
-# licensed under The Parity Public License 3.0.0 (https://licensezero.com/licenses/parity)
+# licensed under The Parity Public License 6.0.0 (https://licensezero.com/licenses/parity)
 #
 # -----------------------------------------------------------------------------
 
@@ -20,6 +20,8 @@ if [ -z ${FRECKLES_CHECK_PYTHON_MODULES} ]
 then
   export FRECKLES_CHECK_PYTHON_MODULES="zipfile"
 fi
+
+DEFAULT_CHECK_PYTHON_EXES="/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
 
 # from: https://stackoverflow.com/questions/3963716/how-to-manually-expand-a-special-variable-ex-tilde-in-bash/29310477#29310477
 function expand_path () {
@@ -63,10 +65,6 @@ function can_passwordless_sudo () {
     return $?
 }
 
-function check_executable () {
-    exe=$1
-
-}
 
 function check_executables () {
 
@@ -173,6 +171,19 @@ function read_freckle_file () {
 
 }
 
+function read_box_basics_file () {
+
+    echo
+    echo "box_basics_file: "
+
+    if [ ! -f "$HOME/.local/share/freckles/.box_basics" ]; then
+        echo "  exists: false"
+    else
+        echo "  exists: true"
+        cat "$HOME/.local/share/freckles/.box_basics" 2> /dev/null | sed 's/^/  /'
+    fi
+}
+
 function get_home_directory () {
     echo "home: ${HOME}"
     echo
@@ -198,28 +209,30 @@ function check_git_xcode () {
 
 function check_python_modules_installed () {
 
-    if [ -z ${FRECKLES_CHECK_PYTHON_MODULES} ]
+    echo
+
+    if [ -z "${FRECKLES_CHECK_PYTHON_MODULES}" ]
     then
-      echo "python_modules: {}"
+      echo "    python_modules: {}"
       return
     fi
 
     path=$(which -a python 2> /dev/null)
     if [[ -z ${path} ]]
     then
-       echo "python_modules: {}"
+       echo "    python_modules: {}"
        return
     fi
 
-    echo "python_modules:"
+    echo "    python_modules:"
     OLD_IFS=${IFS}
     IFS=:
 
     for module in ${FRECKLES_CHECK_PYTHON_MODULES}
     do
 
-      python -c "import ${module}" 2> /dev/null
-      echo "  ${module}: $?"
+      eval "$1 -c \"import ${module}\" 2> /dev/null"
+      echo "      ${module}: $?"
 
     done
     IFS=${OLD_IFS}
@@ -227,6 +240,28 @@ function check_python_modules_installed () {
 
 }
 
+function check_python_exes () {
+
+    echo
+    echo "pythons:"
+    OLD_IFS=${IFS}
+    IFS=:
+
+    for python_exe in ${DEFAULT_CHECK_PYTHON_EXES}
+    do
+        echo "  ${python_exe}:"
+        path=$(which -a ${python_exe} 2> /dev/null)
+        if [[ -z ${path} ]]
+        then
+          echo "    exists: false"
+        else
+          echo "    exists: true"
+          check_python_modules_installed "${python_exe}"
+        fi
+
+    done
+    IFS=${OLD_IFS}
+}
 
 can_passwordless_sudo
 echo "can_passwordless_sudo: $?"
@@ -238,4 +273,7 @@ check_directories
 get_home_directory
 get_username
 read_freckle_files
-check_python_modules_installed
+check_python_exes
+read_box_basics_file
+
+exit 0
