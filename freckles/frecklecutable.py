@@ -486,6 +486,7 @@ class Frecklecutable(object):
             "env_prepare_adapter_{}".format(adapter_name),
             msg="preparing adapter: {}".format(adapter_name),
             callbacks=self._callbacks,
+            is_utility_task=True,
         )
 
         prepare_root_task = prepare_tasks.start()
@@ -500,7 +501,6 @@ class Frecklecutable(object):
             raise e
 
         prepare_tasks.finish()
-        click.echo()
 
         result_callback = FrecklesResultCallback()
         run_tasks = Tasks(

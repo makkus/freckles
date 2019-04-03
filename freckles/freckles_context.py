@@ -384,7 +384,10 @@ class FrecklesContext(object):
 
         if to_download:
             sync_tasks = Tasks(
-                "preparing context", category="internal", callbacks=self._callbacks
+                "preparing context",
+                category="internal",
+                callbacks=self._callbacks,
+                is_utility_task=True,
             )
             sync_root_task = sync_tasks.start()
 
