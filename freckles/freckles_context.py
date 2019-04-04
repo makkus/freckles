@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 import time
-from collections import Mapping, Iterable
+from collections import Mapping, Iterable, Sequence
 from datetime import datetime
 
 from plumbum import local
@@ -228,11 +228,12 @@ class CnfProfiles(TingTings):
                         try:
                             value = int(value)
                         except (Exception):
-                            raise Exception(
-                                "Can't assemble profile configuration, unknown type for: {}".format(
-                                    value
-                                )
-                            )
+                            # raise Exception(
+                            #     "Can't assemble profile configuration, unknown type for: {}".format(
+                            #         value
+                            #     )
+                            # )
+                            pass
                     profile = {key: value}
 
                 elif profile.startswith("{"):
@@ -329,7 +330,27 @@ class FrecklesContext(object):
         # self._callback = DefaultCallback(profile="verbose")
         # self._callback = SimpleCallback()
         self._callbacks = []
-        callback_config = self._context_config.config.get("callbacks")
+        callback_config = self._context_config.config.get("callback")
+
+        if isinstance(callback_config, string_types):
+            callback_config = [callback_config]
+        elif isinstance(callback_config, Mapping):
+            temp = []
+            for key, value in callback_config:
+                if not isinstance(key, string_types):
+                    raise Exception(
+                        "Invalid callback config value: {}".format(callback_config)
+                    )
+                temp.append({key: value})
+
+            callback_config = temp
+        elif not isinstance(callback_config, Sequence):
+            raise Exception(
+                "Invalid callback config type '{}': {}".format(
+                    type(callback_config, callback_config)
+                )
+            )
+
         for cc in callback_config:
             if isinstance(cc, string_types):
                 c = load_callback(cc)

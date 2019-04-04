@@ -133,10 +133,9 @@ There are 3 special repository aliases that can be used instead of a path:
             "short_help": "whether to add the adapter name to the run environment folder name"
         },
     },
-    "callbacks": {
-        "type": "list",
+    "callback": {
+        "type": ["string", "dict", "list"],
         "default": ["auto"],
-        "schema": {"type": ["string", "dict"]},
         "doc": {"short_help": "a list of callbacks to attach to a freckles run"},
     },
 }
