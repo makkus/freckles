@@ -29,11 +29,27 @@ EXTERNAL_FOLDER = os.path.join(MODULE_FOLDER, "external")
 DEFAULT_FRECKLETS_FOLDER = os.path.join(EXTERNAL_FOLDER, FRECKLETS_KEY)
 FRECKLES_DOCS_FOLDER = os.path.join(MODULE_FOLDER, "doc")
 
-FRECKLES_CONFIG_DIR = os.path.expanduser("~/.config/freckles")
+XDG_CONFIG_HOME = os.getenv("XDG_CONFIG_HOME")
+if XDG_CONFIG_HOME:
+    FRECKLES_CONFIG_DIR = os.path.join(XDG_CONFIG_HOME, "freckles")
+else:
+    FRECKLES_CONFIG_DIR = os.path.expanduser("~/.config/freckles")
 
-FRECKLES_SHARE_DIR = os.path.join(
-    os.path.expanduser("~"), ".local", "share", "freckles"
-)
+XDG_DATA_HOME = os.getenv("XDG_DATA_HOME")
+if XDG_DATA_HOME:
+    FRECKLES_SHARE_DIR = os.path.join(XDG_DATA_HOME, "freckles")
+else:
+    FRECKLES_SHARE_DIR = os.path.join(
+        os.path.expanduser("~"), ".local", "share", "freckles"
+    )
+
+XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME")
+if XDG_CACHE_HOME:
+    FRECKLES_CACHE_BASE = os.path.join(XDG_CACHE_HOME, "freckles")
+else:
+    FRECKLES_CACHE_BASE = os.path.expanduser("~/.cache/freckles")
+
+
 FRECKLES_RUN_INFO_FILE = os.path.join(FRECKLES_SHARE_DIR, ".run_info")
 
 FRECKLES_CONDA_ENV_PATH = os.path.join(FRECKLES_SHARE_DIR, "envs", "conda", "freckles")
@@ -42,12 +58,11 @@ FRECKLES_VENV_ENV_PATH = os.path.join(
     FRECKLES_SHARE_DIR, "envs", "virtualenv", "freckles"
 )
 
-FRECKLES_CONFIG_PROFILES_DIR = FRECKLES_CONFIG_DIR
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
     "~/.local/share/freckles/runs/current"
 )
-FRECKLES_CACHE_BASE = os.path.join(FRECKLES_SHARE_DIR, "cache")
+
 
 PASSWORD_ASK_MARKER = "ask"
 # ---------------------------------------------------------------

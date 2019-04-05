@@ -35,9 +35,9 @@ from .defaults import (
     MIXED_CONTENT_TYPE,
     FRECKLES_CACHE_BASE,
     FRECKLES_RUN_INFO_FILE,
-    FRECKLES_CONFIG_PROFILES_DIR,
     ACCEPT_FRECKLES_LICENSE_KEYNAME,
     FRECKLES_SHARE_DIR,
+    FRECKLES_CONFIG_DIR,
 )
 from .exceptions import FrecklesConfigException
 from .frecklet.arguments import *  # noqa
@@ -287,13 +287,13 @@ class CnfProfiles(TingTings):
 
 def startup_housekeeping():
 
-    if not os.path.exists(FRECKLES_CONFIG_PROFILES_DIR):
-        os.makedirs(FRECKLES_CONFIG_PROFILES_DIR)
+    if not os.path.exists(FRECKLES_CONFIG_DIR):
+        os.makedirs(FRECKLES_CONFIG_DIR)
     else:
-        if not os.path.isdir(os.path.realpath(FRECKLES_CONFIG_PROFILES_DIR)):
+        if not os.path.isdir(os.path.realpath(FRECKLES_CONFIG_DIR)):
             raise Exception(
                 "Freckles config location exists and is not a directory: '{}'".format(
-                    FRECKLES_CONFIG_PROFILES_DIR
+                    FRECKLES_CONFIG_DIR
                 )
             )
 
@@ -306,6 +306,11 @@ def startup_housekeeping():
                     FRECKLES_SHARE_DIR
                 )
             )
+
+    os.chmod(FRECKLES_SHARE_DIR, 0o0700)
+
+    if os.path.exists(FRECKLES_CONFIG_DIR):
+        os.chmod(FRECKLES_CONFIG_DIR, 0o0700)
 
 
 class FrecklesContext(object):
@@ -580,6 +585,12 @@ class FrecklesContext(object):
             branch = git_details.get("branch", "master")
 
             postfix = os.path.join(branch, basename)
+
+            if not os.path.exists(FRECKLES_CACHE_BASE):
+                os.makedirs(FRECKLES_CACHE_BASE)
+
+            os.chmod(FRECKLES_CACHE_BASE, 0o0700)
+
             cache_location = calculate_cache_location_for_url(full, postfix=postfix)
             cache_location = os.path.join(FRECKLES_CACHE_BASE, cache_location)
 
@@ -754,7 +765,7 @@ class FrecklesContext(object):
                 "Need user acceptance of freckles license to unlock configuration."
             )
 
-        target = os.path.join(FRECKLES_CONFIG_PROFILES_DIR, "default.context")
+        target = os.path.join(FRECKLES_CONFIG_DIR, "default.context")
 
         if os.path.exists(target):
             with io.open(target, "r", encoding="utf-8") as f:
