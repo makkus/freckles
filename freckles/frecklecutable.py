@@ -393,20 +393,26 @@ class Frecklecutable(object):
         secret_args = []
 
         for arg_name, arg in self.frecklet.vars_frecklet.items():
+
             if arg.secret:
                 secret_args.append(arg)
 
         if secret_args:
+            asked = False
             for arg in secret_args:
 
                 v = inventory.retrieve_value(arg.key)
 
                 if v == PASSWORD_ASK_MARKER:
+                    asked = True
                     new_val = click.prompt(
                         "Please provide secret value for '{}'".format(arg.key),
                         hide_input=True,
                     )
                     inventory.set_value(arg.key, new_val)
+
+            if asked:
+                click.echo()
 
         frecklet_name = self.frecklet.id
         log.debug("Running frecklecutable: {}".format(frecklet_name))
