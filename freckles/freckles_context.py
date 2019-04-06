@@ -399,6 +399,16 @@ class FrecklesContext(object):
 
             adapter.set_resource_folder_map(map)
 
+    @property
+    def adapters(self):
+
+        return self._adapters
+
+    @property
+    def context_cnf(self):
+
+        return self._cnf.get_interpreter("context")
+
     def ensure_local_repos(self, repo_list):
 
         to_download = []
