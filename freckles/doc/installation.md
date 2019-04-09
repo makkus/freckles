@@ -5,10 +5,33 @@ url_path_prio: 2
 
 There are a few different ways to bootstrap *freckles*. Depending on the state of your box, your proficiency and your general trust in random people on the internet, you can choose one of the methods below.
 
+## via executable download {: .section-title}
+<div class="section-block" markdown="1">
+
+The most straightforward way of installing *freckles* is to download the executable of the command you need:
+
+- Linux / [Windows subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) (pure Windows not supported yet)
+    - [freckles](https://pkgs.frkl.io/downloads/linux-gnu/freckles)
+    - [frecklecute](https://pkgs.frkl.io/downloads/linux-gnu/frecklecute)
+- Mac OS X
+    - [freckles](https://pkgs.frkl.io/downloads/darwin15/freckles)
+    - [frecklecute](https://pkgs.frkl.io/downloads/darwin15/frecklecute)
+  
+
+After download, place the executable in question somewhere in your path (I usually use ``$HOME/.local/bin`` -- but you might have to add that to your ``$PATH`` environment variable) and make it executable:
+
+```
+mv ~/Downloads/frecklecute ~/.local/bin
+chmod +x ~/.local/bin/frecklecute
+```
+  
+Note: ``freckles`` and ``frecklecute`` are actually the same file, they just behave differently depending on the filename they are called with. So, if you need both, you can just 'hard-link' one filename to the other if you  want: ``ln freckles frecklecute``
+ 
+</div>
 ## via curl/wget {: .section-title}
 <div class="section-block" markdown="1">
 
-The main way of bootstrapping *freckles* is by utilizing [``inaugurate``](https://gitlab.com/frkl/inaugurate), a bash script I wrote for *freckles* but decided to make into it's own project because I figured it might be worth a shot creating a sort of 'generic bootstrap script'.
+The good way of bootstrapping *freckles* on vanilla boxes is by utilizing [``inaugurate``](https://gitlab.com/frkl/inaugurate), a bash script I wrote for *freckles* but decided to make into it's own project because I figured it might be worth a shot creating a sort of 'generic bootstrap script'.
 
 For how it exactly works, and why you should or should not trust it, head over to it's [homepage](https://gitlab.com/frkl/inaugurate). This method of bootstrapping is the easiest, and fricktionlessest. One of the main reasons for creating *freckles* was that I wanted a way to setup a new box (physical or virtual) by executing only one (easy-ish to remember) line in a terminal. ``inaugurate`` provides that functionality.
 
@@ -110,7 +133,7 @@ curl https://freckles.sh | NO_ADD_PATH=true bash -s -- frecklecute admin-user-ex
 </div>
 </div>
 
-## Install manually via 'pip' {: .section-title}
+## via 'pip' (manual install) {: .section-title}
 <div class="section-block" markdown="1">
 
 If you prefer to install *freckles* from pypi_ yourself, you'll have to install a few system packages, mostly to be able to install the ``pycrypto`` and ``cryptography`` packages when doing the ``pip install``. 

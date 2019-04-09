@@ -12,7 +12,7 @@
     {% else %}
     {% set temp = [frecklet_name] %}
     {% endif %}
-    <h5 class="js-toc-ignore block-title">Example frecklet</h5>
+    <h5 class="js-toc-ignore block-title">Code</h5>
     {{ temp | to_yaml | to_code_block(format="yaml")
     | from_markdown }}
     {% set desc = example.get("desc", None) %}
