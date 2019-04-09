@@ -38,8 +38,6 @@ def print_task_descriptions(task_desc_list):
             click.echo()
 
 
-
-
 def describe_frecklet(context, frecklet_name, vars, auto_vars=False):
 
     fx = context.create_frecklecutable(frecklet_name)
@@ -69,9 +67,16 @@ def describe_frecklet(context, frecklet_name, vars, auto_vars=False):
         f_type = task[FRECKLET_KEY_NAME]["type"]
         name = task[FRECKLET_KEY_NAME]["name"]
 
-        f_doc = Doc(task[FRECKLET_KEY_NAME], short_help_key="msg", help_key="desc", further_reading_key="references")
+        f_doc = Doc(
+            task[FRECKLET_KEY_NAME],
+            short_help_key="msg",
+            help_key="desc",
+            further_reading_key="references",
+        )
 
-        title = f_doc.get_short_help(default=None, use_help=False, list_item_format=True)
+        title = f_doc.get_short_help(
+            default=None, use_help=False, list_item_format=True
+        )
         if title:
             if title.startswith("["):
                 title = title[1:]
@@ -80,13 +85,14 @@ def describe_frecklet(context, frecklet_name, vars, auto_vars=False):
         else:
             title = None
 
-
         if f_type == "frecket":
             alt_title = context.get_frecklet(name).doc.get_short_help(
                 list_item_format=True
             )
 
-            alt_desc = context.get_frecklet(name).doc.get_short_help(list_item_format=False)
+            alt_desc = context.get_frecklet(name).doc.get_short_help(
+                list_item_format=False
+            )
             if alt_desc:
                 alt_desc = alt_desc.strip()
         else:
