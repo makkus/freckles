@@ -101,13 +101,23 @@ class ShellScriptProcessor(ShellTaskTypeProcessor):
         functions = self.get_all_dependency_functions(task_functions, script_name)
         files = {}
 
-        commands = [script_name]
+        command_name = task[TASK_KEY_NAME].get("command_name", None)
+        if command_name is None:
+
+            is_idempotent = False
+            if is_idempotent:
+                command_name = script_name
+            else:
+                task_id = task[FRECKLET_KEY_NAME]["_task_id"]
+                command_name = "{}_{}".format(script_name, task_id)
+
+        commands = [command_name]
         for p in params:
             commands.append('"{}"'.format(p))
 
         use_function = True
         if use_function:
-            functions[script_name] = content
+            functions[command_name] = content
         else:
             ext_file = {}
             ext_file["type"] = "string_content"
@@ -115,7 +125,7 @@ class ShellScriptProcessor(ShellTaskTypeProcessor):
                 content = "#!/usr/bin/env bash\n\n" + content
             ext_file["content"] = content
 
-            files[script_name] = ext_file
+            files[command_name] = ext_file
 
         command_desc = {"commands": [commands], "files": files, "functions": functions}
 

@@ -6,7 +6,7 @@ import stat
 import sys
 
 from jinja2 import Environment, FileSystemLoader
-from plumbum import SshMachine, local
+from plumbum import SshMachine, local, ProcessExecutionError
 
 from freckles.defaults import MODULE_FOLDER
 from freckles.exceptions import FrecklesConfigException
@@ -170,91 +170,127 @@ class ShellRunner(object):
 
         machine.env["ECHO_TASK_START"] = "true"
         machine.env["ECHO_TASK_FINISHED"] = "true"
+
         cmd = machine["bash"]
 
         # rc, stdout, stderr = cmd.run([run_script], retcode=None)
         current_task = parent_task
-        popen = cmd.popen(run_script)
+        current_task_stdout = None
+        current_task_stderr = None
 
-        current_task_stdout = []
-        current_task_stderr = []
-        current_task_id = -1
+        pending_finshed = None
 
-        log.debug("Reading command output...")
-        for line in popen.iter_lines():
+        try:
 
-            log.debug(line)
-            # print(line)
-            stdout = line[0]
-            if stdout:
-                if stdout.startswith("STARTING_TASK["):
-                    index = stdout.index("]")
-                    task_id = int(stdout[14:index])
-                    current_msg = stdout[index + 2 :].strip()  # noqa
-                    # print(stdout)
-                    if task_id > current_task_id:
-                        # print("starting: {}".format(msg))
-                        # td = TaskDetail(
-                        #     task_name=current_msg,
-                        #     task_type="script-command",
-                        #     task_parent=current_task,
-                        #     task_title=current_msg,
-                        #     freckles_task_id=task_id,
-                        # )
-                        current_task = current_task.add_subtask(
-                            task_name=current_msg,
-                            category="script-command",
-                            reference=task_id,
+            popen = cmd.popen(run_script)
+
+            current_task_id = -1
+
+            log.debug("Reading command output...")
+            for line in popen.iter_lines():
+                log.debug(line)
+
+                stderr = line[1]
+                stdout = line[0]
+                stderr_processed = False
+                if stdout:
+                    if stdout.startswith("STARTING_TASK["):
+
+                        if pending_finshed:
+
+                            stdout_msg = "\n".join(current_task_stdout)
+                            stderr_msg = "\n".join(current_task_stderr)
+
+                            current_task = current_task.finish(
+                                msg=stdout_msg, error_msg=stderr_msg, **pending_finshed
+                            )
+                            pending_finshed = None
+
+                        current_task_stdout = []
+                        current_task_stderr = []
+                        index = stdout.index("]")
+                        task_id = int(stdout[14:index])
+                        current_msg = stdout[index + 2 :].strip()  # noqa
+                        # print(stdout)
+                        if task_id > current_task_id:
+                            # print("starting: {}".format(msg))
+                            # td = TaskDetail(
+                            #     task_name=current_msg,
+                            #     task_type="script-command",
+                            #     task_parent=current_task,
+                            #     task_title=current_msg,
+                            #     freckles_task_id=task_id,
+                            # )
+                            current_task = current_task.add_subtask(
+                                task_name=current_msg,
+                                category="script-command",
+                                reference=task_id,
+                            )
+                            # output_callback.task_started(td)
+                            current_task_id = task_id
+                        if stderr:
+                            current_task_stderr.append(stderr)
+                            stderr_processed = True
+
+                    elif stdout.startswith("FINISHED_TASK["):
+                        index = stdout.index("]")
+                        task_id = int(stdout[14:index])
+                        rc = int(stdout[index + 2 :])  # noqa
+                        if rc == 0:
+                            success = True
+                            skipped = False
+                            changed = True
+                        elif rc == 100:
+                            success = True
+                            skipped = False
+                            changed = False
+                        elif rc == 101:
+                            success = True
+                            skipped = True
+                            changed = False
+                        else:
+                            success = False
+                            skipped = None
+                            changed = None
+
+                        if stderr:
+                            current_task_stderr.append(stderr)
+                            stderr_processed = True
+
+                        pending_finshed = dict(
+                            success=success, changed=changed, skipped=skipped
                         )
-                        # output_callback.task_started(td)
-                        current_task_id = task_id
 
-                elif stdout.startswith("FINISHED_TASK["):
-                    # print("finished")
-                    index = stdout.index("]")
-                    task_id = int(stdout[14:index])
-                    rc = int(stdout[index + 2 :])  # noqa
-                    success = rc == 0
-                    stdout = "\n".join(current_task_stdout)
-                    stderr = "\n".join(current_task_stderr)
-                    # msg = ""
-                    # if stdout and not stderr:
-                    #     msg = "stdout:\n{}".format(stdout)
-                    # elif stderr and not stdout:
-                    #     msg = "stderr:\n{}".format(stderr)
-                    # elif stdout and stderr:
-                    #     msg = "stdout:\n{}\nstderr:\n{}".format(stdout, stderr)
+                    else:
+                        if stdout:
+                            if stdout.lower().startswith("error:"):
+                                current_task_stderr.append(stdout[6:])
+                            else:
+                                current_task_stdout.append(stdout)
 
-                    current_task = current_task.finish(
-                        success=success,
-                        changed=True,
-                        skipped=False,
-                        msg=stdout,
-                        error_msg=stderr,
-                    )
-                    # output_callback.task_finished(
-                    #     current_task,
-                    #     success=success,
-                    #     changed=True,
-                    #     skipped=False,
-                    #     msg=msg,
-                    # )
-                    current_task_stdout = []
-                    current_task_stderr = []
-                    # current_task = current_task.task_parent
-                    current_msg = None
-                else:
-                    if stdout and current_task_id is not None:
-                        current_task_stdout.append(stdout)
+                if stderr and not stderr_processed:
+                    current_task_stderr.append(stderr)
 
-            stderr = line[1]
-            if stderr:
-                current_task_stderr.append(stderr)
+            rc = popen._proc.returncode
 
-        rc = popen._proc.returncode
+            if pending_finshed:
 
-        run_properties["return_code"] = rc
-        run_properties["signal_status"] = -1
+                stdout_msg = "\n".join(current_task_stdout)
+                stderr_msg = "\n".join(current_task_stderr)
+
+                current_task = current_task.finish(
+                    msg=stdout_msg, error_msg=stderr_msg, **pending_finshed
+                )
+
+            run_properties["return_code"] = rc
+            run_properties["signal_status"] = -1
+
+        except (ProcessExecutionError) as e:
+            # for l in current_task_stdout:
+            #     current_task.add_result_msg(l)
+            # for l in current_task_stderr:
+            #     current_task.add_result_error(l)
+            current_task.finish(success=False, msg=stdout, error_msg=str(e))
 
         if remote:
             raise Exception("not implemented yet")

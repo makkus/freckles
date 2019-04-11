@@ -4,7 +4,6 @@ import os
 
 from freckles.adapters import FrecklesAdapter
 from freckles.adapters.shell.processors import (
-    ShellScriptTemplateProcessor,
     ShellScriptProcessor,
 )
 from freckles.adapters.shell.shell_runner import ShellRunner
@@ -158,7 +157,7 @@ class ScriptlingContext(object):
         self._context_name = context_name
         self._cnf = cnf
         self.repos = repos
-        self.repos = ["/home/markus/temp/scriptlings"]
+        self.repos = ["/home/markus/projects/repos/shell/frecklets-default-shell"]
         self._scriptling_index = None
 
     @property
@@ -216,9 +215,9 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
             return self._processors[proc_name]
 
-        if proc_name == "scriptling-template":
-            proc = ShellScriptTemplateProcessor()
-        elif proc_name == "scriptling":
+        if proc_name == "scriptling-template" or "scriptling":
+            # proc = ShellScriptTemplateProcessor()
+            # elif proc_name == "scriptling":
             proc = ShellScriptProcessor(self.shell_adapter_contex.scriptling_index)
         else:
             raise Exception("No processor for type: {}".format(proc_name))
