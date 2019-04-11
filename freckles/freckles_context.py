@@ -18,7 +18,6 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
-
 # from .output_callback import DefaultCallback
 from frutils.tasks.callback import load_callback
 from frutils.tasks.tasks import Tasks
@@ -222,8 +221,8 @@ class CnfProfiles(TingTings):
                         value = True
                     elif value.lower() in ["false", "no"]:
                         value = False
-                    elif "::" in value:
-                        value = value.splt("::")
+                    # elif "::" in value:
+                    #     value = value.split("::")
                     else:
                         try:
                             value = int(value)
@@ -338,8 +337,13 @@ class FrecklesContext(object):
         callback_config = self._context_config.config.get("callback")
 
         if isinstance(callback_config, string_types):
-            callback_config = [callback_config]
-        elif isinstance(callback_config, Mapping):
+            if "::" in callback_config:
+                callback_config, profile = callback_config.split("::")
+                callback_config = [{callback_config: {"profile": profile}}]
+            else:
+                callback_config = [callback_config]
+
+        if isinstance(callback_config, Mapping):
             temp = []
             for key, value in callback_config:
                 if not isinstance(key, string_types):
@@ -349,12 +353,14 @@ class FrecklesContext(object):
                 temp.append({key: value})
 
             callback_config = temp
-        elif not isinstance(callback_config, Sequence):
-            raise Exception(
-                "Invalid callback config type '{}': {}".format(
-                    type(callback_config, callback_config)
-                )
-            )
+
+        if not isinstance(callback_config, Sequence):
+            callback_config = [callback_config]
+            # raise Exception(
+            #     "Invalid callback config type '{}': {}".format(
+            #         type(callback_config, callback_config)
+            #     )
+            # )
 
         for cc in callback_config:
             if isinstance(cc, string_types):

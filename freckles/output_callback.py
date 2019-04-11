@@ -3,6 +3,7 @@ import logging
 from collections import OrderedDict
 
 import colorama
+
 from frutils import readable_yaml, dict_merge
 
 colorama.init()

@@ -502,6 +502,7 @@ class Frecklecutable(object):
                 run_config=run_config, parent_task=prepare_root_task
             )
             prepare_root_task.finish(success=True)
+
         except (Exception) as e:
             prepare_root_task.finish(success=False, error_msg=str(e))
             raise e
