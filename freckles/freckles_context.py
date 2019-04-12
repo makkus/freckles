@@ -11,6 +11,7 @@ from ruamel.yaml import YAML
 from six import string_types
 
 from frkl.utils import expand_string_to_git_details
+from frkl_pkg import FrklPkg
 from frutils import (
     is_url_or_abbrev,
     DEFAULT_URL_ABBREVIATIONS_REPO,
@@ -18,6 +19,7 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
+
 # from .output_callback import DefaultCallback
 from frutils.tasks.callback import load_callback
 from frutils.tasks.tasks import Tasks
@@ -37,6 +39,7 @@ from .defaults import (
     ACCEPT_FRECKLES_LICENSE_KEYNAME,
     FRECKLES_SHARE_DIR,
     FRECKLES_CONFIG_DIR,
+    FRECKLES_EXTRA_LOOKUP_PATHS,
 )
 from .exceptions import FrecklesConfigException
 from .frecklet.arguments import *  # noqa
@@ -404,6 +407,13 @@ class FrecklesContext(object):
                 map[rt] = folders
 
             adapter.set_resource_folder_map(map)
+
+        self._frkl_pkg = FrklPkg(extra_lookup_paths=FRECKLES_EXTRA_LOOKUP_PATHS)
+
+    @property
+    def frkl_pkg(self):
+
+        return self._frkl_pkg
 
     @property
     def adapters(self):

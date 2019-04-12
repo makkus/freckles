@@ -51,3 +51,8 @@ def print_frecklet_list(frecklet_dict):
             click.secho("desc", bold=True, nl=False)
             click.echo(": {}".format(row[1]))
             click.echo()
+
+
+# def check_dependencies():
+#
+#     git = find_executable("git", path="")

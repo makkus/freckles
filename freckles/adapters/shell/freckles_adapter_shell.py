@@ -3,9 +3,7 @@ import copy
 import os
 
 from freckles.adapters import FrecklesAdapter
-from freckles.adapters.shell.processors import (
-    ShellScriptProcessor,
-)
+from freckles.adapters.shell.processors import ShellScriptProcessor
 from freckles.adapters.shell.shell_runner import ShellRunner
 from freckles.defaults import (
     DEFAULT_FRECKLES_JINJA_ENV,

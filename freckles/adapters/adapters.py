@@ -64,6 +64,10 @@ class FrecklesAdapter(object):
     def name(self):
         return self._name
 
+    @property
+    def context(self):
+        return self._context
+
     # @abc.abstractmethod
     # def get_config_schema(self):
     #     pass

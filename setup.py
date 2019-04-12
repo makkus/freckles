@@ -14,6 +14,7 @@ with io.open("HISTORY.rst", encoding="utf-8") as history_file:
 
 requirements = [
     "frkl==1.0.0b1",
+    "frkl-pkg==0.1.0",
     "ting==1.0.0b1",
     "termcolor==1.1.0",
     "tabulate==0.8.3",
