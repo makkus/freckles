@@ -320,12 +320,12 @@ class VariablesAttribute(TingAttribute):
                                 new_arg = arg
                             else:
                                 new_arg = Arg(
-                                    key, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                                    tk, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
                                 )
                                 new_arg.add_child(arg)
                         else:
                             new_arg = Arg(
-                                key,
+                                tk,
                                 arg_config,
                                 default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                             )
