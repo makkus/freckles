@@ -294,7 +294,9 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
         pass
 
-    def run(self, tasklist, run_vars, run_cnf, run_env, result_callback, parent_task):
+    def run(
+        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+    ):
 
         # import pp
         # output(tasklist, output_type="yaml")
@@ -327,7 +329,7 @@ class FrecklesAdapterShell(FrecklesAdapter):
         )
 
         run_properties = runner.run(
-            run_cnf=run_cnf,
+            run_cnf=run_config,
             run_properties=run_properties,
             result_callback=result_callback,
             parent_task=parent_task,

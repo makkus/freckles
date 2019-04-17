@@ -87,7 +87,7 @@ class FrecklesAdapter(object):
 
     def get_extra_frecklets(self):
 
-        return []
+        return {}
 
     @abc.abstractmethod
     def get_supported_resource_types(self):
@@ -122,7 +122,7 @@ class FrecklesAdapter(object):
 
     @abc.abstractmethod
     def run(
-        self, tasklist, run_vars, run_cnf, output_callback, result_callback, parent_task
+        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
     ):
 
         pass
@@ -138,7 +138,7 @@ class FrecklesAdapter(object):
         result = self.run(
             tasklist=tasklist,
             run_vars=run_vars,
-            run_cnf=final_run_config,
+            run_config=final_run_config,
             run_env=run_env,
             result_callback=result_callback,
             parent_task=parent_task,

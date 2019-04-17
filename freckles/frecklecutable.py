@@ -1,5 +1,6 @@
 import copy
 import logging
+import os
 from collections import OrderedDict
 
 import click
@@ -21,6 +22,12 @@ from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
+
+
+def ask_password(prompt):
+
+    pw = click.prompt(prompt, type=str, hide_input=True)
+    return pw
 
 
 class FrecklecutableMixin(object):
@@ -388,7 +395,23 @@ class Frecklecutable(object):
 
         return processed_tree
 
-    def run(self, inventory, run_config, run_vars):
+    def run(
+        self,
+        inventory,
+        run_config,
+        run_vars=None,
+        parent_task=None,
+        elevated=None,
+        ask_sudo_pass=False,
+        ask_ssh_pass=False,
+    ):
+
+        if run_vars is None:
+            run_vars = {}
+
+        run_vars.setdefault("__freckles_run__", {})["pwd"] = os.path.realpath(
+            os.getcwd()
+        )
 
         secret_args = []
 
@@ -424,8 +447,13 @@ class Frecklecutable(object):
         current_adapter = None
 
         # all_resources = {}
+        tasks_elevated = False
 
         for task in tasks:
+
+            if task[FRECKLET_KEY_NAME].get("elevated", False):
+                tasks_elevated = True
+
             tt = task[FRECKLET_KEY_NAME]["type"]
 
             adapter_name = self.context._adapter_tasktype_map.get(tt, None)
@@ -482,20 +510,56 @@ class Frecklecutable(object):
 
         adapter = self.context._adapters[current_adapter]
         run_env_properties = self.context.create_run_environment(adapter)
+        sudo_pass = run_vars.get("__freckles_run__", {}).get("sudo_pass", None)
+        ssh_pass = run_vars.get("__freckles_run__", {}).get("ssh_pass", None)
+
+        run_elevated = tasks_elevated
+
+        if elevated is not None:
+            # we overwrite with whatever the user explicitely provided
+            run_elevated = elevated
+
+        asked = False
+        if ask_sudo_pass and sudo_pass is None:
+            sudo_pass = ask_password("SUDO PASS")
+            run_vars["__freckles_run__"]["sudo_pass"] = sudo_pass
+            asked = True
+        if ask_ssh_pass and ssh_pass is None:
+            ssh_pass = ask_password("SSH PASS")
+            run_vars["__freckles_run__"]["ssh_pass"] = ssh_pass
+            asked = True
+
+        if asked:
+            click.echo()
 
         # preparing execution environment...
         self._context._run_info.get("prepared_execution_environments", {}).get(
             current_adapter, None
         )
 
-        prepare_tasks = Tasks(
-            "env_prepare_adapter_{}".format(adapter_name),
-            msg="preparing adapter: {}".format(adapter_name),
-            callbacks=self._callbacks,
-            is_utility_task=True,
-        )
+        parent_task_empty = False
+        if parent_task is None:
+            parent_task_empty = True
+            root_task = Tasks(
+                "env_prepare_adapter_{}".format(adapter_name),
+                msg="starting run",
+                category="run",
+                callbacks=self._callbacks,
+                is_utility_task=False,
+            )
+            parent_task = root_task.start()
 
-        prepare_root_task = prepare_tasks.start()
+        # prepare_tasks = Tasks(
+        #     "env_prepare_adapter_{}".format(adapter_name),
+        #     msg="preparing adapter: {}".format(adapter_name),
+        #     callbacks=self._callbacks,
+        #     is_utility_task=True,
+        # )
+
+        prepare_root_task = parent_task.add_subtask(
+            task_name="env_prepare_adapter_{}".format(adapter_name),
+            msg="preparing adapter: {}".format(adapter_name),
+        )
 
         try:
             adapter.prepare_execution_requirements(
@@ -507,18 +571,26 @@ class Frecklecutable(object):
             prepare_root_task.finish(success=False, error_msg=str(e))
             raise e
 
-        prepare_tasks.finish()
-
         result_callback = FrecklesResultCallback()
-        run_tasks = Tasks(
-            title=frecklet_name,
-            category="run",
-            msg="running frecklet: {}".format(frecklet_name),
-            callbacks=self._callbacks,
-        )
-        root_run_task = run_tasks.start()
+        # run_tasks = Tasks(
+        #     title=frecklet_name,
+        #     category="run",
+        #     msg="running frecklet: {}".format(frecklet_name),
+        #     callbacks=self._callbacks,
+        # )
+        # root_run_task = run_tasks.start()
+
+        host = run_config["host"]
+
+        if adapter_name == "freckles":
+            msg = "running frecklecutable: {}".format(frecklet_name)
+        else:
+            msg = "running frecklet: {} (on: {})".format(frecklet_name, host)
+        root_run_task = parent_task.add_subtask(task_name=frecklet_name, msg=msg)
 
         # task_details = root_run_task.add_child(task_name=frecklet_name, category="frecklecutable")
+
+        run_config["elevated"] = run_elevated
 
         try:
             run_properties = adapter._run(
@@ -530,7 +602,7 @@ class Frecklecutable(object):
                 parent_task=root_run_task,
             )
 
-            run_tasks.finish()
+            root_run_task.finish()
             # self._callback.task_finished(task_details, success=True)
             # self._callback.task_finished(parent_task, success=True)
 
@@ -546,9 +618,12 @@ class Frecklecutable(object):
             return run_result
 
         except (Exception) as e:
-            run_tasks.finish()
+            root_run_task.finish(success=False, error_msg=str(e))
             click.echo("frecklecutable run failed: {}".format(e))
             log.debug(e)
             import traceback
 
             traceback.print_exc()
+        finally:
+            if parent_task_empty:
+                root_task.finish()

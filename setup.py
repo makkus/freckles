@@ -55,6 +55,7 @@ setup(
             # "spinner=freckles.callbacks:SpinnerCallback"
         ],
         "freckles.adapters": [
+            "freckles=freckles.adapters.freckles.freckles_adapter_freckles:FrecklesAdapterFreckles",
             "shell=freckles.adapters.shell.freckles_adapter_shell:FrecklesAdapterShell"
         ],
     },
