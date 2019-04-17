@@ -621,9 +621,9 @@ class Frecklecutable(object):
             root_run_task.finish(success=False, error_msg=str(e))
             click.echo("frecklecutable run failed: {}".format(e))
             log.debug(e)
-            import traceback
-
-            traceback.print_exc()
+            # import traceback
+            #
+            # traceback.print_exc()
         finally:
             if parent_task_empty:
                 root_task.finish()
