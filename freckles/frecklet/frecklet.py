@@ -1,4 +1,3 @@
-import copy
 import os
 from collections import Sequence, Mapping
 
@@ -260,6 +259,25 @@ FRECKLET_LOAD_CONFIG = {
                 },
             ],
         },
+        "frecklet_file": {
+            "class": "ting.tings.FileTings",
+            "load_config": {},
+            "attributes": [
+                {
+                    "DictContentAttribute": {
+                        "dict_name": "_metadata_raw",
+                        "source_attr_name": "ting_content",
+                    }
+                },
+                "FileStringContentAttribute",
+                {
+                    "MirrorAttribute": {
+                        "source_attr_name": "full_path",
+                        "target_attr_name": "frecklet_name",
+                    }
+                },
+            ],
+        },
         "frecklet_dicts": {
             "class": "ting.tings.DictTings",
             "load_config": {},
@@ -268,8 +286,23 @@ FRECKLET_LOAD_CONFIG = {
     },
 }
 
-FRECKLET_LOAD_CONFIG_FILE = copy.deepcopy(FRECKLET_LOAD_CONFIG)
-FRECKLET_LOAD_CONFIG_FILE["loaders"]["frecklet_files"]["load_config"] = {}
+# FRECKLET_LOAD_CONFIG_FILE = copy.deepcopy(FRECKLET_LOAD_CONFIG)
+# FRECKLET_LOAD_CONFIG_FILE["loaders"]["frecklet_files"]["load_config"] = {}
+# FRECKLET_LOAD_CONFIG_FILE["loaders"]["frecklet_files"]["attributes"] = [
+#     {
+#         "DictContentAttribute": {
+#             "dict_name": "_metadata_raw",
+#             "source_attr_name": "ting_content",
+#         }
+#     },
+#     "FileStringContentAttribute",
+#     {
+#         "MirrorAttribute": {
+#             "source_attr_name": "full_path",
+#             "target_attr_name": "frecklet_name",
+#         }
+#     },
+# ]
 
 
 # class FreckletCast(TingCast):

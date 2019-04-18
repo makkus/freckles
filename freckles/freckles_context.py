@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import time
+import uuid
 from collections import Mapping, Iterable, Sequence
 from datetime import datetime
 
@@ -21,6 +22,7 @@ from frutils import (
 from frutils.config.cnf import Cnf
 
 # from .output_callback import DefaultCallback
+from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback
 from frutils.tasks.tasks import Tasks
 from ting.ting_attributes import (
@@ -770,6 +772,84 @@ class FrecklesContext(object):
     def get_frecklet_names(self):
 
         return self.frecklet_index.keys()
+
+    def add_dynamic_frecklet(self, path_or_frecklet_content):
+
+        full_path = os.path.realpath(os.path.expanduser(path_or_frecklet_content))
+
+        if os.path.isfile(full_path):
+
+            index_conf = {
+                "repo_name": full_path,
+                "folder_url": full_path,
+                "loader": "frecklet_file",
+            }
+
+            index = TingTings.from_config(
+                "frecklecutable",
+                [index_conf],
+                FRECKLET_LOAD_CONFIG,
+                indexes=["frecklet_name"],
+            )
+
+            names = list(index.get_ting_names())
+            if len(names) == 1:
+                local_frecklet_name = names[0]
+            else:
+                raise Exception(
+                    "Multiple frecklets found for name '{}', this is a bug: {}".format(
+                        path_or_frecklet_content, full_path
+                    )
+                )
+
+        else:
+
+            # try to parse string into a dict/list
+            try:
+                frecklet_data = auto_parse_string(path_or_frecklet_content)
+
+                id = str(uuid.uuid4())
+
+                data = {id: frecklet_data}
+
+                index_conf = {
+                    "repo_name": id,
+                    "data": data,
+                    "loader": "frecklet_dicts",
+                    "key_name": "frecklet_name",
+                    "meta_name": "_metadata_raw",
+                }
+
+                index = TingTings.from_config(
+                    "frecklecutable",
+                    [index_conf],
+                    FRECKLET_LOAD_CONFIG,
+                    indexes=["frecklet_name"],
+                )
+
+                names = list(index.get_ting_names())
+                if len(names) == 1:
+                    local_frecklet_name = names[0]
+                else:
+                    raise Exception(
+                        "Multiple frecklets found for name '{}', this is a bug: {}".format(
+                            path_or_frecklet_content, full_path
+                        )
+                    )
+
+            except (Exception) as e:
+                log.debug(
+                    "Could not parse content into frecklet: {}".format(
+                        path_or_frecklet_content
+                    )
+                )
+                raise e
+
+        # init, just in case
+        _ = self.frecklet_index.tings
+
+        self.frecklet_index.add_tings(index)
+        return local_frecklet_name
 
     def create_frecklecutable(self, frecklet_name):
 
