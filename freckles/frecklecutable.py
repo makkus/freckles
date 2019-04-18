@@ -432,7 +432,7 @@ class Frecklecutable(object):
                         "Please provide secret value for '{}'".format(arg.key),
                         hide_input=True,
                     )
-                    inventory.set_value(arg.key, new_val)
+                    inventory.set_value(arg.key, new_val, is_secret=True)
 
             if asked:
                 click.echo()

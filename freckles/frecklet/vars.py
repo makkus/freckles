@@ -73,6 +73,10 @@ class Inventory(object):
 
         return result
 
+    @abc.abstractmethod
+    def get_all(self, hide_secret=False):
+        pass
+
 
 class VarsInventory(Inventory):
     def __init__(self, *vars):
@@ -80,6 +84,7 @@ class VarsInventory(Inventory):
         super(VarsInventory, self).__init__()
 
         self.vars_list = vars
+        self._secrets = []
 
         self._vars = {}
         for v in self.vars_list:
@@ -89,13 +94,26 @@ class VarsInventory(Inventory):
 
         return self._vars.get(var_name, None)
 
-    def set_value(self, var_name, new_value, **task_context):
+    def set_value(self, var_name, new_value, is_secret=False):
 
         self._vars[var_name] = new_value
+        if is_secret:
+            self._secrets.append(var_name)
 
     @property
     def vars(self):
         return self._vars
+
+    def get_all(self, hide_secret=False):
+
+        result = {}
+        for k, v in self.vars.items():
+            if hide_secret and k in self._secrets:
+                result[k] = "__secret__"
+            else:
+                result[k] = v
+
+        return result
 
 
 # class TingsInventory(TingTings):
