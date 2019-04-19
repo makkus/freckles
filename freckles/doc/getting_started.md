@@ -3,30 +3,41 @@ url_path_prio: 1
 title: Getting started
 ---
 
-## Bootstrapping *freckles* {: .section-title}
+## Installing *freckles* {: .section-title}
 
 <div class="section-block" markdown="1">
-There are several ways to install the *freckles* package. For the purpose of getting started quickly, we'll use the recommended way, the [inaugurate bootstrap script](https://gitlab.com/frkl/inaugurate).
 
-For other options, check [here](/doc/installation).
+There are several ways to install *freckles*. The simplest one is to just download the binary for your platform:
+
+- [Linux](https://pkgs.freckles.sh/downloads/linux-gnu/freckles)
+- [Mac OS X](https://pkgs.freckles.sh/downloads/darwin15/freckles)
+- Windows is not supported directly, but you can use the [Linux version](https://pkgs.freckles.sh/downloads/linux-gnu/freckles) on [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux)
+
+Make the file executable and copy it into a folder on your ``PATH`` (e.g. ``/usr/local/bin``). If you intend to also use the ``frecklecute`` application (and you probably want to), also 'link' the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this (on Linux):
+
+```console
+wget https://pkgs.frkl.io/downloads/linux-gnu/freckles
+chmod +x freckles
+sudo mv freckles /usr/local/bin
+sudo ln -s /usr/local/bin/freckles /usr/local/bin/frecklecute
+``` 
+
+For the purpose of getting started quickly, you could also use the [*freckles* bootstrap script](https://gitlab.com/freckles-io/freck), which achieves something similar to the above:
 
 ```console
 curl https://freckles.sh | bash
+# or
+wget -O- https://freckles.sh | bash
 ```
 
-For a quicker and leaner install using system dependencies, you can opt install *freckles* using sudo permissions:
-
-```console
-curl https://freckles.sh | sudo bash
-```
-
-Both of those will install *freckles* self-contained under ``$HOME/.local/share/inaugurate/`` and add its location to the ``PATH`` variable (in ``$HOME/.profile`` - for details and config options check the [inaugurate homepage](https://gitlab.com/frkl/inaugurate#how-does-this-work-what-does-it-do)). 
-
-To have the *freckles* commands available in your shell session, we either have to logout and re-login to our session, or source the ``.profile`` file:
+This adds a section to your ``$HOME/.profile`` to make *freckles* available in your ``$PATH``. For that to be the case, you either have to logout and re-login to your session, or source the ``.profile`` file:
 
 ```console
 source ~/.profile
 ```
+
+For other install options, check [here](/doc/installation).
+
 </div>
 
 ## Getting help {: .section-title}
