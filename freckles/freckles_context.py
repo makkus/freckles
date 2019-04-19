@@ -20,6 +20,7 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
+
 # from .output_callback import DefaultCallback
 from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback

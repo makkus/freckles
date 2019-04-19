@@ -1,6 +1,7 @@
 import logging
 from collections import Mapping
 
+from six import string_types
 from treelib import Tree
 
 from freckles.defaults import (
@@ -78,6 +79,24 @@ class SpecialCaseProcessor(ConfigProcessor):
         new_config["frecklets"] = []
 
         for task in frecklets:
+
+            if (
+                isinstance(task, Mapping)
+                and "target" in task.keys()
+                and FRECKLET_KEY_NAME in task.keys()
+            ):
+
+                # this is a frecklecutable, let's wrap it in one so users don't have to do it
+                task = {"frecklecute": task}
+
+            elif (
+                isinstance(task, Mapping)
+                and FRECKLET_KEY_NAME in task.keys()
+                and isinstance(task[FRECKLET_KEY_NAME], string_types)
+            ):
+
+                frecklet_name = task.pop(FRECKLET_KEY_NAME)
+                task[FRECKLET_KEY_NAME] = {"name": frecklet_name}
 
             if isinstance(task, Mapping) and len(task) == 1:
 
