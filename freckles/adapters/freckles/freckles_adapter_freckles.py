@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import logging
+import os
 
 from ruamel.yaml import YAML
 
@@ -93,7 +94,6 @@ args:
     type: dict
     required: false
     empty: true
-    default: {}
 frecklets:
  - frecklet:
      name: frecklecute
@@ -120,7 +120,7 @@ frecklets:
 
         tl = copy.deepcopy(tasklist)
 
-        self.run(
+        return self.run(
             tasklist=tl,
             run_vars=run_vars,
             run_config=run_config,
@@ -135,7 +135,9 @@ frecklets:
 
         run_elevated = run_config["elevated"]
 
-        for task in tasklist:
+        result_list = []
+
+        for task_nr, task in enumerate(tasklist):
 
             vars_dict = task[VARS_KEY]
 
@@ -157,10 +159,19 @@ frecklets:
 
             vars = vars_dict.get(VARS_KEY, {})
 
-            fx.run(
+            run_env_task = copy.deepcopy(run_env)
+
+            env_dir = os.path.join(run_env_task["env_dir"], "task_{}".format(task_nr))
+
+            result = fx.run(
                 inventory=VarsInventory(vars),
                 run_config=task_run_config,
                 run_vars=run_vars,
                 parent_task=parent_task,
                 elevated=elevated,
+                env_dir=env_dir,
             )
+
+            result_list.append(result)
+
+        return {"subtask_results": result_list}

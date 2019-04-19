@@ -20,16 +20,25 @@ ALLOWED_STATUS = ["ok", "skipped", "changed", "failed"]
 
 
 class FrecklesRun(object):
-    def __init__(self, run_id, result_dict):
+    def __init__(
+        self,
+        run_id,
+        adapter_name,
+        task_list,
+        run_vars,
+        run_config,
+        run_env,
+        run_properties,
+    ):
 
         self.run_id = run_id
-        self.result_dict = result_dict
+        self.adapter_name = adapter_name
+        self.task_list = task_list
+        self.run_vars = run_vars
+        self.run_config = run_config
+        self.run_env = run_env
 
-        self.adapter = self.result_dict["adapter"]
-        self.frecklet_name = self.result_dict["name"]
-        self.outcome = self.result_dict["result"]
-        self.run_properties = self.result_dict["run_properties"]
-        self.task_list = self.result_dict["task_list"]
+        self.run_properties = run_properties
 
     def __str__(self):
 

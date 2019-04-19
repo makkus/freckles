@@ -1,5 +1,5 @@
 import os
-from collections import Sequence, Mapping
+from collections import Sequence
 
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown

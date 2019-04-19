@@ -1,4 +1,5 @@
 import logging
+from collections import Mapping
 
 from treelib import Tree
 
@@ -65,6 +66,44 @@ def fill_defaults(task_item):
         task_item[FRECKLET_KEY_NAME]["name"] = task_item[TASK_KEY_NAME]["command"]
     elif "command" not in task_item[TASK_KEY_NAME].keys():
         task_item[TASK_KEY_NAME]["command"] = task_item[FRECKLET_KEY_NAME]["name"]
+
+
+class SpecialCaseProcessor(ConfigProcessor):
+    """Makes sure that no keywords are in vars."""
+
+    def process_current_config(self):
+
+        new_config = self.current_input_config
+        frecklets = new_config.pop("frecklets", [])
+        new_config["frecklets"] = []
+
+        for task in frecklets:
+
+            if isinstance(task, Mapping) and len(task) == 1:
+
+                task_name = list(task.keys())[0]
+                value = task[task_name]
+
+                if (
+                    FRECKLET_KEY_NAME in value.keys()
+                    or TASK_KEY_NAME in value.keys()
+                    or VARS_KEY in value.keys()
+                ):
+                    new_task = {
+                        FRECKLET_KEY_NAME: {"name": task_name},
+                        VARS_KEY: task[task_name],
+                    }
+                    task = new_task
+
+            new_config["frecklets"].append(task)
+
+            # if task.get(FRECKLET_KEY_NAME, {}).get("name", None) == "frecklecute":
+            #     print("HIT")
+            #     import sys
+            #     sys.exit()
+            #     task[FRECKLET_KEY_NAME]["type"] = "frecklecutable"
+
+        return new_config
 
 
 class CommandNameProcessor(ConfigProcessor):
@@ -268,6 +307,7 @@ class TaskListDetailedAttribute(TingAttribute):
 
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
         chain = [
+            SpecialCaseProcessor(),
             FrklProcessor(**TaskListDetailedAttribute.FRECKLET_FORMAT),
             CommandNameProcessor(),
             TaskTypePrefixProcessor(),

@@ -20,7 +20,6 @@ from frutils import (
     readable,
 )
 from frutils.config.cnf import Cnf
-
 # from .output_callback import DefaultCallback
 from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback
@@ -892,33 +891,36 @@ class FrecklesContext(object):
                     )
                 )
 
-    def create_run_environment(self, adapter):
+    def create_run_environment(self, adapter, env_dir=None):
 
         result = {}
-        cnf = self.cnf.get_interpreter("context")
 
-        run_folder = cnf.get("run_folder")
-        force = cnf.get("force")
-        add_timestamp = cnf.get("add_timestamp_to_env")
-        adapter_name = cnf.get("add_adapter_name_to_env")
+        cnf = self.cnf.get_interpreter("context")
         symlink = cnf.get("current_run_folder")
 
-        env_dir = os.path.expanduser(run_folder)
-        if adapter_name:
-            dirname, basename = os.path.split(env_dir)
-            env_dir = os.path.join(dirname, "{}_{}".format(basename, adapter.name))
+        if env_dir is None:
 
-        if add_timestamp:
-            start_date = datetime.now()
-            date_string = start_date.strftime("%y%m%d_%H_%M_%S")
-            dirname, basename = os.path.split(env_dir)
-            env_dir = os.path.join(dirname, "{}_{}".format(basename, date_string))
+            run_folder = cnf.get("run_folder")
+            force = cnf.get("force")
+            add_timestamp = cnf.get("add_timestamp_to_env")
+            adapter_name = cnf.get("add_adapter_name_to_env")
 
-        if os.path.exists(env_dir):
-            if not force:
-                raise Exception("Run folder '{}' already exists.".format(env_dir))
-            else:
-                shutil.rmtree(env_dir)
+            env_dir = os.path.expanduser(run_folder)
+            if adapter_name:
+                dirname, basename = os.path.split(env_dir)
+                env_dir = os.path.join(dirname, "{}_{}".format(basename, adapter.name))
+
+            if add_timestamp:
+                start_date = datetime.now()
+                date_string = start_date.strftime("%y%m%d_%H_%M_%S")
+                dirname, basename = os.path.split(env_dir)
+                env_dir = os.path.join(dirname, "{}_{}".format(basename, date_string))
+
+            if os.path.exists(env_dir):
+                if not force:
+                    raise Exception("Run folder '{}' already exists.".format(env_dir))
+                else:
+                    shutil.rmtree(env_dir)
 
         os.makedirs(env_dir)
         result["env_dir"] = env_dir
