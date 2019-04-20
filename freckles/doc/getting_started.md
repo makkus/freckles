@@ -20,6 +20,7 @@ wget https://pkgs.frkl.io/downloads/linux-gnu/freckles
 chmod +x freckles
 mkdir -p ~/.local/bin
 mv freckles ~/.local/bin
+ln -s freckles ~/.local/bin/frecklecute
 
 # adjust PATH, if ~/.local/bin is not already in it:
 echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
