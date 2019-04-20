@@ -6,23 +6,39 @@ title: Getting started
 ## Installing *freckles* {: .section-title}
 <div class="section-block" markdown="1">
 
+
 There are several ways to install *freckles*. The simplest one is to just download the binary for your platform:
 
-- [Linux](https://pkgs.freckles.sh/downloads/linux-gnu/freckles)
-- [Mac OS X](https://pkgs.freckles.sh/downloads/darwin15/freckles)
+- [Linux](https://pkgs.freckles.sh/downloads/linux-gnu/freckles/freckles)
+- [Mac OS X](https://pkgs.freckles.sh/downloads/darwin15/freckles/freckles)
 - Windows is not supported directly, but you can use the [Linux version](https://pkgs.freckles.sh/downloads/linux-gnu/freckles) on [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux)
 
 Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this (on Linux):
 
-```console
-# download and install
+``` console tab="Linux"
+# download and install on Linux
+
 wget https://pkgs.frkl.io/downloads/linux-gnu/freckles
 chmod +x freckles
 mkdir -p ~/.local/bin
 mv freckles ~/.local/bin
 ln -s freckles ~/.local/bin/frecklecute
 
-# adjust PATH, if ~/.local/bin is not already in it:
+# adjust PATH (optional)
+echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
+source ~/.profile
+``` 
+
+``` console tab="Mac OS X"
+# download and install on Mac OS X
+
+wget https://pkgs.frkl.io/downloads/darwin15/freckles
+chmod +x freckles
+mkdir -p ~/.local/bin
+mv freckles ~/.local/bin
+ln -s freckles ~/.local/bin/frecklecute
+
+# adjust PATH (optional)
 echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
 source ~/.profile
 ``` 
@@ -386,7 +402,7 @@ For local usage, you don't need to do anything special:
 ### remotely {: .block-title}
 <div class="section-block" markdown="1">
 
-For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (which you can setup using a [frecklet](//frecklets/default/system/passwordless-sudo-users), by the way).
+For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).
 
 To login to a remote server, add the ``--host <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
@@ -526,6 +542,8 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written in a way so *frecklets*
  require as little information and manual specification as possible, and they will just do the sensible thing. 
  You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitely.
+
+
 
 </div>
 <!-- end block your first frecklet -->

@@ -1,9 +1,8 @@
 ---
 title: Installation
-url_path_prio: 2
+url_path_prio: 4
 ---
 
-There are a few different ways to bootstrap *freckles*. Depending on the state of your box, your proficiency and your general trust in random people on the internet, you can choose one of the methods below.
 
 ## download binary {: .section-title}
 <div class="section-block" markdown="1">
@@ -49,14 +48,14 @@ curl https://freckles.sh | bash
 Using `wget`:
 
 ```
-wget -O - https://freckles.sh
+wget -O - https://freckles.sh | bash
 ```
 
-The install process can be influenced with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
+You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
 
 ### What does this do?
 
-asdf
+Check out the [``freck`` README file](https://gitlab.com/freckles-io/freck#how-does-this-work-what-does-it-do).
 
 </div>
 
