@@ -383,6 +383,7 @@ For local usage, you don't need to do anything special:
 
 <!-- begin block remotely -->
 ### remotely {: .block-title}
+
 <div class="section-block" markdown="1">
 
 For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (which you can setup using a [frecklet](/frecklet-index/default/grant-passwordless-sudo/), by the way).
@@ -413,307 +414,106 @@ SSH PASS: ****
 <!-- section executing a command -->
 
 <!-- begin section writing your own frecklet --> 
-## Writing your own *frecklets* {: .section-title}
+## Writing your own *frecklet* {: .section-title}
+
 <div class="section-block" markdown="1">
 
 You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](https://TODO).
 
 But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file (let's call it ``hello-world.frecklet``), and assemble the tasks you need done.
 
-<!-- begin block your first frecklet -->
-### Your first *frecklet*
-<div class="section-block" markdown="1">
-
-To demonstrate how to combine multiple (pre-existing) *frecklets* into a new one, let's do some basic filesystem manipulation
-that doesn't require root permissions. This example does not make a whole lot of sense, but demonstrates a few basic 
- concepts. 
- 
- So, for the sake of argument let's assume we need to have an archive of a folder that contains a downloaded file, a
- readme file with certain content, and another file that contains the directory listing at the point just before the archiving.
- 
- This is what needs to happen:
- 
- - we need to create the directory that needs to be archived
- - we need to download a file into it
- - we need to create the text file inside the folder
- - we need to create the directory listing file inside the folder
- - we need to create the archive
- - we also should delete the directory, once the archive was created
- 
-After perusing the [frecklet index](/frecklets/default), we found we can use those *frecklets* for what we have to do:
-
-- [file-downloaded](/frecklets/default/filesystem/file-downloaded/)
-- [file-with-content](/frecklets/default/filesystem/file-with-content/)
-- [command-output-to-file](/frecklets/default/filesystem/command-output-to-file/)
-- [path-archived](/frecklets/default/filesystem/path-archived/)
-- [path-is-absent](/frecklets/default/filesystem/path-is-absent/)
-
-We don't need to actually create the directory, because each of those would implicitely do that for us. For example the
-[file-downloaded](/frecklets/default/filesystem/file-downloaded) *frecklet* will automatically create the (parent) directory that is indirectly specified with that *frecklets* ``dest`` parameter. 
-
-The most basic *frecklet* is a text file containing a list of other frecklets and their configuration, 
-in either 'yaml', 'json', or 'toml' format (for more details, head over to the [frecklet documentation](/doc/frecklets/)
-section). Let's use the 'yaml' format, and create a file called ``my-first.frecklet``, with the following content:
+In our example, let's install a webserver, configure it properly for our task, and let it serve a single, static html page. For that we use the [``nginx-vhost-config``](https://TODO), [``webserver-prepared``](/frecklet-index/default/webserver-prepared) and [``file-has-content``](/frecklet-index/default/file-has-content) *frecklets*:
 
 ```yaml
-- file-downloaded:
-    url: https://frkl.io/images/frkl-logo-black.svg
-    dest: /tmp/target_dir/frkl-logo-black.svg
-- file-with-content:
-    path: /tmp/target_dir/readme.txt
+- nginx-vhost-config:
+    path: /etc/nginx/sites-enabled/example.conf
+    document_root: /var/www/html
+    become: true
+- webserver-prepared:                  # by default, nginx is used
+    document_root: /var/www/html
+- file-has-content:
+    owner: www-data
+    path: /var/www/html/index.html
+    become: true
     content: |
-      Hi there!
-
-      Welcome to the archive that contains this file we downloaded and other stuff.
-- command-output-to-file:
-    path: /tmp/target_dir/contents.txt
-    command: "ls -l /tmp/target_dir"
-- path-archived:
-    path: /tmp/target_dir
-    dest: /tmp/target_archive.zip
-    format: zip
-- path-is-absent:
-    path: /tmp/target_dir
+      <h1><i>freckles</i> says "hello", World!</h1>
 ```
 
-Once saved, we can execute this file with the ``frecklecute`` command:
+!!! note
+    You probably don't want to execute this command on your local machine, as you most likley don't want a webserver running. If you want to try this out, maybe use [Vagrant](https://vagrantup.com) or a [Docker](https://docker.com) container.
+
+This is how we execute our newly created script:
 
 ```console
-➜ frecklecute my-first.frecklet
-
-╭╼ starting run
-│  ├╼ running frecklet: /home/markus/my-first.frecklet (on: localhost)
-│  │  ├╼ starting Ansible run
-│  │  │  ├╼ create directory: /tmp/target_dir'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ download 'https://frkl.io/images/frkl-logo-black.svg -> /tmp/target_dir/frkl-logo-black.svg'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write content to file: /tmp/target_dir/readme.txt
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ execute command: 'ls -l /tmp/target_dir'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write command output to: /tmp/target_dir/contents.txt
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ archive path: /tmp/target_dir -> /tmp/target_archive.zip
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ delete file (if exists): /tmp/target_dir
-│  │  │  │  ╰╼ ok
-│  │  │  ╰╼ ok
-│  │  ╰╼ ok
-│  ╰╼ ok
-╰╼ ok
-``` 
- 
- **Hint**: for fun and giggles, try the ``--describe`` flag (``frecklecute --describe my-first.frecklet``)
- 
- Now, if you know some shell scripting, you'll probably agree that this is nothing a small script couldn't have done
- equally well. So if you don't think this whole thing makes any sense so far, head on down to the next examples.
-  
- The *frecklet* schema is designed to be easy and quick to read, understand and write. Whether the above
- code fits that bill or not is up to you to decide. One thing to point out though is the absence of any intermediate (sub-)tasks that
- are implied in a (parent-)task. 
- 
- Take, for example, ``file-downloaded``. As we always need a target folder for our downloaded file to exist,
- and as that target folder path is clear from the ``dest`` parameter the user provides, it (arguably -- there are some caveats)
-  makes sense to always create that folder automatically. Similarly, had we set the  ``owner`` parameter of the same *frecklet*, it would have been 
- implicit that a user with that name needs to exist on the system, and *freckles* had created that user. That would have required
- 'root' or 'sudo' permissions, though.
- 
- On a sidenote: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
- *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written in a way so *frecklets*
- require as little information and manual specification as possible, and they will just do the sensible thing. 
- You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitely.
-
-</div>
-<!-- end block your first frecklet -->
-
-<!-- begin block your first parameters -->
-### Adding parameters
-<div class="section-block" markdown="1">
-
-One of the neat things about *freckles* is that it is very easy to turn a *frecklet* into a full-blown commandline script,
-including argument parsing.
-
-So, let's say we want the download url as well as the path of the archive to be user configurable. Let's do that, and
-while we're at it let's also add a [shebang line](https://en.wikipedia.org/wiki/Shebang_(Unix)) to our script so we can execute it
-directly. Let's create a new file, ``my-second.frecklet``:
-
-```yaml
-#!/usr/bin/env frecklecute
-
-- file-downloaded:
-    url: "{{:: file_url ::}}"
-    dest: /tmp/target_dir/
-- file-with-content:
-    path: /tmp/target_dir/readme.txt
-    content: |
-      Hi there!
-
-      Welcome to the archive that contains this file we downloaded from {{:: file_url ::}} and other stuff.
-- command-output-to-file:
-    path: /tmp/target_dir/contents.txt
-    command: "ls -l /tmp/target_dir"
-- path-archived:
-    path: /tmp/target_dir
-    dest: "{{:: archive_path ::}}"
-    format: zip
-- path-is-absent:
-    path: /tmp/target_dir
+frecklecute hello-world.frecklet
 ```
 
-*freckles* uses the [jinja2](http://jinja.pocoo.org/) templating engine (with its own block markers) to let users specify
-arguments. By default, all jinja variables will be turned into an argument that is non-optional, and can't be empty. Let's see:
+??? abstract "command output"
 
-```console
-> ./my-second.frecklet --help
+    ```console
+    $ frecklecute hello-world.frecklet
+    SUDO_PASSWORD: xxxx
+    ╭─ starting: 'hello-world'
+    ├╼ connector: nsbl
+    │  ├╼ host: localhost
+    │  │  ├╼ starting playbook
+    │  │  │  ├╼ doing freckly init stuff, may take a while
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ installing webserver
+    │  │  │  │  ├╼ include_tasks
+    │  │  │  │  │  ├╼ setting webserver defaults
+    │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  ├╼ setting webserver user
+    │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  ├╼ setting webserver_group
+    │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  ├╼ setting webserver_service_name
+    │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  ├╼ setting webserver-specific variables
+    │  │  │  │  │  │  ├╼ basic auth
+    │  │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  │  ├╼ setting variables for non-https deployment
+    │  │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  │  ├╼ setting nginx vhosts vars
+    │  │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  │  │  ├╼ setting various nginx vars
+    │  │  │  │  │  │  │  ╰╼ ok
+    │  │  │  │  ├╼ include_tasks
+    │  │  │  ├╼ Include OS-specific variables.
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ include_tasks
+    │  │  │  │  ├╼ Update apt cache.
+    │  │  │  │  │  ╰╼ ok
+    │  │  │  │  ├╼ Ensure nginx is installed.
+    │  │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Remove default nginx vhost config file (if configured).
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Ensure nginx_vhost_path exists.
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Add managed vhost config files.
+    │  │  │  │  ├╼ {u'extra_parameters': u'\n\n\n\n# letsencrypt\n# not applicable\n\n# ssl options\n\n\n', u'listen': u'80 ', u'root': u'/var/www/html', u'server_name': u'localhost', u'filename': u'localhost.80.conf'}
+    │  │  │  │  │  ╰╼ ok
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Remove legacy vhosts.conf file.
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Copy nginx configuration in place.
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ Ensure nginx is started and enabled to start at boot.
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ checking parent folder stats
+    │  │  │  │  ╰╼ ok
+    │  │  │  ├╼ writing content to file: /var/www/html/index.html
+    │  │  │  │  ╰╼ ok
+    │  │  │  ╰╼ ok
+    │  │  ╰╼ ok
+    │  ╰╼ ok
+    ╰─ ok
+    ```
 
-Usage: frecklecute ./my-second.frecklet [OPTIONS]
+!!! note
+    This would ask you for the sudo password, as it needs to install packages via the system package manager.
 
-  n/a
-
-Options:
-  --archive-path ARCHIVE_PATH  n/a  [required]
-  --file-url FILE_URL          n/a  [required]
-  --help                       Show this message and exit.
-```
-
-Now try to actually provide those new arguments:
-
-```console
-> ./my-second.frecklet --file-url https://frkl.io/images/frkl-logo-black.svg --archive-path /tmp/my_custom_path.zip
-
-╭╼ starting run
-│  ├╼ running frecklet: /home/markus/my-second.frecklet (on: localhost)
-│  │  ├╼ starting Ansible run
-│  │  │  ├╼ create directory: /tmp/target_dir/'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ download 'https://frkl.io/images/frkl-logo-black.svg -> /tmp/target_dir/'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write content to file: /tmp/target_dir/readme.txt
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ execute command: 'ls -l /tmp/target_dir'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write command output to: /tmp/target_dir/contents.txt
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ archive path: /tmp/target_dir -> /tmp/my_custom_path.zip
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ delete file (if exists): /tmp/target_dir
-│  │  │  │  ╰╼ ok
-│  │  │  ╰╼ ok
-│  │  ╰╼ ok
-│  ╰╼ ok
-╰╼ ok
-```
-
-</div>
-
-There is a lot more you can do to make the script more usable, for example add documentation, and specify argument types
-so *freckles* can validate user input. Check out the [documentation](/frecklets) to learn more. 
-
-<!-- end block your first parameters -->
-
-<!-- begin block real-life example -->
-### A real-life example
-<div class="section-block" markdown="1">
-
-To see how useful *freckles* can be, we need a task that isn't as easy to script in a shell as the above. How about
-setting up machine so it can host a static webpage? It's a fairly simple task when using *freckles*, but would take
-considerable determination to reliably script in bash.
-
-What needs to be done? Here's a list:
- 
-- install a webserver (Nginx, in this instance)
-- configure it properly for our task (serve a folder of static html pages)
-- upload our html page(s)
-
-Again, we check the [default](/frecklets/default) and [community](/frecklets/community) frecklet indexes for any pre-written
-*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure](/frecklets/default/web/webserver-static-site/) 
-a static website. But let's pretend it didn't and go a tiny bit lower level.
-
-So, here are the *frecklets* we are going to use:
-
-- [``nginx-vhost-from-folder``](/frecklets/default/service/nginx-vhost-from-folder/), to create the vhost/server-block configuration file 
-- [``service-webserver``](/frecklets/default/service/service-webserver/), to setup and configure Nginx
-- [``file-with-content``](/frecklets/default/filesystem/file-with-content/), to create the html file
-
-
-Here's what our new *frecklet* looks like (let's save it to a file called ``my-webserver.frecklet``):
-
-```yaml
-- nginx-vhost-from-folder:                                                     
-    hostname: "{{:: hostname ::}}"                                                
-- service-webserver:                                                           
-    webserver: nginx                                                           
-- file-with-content:                                                           
-    owner: www-data                                                            
-    path: /var/www/html/index.html                                             
-    content: |                                                                 
-      <h1><i>freckles</i> says "hello", {{:: helloee ::}}!</h1>                            
-```
-
-As in the example above, we made some of our script configurable via arguments (the 'hostname', and part of the html page content, 'helloee') and we could
-use the ``--help`' flag on our *frecklet* to see that.
-
-For this example, I don't want to run it my local machine, as it would install a webserver that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has passwordless sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon, in a different place. For now, just peruse your favourite search engine.
-
-Ok, execute time:
-
-<div class="code-max-height" markdown="1">
-
-```console
-➜ frecklecute  -t admin@dev.cutecode.co my-webserver.frecklet --hostname dev.frkl.io --helloee World
-
-╭╼ starting run
-│  ├╼ running frecklet: /home/markus/my-webserver.frecklet (on: dev.frkl.io)
-│  │  ├╼ starting Ansible run
-│  │  │  ├╼ create directory: /etc/nginx/sites-enabled'
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write content to file: /etc/nginx/sites-enabled/dev.frkl.io.http.conf
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ creating webserver user
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ Ensure nginx is installed.
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ Remove default nginx vhost config file (if configured).
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ restart nginx
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ Copy nginx configuration in place.
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ reload nginx
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ reloading webserver
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ ensure user 'www-data' exists
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ write content to file: /var/www/html/index.html
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ geerlingguy.nginx : restart nginx
-│  │  │  │  ╰╼ ok
-│  │  │  ├╼ geerlingguy.nginx : reload nginx
-│  │  │  │  ╰╼ ok
-│  │  │  ╰╼ ok
-│  │  ╰╼ ok
-│  ╰╼ ok
-╰╼ ok
-
-```
-
-</div>
-
-Now, to check if this worked, I visit the hostname I specified ('dev.frkl.io', in this case) with my browser, and should see:
-
-```
-freckles says "hello", World!
-```
-
-It'd be really easy to change the *frecklet* to, for example, upload a local folder with html files instead of creating the single
-file on the server, support https via letsencrypt, add a firewall, etc. All this exceeds the scope of this 'getting started'-guide.
-Check out the [Documentation]('/doc) if you want to learn more!
-
-<!-- end block real-life example -->
-
-</div>
+Visiting [http://localhost](http://localhost) should show you our newly created page.
 
 </div>
 <!-- end section writing your own frecklet --> 
