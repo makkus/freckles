@@ -385,7 +385,7 @@ For local usage, you don't need to do anything special:
 ### remotely {: .block-title}
 <div class="section-block" markdown="1">
 
-For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (which you can setup using a [frecklet](/frecklet-index/default/grant-passwordless-sudo/), by the way).
+For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (which you can setup using a [frecklet](//frecklets/default/system/passwordless-sudo-users), by the way).
 
 To login to a remote server, add the ``--host <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
@@ -448,12 +448,14 @@ After perusing the [frecklet index](/frecklets/default), we found we can use tho
 - [path-archived](/frecklets/default/filesystem/path-archived/)
 - [path-is-absent](/frecklets/default/filesystem/path-is-absent/)
 
-We don't need to actually create the directory, because each of those would implicitely do that for us. For example the
+We don't need to actually create the directory, because a few of those *frecklets* would implicitely do that for us. For example the
 [file-downloaded](/frecklets/default/filesystem/file-downloaded) *frecklet* will automatically create the (parent) directory that is indirectly specified with that *frecklets* ``dest`` parameter. 
 
 The most basic *frecklet* is a text file containing a list of other frecklets and their configuration, 
 in either 'yaml', 'json', or 'toml' format (for more details, head over to the [frecklet documentation](/doc/frecklets/)
-section). Let's use the 'yaml' format, and create a file called ``my-first.frecklet``, with the following content:
+section). 
+
+Let's use the 'yaml' format, and create a file called ``my-first.frecklet``, with the following content:
 
 ```yaml
 - file-downloaded:
@@ -627,8 +629,8 @@ What needs to be done? Here's a list:
 - upload our html page(s)
 
 Again, we check the [default](/frecklets/default) and [community](/frecklets/community) frecklet indexes for any pre-written
-*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure](/frecklets/default/web/webserver-static-site/) 
-a static website. But let's pretend it didn't and go a tiny bit lower level.
+*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/webserver-static-site/) 
+. But let's pretend it didn't and go a tiny bit lower level.
 
 So, here are the *frecklets* we are going to use:
 
@@ -654,14 +656,14 @@ Here's what our new *frecklet* looks like (let's save it to a file called ``my-w
 As in the example above, we made some of our script configurable via arguments (the 'hostname', and part of the html page content, 'helloee') and we could
 use the ``--help`' flag on our *frecklet* to see that.
 
-For this example, I don't want to run it my local machine, as it would install a webserver that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has passwordless sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon, in a different place. For now, just peruse your favourite search engine.
+For this example, I don't want to run it on my local machine, as it would install a webserver that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has passwordless sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon (or, rather, a few *frecklets* to do it for you), in a different place. For now, just peruse your favourite search engine if you want to know more.
 
 Ok, execute time:
 
 <div class="code-max-height" markdown="1">
 
 ```console
-➜ frecklecute  -t admin@dev.cutecode.co my-webserver.frecklet --hostname dev.frkl.io --helloee World
+➜ frecklecute  -t admin@dev.frkl.io my-webserver.frecklet --hostname dev.frkl.io --helloee World
 
 ╭╼ starting run
 │  ├╼ running frecklet: /home/markus/my-webserver.frecklet (on: dev.frkl.io)
@@ -707,8 +709,8 @@ Now, to check if this worked, I visit the hostname I specified ('dev.frkl.io', i
 freckles says "hello", World!
 ```
 
-It'd be really easy to change the *frecklet* to, for example, upload a local folder with html files instead of creating the single
-file on the server, support https via letsencrypt, add a firewall, etc. All this exceeds the scope of this 'getting started'-guide.
+It'd be really easy to change this *frecklet* to, for example, upload a local folder with html files instead of creating the single
+file on the server, support https via letsencrypt, add a firewall, etc. All this exceeds the scope of this 'getting started'-guide though.
 Check out the [Documentation]('/doc) if you want to learn more!
 
 <!-- end block real-life example -->
