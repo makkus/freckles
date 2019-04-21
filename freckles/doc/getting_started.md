@@ -65,9 +65,9 @@ For other install options, check [here](/doc/installation).
 ## Getting help {: .section-title}
 <div class="section-block" markdown="1">
 
-*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a wordpress instance').
+*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a wordpress instance'). You will be dealing mostly with the former, at least initially.
 
-The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own ones. A typical purpose would be installing and configuring a service.
+The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
 
 To display help for ``frecklecute`` (as well as any of the other included applications), use the ``--help`` flag:
 
@@ -128,7 +128,7 @@ Options:
 
 <div class="section-block" markdown="1">
 
-Let's get a list of all the *frecklets* that are supported out of the box, use the ``--help-frecklets`` flag (this might take a few seconds, to process the current context):
+Let's get a list of all the *frecklets* that are supported out of the box, use the ``--help-frecklets`` flag (this might take a few moments, as it needs to process the current context):
 
 <div class="code-max-height" markdown="1">
 
@@ -290,7 +290,7 @@ zile-config-file                     configuration for the 'zile' text editor
 ```
 </div>
 
-The same list of *frecklets* can also be found online: [frecklets](https://freckles.io/contexts/default/overview/).
+The same list of *frecklets* can also be found online in the [default frecklet repository](https://freckles.io/contexts/default/overview/).
 
 If you want to see all tasks that are related to one (or several) search terms, use:
 
@@ -305,10 +305,7 @@ So, as an example, for everything related to the term 'nginx', we'd see:
 
 frecklet                  description
 ------------------------  -------------------------------------------------
-apache-vhost-from-folder  configure a Nginx vhost for static site
 devpi-nginx-vhost-config  creates a vhost for devpi on Nginx
-nginx-inaugurate-vhost    creates a vhost to host a 'inaugurate' bootstrap
-                          script
 nginx-server-block-file   nginx server configuration
 nginx-vhost-from-folder   configure a Nginx vhost for static site
 pkg-nginx                 ensures the nginx web server is installed and
@@ -318,8 +315,8 @@ service-devpi             installs a complete devpi server, including nginx
 service-devpi-standalone  installs a complete devpi server, including nginx
                           proxy & lets-encrypt certs
 wordpress-vhost-nginx     create Nginx wordpress virtual host config
-
 ```
+
 </div>
 <!-- list available frecklets -->
 
@@ -342,7 +339,7 @@ For example, the [``file-downloaded``](/frecklets/default/filesystem/file-downlo
 
 Usage: frecklecute file-downloaded [OPTIONS] URL
 
-  Download a file, creates intermediate destination directories and a
+  Download a file, create intermediate destination directories and a
   user/group if necessary.
 
   If no 'dest' option is provided, the file will be downloaded into
@@ -368,13 +365,13 @@ Options:
 <!-- section installing freckles -->
 
 <!-- section executing a command -->
-## Executing a *frecklet* {: .section-title}
+## Executing a *frecklet*... {: .section-title}
 <div class="section-block" markdown="1">
 
-You can use the same *frecklet* on your local machine, as well as remotely.
+You can use the same *frecklet* on your local machine or remotely.
 
 <!-- begin block locally -->
-### locally {: .block-title}
+### ...locally {: .block-title}
 
 <div class="section-block" markdown="1">
 
@@ -399,7 +396,7 @@ For local usage, you don't need to do anything special:
 <!-- end block locally -->
 
 <!-- begin block remotely -->
-### remotely {: .block-title}
+### ...remotely {: .block-title}
 <div class="section-block" markdown="1">
 
 For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).

@@ -9,7 +9,7 @@ This page describes the different ways to create a *frecklet*. To learn how more
 ## Supported formats {: .section-title}
 <div class="section-block" markdown="1">
 
-A *frecklet* is a text file in either [yaml](https://yaml.org), [json](https://www.json.org), or [toml](https://github.com/toml-lang/toml) format (other formats might be supported later). It can also be, depending on the context it is mentioned, a dict or list data structure. In most cases though it'll be a text file. In the following, we'll exclusively use 'yaml' as our data format.
+A *frecklet* is a text file in either [yaml](https://yaml.org), [json](https://www.json.org), or [toml](https://github.com/toml-lang/toml) format (other formats might be supported later). It can also be, depending on the context (e.g. when using *freckles* as a Python library) a dict or list data structure. In most cases though it'll be a text file. In the following, we'll exclusively use 'yaml' as our data format.
 
 </div>
 
@@ -17,7 +17,7 @@ A *frecklet* is a text file in either [yaml](https://yaml.org), [json](https://w
 ## The elastic (non-)schema {: .section-title}
 <div class="section-block" markdown="1">
 
-*frecklets* don't have a 'fixed' schema, but offer several ways to express the same thing. This page lists the different ways to describe tasks items and their metadata within a *frecklet*, from the shortest, most minimal way to the most flexible and descriptive.
+*frecklets* don't have to follow a 'fixed' schema; they can 'mature' as they become more important. The *freckles* parser allows for several ways to express the same thing so the complexity of your code can mirror the importance of the context it is executed in. This page lists the different ways to describe tasks items and their metadata within a *frecklet*, from the shortest, most minimal way to the most powerful and descriptive.
 
 Offering such a 'non-schema' might be considered fragile and wrong by some (I don't think that to be the case, obviously -- I think it's a worthwhile experiment, and a good trade-off for the read-ability it enables, and the general flexibility it brings to the table). If you don't feel comfortable with this idea but still -- for some reason -- want to use *freckles*, I'd suggest to only use the most verbose way of writing *frecklets* (described at the bottom of this page). It still might make sense to go through all the other options, as it should make it easier to understand how everything works.
 
@@ -25,13 +25,13 @@ Offering such a 'non-schema' might be considered fragile and wrong by some (I do
 ### The list of tasks
 <div class="section-block" markdown="1">
 
-Without any additional metadata, a *frecklet* is a list of strings and/or dicts.
+Without any additional metadata, a minimal *frecklet* is just a list of strings and/or dicts.
 
 #### A list of (one or more) strings
 
-In it's most minimal form, a *frecklet* is a text file that contains a list of strings.
+In it's most basic form, a *frecklet* is a text file that contains a list of strings where each string represents a command (a.k.a. other *frecklet*) that doesn't require any arguments.
 Each list item needs to be the name of another frecklet that exists in the current [context](/doc/contexts)
-(which can be displayed with ``freckles list``).
+(get a list of all possible ones with: ``freckles list``).
 
 Here's an example:
 ```yaml
@@ -42,22 +42,22 @@ Let's put that into a file called ``my-docker-install.frecklet``. Issuing:
 ```bash
 > frecklecute my-docker-install.frecklet
 ```
-will install *Docker* on the local machine, using [this frecklet](/frecklets/default/virtualization/pkg-docker/).
+would install *Docker* on the local machine (by executing [this frecklet](/frecklets/default/virtualization/pkg-docker/)).
 
-#### A list of (single-key) dicts
+#### A list of single-key dicts
 
-In the example above we don't need any custom variables, as installing Docker is usually pretty straight-forward.
+In the example above we don't need any custom variables, as installing Docker is usually pretty straight-forward, and there is no configuration option that requires user input. This uses a list of single-key dicts, a data structure you'll see often within *freckles* as it's quite easy for a human to grasp what it is meant to express (esp. in 'yaml' format).
 
-Let's say we want to create a new user, which, as a minimum, requires us to provide a username. We'll use a
+Let's say we want to create a new user, which -- obviously -- as a minimum requires us to provide a username. We'll use a
 readymade and available *frecklet* again (the [``user-exists``](/frecklets/default/system/user-exists/) one), only this time with some custom
-parameters (we can investigate the available argument names and what they do with ``freckles frecklet args user-exists``):
+parameters (we can investigate the available argument names and what they do with either ``freckles frecklet args user-exists`` or ``frecklecute user-exists --help``):
 
 ```yaml
 - user-exists:
     name: markus
 ```
 
-or, if we also want to specify the users UID:
+or, if we also want to specify the users' UID:
 
 ```yaml
 - user-exists:
@@ -65,11 +65,11 @@ or, if we also want to specify the users UID:
     uid: 1010
 ```
 
-In both cases, after putting the content in a file (say, ``my-create-user.frecklet``), we can create
+In both cases, after putting the content in a file (say, ``my-new-user.frecklet``), we can create
 the user (or rather: make sure the user exists) with a simple:
 
 ```console
-frecklecute my-create-user.frecklet
+frecklecute my-new-user.frecklet
 ```
 
 #### Mixed string(s) and dicts
@@ -94,6 +94,21 @@ that is allowed to user 'docker', we could write (after checking the [``pkg-dock
 
 ```
 </div>
+
+### Targets
+
+#### A list of dictionaries
+
+The (single-key dicts) example from above can also be expressed as a list of dicts in a slightly different format:
+
+```yaml
+- frecklet: user-exists
+  vars:
+    name: markus
+- frecklet: pkg-docker
+    users:
+      - markus
+```
 
 ### Metadata
 <div class="section-block" markdown="1">
