@@ -5,6 +5,8 @@ url_path_prio: 100
 
 This page describes the different ways to create a *frecklet*. To learn how more about how to call/use those, please check out [this page](/doc/getting_started).
 
+To get into detail about all the properties and allowed keys/values of a full-blown *frecklet*, read the [Anatomy of a *frecklet*](/doc/frecklets/anatomy) page.
+
 
 ## Supported formats {: .section-title}
 <div class="section-block" markdown="1">
@@ -106,16 +108,45 @@ The (single-key dicts) example from above can also be expressed as a list of dic
   vars:
     name: markus
 - frecklet: pkg-docker
+  vars:
     users:
       - markus
 ```
 
+This by itself is not useful, as it's just a more verbose, and less readable way of saying the same thing. It makes more 
+sense once we add another keyword though: ``target`` (as in the ``--target`` option of the ``frecklecute`` command).
+
+This enables us to have tasks that are executed on different targets, in the same *frecklet*. By default, a *frecklet* executes on the target
+that is specified on the commandline with ``--target``, or, if that is not used, 'localhost'. Having 'target'  in the *frecklet*
+will override both options. Here's how that would look:
+
+```yaml
+- frecklet: file-with-content
+  vars:
+    path: /tmp/upload.log
+    content: |
+      Installed Docker on host 'dev.frkl.io'.
+- frecklet: pkg-docker
+  target: admin@dev.frkl.io
+  vars:
+    users:
+      - markus
+```
+
+This example is a bit non-sensical, but where this comes in really handy, for example, is when you want to provision a 
+new VM from a cloud provider. The first task would be executed locally, and talk to the providers API to create a new VM. 
+The second one would connect to that VM (probably as root), and does some initial setup (like provisioning an admin user, disabling password-login for ssh, etc.).
+
 ### Metadata
 <div class="section-block" markdown="1">
 
-Once we want to add metadata, a *frecklet* becomes a dict-like data structure. The task-list we used so far moves to a key called ``frecklets``.
+*frecklets* like the ones we discussed so far are really quick to create, they are good for prototyping, and serve as easy-to-understand starting points for more complex tasks. Once you get to a stage where you want to share a *frecklet*, or maybe use it in production, I'd recommend adding some metadata though. There are different types of metadata you can add:
 
-Additional allowed keys are: ``doc``, ``args``, and ``meta``.
+- Documentation (``doc`` keyword)
+- Arguments (``args`` keyword)
+- Generic metadata, to be used in plugins or for other purposes (``meta`` keyword, which we'll ignore for now)
+
+Once we want to add metadata, a *frecklet* becomes a dict-like data structure. The task-list we used so far moves to a key called ``frecklets``.
 
 #### Adding documentation
 
@@ -130,14 +161,13 @@ frecklets:
       name: markus
       uid: 1010
 ```
-This is equivalent to the list-version of the *frecklet* from the example above. Now, for some documentation:
+This is a valid *frecklet*, and it is equivalent to the 'pure-list'-version with the same content from a few examples before. Now, for some documentation:
 
 ```yaml
 doc:
   short_help: Creates the user 'markus' with the uid 1010.
   help: |
-    This uses the 'create-user' frecklet to create
-    a single user, named 'markus'.
+    Creates a single user, named 'markus'.
 
     The UID of this user will be '1010'.
 
@@ -154,19 +184,18 @@ This information can be used by the *freckles* framework, and displayed where ne
 Usage: frecklecute my-create-user.frecklet
            [OPTIONS]
 
-  This uses the 'create-user' frecklet to create a
-  single user, named 'markus'.
+  Creates a single user, named 'markus'.
 
   The UID of this user will be '1010'.
 ```
 
 #### Adding arguments
 
-Up until now, our *frecklet* is hardcoded to do exactly one thing, creating a user with a fixed name and UID. What if we want to re-use it with different values? This is what variables are, and what arguemnts are used for in command-line tools.
+Up until now, our *frecklet* is hardcoded to do exactly one thing, creating a user with a fixed name and UID. What if we want to re-use it with different values? This is a typical use-case for variables, and what arguemnts are used for in command-line tools.
 
 ##### Non-typed arguments
 
-If you don't want to clutter your *frecklet* with metadata about its argument(s), and you are happy for them to be required, non-empty strings, all you have to do is use a special template syntax ( ``{{:: key ::}}`` ) for the values you want user input for:
+If you don't want to clutter your *frecklet* with metadata about its argument(s), and you are happy for them to be required and non-empty strings, all you have to do is use a special *freckles* template syntax ( ``{{:: key ::}}`` ) for the values you want user input for:
 
 ``` yaml
 frecklets:
@@ -255,10 +284,15 @@ frecklets:
 
 Every variable we want to ask the user needs to be present as key under the ``args`` section, and also at least once somewhere in ``frecklets``. If the former is not the case, *freckles* will use a default argument spec (a required item, non-empty). If the latter is not the case, *freckles* will just ignore it.
 
-!!! note
-    Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwared more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
+---
 
-Note how we use ``required: no`` for our ``uid`` value. This is a good way to specify optional arguments. If a 'none' value or empty string is passed to a key in a dict, it won't be forwarded to the child *frecklet* that is called. Also, we have specified the type of the argument as an integer under ``args``. This causes the variable to be validated, and if successful, converted into the proper type.
+**Note**:
+
+Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwared more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
+
+---   
+                                    
+Notice how we use ``required: no`` for our ``uid`` value. This is a good way to specify optional arguments. If a 'none' value or empty string is passed to a key in a dict, it won't be forwarded to the child *frecklet* that is called. Also, we have specified the type of the argument as an integer under ``args``. This causes the variable to be validated, and if successful, converted into the proper type.
 
 Let's see what ``frecklecute`` makes of this:
 
