@@ -30,7 +30,7 @@ ln -s freckles ~/.local/bin/frecklecute
  
 </div>
 
-## via 'curyly' bootstrap script {: .section-title}
+## via 'curly' bootstrap script {: .section-title}
 <div class="section-block" markdown="1">
 
 A good way of bootstrapping *freckles* on vanilla boxes is by utilizing [``freck``](https://gitlab.com/freckles-io/freck), the official *freckles* bootstrap script.
