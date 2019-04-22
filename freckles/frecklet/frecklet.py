@@ -1,6 +1,8 @@
 import os
 from collections import Sequence
 
+from ruamel.yaml.comments import CommentedMap
+
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
 from .tasks import *  # noqa
@@ -37,7 +39,9 @@ class FreckletAugmentMetadataAttribute(TingAttribute):
 
         raw = ting._metadata_raw
 
-        if isinstance(raw, Sequence):
+        if isinstance(raw, string_types):
+            raise Exception("Invalid frecklet: content needs to be a list or dict: {}".format(raw))
+        elif isinstance(raw, Sequence):
             md = {"frecklets": raw}
         elif not isinstance(raw, Mapping):
             raise Exception("Invalid frecklet: content needs to be a list or dict")
@@ -57,6 +61,62 @@ class FreckletAugmentMetadataAttribute(TingAttribute):
             md["args"] = {}
 
         return md
+
+class FreckletValidAttribute(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return ["valid"]
+
+    def requires(self):
+        return ["exploded"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        try:
+            exploded = ting.exploded
+            log.debug("checking exploded data structure: {}".format(exploded))
+        except (Exception) as e:
+            log.debug("Validation for frecklet failed.")
+            log.debug(e, exc_info=1)
+            return False
+        return True
+
+class FreckletExplodedAttribute(TingAttribute):
+
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return ["exploded"]
+
+    def requires(self):
+
+        return ["vars_frecklet", "doc", "tasklist"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        result = CommentedMap()
+
+        result["doc"] = ting.doc.exploded_dict()
+
+        result["args"] = CommentedMap()
+        for k, arg in ting.vars_frecklet.items():
+            details = arg.pretty_print_dict(full_details=True)
+            result["args"][k] = details
+
+        result["frecklets"] = []
+        for task in ting.tasklist:
+            r = CommentedMap()
+            r[FRECKLET_KEY_NAME] = task[FRECKLET_KEY_NAME]
+            if TASK_KEY_NAME in task.keys() and task[TASK_KEY_NAME]:
+                r[TASK_KEY_NAME] = task[TASK_KEY_NAME]
+            if VARS_KEY in task.keys() and task[VARS_KEY]:
+                r[VARS_KEY] = task[VARS_KEY]
+            result["frecklets"].append(r)
+
+        return result
 
 
 class FreckletMetaAttribute(ValueAttribute):
@@ -211,6 +271,8 @@ FRECKLET_LOAD_CONFIG = {
         "TaskListDetailedAttribute",
         "FreckletHtmlAttribute",
         "FreckletMarkdownAttribute",
+        "FreckletExplodedAttribute",
+        "FreckletValidAttribute",
         "TaskTreeAttribute",
         {
             "VariablesAttribute": {

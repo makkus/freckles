@@ -97,7 +97,7 @@ There are 3 special repository aliases that can be used instead of a path:
     # },
     "remote_cache_valid_time": {
         "type": "integer",
-        "default": (3600 * 24),
+        "default": -1,
         "doc": "Update remote repos if their last checkout was longer ago than this threshold.",
     },
     "run_folder": {

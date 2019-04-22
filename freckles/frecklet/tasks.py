@@ -323,7 +323,7 @@ class TaskListDetailedAttribute(TingAttribute):
 
     def requires(self):
 
-        return ["args", "_meta_parent_repo"]
+        return ["args", "_meta_parent_repo", "_metadata"]
 
     def get_attribute(self, ting, attribute_name=None):
 

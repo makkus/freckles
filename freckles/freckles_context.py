@@ -412,6 +412,10 @@ class FrecklesContext(object):
 
         self._frkl_pkg = FrklPkg(extra_lookup_paths=FRECKLES_EXTRA_LOOKUP_PATHS)
 
+    def update_repos(self, force=False, timeout=-1):
+
+        self.ensure_local_repos(self._resource_repo_list)
+
     @property
     def frkl_pkg(self):
 
@@ -519,12 +523,16 @@ class FrecklesContext(object):
             if cache_key in self._run_info.get("pull_cache", {}).keys():
                 last_time = self._run_info["pull_cache"][cache_key]
                 valid = self._context_config.get("remote_cache_valid_time")
+
+                if valid < 0:
+                    log.debug("Not pulling again, updating repo disabled: {}".format(url))
+                    return
                 now = time.time()
 
                 if now - last_time < valid:
                     # click.echo("  - using cached repo: {}".format(url))
                     pull_task.finish(success=True, skipped=True)
-                    log.debug("Not pulling again: {}".format(url))
+                    log.debug("Not pulling again, using cached repo: {}".format(url))
                     return
 
             # TODO: check if remote/branch is right?
@@ -765,7 +773,18 @@ class FrecklesContext(object):
         )
         return self._frecklet_index
 
-    def get_frecklet(self, frecklet_name, allow_external=False):
+    def get_frecklet(self, frecklet_name, validate=False, allow_external=False, check_path_first=False):
+
+        if allow_external and check_path_first:
+
+            if os.path.isfile(frecklet_name):
+                try:
+                    frecklet_name = self.add_dynamic_frecklet(frecklet_name)
+                    result = self.frecklet_index.get(frecklet_name)
+                    if result.valid:
+                        return result
+                except (Exception) as e:
+                    log.warning("File exists for path '{}', but frecklet invalid, trying to find frecklet in index...".format(frecklet_name))
 
         result = self.frecklet_index.get(frecklet_name)
 
@@ -773,6 +792,12 @@ class FrecklesContext(object):
             try:
                 frecklet_name = self.add_dynamic_frecklet(frecklet_name)
                 result = self.frecklet_index.get(frecklet_name)
+                if validate:
+                    # TODO: change that to validation method once it's implemented
+                    valid = result.valid
+                    if not valid:
+                        log.debug("frecklet {} invalid".format(frecklet_name))
+                        result = None
             except (Exception):
                 result = None
 
@@ -782,7 +807,7 @@ class FrecklesContext(object):
 
         return self.frecklet_index.keys()
 
-    def add_dynamic_frecklet(self, path_or_frecklet_content):
+    def add_dynamic_frecklet(self, path_or_frecklet_content, validate=False):
 
         full_path = os.path.realpath(os.path.expanduser(path_or_frecklet_content))
 
@@ -858,6 +883,13 @@ class FrecklesContext(object):
         _ = self.frecklet_index.tings
 
         self.frecklet_index.add_tings(index)
+
+        if validate:
+            f = self.get_frecklet(local_frecklet_name)
+            valid = f.valid
+            if not valid:
+                return None
+
         return local_frecklet_name
 
     def create_frecklecutable(self, frecklet_name):
