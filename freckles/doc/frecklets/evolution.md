@@ -95,11 +95,9 @@ that is allowed to user 'docker', we could write (after checking the [``pkg-dock
       - markus
 
 ```
-</div>
 
-### Targets
 
-#### A list of dictionaries
+#### Single-and double-key dictionaries
 
 The (single-key dicts) example from above can also be expressed as a list of dicts in a slightly different format:
 
@@ -137,7 +135,14 @@ This example is a bit non-sensical, but where this comes in really handy, for ex
 new VM from a cloud provider. The first task would be executed locally, and talk to the providers API to create a new VM. 
 The second one would connect to that VM (probably as root), and does some initial setup (like provisioning an admin user, disabling password-login for ssh, etc.).
 
-### Metadata
+There is a further evolution step to double-key dictionary *frecklet*-items. This is only usable in advanced use-cases,
+so we'll ignore that for now, and come back to it later, at the end of the page. For now, le'ts look into metadata to 
+improve our *frecklets* usability (and usefulness).
+
+</div> 
+<!-- end list of tasks>
+
+### The metadata dictionary
 <div class="section-block" markdown="1">
 
 *frecklets* like the ones we discussed so far are really quick to create, they are good for prototyping, and serve as easy-to-understand starting points for more complex tasks. Once you get to a stage where you want to share a *frecklet*, or maybe use it in production, I'd recommend adding some metadata though. There are different types of metadata you can add:
@@ -324,6 +329,97 @@ its users, and in terms of specifying exactly which tasks to execute, and in whi
 please refer to the [*freckles* documetation](https://docs.freckles.io).
 
 </div>
+<!-- end metadata dictionary -->
+
+### Exploded ``frecklet``-items
+<div class="section-block" markdown="1">
+
+As I've mentioned before, there is an additional evolutionary step to how the items in the list under ``frecklets`` can
+be expressed. This is the internal representation of such an item within *freckles*, and it offers the most flexibility,
+but trades in some readability and ease of use. We'll only give a broad overview of the topic here, for more in-detail
+information plese refer to the [Anatomy of a *frecklet*](/doc/frecklets/anatomy) page.
+
+For the purpose of explaining this, we'll use a *frecklet* without metadata, and only one task. This format is really
+only useful to develop new *frecklets* that call low-level tasks that don't have their own *frecklet* yet. Ideally, end-users
+would only ever have to deal with pre-developed *frecklets*, but once requirements become more complex, chances increase
+that some custom development needs to be done.
+
+Ok, here's the *frecklet* we'll be working with:
+
+```yaml
+# filename: example.frecklet
+- user-exists:
+    name: markus
+```
+
+Very simple, one task, makes sure a user exists on a system. You can use *freckles* to see the fully-exploded data
+structure of a *frecklet* which is used internally. Here's how:
+
+```console
+> freckles frecklet explode example.frecklet
+
+doc: {}
+  
+args: {}
+  
+frecklets:
+
+  - frecklet:
+      name: user-exists
+      type: frecklet
+    task:
+      command: user-exists
+    vars:
+      name: markus
+```
+
+The important part is the one list item under the ``frecklets`` key. We can see the item is a directory with 3 keys:
+
+- ``frecklet``: contains general metadata about the frecklet item and it's type
+- ``task``: contains [adapter](/doc/adapters)-specific metadata (in this case that doesn't really applly, as the item is just another *frecklet*)
+- ``vars``: the vars to use for this *frecklet* in this run
+
+As I've said, using this format just to call an existing *frecklet* does not make too much sense. Let's see how the ``user-exists`` frecklet is implemented internally. Apart from creating the users group if it doesn't exist and some optional metadata (which we'll both ignore here), this is the basic implementation of ``user-exists``:
+
+```yaml
+frecklets:
+  - frecklet:
+      name: user
+      type: ansible-module
+      msg: "ensure user '{{:: name ::}}' exists"
+    task:
+      become: true
+    vars:
+      name: "{{:: name ::}}"
+      state: present
+      groups: "{{:: group ::}}"
+      append: true
+      uid: "{{:: uid ::}}"
+      system: "{{:: system_user ::}}"
+      password: "{{:: password | sha512_crypt ::}}"
+      shell: "{{:: shell ::}}"
+```
+ 
+You could put this into a file and call it with ``frecklecute <filename> --help``, and you'd get a basic help message, similar to the one we saw above, with all of the arguments being required (and strings).
+
+The 'vars' value works like in any of the other examples we've looked at so far, so I'll not go into that again here. The interesting stuff happens in ``frecklet``, and ``task``.
+
+#### The ``frecklet`` (sub-)key
+
+The important key in this part of the configuration is ``type``. This lets *freckles* know which one of the available [freckles adapters](/doc/adapters) to use to process this item. Every adapter registers with *freckles* with a list of supported types. In this case (``ansible-module``) the [nsbl](/doc/adapters/nsbl) one will be used. 
+
+There are other keys you can put into ``frecklet``, the most important one being ``skip``, which lets you skip a task in certain situations. Here we are also showing ``msg``, which is the message the user sees when this task is executed.  
+
+#### The ``task`` (sub)-key
+
+This one lets you fine-tune the behaviour of this (dynamically created) *frecklet* in question. In this case, the [``user``](http://docs.ansible.com/ansible/latest/user_module.html) Ansible module will be called with the ``become`` key set to ``true``.
+
+The content of this sub-key is highly dependent on the adapter used, so you'll have to refer to the documentation of the adapter in question for details.
+
+That's all folks. Check out the other docs, or head over to the [friends of freckles](https://friends.of.freckles) if you have questions!
+ 
+</div>
+<!-- end fully flexible -->
 
 </div>
 <!-- end section non-schema -->
