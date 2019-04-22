@@ -765,9 +765,18 @@ class FrecklesContext(object):
         )
         return self._frecklet_index
 
-    def get_frecklet(self, frecklet_name):
+    def get_frecklet(self, frecklet_name, allow_external=False):
 
-        return self.frecklet_index.get(frecklet_name)
+        result = self.frecklet_index.get(frecklet_name)
+
+        if not result and allow_external:
+            try:
+                frecklet_name = self.add_dynamic_frecklet(frecklet_name)
+                result = self.frecklet_index.get(frecklet_name)
+            except (Exception):
+                result = None
+
+        return result
 
     def get_frecklet_names(self):
 

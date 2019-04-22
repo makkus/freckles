@@ -68,6 +68,9 @@ def fill_defaults(task_item):
     elif "command" not in task_item[TASK_KEY_NAME].keys():
         task_item[TASK_KEY_NAME]["command"] = task_item[FRECKLET_KEY_NAME]["name"]
 
+    if "type" not in task_item[FRECKLET_KEY_NAME].keys():
+        task_item[FRECKLET_KEY_NAME]["type"] = "frecklet"
+
 
 class SpecialCaseProcessor(ConfigProcessor):
     """Makes sure that no keywords are in vars."""
