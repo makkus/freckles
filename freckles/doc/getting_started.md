@@ -65,7 +65,7 @@ For other install options, check [here](/doc/installation).
 ## Getting help {: .section-title}
 <div class="section-block" markdown="1">
 
-*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a wordpress instance'). You will be dealing mostly with the former, at least initially.
+*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a Wordpress instance'). You will be dealing mostly with the former, at least initially.
 
 The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
 
@@ -399,7 +399,7 @@ For local usage, you don't need to do anything special:
 ### ...remotely {: .block-title}
 <div class="section-block" markdown="1">
 
-For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do passwordless sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).
+For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do password-less sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).
 
 To login to a remote server, add the ``--host <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
@@ -439,7 +439,7 @@ But maybe you'd like to combine a few of those *frecklets*, and create your own 
 <div class="section-block" markdown="1">
 
 To demonstrate how to combine multiple (pre-existing) *frecklets* into a new one, let's do some basic filesystem manipulation
-that doesn't require root permissions. This example does not make a whole lot of sense, but demonstrates a few basic 
+that does not require root permissions. This example does not make a whole lot of sense, but demonstrates a few basic 
  concepts. 
  
  So, for the sake of argument let's assume we need to have an archive of a folder that contains a downloaded file, a
@@ -462,7 +462,7 @@ After perusing the [frecklet index](/frecklets/default), we found we can use tho
 - [path-archived](/frecklets/default/filesystem/path-archived/)
 - [path-is-absent](/frecklets/default/filesystem/path-is-absent/)
 
-We don't need to actually create the directory, because a few of those *frecklets* would implicitely do that for us. For example the
+We don't need to actually create the directory, because a few of those *frecklets* would implicitly do that for us. For example the
 [file-downloaded](/frecklets/default/filesystem/file-downloaded) *frecklet* will automatically create the (parent) directory that is indirectly specified with that *frecklets* ``dest`` parameter. 
 
 The most basic *frecklet* is a text file containing a list of other frecklets and their configuration, 
@@ -522,7 +522,7 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  
  **Hint**: for fun and giggles, try the ``--describe`` flag (``frecklecute --describe my-first.frecklet``)
  
- Now, if you know some shell scripting, you'll probably agree that this is nothing a small script couldn't have done
+ Now, if you know some shell scripting, you'll probably agree that this is nothing a small script could not have done
  equally well. So if you don't think this whole thing makes any sense so far, head on down to the next examples.
   
  The *frecklet* schema is designed to be easy and quick to read, understand and write. Whether the above
@@ -535,10 +535,10 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  implicit that a user with that name needs to exist on the system, and *freckles* had created that user. That would have required
  'root' or 'sudo' permissions, though.
  
- On a sidenote: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
+ On a side-note: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
  *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written in a way so *frecklets*
  require as little information and manual specification as possible, and they will just do the sensible thing. 
- You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitely.
+ You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitly.
 
 
 
@@ -635,18 +635,18 @@ so *freckles* can validate user input. Check out the [documentation](/frecklets)
 <div class="section-block" markdown="1">
 
 To see how useful *freckles* can be, we need a task that isn't as easy to script in a shell as the above. How about
-setting up machine so it can host a static webpage? It's a fairly simple task when using *freckles*, but would take
+setting up machine so it can host a static web-page? It's a fairly simple task when using *freckles*, but would take
 considerable determination to reliably script in bash.
 
 What needs to be done? Here's a list:
  
-- install a webserver (Nginx, in this instance)
+- install a web-server (Nginx, in this instance)
 - configure it properly for our task (serve a folder of static html pages)
 - upload our html page(s)
 
 Again, we check the [default](/frecklets/default) and [community](/frecklets/community) frecklet indexes for any pre-written
 *frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/webserver-static-site/) 
-. But let's pretend it didn't and go a tiny bit lower level.
+. But let's pretend it did not and go a tiny bit lower level.
 
 So, here are the *frecklets* we are going to use:
 
@@ -672,7 +672,7 @@ Here's what our new *frecklet* looks like (let's save it to a file called ``my-w
 As in the example above, we made some of our script configurable via arguments (the 'hostname', and part of the html page content, 'helloee') and we could
 use the ``--help`' flag on our *frecklet* to see that.
 
-For this example, I don't want to run it on my local machine, as it would install a webserver that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has passwordless sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon (or, rather, a few *frecklets* to do it for you), in a different place. For now, just peruse your favourite search engine if you want to know more.
+For this example, I don't want to run it on my local machine, as it would install a web-server that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has password-less sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon (or, rather, a few *frecklets* to do it for you), in a different place. For now, just peruse your favourite search engine if you want to know more.
 
 Ok, execute time:
 
@@ -726,7 +726,7 @@ freckles says "hello", World!
 ```
 
 It'd be really easy to change this *frecklet* to, for example, upload a local folder with html files instead of creating the single
-file on the server, support https via letsencrypt, add a firewall, etc. All this exceeds the scope of this 'getting started'-guide though.
+file on the server, support https via [Let's encrypt](https://letsencrypt.org), add a firewall, etc. All this exceeds the scope of this 'getting started'-guide though.
 Check out the [Documentation]('/doc) if you want to learn more!
 
 <!-- end block real-life example -->

@@ -14,7 +14,7 @@ Each freckles run happens in a so-called 'context'. A 'context' contains a list 
 ### Resources {: .section-title}
 <div class="section-block" markdown="1">
 
-Depending on the *frecklet* type (and the [connector](/documentation/connectors) that is used to provide that type, resources can be anything from an [Ansible role](docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) to executalbes, to [shell functions](www.shellscript.sh/functions.html).
+Depending on the *frecklet* type (and the [connector](/documentation/connectors) that is used to provide that type, resources can be anything from an [Ansible role](docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) to executables, to [shell functions](www.shellscript.sh/functions.html).
 
 </div>
 ### Repositories {: .section-title}

@@ -31,7 +31,7 @@ Without any additional metadata, a minimal *frecklet* is just a list of strings 
 
 #### A list of (one or more) strings
 
-In it's most basic form, a *frecklet* is a text file that contains a list of strings where each string represents a command (a.k.a. other *frecklet*) that doesn't require any arguments.
+In it's most basic form, a *frecklet* is a text file that contains a list of strings where each string represents a command (a.k.a. other *frecklet*) that does not require any arguments.
 Each list item needs to be the name of another frecklet that exists in the current [context](/doc/contexts)
 (get a list of all possible ones with: ``freckles list``).
 
@@ -51,7 +51,7 @@ would install *Docker* on the local machine (by executing [this frecklet](/freck
 In the example above we don't need any custom variables, as installing Docker is usually pretty straight-forward, and there is no configuration option that requires user input. This uses a list of single-key dicts, a data structure you'll see often within *freckles* as it's quite easy for a human to grasp what it is meant to express (esp. in 'yaml' format).
 
 Let's say we want to create a new user, which -- obviously -- as a minimum requires us to provide a username. We'll use a
-readymade and available *frecklet* again (the [``user-exists``](/frecklets/default/system/user-exists/) one), only this time with some custom
+ready-made and available *frecklet* again (the [``user-exists``](/frecklets/default/system/user-exists/) one), only this time with some custom
 parameters (we can investigate the available argument names and what they do with either ``freckles frecklet args user-exists`` or ``frecklecute user-exists --help``):
 
 ```yaml
@@ -131,7 +131,7 @@ will override both options. Here's how that would look:
       - markus
 ```
 
-This example is a bit non-sensical, but where this comes in really handy, for example, is when you want to provision a 
+This example is a bit nonsensical, but where this comes in really handy, for example, is when you want to provision a 
 new VM from a cloud provider. The first task would be executed locally, and talk to the providers API to create a new VM. 
 The second one would connect to that VM (probably as root), and does some initial setup (like provisioning an admin user, disabling password-login for ssh, etc.).
 
@@ -155,9 +155,9 @@ Once we want to add metadata, a *frecklet* becomes a dict-like data structure. T
 
 #### Adding documentation
 
-Having documentatin is always good, and the best place for documentation to live is very close to
+Having documentation is always good, and the best place for documentation to live is very close to
 the thing it is documenting. If we want to add documentation to a *frecklet*, we need to transform our
- frecklet content into a dictionary, and move the current tasklist (well, list of a single task in the example below)
+ frecklet content into a dictionary, and move the current task-list (well, list of a single task in the example below)
  under the ``frecklets`` key:
 
 ```yaml
@@ -196,7 +196,7 @@ Usage: frecklecute my-create-user.frecklet
 
 #### Adding arguments
 
-Up until now, our *frecklet* is hardcoded to do exactly one thing, creating a user with a fixed name and UID. What if we want to re-use it with different values? This is a typical use-case for variables, and what arguemnts are used for in command-line tools.
+Up until now, our *frecklet* is hardcoded to do exactly one thing, creating a user with a fixed name and UID. What if we want to re-use it with different values? This is a typical use-case for variables, and what arguments are used for in command-line tools.
 
 ##### Non-typed arguments
 
@@ -293,7 +293,7 @@ Every variable we want to ask the user needs to be present as key under the ``ar
 
 **Note**:
 
-Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwared more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
+Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
 
 ---   
                                     
@@ -326,7 +326,7 @@ Error: Invalid value for "--uid": markus is not a valid integer
 
 And that's basically it. There are more details you can adjust, both in terms how the *frecklet* presents itself to
 its users, and in terms of specifying exactly which tasks to execute, and in which manner. For more details on those,
-please refer to the [*freckles* documetation](https://docs.freckles.io).
+please refer to the [*freckles* documentation](https://docs.freckles.io).
 
 </div>
 <!-- end metadata dictionary -->
@@ -337,7 +337,7 @@ please refer to the [*freckles* documetation](https://docs.freckles.io).
 As I've mentioned before, there is an additional evolutionary step to how the items in the list under ``frecklets`` can
 be expressed. This is the internal representation of such an item within *freckles*, and it offers the most flexibility,
 but trades in some readability and ease of use. We'll only give a broad overview of the topic here, for more in-detail
-information plese refer to the [Anatomy of a *frecklet*](/doc/frecklets/anatomy) page.
+information please refer to the [Anatomy of a *frecklet*](/doc/frecklets/anatomy) page.
 
 For the purpose of explaining this, we'll use a *frecklet* without metadata, and only one task. This format is really
 only useful to develop new *frecklets* that call low-level tasks that don't have their own *frecklet* yet. Ideally, end-users
@@ -376,10 +376,10 @@ frecklets:
 The important part is the one list item under the ``frecklets`` key. We can see the item is a directory with 3 keys:
 
 - ``frecklet``: contains general metadata about the frecklet item and it's type
-- ``task``: contains [adapter](/doc/adapters)-specific metadata (in this case that doesn't really applly, as the item is just another *frecklet*)
+- ``task``: contains [adapter](/doc/adapters)-specific metadata (in this case that does not really apply, as the item is just another *frecklet*)
 - ``vars``: the vars to use for this *frecklet* in this run
 
-As I've said, using this format just to call an existing *frecklet* does not make too much sense. Let's see how the ``user-exists`` frecklet is implemented internally. Apart from creating the users group if it doesn't exist and some optional metadata (which we'll both ignore here), this is the basic implementation of ``user-exists``:
+As I've said, using this format just to call an existing *frecklet* does not make too much sense. Let's see how the ``user-exists`` frecklet is implemented internally. Apart from creating the users group if it does not exist and some optional metadata (which we'll both ignore here), this is the basic implementation of ``user-exists``:
 
 ```yaml
 frecklets:
