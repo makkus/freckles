@@ -40,7 +40,9 @@ class FreckletAugmentMetadataAttribute(TingAttribute):
         raw = ting._metadata_raw
 
         if isinstance(raw, string_types):
-            raise Exception("Invalid frecklet: content needs to be a list or dict: {}".format(raw))
+            raise Exception(
+                "Invalid frecklet: content needs to be a list or dict: {}".format(raw)
+            )
         elif isinstance(raw, Sequence):
             md = {"frecklets": raw}
         elif not isinstance(raw, Mapping):
@@ -61,6 +63,7 @@ class FreckletAugmentMetadataAttribute(TingAttribute):
             md["args"] = {}
 
         return md
+
 
 class FreckletValidAttribute(TingAttribute):
     def __init__(self):
@@ -83,8 +86,8 @@ class FreckletValidAttribute(TingAttribute):
             return False
         return True
 
-class FreckletExplodedAttribute(TingAttribute):
 
+class FreckletExplodedAttribute(TingAttribute):
     def __init__(self):
         pass
 

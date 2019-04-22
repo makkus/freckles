@@ -525,7 +525,9 @@ class FrecklesContext(object):
                 valid = self._context_config.get("remote_cache_valid_time")
 
                 if valid < 0:
-                    log.debug("Not pulling again, updating repo disabled: {}".format(url))
+                    log.debug(
+                        "Not pulling again, updating repo disabled: {}".format(url)
+                    )
                     return
                 now = time.time()
 
@@ -773,7 +775,13 @@ class FrecklesContext(object):
         )
         return self._frecklet_index
 
-    def get_frecklet(self, frecklet_name, validate=False, allow_external=False, check_path_first=False):
+    def get_frecklet(
+        self,
+        frecklet_name,
+        validate=False,
+        allow_external=False,
+        check_path_first=False,
+    ):
 
         if allow_external and check_path_first:
 
@@ -784,7 +792,12 @@ class FrecklesContext(object):
                     if result.valid:
                         return result
                 except (Exception) as e:
-                    log.warning("File exists for path '{}', but frecklet invalid, trying to find frecklet in index...".format(frecklet_name))
+                    log.debug(e, exc_info=1)
+                    log.warning(
+                        "File exists for path '{}', but frecklet invalid, trying to find frecklet in index...".format(
+                            frecklet_name
+                        )
+                    )
 
         result = self.frecklet_index.get(frecklet_name)
 
