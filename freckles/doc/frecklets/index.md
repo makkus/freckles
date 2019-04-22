@@ -1,12 +1,28 @@
 ---
 url_path_prio: 30
-title: Frecklets
+title: frecklets
 ---
 
-*frecklets* are basically [elastic configuration](https://frkl.io/blog/to_write) files. They configure a list of tasks, in an as minimal way as possible. Or, conversely, as elaborately as necessary.
+*frecklets* are building blocks for the *freckles* framework. Each *frecklet* is 
+designed to achieve one, fairly narrowly defined, purpose. This can be a small, atomic operation like 'create a directory', or something quite involved, like: 'setup a Wordpress server'.  
 
-*frecklets* are text files in the [YAML](http://yaml.org/) format. Other formats like [JSON](https://www.json.org/) or [TOML](https://github.com/toml-lang/toml) might be supported in the future.
+At their core, *frecklets* are either list- or dictionary-type data structures, with a sort of ['loose' schema](frecklets/evolution/#the-elastic-non-schema).
 
-If the base element of a *frecklet* is a list, it is interpreted as a list of tasks, without any metadata (documentation, argument descriptions, etc.). This allows for a quick way to put together utility scripts, but it is not recommended for anything you plan to re-use in the future, and possibly build upon. 
+Most comman, a *frecklet* is a text file in [YAML](http://yaml.org/) format. Other formats like [JSON](https://www.json.org/) or [TOML](https://github.com/toml-lang/toml) are also supported though. And, if used within an application, a *frecklet* can be just a list, or a dict in whatever programming language is used.
 
-If it is a dictionary/map, it needs to contain the ``tasks`` key, otherwise it is considered invalid. Other (optional) allowed keys are: ``doc``, ``args``, ``meta``. For more information on how that works, please check out the '[evolution of a frecklet](/doc/frecklets/evolution)' and '[anatomy of a frecklet](/doc/frecklets/anatomy) pages.
+Here are some resources to find out more about *frecklets*, how they are called, work, and look like:
+
+[Getting started](/doc/getting_started)
+:    The recommended guide to get started with using *freckles*. Read this first.
+
+[The evolution of a frecklet](/doc/frecklets/evolution)
+:    How to write a *frecklet*. Discusses the different ways a *frecklet* can be implemented, from the most simple and easy, to most featureful and flexible.
+
+[The anatomy of a frecklet](/doc/frecklets/anatomy)
+:    For when you want to create your own, non-trivial *frecklets*. Non essential reading if you just want to use *freckles* to run existing *frecklets*, or cobble together a few simple ones of your own.
+
+[Default frecklet index](/frecklets/default)
+:    The repository containing the default set of *frecklets* that which is included in the *freckles* application. 
+
+[Community frecklet index](/frecklets/community)
+:    The repository containing a *frecklets* that were created, improved and maintained by the community.

@@ -4,7 +4,7 @@ url_path_prio: 4
 ---
 
 
-## download binary {: .section-title}
+## Binary file download {: .section-title}
 <div class="section-block" markdown="1">
 
 The most straightforward way of installing *freckles* is to download the executable of the command you need:
@@ -30,7 +30,7 @@ ln -s freckles ~/.local/bin/frecklecute
  
 </div>
 
-## via 'curly' bootstrap script {: .section-title}
+## 'Curly' bootstrap script {: .section-title}
 <div class="section-block" markdown="1">
 
 A good way of bootstrapping *freckles* on vanilla boxes is by utilizing [``freck``](https://gitlab.com/freckles-io/freck), the official *freckles* bootstrap script.
@@ -59,7 +59,7 @@ Check out the [``freck`` README file](https://gitlab.com/freckles-io/freck#how-d
 
 </div>
 
-## via 'pip' (manual install) {: .section-title}
+## Python virtualenv / manual {: .section-title}
 <div class="section-block" markdown="1">
 
 TODO

@@ -1,16 +1,25 @@
 ---
-title: Configuration
-nav_priority: 3
+title: Configuration / contexts
+url_path_prio: 10
+draft: false
 ---
 
-## Configuration profiles
+DOCUMENTATION STILL TO BE DONE - CHECK BACK LATER
 
-TBD
+### Context {: .section-title}
+<div class="section-block" markdown="1">
 
-## Default profile
+Each freckles run happens in a so-called 'context'. A 'context' contains a list of available *frecklets* (indexed by their name), and external resources that might be needed for those *frecklets*.
+</div>
+### Resources {: .section-title}
+<div class="section-block" markdown="1">
 
-TBD
+Depending on the *frecklet* type (and the [connector](/documentation/connectors) that is used to provide that type, resources can be anything from an [Ansible role](docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) to executalbes, to [shell functions](www.shellscript.sh/functions.html).
 
-## Allow config change
+</div>
+### Repositories {: .section-title}
+<div class="section-block" markdown="1">
 
-TBD
+*frecklets* as well as *resources* either come included with the *freckles* package, one of the packages that contain a *freckles* connector, or they can be imported into a *freckles* run from a local folder or a remote git repository.
+
+</div>

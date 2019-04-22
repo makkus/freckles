@@ -352,8 +352,8 @@ Ok, here's the *frecklet* we'll be working with:
     name: markus
 ```
 
-Very simple, one task, makes sure a user exists on a system. You can use *freckles* to see the fully-exploded data
-structure of a *frecklet* which is used internally. Here's how:
+Very simple, one task, makes sure a user exists on a system. You can use *freckles* to display the fully-exploded, 
+internally used data structure of a *frecklet*. Here's how:
 
 ```console
 > freckles frecklet explode example.frecklet
