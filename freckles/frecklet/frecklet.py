@@ -43,7 +43,7 @@ class FreckletAugmentMetadataAttribute(TingAttribute):
             raise Exception(
                 "Invalid frecklet: content needs to be a list or dict: {}".format(raw)
             )
-        elif isinstance(raw, Sequence):
+        if isinstance(raw, Sequence):
             md = {"frecklets": raw}
         elif not isinstance(raw, Mapping):
             raise Exception("Invalid frecklet: content needs to be a list or dict")

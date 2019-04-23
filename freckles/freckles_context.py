@@ -775,44 +775,43 @@ class FrecklesContext(object):
         )
         return self._frecklet_index
 
-    def get_frecklet(
-        self,
-        frecklet_name,
-        validate=False,
-        allow_external=False,
-        check_path_first=False,
-    ):
+    def load_frecklet(self, frecklet_full_path_or_name_or_content, validate=False):
+        """Loads a frecklet.
 
-        if allow_external and check_path_first:
+        First, checksi if argument is a path and exists. If that is the case, uses that to create the frecklet. If not, tries
+        to find a frecklet with the provided name. If that doesn't exists either, it tries to interprete the string as frecklet content.
+        """
 
-            if os.path.isfile(frecklet_name):
-                try:
-                    frecklet_name = self.add_dynamic_frecklet(frecklet_name)
-                    result = self.frecklet_index.get(frecklet_name)
-                    if result.valid:
-                        return result
-                except (Exception) as e:
-                    log.debug(e, exc_info=1)
-                    log.warning(
-                        "File exists for path '{}', but frecklet invalid, trying to find frecklet in index...".format(
-                            frecklet_name
-                        )
-                    )
+        full_path = os.path.realpath(
+            os.path.expanduser(frecklet_full_path_or_name_or_content)
+        )
+
+        if os.path.isfile(frecklet_full_path_or_name_or_content):
+            frecklet_name = self.add_dynamic_frecklet(
+                path_or_frecklet_content=full_path, validate=validate
+            )
+            frecklet = self.get_frecklet(frecklet_name, validate=validate)
+            return (frecklet, frecklet_name)
+
+        if frecklet_full_path_or_name_or_content in self.get_frecklet_names():
+            frecklet = self.get_frecklet(
+                frecklet_full_path_or_name_or_content, validate=validate
+            )
+            return (frecklet, frecklet_full_path_or_name_or_content)
+
+        frecklet_name = self.add_dynamic_frecklet(frecklet_full_path_or_name_or_content)
+        if frecklet_name:
+            frecklet = self.get_frecklet(frecklet_name, validate=validate)
+            return (frecklet, frecklet_name)
+
+        return None, None
+
+    def get_frecklet(self, frecklet_name, validate=False):
 
         result = self.frecklet_index.get(frecklet_name)
 
-        if not result and allow_external:
-            try:
-                frecklet_name = self.add_dynamic_frecklet(frecklet_name)
-                result = self.frecklet_index.get(frecklet_name)
-                if validate:
-                    # TODO: change that to validation method once it's implemented
-                    valid = result.valid
-                    if not valid:
-                        log.debug("frecklet {} invalid".format(frecklet_name))
-                        result = None
-            except (Exception):
-                result = None
+        if validate:
+            result.valid
 
         return result
 
@@ -820,36 +819,40 @@ class FrecklesContext(object):
 
         return self.frecklet_index.keys()
 
-    def add_dynamic_frecklet(self, path_or_frecklet_content, validate=False):
+    def add_dynamic_frecklet(
+        self, path_or_frecklet_content, validate=False, check_path=True
+    ):
 
-        full_path = os.path.realpath(os.path.expanduser(path_or_frecklet_content))
+        local_frecklet_name = None
+        if check_path:
+            full_path = os.path.realpath(os.path.expanduser(path_or_frecklet_content))
 
-        if os.path.isfile(full_path):
+            if os.path.isfile(full_path):
 
-            index_conf = {
-                "repo_name": full_path,
-                "folder_url": full_path,
-                "loader": "frecklet_file",
-            }
+                index_conf = {
+                    "repo_name": full_path,
+                    "folder_url": full_path,
+                    "loader": "frecklet_file",
+                }
 
-            index = TingTings.from_config(
-                "frecklecutable",
-                [index_conf],
-                FRECKLET_LOAD_CONFIG,
-                indexes=["frecklet_name"],
-            )
-
-            names = list(index.get_ting_names())
-            if len(names) == 1:
-                local_frecklet_name = names[0]
-            else:
-                raise Exception(
-                    "Multiple frecklets found for name '{}', this is a bug: {}".format(
-                        path_or_frecklet_content, full_path
-                    )
+                index = TingTings.from_config(
+                    "frecklecutable",
+                    [index_conf],
+                    FRECKLET_LOAD_CONFIG,
+                    indexes=["frecklet_name"],
                 )
 
-        else:
+                names = list(index.get_ting_names())
+                if len(names) == 1:
+                    local_frecklet_name = names[0]
+                else:
+                    raise Exception(
+                        "Multiple frecklets found for name '{}', this is a bug: {}".format(
+                            path_or_frecklet_content, full_path
+                        )
+                    )
+
+        if local_frecklet_name is None:
 
             # try to parse string into a dict/list
             try:
@@ -880,7 +883,7 @@ class FrecklesContext(object):
                 else:
                     raise Exception(
                         "Multiple frecklets found for name '{}', this is a bug: {}".format(
-                            path_or_frecklet_content, full_path
+                            path_or_frecklet_content, frecklet_data
                         )
                     )
 
@@ -899,21 +902,23 @@ class FrecklesContext(object):
 
         if validate:
             f = self.get_frecklet(local_frecklet_name)
-            valid = f.valid
-            if not valid:
-                return None
+            f.valid
 
         return local_frecklet_name
 
-    def create_frecklecutable(self, frecklet_name):
+    def create_frecklecutable(self, frecklet_name, only_from_index=True):
 
-        frecklet = self.frecklet_index.get(frecklet_name, None)
-        if frecklet is None:
-            raise Exception(
-                "No frecklet named '{}' in context '{}'".format(
-                    frecklet_name, self._context_name
+        if only_from_index:
+
+            frecklet = self.frecklet_index.get(frecklet_name, None)
+            if frecklet is None:
+                raise Exception(
+                    "No frecklet named '{}' in context '{}'".format(
+                        frecklet_name, self._context_name
+                    )
                 )
-            )
+        else:
+            frecklet, internal_name = self.load_frecklet(frecklet_name)
 
         frecklecutable = frecklet.create_frecklecutable(context=self)
         return frecklecutable
