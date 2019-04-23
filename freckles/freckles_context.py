@@ -641,7 +641,7 @@ class FrecklesContext(object):
                 repo_desc["abbrev"] = abbrev
 
         else:
-            repo_desc["path"] = url
+            repo_desc["path"] = os.path.expanduser(url)
             repo_desc["remote"] = False
 
         if "alias" in repo_orig.keys():
@@ -939,9 +939,10 @@ class FrecklesContext(object):
             current_content = self.cnf.config
 
         current_content[ACCEPT_FRECKLES_LICENSE_KEYNAME] = user_accepts
-        repos = current_content.setdefault("repos", [])
-        if "community" not in repos:
-            repos.append("community")
+        if use_community:
+            repos = current_content.setdefault("repos", [])
+            if "community" not in repos:
+                repos.append("community")
 
         if save:
             with io.open(target, "w", encoding="utf-8") as f:
@@ -956,16 +957,15 @@ class FrecklesContext(object):
         result = {}
 
         cnf = self.cnf.get_interpreter("context")
-        symlink = cnf.get("current_run_folder")
+        symlink = os.path.expanduser(cnf.get("current_run_folder"))
 
         if env_dir is None:
 
-            run_folder = cnf.get("run_folder")
+            env_dir = os.path.expanduser(cnf.get("run_folder"))
             force = cnf.get("force")
             add_timestamp = cnf.get("add_timestamp_to_env")
             adapter_name = cnf.get("add_adapter_name_to_env")
 
-            env_dir = os.path.expanduser(run_folder)
             if adapter_name:
                 dirname, basename = os.path.split(env_dir)
                 env_dir = os.path.join(dirname, "{}_{}".format(basename, adapter.name))
