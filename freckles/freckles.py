@@ -1,5 +1,5 @@
 from freckles.context.config import ContextConfigs
-from .context.freckles_context import FrecklesContext
+from freckles.context.freckles_context import FrecklesContext
 
 
 class Freckles(object):
