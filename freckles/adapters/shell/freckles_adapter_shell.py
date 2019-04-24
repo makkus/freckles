@@ -13,6 +13,7 @@ from freckles.defaults import (
     FRECKLET_KEY_NAME,
 )
 from frutils import dict_merge
+from frutils.config import Cnf
 from ting.tings import TingTings
 
 SHELL_CONFIG_SCHEMA = {}
@@ -192,11 +193,10 @@ class ScriptlingContext(object):
 
 
 class FrecklesAdapterShell(FrecklesAdapter):
-    def __init__(self, name, cnf, context):
+    def __init__(self, name, context):
 
         super(FrecklesAdapterShell, self).__init__(
             adapter_name=name,
-            cnf=cnf,
             context=context,
             config_schema=SHELL_CONFIG_SCHEMA,
             run_config_schema=SHELL_RUN_CONFIG_SCHEMA,
@@ -230,7 +230,8 @@ class FrecklesAdapterShell(FrecklesAdapter):
         if self._shell_context is not None:
             return self._shell_context
 
-        self._shell_context = ScriptlingContext("default", self.cnf, None)
+        cnf = Cnf(self.context.config)
+        self._shell_context = ScriptlingContext("default", cnf, None)
 
         return self._shell_context
 

@@ -18,7 +18,7 @@ from .defaults import (
     FRECKLES_DEFAULT_ARG_SCHEMA,
     PASSWORD_ASK_MARKER,
 )
-from .exceptions import FrecklesVarException
+from .exceptions import FrecklesVarException, FrecklesException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
@@ -615,8 +615,14 @@ class Frecklecutable(object):
                 runs_result.append(run_result)
 
             except (Exception) as e:
-                root_run_task.finish(success=False, error_msg=str(e))
-                click.echo("frecklecutable run failed: {}".format(e))
+
+                if isinstance(e, FrecklesException):
+                    msg = e.message
+                else:
+                    msg = str(e)
+
+                root_run_task.finish(success=False, error_msg=msg)
+                # click.echo("frecklecutable run failed: {}".format(e))
                 log.debug(e, exc_info=1)
                 break
                 # import traceback

@@ -20,11 +20,10 @@ yaml = YAML()
 
 
 class FrecklesAdapterFreckles(FrecklesAdapter):
-    def __init__(self, name, cnf, context):
+    def __init__(self, name, context):
 
         super(FrecklesAdapterFreckles, self).__init__(
             adapter_name=name,
-            cnf=cnf,
             context=context,
             config_schema=FRECKLES_ADAPTER_CONFIG_SCHEMA,
             run_config_schema=FRECKLES_ADAPTER_RUN_CONFIG_SCHEMA,

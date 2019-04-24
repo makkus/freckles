@@ -1,4 +1,3 @@
-from frutils import dict_merge
 from .defaults import FRECKLES_RUN_DIR, FRECKLES_CURRENT_RUN_SYMLINK
 
 # schema to load '*.context' files in $HOME/.config/freckles
@@ -73,43 +72,39 @@ There are 3 special repository aliases that can be used instead of a path:
             ],
         },
     },
-    # "resources": {
-    #     "empty": True,
-    #     "default": {},
-    #     "type": "dict",
-    #     "keyschema": {"type": "string"},
-    #     "valueschema": {"type": "dict"},
-    # },
     "allow_remote": {
         "type": "boolean",
         "default": False,
-        "doc": "Whether to allow remote repositories and resources.",
+        "doc": "Allow all remote repositories (except ones that match an item in 'allow_remote_blacklist').",
     },
-    "ignore_nonexistent_repos": {
+    "allow_remote_whitelist": {
+        "type": "list",
+        "default": [],
+        "doc": "List of urls (or url regexes) of allowed remote repositories.",
+    },
+    "ignore_empty_repos": {
         "type": "boolean",
         "default": True,
-        "doc": "Whether to ignore non-existent local repos or fail if one such is encountered.",
+        "doc": "Whether to ignore non-existent or empty local repos or fail if one such is encountered.",
+        "tags": ["safe"],
     },
-    # "always_update_remote_repos": {
-    #     "type": "boolean",
-    #     "default": True,
-    #     "doc": "Whether to always update remote repos, even if they are already checked out.",
-    # },
     "remote_cache_valid_time": {
         "type": "integer",
         "default": -1,
         "doc": "Update remote repos if their last checkout was longer ago than this threshold.",
+        "tags": ["safe"],
     },
     "run_folder": {
         "type": "string",
         "default": FRECKLES_RUN_DIR,
         "doc": {"short_help": "the target for the generated run environment"},
-        # "target_key": "target",
+        "tags": ["safe"],
     },
     "current_run_folder": {
         "type": "string",
         "default": FRECKLES_CURRENT_RUN_SYMLINK,
         "doc": {"short_help": "target of a symlink the current run environment"},
+        "tags": ["safe"],
     },
     "force_run_folder": {
         "type": "boolean",
@@ -118,6 +113,7 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {
             "short_help": "overwrite a potentially already existing run environment"
         },
+        "tags": ["safe"],
     },
     "add_timestamp_to_env": {
         "type": "boolean",
@@ -125,6 +121,7 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {
             "short_help": "whether to add a timestamp to the run environment folder name"
         },
+        "tags": ["safe"],
     },
     "add_adapter_name_to_env": {
         "type": "boolean",
@@ -132,13 +129,16 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {
             "short_help": "whether to add the adapter name to the run environment folder name"
         },
+        "tags": ["safe"],
     },
     "callback": {
         "type": ["string", "dict", "list"],
         "default": ["auto"],
         "doc": {"short_help": "a list of callbacks to attach to a freckles run"},
+        "tags": ["safe"],
     },
 }
+
 
 # Schema to contain all the settings that can only be set in the 'default' context. Mainly used to give the user
 # contol about what other, imported context configurations are allowed to do or not.
@@ -151,125 +151,4 @@ FRECKLES_PERMISSION_SCHEMA = {
 }
 
 # Merged schema, contains all high-level permission variables, as well as the default context config ones.
-FRECKLES_DEFAULT_CONFIG_SCHEMA = dict_merge(
-    FRECKLES_CONTEXT_SCHEMA, FRECKLES_PERMISSION_SCHEMA, copy_dct=True
-)
-
-
-# FRECKLES_CONFIG_SCHEMA = {
-#     "allow_dynamic_frecklets": {
-#         "type": "boolean",
-#         "default": False,
-#         "__doc__": {
-#             "short_help": "allow the dynamic creation of frecklets from a string (if the adapter allows it). This is not implemented yet."
-#         },
-#     },
-#     "task_type_whitelist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {
-#             "short_help": "only allow a certain type of tasks (not implemented yet)"
-#         },
-#     },
-#     "task_type_blacklist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {"short_help": "block certain types of tasks (not implemented yet)"},
-#     },
-#     "allowed_adapters": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {"short_help": "a list of allowed adapters"},
-#     },
-# }
-#
-# FRECKLES_CONTROL_CONFIG_SCHEMA = {
-#     "target": {
-#         "type": "string",
-#         "default": "boolean",
-#         "__doc__": {"short_help": "the target to run the command on"},
-#     },
-#     "port": {
-#         "type": "integer",
-#         "__doc__": {"short_help": "the port to connect to (if appropriate)"},
-#     },
-#     "user": {"type": "string", "__doc__": {"short_help": "the user to connect as"}},
-#     "output": {
-#         "type": "string",
-#         "default": "freckles",
-#         "__alias__": "run_callback",
-#         "__doc__": {
-#             "short_help": "the name of the run callback to use (advanced, you most likely should not touch this)"
-#         },
-#     },
-#     "run_callback_config": {
-#         "type": "dict",
-#         "__doc__": {
-#             "short_help": "the configuration for the run used run callback (advanced, you most likely should not touch this)"
-#         },
-#     },
-#     "no_run": {
-#         "type": "boolean",
-#         "default": False,
-#         "__doc__": {
-#             "short_help": "whether to actually run the task list (for debugging/information purposes)"
-#         },
-#     },
-#     "elevated": {
-#         "type": "boolean",
-#         "__doc__": {"short_help": "whether this run needs elevated permissions"},
-#     },
-#     "keep_run_folders": {
-#         "type": "integer",
-#         "__doc__": {"short_help": "how many run folders to keep (per connector)"},
-#         "default": 1,
-#     },
-# }
-#
-# REPO_MANAGER_CONFIG_SCHEMA = {
-#     "context_repos": {
-#         "type": "list",
-#         "default": DEFAULT_FRECKLES_REPOS,
-#         "schema": {"type": "string"},
-#     },
-#     "allow_remote": {
-#         "type": "boolean",
-#         "default": False,
-#         "__doc__": {
-#             "short_help": "allow external (remote) resources (frecklets, adapter-specific resources, ...)"
-#         },
-#     },
-#     "allow_community": {
-#         "type": "boolean",
-#         "default": True,
-#         "__doc__": {
-#             "short_help": "allow resources from the community repo (https://gitlab.com/freckles-io/freckles-community)"
-#         },
-#     },
-#     "remote_whitelist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {
-#             "short_help": "list of regular expressions of allowed external urls"
-#         },
-#     },
-#     "remote_blacklist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {
-#             "short_help": "list of regular expressions of prohibitet external urls"
-#         },
-#     },
-#     "local_whitelist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {"short_help": "list of regular expressions of allowed local paths"},
-#     },
-#     "local_blacklist": {
-#         "type": "list",
-#         "schema": {"type": "string"},
-#         "__doc__": {
-#             "short_help": "list of regular expressions of prohibited local paths"
-#         },
-#     },
-# }
+FRECKLES_DEFAULT_CONFIG_SCHEMA = FRECKLES_CONTEXT_SCHEMA

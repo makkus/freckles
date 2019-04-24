@@ -35,7 +35,7 @@ def create_adapter(adapter_name, cnf, context):
         namespace="freckles.adapters",
         name=adapter_name,
         invoke_on_load=True,
-        invoke_args=(adapter_name, cnf, context),
+        invoke_args=(adapter_name, context),
     )
 
     return mgr.driver
@@ -43,22 +43,40 @@ def create_adapter(adapter_name, cnf, context):
 
 @six.add_metaclass(abc.ABCMeta)
 class FrecklesAdapter(object):
-    def __init__(self, adapter_name, cnf, context, config_schema, run_config_schema):
+    def __init__(self, adapter_name, context, config_schema, run_config_schema):
 
         self._name = adapter_name
         self._context = context
-        self._cnf_interpreter = cnf.add_interpreter(
+        self._context.add_config_interpreter(
             "adapter_config_{}".format(adapter_name), config_schema
         )
-        self._run_cnf_interpreter = cnf.add_interpreter(
+        self._context.add_config_interpreter(
             "adapter_run_config_{}".format(adapter_name), run_config_schema
         )
 
         self.resource_folder_map = None
 
-    @property
-    def cnf(self):
-        return self._cnf_interpreter
+    def config_value(self, key):
+
+        return self._context.config_value(
+            key, interpreter_name="adapter_config_{}".format(self._name)
+        )
+
+    def run_config_value(self, key):
+
+        return self._context.config_value(
+            key, interpreter_name="adapter_run_config_{}".format(self._name)
+        )
+
+    def run_config(self, *overlays):
+
+        return self._context.config(
+            "adapter_run_config_{}".format(self._name), *overlays
+        )
+
+    def config(self, *overlays):
+
+        return self._context.config("adapter_config_{}".format(self._name), *overlays)
 
     @property
     def name(self):
@@ -131,7 +149,7 @@ class FrecklesAdapter(object):
         self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
     ):
 
-        final_run_config = self._run_cnf_interpreter.overlay(run_config)
+        final_run_config = self.run_config(run_config)
 
         tasklist = copy.deepcopy(tasklist)
 

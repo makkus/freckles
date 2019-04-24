@@ -1,40 +1,17 @@
 import io
-import json
 import os
 import shutil
 import time
 import uuid
-from collections import Mapping, Iterable, Sequence
+from collections import Mapping, Sequence
 from datetime import datetime
 
 from plumbum import local
 from ruamel.yaml import YAML
 from six import string_types
 
-from frkl.utils import expand_string_to_git_details
-from frkl_pkg import FrklPkg
-from frutils import (
-    is_url_or_abbrev,
-    DEFAULT_URL_ABBREVIATIONS_REPO,
-    calculate_cache_location_for_url,
-    readable,
-)
-from frutils.config.cnf import Cnf
-
-# from .output_callback import DefaultCallback
-from frutils.frutils import auto_parse_string
-from frutils.tasks.callback import load_callback
-from frutils.tasks.tasks import Tasks
-from ting.ting_attributes import (
-    FrontmatterAndContentAttribute,
-    DictContentAttribute,
-    FileStringContentAttribute,
-    ValueAttribute,
-)
-from ting.ting_cast import TingCast
-from ting.tings import TingTings
-from .adapters.adapters import create_adapter
-from .defaults import (
+from freckles.adapters.adapters import create_adapter
+from freckles.defaults import (
     MIXED_CONTENT_TYPE,
     FRECKLES_CACHE_BASE,
     FRECKLES_RUN_INFO_FILE,
@@ -43,10 +20,25 @@ from .defaults import (
     FRECKLES_CONFIG_DIR,
     FRECKLES_EXTRA_LOOKUP_PATHS,
 )
-from .exceptions import FrecklesConfigException
-from .frecklet.arguments import *  # noqa
-from .frecklet.frecklet import FRECKLET_LOAD_CONFIG
-from .schemas import FRECKLES_CONTEXT_SCHEMA
+from freckles.exceptions import (
+    FrecklesConfigException,
+    FrecklesPermissionException,
+)
+from freckles.frecklet.arguments import *  # noqa
+from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
+from frkl.utils import expand_string_to_git_details
+from frkl_pkg import FrklPkg
+from frutils import (
+    is_url_or_abbrev,
+    DEFAULT_URL_ABBREVIATIONS_REPO,
+    calculate_cache_location_for_url,
+    readable,
+)
+# from .output_callback import DefaultCallback
+from frutils.frutils import auto_parse_string
+from frutils.tasks.callback import load_callback
+from frutils.tasks.tasks import Tasks
+from ting.tings import TingTings
 
 log = logging.getLogger("freckles")
 
@@ -68,225 +60,225 @@ yaml = YAML()
 #         return Cnf(config_dict=ting.config_dict)
 
 
-class CnfProfileTingCast(TingCast):
-    """A :class:`TingCast` to create freckles profiles by reading yaml files."""
-
-    CNF_PROFILE_ATTRIBUTES = [
-        FileStringContentAttribute(target_attr_name="ting_content"),
-        FrontmatterAndContentAttribute(
-            content_name="content", source_attr_name="ting_content"
-        ),
-        ValueAttribute("config_dict", source_attr_name="content"),
-        # CnfTingAttribute(),
-        DictContentAttribute(
-            source_attr_name="content",
-            dict_name="config_dict",
-            default={},
-            copy_default=True,
-        ),
-    ]
-
-    def __init__(self):
-
-        super(CnfProfileTingCast, self).__init__(
-            class_name="CnfProfile",
-            ting_attributes=CnfProfileTingCast.CNF_PROFILE_ATTRIBUTES,
-            ting_id_attr="filename_no_ext",
-        )
-
-
-class CnfProfiles(TingTings):
-    """A class to manage freckles profiles.
-
-    This reads all '*.profile' files in the freckles config folder. Those are later used to create a freckles context
-    (per profile). It also checks whether there exists a 'default.profile' file with the 'accept_freckles_license' value
-    set to 'true'. Only if that is the case will it allow custom profiles (mainly for security reasons - the user should
-    explicitely accept that certain configurations can be insecure).
-    """
-
-    DEFAULT_TING_CAST = CnfProfileTingCast
-
-    # LOAD_CONFIG_SCHEMA = PROFILE_LOAD_CONFIG_SCHEMA
-
-    def __init__(self, repo_name, tingsets, cnf, **kwargs):
-
-        if cnf is None:
-            raise Exception("Base configuration object can't be None.")
-
-        if "profile_load" not in cnf.get_interpreter_names():
-            raise Exception("No 'profile_load' cnf interpreter available.")
-        load_config = cnf.get_interpreter("profile_load")
-
-        if "root_config" not in cnf.get_interpreter_names():
-            raise Exception("No root_config profile interpreter in cnf.")
-
-        if (
-            "default_profile"
-            in cnf.get_interpreter("root_config").get_interpreter_names()
-        ):
-            # not sure if this is necessary, might take that out later
-            raise Exception(
-                "Configuration already contains a 'default_profile' interpreter."
-            )
-
-        self._root_config = cnf.get_interpreter("root_config")
-
-        self._default_profile_values = None
-
-        super(CnfProfiles, self).__init__(
-            repo_name=repo_name,
-            tingsets=tingsets,
-            load_config=load_config,
-            indexes=["filename_no_ext"],
-        )
-
-    @property
-    def root_config(self):
-
-        return self._root_config
-
-    @property
-    def default_profile_dict(self):
-
-        if self._default_profile_values is not None:
-            return self._default_profile_values
-
-        if "default" not in self.keys():
-            return self._root_config.config
-
-        default_config = self["default"].config_dict
-
-        license_accepted = default_config.get("accept_freckles_license", False)
-        if not license_accepted:
-            raise Exception(
-                "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
-            )
-
-        self._default_profile_values = dict(default_config)
-        for k, v in self._root_config.config.items():
-            if k not in self._default_profile_values.keys():
-                self._default_profile_values[k] = v
-
-        return self._default_profile_values
-
-    def license_accepted(self):
-
-        if "default" not in self.keys():
-            return False
-
-        default_config = self["default"].config_dict
-        license_accepted = default_config.get("accept_freckles_license", False)
-        return license_accepted
-
-    def _get_profile_dict(self, profile_name="default"):
-
-        if profile_name == "default":
-            return self.default_profile_dict
-
-        if not self.license_accepted() and profile_name != "default":
-            raise Exception(
-                "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
-            )
-
-        result = self.get(profile_name)
-
-        if not result:
-            raise Exception("No context named '{}' available.".format(profile_name))
-
-        return result.config_dict
-
-    def create_profile_cnf(self, profile_configs, extra_repos=None):
-
-        if isinstance(profile_configs, (string_types, Mapping)):
-            profile_configs = [profile_configs]
-        elif not isinstance(profile_configs, Iterable):
-            profile_configs = [profile_configs]
-
-        # if len(profile_list) == 1 and isinstance(profile_list[0], string_types) and profile_list[0] in self.get_profile_names():
-        #     return self.get_profile_cnf(profile_list[0])
-
-        result = {}
-        for profile in profile_configs:
-
-            if isinstance(profile, string_types):
-                profile = profile.strip()
-                if not self.license_accepted() and profile == "default":
-                    profile = self.default_profile_dict
-                elif not self.license_accepted() and profile in self.keys():
-                    raise Exception(
-                        "The initial freckles configuration is locked, so can't open context configuration '{}'. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.".format(
-                            profile
-                        )
-                    )
-                elif self.license_accepted() and profile in self.get_profile_names():
-                    profile = self._get_profile_dict(profile)
-                elif not profile.startswith("{") and "=" in profile:
-                    key, value = profile.split("=", 1)
-                    if value.lower() in ["true", "yes"]:
-                        value = True
-                    elif value.lower() in ["false", "no"]:
-                        value = False
-                    # elif "::" in value:
-                    #     value = value.split("::")
-                    else:
-                        try:
-                            value = int(value)
-                        except (Exception):
-                            # raise Exception(
-                            #     "Can't assemble profile configuration, unknown type for: {}".format(
-                            #         value
-                            #     )
-                            # )
-                            pass
-                    profile = {key: value}
-
-                elif profile.startswith("{"):
-                    # trying to read json
-                    try:
-                        profile = json.loads(profile)
-                    except (Exception):
-                        raise Exception(
-                            "Can't assemble profile configuration, don't know how to handle: {}".format(
-                                profile
-                            )
-                        )
-                else:
-                    raise Exception(
-                        "Can't create profile configuration, invalid config: {}.".format(
-                            profile
-                        )
-                    )
-
-            if isinstance(profile, Mapping):
-
-                dict_merge(result, dict(profile), copy_dct=False)
-            else:
-                raise Exception(
-                    "Can't assemble profile configuration, unknown type '{}' for value '{}'".format(
-                        type(profile), profile
-                    )
-                )
-
-        if extra_repos:
-            if isinstance(extra_repos, string_types):
-                extra_repos = [extra_repos]
-            else:
-                extra_repos = list(extra_repos)
-            result["repos"] = list(result["repos"]) + extra_repos
-
-        return Cnf(config_dict=result)
-
-    def get_profile_names(self):
-
-        if not self.license_accepted():
-            return ["default"]
-
-        else:
-            names = list(self.get_ting_names())
-            if "default" not in names:
-                names.append("default")
-
-            return sorted(names)
+# class CnfProfileTingCast(TingCast):
+#     """A :class:`TingCast` to create freckles profiles by reading yaml files."""
+#
+#     CNF_PROFILE_ATTRIBUTES = [
+#         FileStringContentAttribute(target_attr_name="ting_content"),
+#         FrontmatterAndContentAttribute(
+#             content_name="content", source_attr_name="ting_content"
+#         ),
+#         ValueAttribute("config_dict", source_attr_name="content"),
+#         # CnfTingAttribute(),
+#         DictContentAttribute(
+#             source_attr_name="content",
+#             dict_name="config_dict",
+#             default={},
+#             copy_default=True,
+#         ),
+#     ]
+#
+#     def __init__(self):
+#
+#         super(CnfProfileTingCast, self).__init__(
+#             class_name="CnfProfile",
+#             ting_attributes=CnfProfileTingCast.CNF_PROFILE_ATTRIBUTES,
+#             ting_id_attr="filename_no_ext",
+#         )
+#
+#
+# class CnfProfiles(TingTings):
+#     """A class to manage freckles profiles.
+#
+#     This reads all '*.profile' files in the freckles config folder. Those are later used to create a freckles context
+#     (per profile). It also checks whether there exists a 'default.profile' file with the 'accept_freckles_license' value
+#     set to 'true'. Only if that is the case will it allow custom profiles (mainly for security reasons - the user should
+#     explicitely accept that certain configurations can be insecure).
+#     """
+#
+#     DEFAULT_TING_CAST = CnfProfileTingCast
+#
+#     # LOAD_CONFIG_SCHEMA = PROFILE_LOAD_CONFIG_SCHEMA
+#
+#     def __init__(self, repo_name, tingsets, cnf, **kwargs):
+#
+#         if cnf is None:
+#             raise Exception("Base configuration object can't be None.")
+#
+#         if "profile_load" not in cnf.get_interpreter_names():
+#             raise Exception("No 'profile_load' cnf interpreter available.")
+#         load_config = cnf.get_interpreter("profile_load")
+#
+#         if "root_config" not in cnf.get_interpreter_names():
+#             raise Exception("No root_config profile interpreter in cnf.")
+#
+#         if (
+#             "default_profile"
+#             in cnf.get_interpreter("root_config").get_interpreter_names()
+#         ):
+#             # not sure if this is necessary, might take that out later
+#             raise Exception(
+#                 "Configuration already contains a 'default_profile' interpreter."
+#             )
+#
+#         self._root_config = cnf.get_interpreter("root_config")
+#
+#         self._default_profile_values = None
+#
+#         super(CnfProfiles, self).__init__(
+#             repo_name=repo_name,
+#             tingsets=tingsets,
+#             load_config=load_config,
+#             indexes=["filename_no_ext"],
+#         )
+#
+#     @property
+#     def root_config(self):
+#
+#         return self._root_config
+#
+#     @property
+#     def default_profile_dict(self):
+#
+#         if self._default_profile_values is not None:
+#             return self._default_profile_values
+#
+#         if "default" not in self.keys():
+#             return self._root_config.config
+#
+#         default_config = self["default"].config_dict
+#
+#         license_accepted = default_config.get("accept_freckles_license", False)
+#         if not license_accepted:
+#             raise Exception(
+#                 "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
+#             )
+#
+#         self._default_profile_values = dict(default_config)
+#         for k, v in self._root_config.config.items():
+#             if k not in self._default_profile_values.keys():
+#                 self._default_profile_values[k] = v
+#
+#         return self._default_profile_values
+#
+#     def license_accepted(self):
+#
+#         if "default" not in self.keys():
+#             return False
+#
+#         default_config = self["default"].config_dict
+#         license_accepted = default_config.get("accept_freckles_license", False)
+#         return license_accepted
+#
+#     def _get_profile_dict(self, profile_name="default"):
+#
+#         if profile_name == "default":
+#             return self.default_profile_dict
+#
+#         if not self.license_accepted() and profile_name != "default":
+#             raise Exception(
+#                 "The initial freckles configuration is locked. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration."
+#             )
+#
+#         result = self.get(profile_name)
+#
+#         if not result:
+#             raise Exception("No context named '{}' available.".format(profile_name))
+#
+#         return result.config_dict
+#
+#     def create_profile_cnf(self, profile_configs, extra_repos=None):
+#
+#         if isinstance(profile_configs, (string_types, Mapping)):
+#             profile_configs = [profile_configs]
+#         elif not isinstance(profile_configs, Iterable):
+#             profile_configs = [profile_configs]
+#
+#         # if len(profile_list) == 1 and isinstance(profile_list[0], string_types) and profile_list[0] in self.get_profile_names():
+#         #     return self.get_profile_cnf(profile_list[0])
+#
+#         result = {}
+#         for profile in profile_configs:
+#
+#             if isinstance(profile, string_types):
+#                 profile = profile.strip()
+#                 if not self.license_accepted() and profile == "default":
+#                     profile = self.default_profile_dict
+#                 elif not self.license_accepted() and profile in self.keys():
+#                     raise Exception(
+#                         "The initial freckles configuration is locked, so can't open context configuration '{}'. Use the following command to unlock:\n\nfreckles config unlock\n\nFor more information, please visit: https://freckles.io/docs/configuration.".format(
+#                             profile
+#                         )
+#                     )
+#                 elif self.license_accepted() and profile in self.get_profile_names():
+#                     profile = self._get_profile_dict(profile)
+#                 elif not profile.startswith("{") and "=" in profile:
+#                     key, value = profile.split("=", 1)
+#                     if value.lower() in ["true", "yes"]:
+#                         value = True
+#                     elif value.lower() in ["false", "no"]:
+#                         value = False
+#                     # elif "::" in value:
+#                     #     value = value.split("::")
+#                     else:
+#                         try:
+#                             value = int(value)
+#                         except (Exception):
+#                             # raise Exception(
+#                             #     "Can't assemble profile configuration, unknown type for: {}".format(
+#                             #         value
+#                             #     )
+#                             # )
+#                             pass
+#                     profile = {key: value}
+#
+#                 elif profile.startswith("{"):
+#                     # trying to read json
+#                     try:
+#                         profile = json.loads(profile)
+#                     except (Exception):
+#                         raise Exception(
+#                             "Can't assemble profile configuration, don't know how to handle: {}".format(
+#                                 profile
+#                             )
+#                         )
+#                 else:
+#                     raise Exception(
+#                         "Can't create profile configuration, invalid config: {}.".format(
+#                             profile
+#                         )
+#                     )
+#
+#             if isinstance(profile, Mapping):
+#
+#                 dict_merge(result, dict(profile), copy_dct=False)
+#             else:
+#                 raise Exception(
+#                     "Can't assemble profile configuration, unknown type '{}' for value '{}'".format(
+#                         type(profile), profile
+#                     )
+#                 )
+#
+#         if extra_repos:
+#             if isinstance(extra_repos, string_types):
+#                 extra_repos = [extra_repos]
+#             else:
+#                 extra_repos = list(extra_repos)
+#             result["repos"] = list(result["repos"]) + extra_repos
+#
+#         return Cnf(config_dict=result)
+#
+#     def get_profile_names(self):
+#
+#         if not self.license_accepted():
+#             return ["default"]
+#
+#         else:
+#             names = list(self.get_ting_names())
+#             if "default" not in names:
+#                 names.append("default")
+#
+#             return sorted(names)
 
 
 def startup_housekeeping():
@@ -318,14 +310,12 @@ def startup_housekeeping():
 
 
 class FrecklesContext(object):
-    def __init__(self, context_name, cnf):
+    def __init__(self, context_name, config):
 
         startup_housekeeping()
 
         self._context_name = context_name
-        self._cnf = cnf
-        self._context_config = cnf.add_interpreter("context", FRECKLES_CONTEXT_SCHEMA)
-        # self._folder_load_config = cnf.add_interpreter("frecklet_load", FRECKLET_LOAD_CONFIG_SCHEMA)
+        self._config = config
 
         self._frecklet_index = None
         self._run_info = {}
@@ -339,7 +329,7 @@ class FrecklesContext(object):
         # self._callback = DefaultCallback(profile="verbose")
         # self._callback = SimpleCallback()
         self._callbacks = []
-        callback_config = self._context_config.config.get("callback")
+        callback_config = self.config_value("callback")
 
         if isinstance(callback_config, string_types):
             if "::" in callback_config:
@@ -387,8 +377,8 @@ class FrecklesContext(object):
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
-        for adapter_name in self._context_config.config.get("adapters"):
-            adapter = create_adapter(adapter_name, self._cnf, self)
+        for adapter_name in self.config_value("adapters"):
+            adapter = create_adapter(adapter_name, self._config.cnf, self)
             self._adapters[adapter_name] = adapter
             for tt in adapter.get_supported_task_types():
                 self._adapter_tasktype_map.setdefault(tt, []).append(adapter_name)
@@ -426,10 +416,23 @@ class FrecklesContext(object):
 
         return self._adapters
 
-    @property
-    def context_cnf(self):
+    # @property
+    # def config(self):
+    #     return self._config
 
-        return self._cnf.get_interpreter("context")
+    def add_config_interpreter(self, interpreter_name, schema):
+
+        return self._config.add_cnf_interpreter(
+            interpreter_name=interpreter_name, schema=schema
+        )
+
+    def config_value(self, key, interpreter_name=None):
+
+        return self._config.config_value(key=key, interpreter_name=interpreter_name)
+
+    def config(self, interpreter_name, *overlays):
+
+        return self._config.config(interpreter_name, *overlays)
 
     def ensure_local_repos(self, repo_list):
 
@@ -522,7 +525,7 @@ class FrecklesContext(object):
 
             if cache_key in self._run_info.get("pull_cache", {}).keys():
                 last_time = self._run_info["pull_cache"][cache_key]
-                valid = self._context_config.get("remote_cache_valid_time")
+                valid = self.config_value("remote_cache_valid_time")
 
                 if valid < 0:
                     log.debug(
@@ -561,27 +564,33 @@ class FrecklesContext(object):
 
             if not os.path.exists(repo["path"]):
 
-                if self._context_config.get("ignore_nonexistent_repos"):
+                if self.config_value("ignore_empty_repos"):
                     log.warning(
                         "Local repo '{}' empty, ignoring...".format(repo["path"])
                     )
                 else:
-                    raise Exception(
-                        "Local repo '{}' does not exists, exiting...".format(
+                    raise FrecklesConfigException(
+                        keys="repos",
+                        msg="Local repository folder '{}' does not exists.".format(
                             repo["path"]
-                        )
+                        ),
+                        solution="Fix repository path in your configuration, create repository folder, or change 'ignore_empty_repos' configuration option to 'true'.",
                     )
 
             return None
 
         # remote repo
-        if not self._context_config.get("allow_remote"):
+        if not self.config_value("allow_remote"):
 
             if repo.get("alias", None) != "community":
-                raise Exception(
-                    "Remote repos not allowed in config, can't load repo '{}'. Exiting...".format(
-                        repo["url"]
-                    )
+                url = repo.get("url", None)
+                if url is None:
+                    url = str(repo)
+                raise FrecklesPermissionException(
+                    msg="Use of repo '{}' not allowed.".format(url),
+                    reason="Repo not in 'allow_remote_whitelist' or 'allow_remote' not set to 'true'.",
+                    key="repos",
+                    solution="Add the repo to the 'allow_remote_whiltelist', or set configuration option 'allow_remote' to 'true'.",
                 )
 
         return repo
@@ -652,7 +661,7 @@ class FrecklesContext(object):
 
     def _create_resources_repo_list(self):
 
-        repo_list = self._context_config.config.get("repos")
+        repo_list = self.config_value("repos")
 
         resources_list = []
 
@@ -711,10 +720,6 @@ class FrecklesContext(object):
                 result.append(r)
 
         return result
-
-    @property
-    def cnf(self):
-        return self._cnf
 
     @property
     def context_name(self):
@@ -936,7 +941,7 @@ class FrecklesContext(object):
             with io.open(target, "r", encoding="utf-8") as f:
                 current_content = yaml.load(f)
         else:
-            current_content = self.cnf.config
+            current_content = {}
 
         current_content[ACCEPT_FRECKLES_LICENSE_KEYNAME] = user_accepts
         if use_community:
@@ -956,15 +961,14 @@ class FrecklesContext(object):
 
         result = {}
 
-        cnf = self.cnf.get_interpreter("context")
-        symlink = os.path.expanduser(cnf.get("current_run_folder"))
+        symlink = os.path.expanduser(self.config_value("current_run_folder"))
 
         if env_dir is None:
 
-            env_dir = os.path.expanduser(cnf.get("run_folder"))
-            force = cnf.get("force")
-            add_timestamp = cnf.get("add_timestamp_to_env")
-            adapter_name = cnf.get("add_adapter_name_to_env")
+            env_dir = os.path.expanduser(self.config_value("run_folder"))
+            force = self.config_value("force")
+            add_timestamp = self.config_value("add_timestamp_to_env")
+            adapter_name = self.config_value("add_adapter_name_to_env")
 
             if adapter_name:
                 dirname, basename = os.path.split(env_dir)
