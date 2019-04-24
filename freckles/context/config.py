@@ -256,7 +256,7 @@ class ContextConfig(object):
 
         repos_to_add = []
         if use_community:
-            repos_to_add.append["community"]
+            repos_to_add.append("community")
 
         if extra_repos:
             if isinstance(extra_repos, string_types):
