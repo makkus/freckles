@@ -13,7 +13,7 @@ log = logging.getLogger("freckles")
 
 # extensions
 # ------------------------------------------------------------------------
-def create_adapter(adapter_name, cnf, context):
+def create_adapter(adapter_name, context):
     """Loading a dictlet finder extension.
 
     Returns:

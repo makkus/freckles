@@ -679,7 +679,7 @@ Ok, execute time:
 <div class="code-max-height" markdown="1">
 
 ```console
-➜ frecklecute  -t admin@dev.frkl.io my-webserver.frecklet --hostname dev.frkl.io --helloee World
+> frecklecute  -t admin@dev.frkl.io my-webserver.frecklet --hostname dev.frkl.io --helloee World
 
 ╭╼ starting run
 │  ├╼ running frecklet: /home/markus/my-webserver.frecklet (on: dev.frkl.io)

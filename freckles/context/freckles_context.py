@@ -378,7 +378,7 @@ class FrecklesContext(object):
         self._adapters = {}
         self._adapter_tasktype_map = {}
         for adapter_name in self.config_value("adapters"):
-            adapter = create_adapter(adapter_name, self._config.cnf, self)
+            adapter = create_adapter(adapter_name, self)
             self._adapters[adapter_name] = adapter
             for tt in adapter.get_supported_task_types():
                 self._adapter_tasktype_map.setdefault(tt, []).append(adapter_name)
