@@ -20,10 +20,7 @@ from freckles.defaults import (
     FRECKLES_CONFIG_DIR,
     FRECKLES_EXTRA_LOOKUP_PATHS,
 )
-from freckles.exceptions import (
-    FrecklesConfigException,
-    FrecklesPermissionException,
-)
+from freckles.exceptions import FrecklesConfigException, FrecklesPermissionException
 from freckles.frecklet.arguments import *  # noqa
 from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from frkl.utils import expand_string_to_git_details
@@ -34,6 +31,7 @@ from frutils import (
     calculate_cache_location_for_url,
     readable,
 )
+
 # from .output_callback import DefaultCallback
 from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback
@@ -415,7 +413,6 @@ class FrecklesContext(object):
     def adapters(self):
 
         return self._adapters
-
 
     def add_config_interpreter(self, interpreter_name, schema):
 

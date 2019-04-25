@@ -8,17 +8,12 @@ from collections import Mapping, Iterable
 from ruamel.yaml import YAML
 from six import string_types
 
-from freckles.defaults import (
-    ACCEPT_FRECKLES_LICENSE_KEYNAME,
-    FRECKLES_CONFIG_DIR,
-)
+from freckles.defaults import ACCEPT_FRECKLES_LICENSE_KEYNAME, FRECKLES_CONFIG_DIR
 from freckles.exceptions import FrecklesConfigException, FrecklesUnlockException
 from freckles.frecklet.arguments import *  # noqa
-from freckles.schemas import (
-    FRECKLES_CONTEXT_SCHEMA,
-    PROFILE_LOAD_CONFIG_SCHEMA,
-)
+from freckles.schemas import FRECKLES_CONTEXT_SCHEMA, PROFILE_LOAD_CONFIG_SCHEMA
 from frutils.config.cnf import Cnf
+
 # from .output_callback import DefaultCallback
 from ting.ting_attributes import (
     FrontmatterAndContentAttribute,

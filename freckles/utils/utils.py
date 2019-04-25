@@ -51,6 +51,7 @@ def print_two_column_table(data, header_one, header_two):
             click.echo(": {}".format(row[1]))
             click.echo()
 
+
 def print_frecklet_list(frecklet_dict):
 
     data = {}
