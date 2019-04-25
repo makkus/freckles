@@ -273,6 +273,10 @@ class ContextConfig(object):
     def cnf(self):
         return self._cnf
 
+    @property
+    def config_unlocked(self):
+        return self._config_unlocked
+
     def add_cnf_interpreter(self, interpreter_name, schema):
 
         # we need that to compare with 'no config' option
