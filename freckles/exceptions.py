@@ -179,6 +179,40 @@ class FreckletBuildException(FrecklesException):
         )
 
 
+class InvalidFreckletException(FrecklesException):
+    def __init__(self, frecklet, parent_exception, frecklet_name=None):
+
+        self.frecklet = frecklet
+        self.parent_exception = parent_exception
+
+        if frecklet_name is None:
+            if self.frecklet is not None:
+                self.frecklet_name = self.frecklet.id
+            else:
+                self.frecklet_name = None
+        else:
+            self.frecklet_name = frecklet_name
+
+        if self.frecklet_name is None:
+            msg = "Invalid or missing frecklet"
+        else:
+            msg = "Invalid or missing frecklet: '{}'.".format(self.frecklet_name)
+
+        reason = None
+        if self.frecklet_name is not None:
+            solution = "Check '{}' is a frecklet in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.".format(
+                frecklet_name
+            )
+        else:
+            solution = "Check frecklet is in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.".format(
+                frecklet_name
+            )
+        references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}
+        super(InvalidFreckletException, self).__init__(
+            msg, solution=solution, reason=reason, references=references
+        )
+
+
 class FreckletException(FrecklesException):
     def __init__(self, frecklet, parent_exception):
 
