@@ -141,19 +141,36 @@ class FrecklesVarException(FrecklesException):
         frecklet=None,
         var_name=None,
         message=None,
-        error=None,
+        errors=None,
         task_path=None,
         vars=None,
         task=None,
     ):
-        super(FrecklesVarException, self).__init__(msg=message)
 
         self.var_name = var_name
         self.frecklet = frecklet
-        self.error = error
+        self.errors = errors
         self.task_path = task_path
         self.vars = vars
         self.task = task
+
+        msg = "Error validating input for frecklet '{}'.".format(frecklet.id)
+
+        if len(self.errors) == 1:
+            reason = Style.BRIGHT + "Var:" + Style.RESET_ALL + "\n\n"
+        else:
+            reason = Style.BRIGHT + "Vars:" + Style.RESET_ALL + "\n\n"
+
+        for var, error in self.errors.items():
+            reason = "  " + Style.DIM + "{}:".format(var) + Style.RESET_ALL
+            if len(error) == 1:
+                reason = reason + " " + error[0]
+            else:
+                reason = reason + "\n"
+                for e in error:
+                    reason = reason + "    - {}".format(e)
+
+        super(FrecklesVarException, self).__init__(msg=msg, reason=reason)
 
     def __str__(self):
 
@@ -214,13 +231,25 @@ class InvalidFreckletException(FrecklesException):
 
 
 class FreckletException(FrecklesException):
-    def __init__(self, frecklet, parent_exception):
+    def __init__(self, frecklet, parent_exception, frecklet_name):
+        """
+
+        Args:
+            frecklet:
+            parent_exception:
+            frecklet_name: optional frecklet name a command was called with
+        """
 
         self.frecklet = frecklet
         self.parent_exception = parent_exception
+        if frecklet_name is not None:
+            self.frecklet_name = frecklet_name
+        elif frecklet is not None:
+            self.frecklet_name = frecklet.id
+        else:
+            self.frecklet_name = "n/a"
 
-        msg = "Can't process frecklet: '{}'".format(self.frecklet.id)
-
+        msg = "Can't process frecklet: '{}'".format(self.frecklet_name)
         if isinstance(parent_exception, TingException):
 
             if len(parent_exception.attribute_chain) == 1:
@@ -248,9 +277,12 @@ class FreckletException(FrecklesException):
                 }
 
         else:
-            solution = "Check format of frecklet '{}' and all of its childs.".format(
-                self.frecklet.id
-            )
+            if self.frecklet_name == "n/a":
+                solution = "Check format of frecklets. Can't say which ones, too little information."
+            else:
+                solution = "Check format of frecklet '{}' and all of its childs.".format(
+                    self.frecklet_name
+                )
             references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}
             reason = None
         super(FreckletException, self).__init__(

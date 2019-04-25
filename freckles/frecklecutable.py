@@ -183,7 +183,7 @@ class Frecklecutable(object):
                 vars_pre_clean = var_value_map
             raise FrecklesVarException(
                 self.frecklet,
-                error=validator.errors,
+                errors=validator.errors,
                 task_path=task_path,
                 vars=vars_pre_clean,
                 task=task,
