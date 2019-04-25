@@ -4,7 +4,7 @@ from collections import OrderedDict
 import click
 
 from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
-from freckles.exceptions import FreckletException
+from freckles.exceptions import FreckletBuildException
 from frutils import get_template_keys, dict_merge
 from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
@@ -244,8 +244,13 @@ class VariablesAttribute(TingAttribute):
             for arg_name, arg in args.items():
 
                 if arg in result.keys():
-                    raise FreckletException(
-                        "Duplicate arg '{}' in frecklet '{}'".format(arg_name, ting.id)
+                    raise FreckletBuildException(
+                        frecklet=ting,
+                        msg="Duplicate arg '{}'.".format(arg_name),
+                        solution="Check format of frecklet '{}'.".format(ting.id),
+                        references={
+                            "frecklet documentation": "https://freckles.io/doc/frecklets/anatomy"
+                        },
                     )
 
                 result[arg_name] = arg
@@ -256,7 +261,7 @@ class VariablesAttribute(TingAttribute):
 
         return ordered
 
-    def resolve_vars(self, current_args, rest_path, last_node, tree):
+    def resolve_vars(self, current_args, rest_path, last_node, tree, ting):
 
         current_node_id = next(rest_path)
 
@@ -283,11 +288,18 @@ class VariablesAttribute(TingAttribute):
             if key not in vars.keys():
 
                 if arg.required and arg.default is None:
-                    raise FreckletException(
-                        "Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(
+                    # relevant frecklet root name: tree.get_node(0).tag,
+                    raise FreckletBuildException(
+                        frecklet=ting,
+                        msg="Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(
                             current_node.tag, tree.get_node(0).tag, key, last_node.tag
                         ),
-                        tree.get_node(0).tag,
+                        solution="Check format of frecklet '{}'.".format(
+                            current_node.tag
+                        ),
+                        references={
+                            "frecklet documentation": "https://freckles.io/doc/frecklets/anatomy"
+                        },
                     )
 
                 # means we don't have to worry about this key, as it is not used and not required
@@ -341,6 +353,7 @@ class VariablesAttribute(TingAttribute):
                 rest_path=rest_path,
                 last_node=current_node,
                 tree=tree,
+                ting=ting,
             )
         else:
 
@@ -387,5 +400,9 @@ class VariablesAttribute(TingAttribute):
         rest_path = reversed(path_to_leaf[0:-1])
 
         return self.resolve_vars(
-            current_args=args, rest_path=rest_path, last_node=root_node, tree=tree
+            current_args=args,
+            rest_path=rest_path,
+            last_node=root_node,
+            tree=tree,
+            ting=ting,
         )

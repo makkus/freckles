@@ -3,7 +3,7 @@ from collections import Mapping
 
 import click
 
-from freckles.defaults import FRECKLET_KEY_NAME, VARS_KEY
+from freckles.defaults import FRECKLET_KEY_NAME, VARS_KEY, TASK_KEY_NAME
 from freckles.frecklet.vars import VarsInventory
 from frutils import dict_merge, reindent, readable
 from frutils.doc import Doc
@@ -38,9 +38,9 @@ def print_task_descriptions(task_desc_list):
             click.echo()
 
 
-def describe_frecklet(context, frecklet_name, vars, auto_vars=False):
+def describe_frecklet(context, frecklet, vars, auto_vars=False):
 
-    fx = context.create_frecklecutable(frecklet_name)
+    fx = frecklet.create_frecklecutable(context=context)
 
     var_all = {}
 
@@ -109,6 +109,12 @@ def describe_frecklet(context, frecklet_name, vars, auto_vars=False):
             vars_string = readable(task[VARS_KEY], out="yaml")
             alt_desc = alt_desc + " using variables:\n\n" + reindent(vars_string, 2)
             alt_desc = alt_desc.strip()
+            if task.get(TASK_KEY_NAME, None):
+                task_string = readable(task[TASK_KEY_NAME], out="yaml")
+                alt_desc = (
+                    alt_desc + "\n\nand task metadata:\n\n" + reindent(task_string, 2)
+                )
+                alt_desc = alt_desc.strip()
 
         task_md = {}
         task_md["title"] = title

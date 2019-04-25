@@ -6,6 +6,15 @@ from colorama import Fore, Style
 from six import string_types
 
 from frutils import readable, reindent, get_terminal_size
+from ting.exceptions import TingException
+
+
+def output_to_terminal(line, nl=True, no_output=False):
+
+    if no_output:
+        return
+
+    click.echo(line.encode("utf-8"), nl=nl)
 
 
 class FrecklesException(Exception):
@@ -54,29 +63,36 @@ class FrecklesException(Exception):
         cols, _ = get_terminal_size()
 
         msg = Fore.RED + "Error: " + Style.RESET_ALL + self.msg
-        msg = textwrap.fill(msg, width=cols, subsequent_indent="       ")
-        click.echo(msg)
+        for m in msg.split("\n"):
+            m = textwrap.fill(m, width=cols, subsequent_indent="       ")
+            output_to_terminal(m)
         click.echo()
         if self.reason:
-            click.echo(Style.BRIGHT + "  Reason: " + Style.RESET_ALL)
+            output_to_terminal(Style.BRIGHT + "  Reason: " + Style.RESET_ALL)
             msg = reindent(self.reason, 4)
-            msg = textwrap.fill(msg, width=cols, subsequent_indent="    ")
-            click.echo(msg)
+            for m in msg.split("\n"):
+                m = textwrap.fill(m, width=cols, subsequent_indent="    ")
+                output_to_terminal(m)
             click.echo()
         if self.solution:
-            click.echo(Style.BRIGHT + "  Solution: " + Style.RESET_ALL)
+            output_to_terminal(Style.BRIGHT + "  Solution: " + Style.RESET_ALL)
             msg = reindent(self.solution, 4)
-            msg = textwrap.fill(msg, width=cols, subsequent_indent="    ")
-            click.echo(msg)
+            for m in msg.split("\n"):
+                m = textwrap.fill(m, width=cols, subsequent_indent="    ")
+                output_to_terminal(m)
             click.echo()
         if self.references:
             if len(self.references) == 1:
                 url = self.references[list(self.references.keys())[0]]
-                click.echo(Style.BRIGHT + "  Reference: " + Style.RESET_ALL + url)
+                output_to_terminal(
+                    Style.BRIGHT + "  Reference: " + Style.RESET_ALL + url
+                )
             else:
-                click.echo(Style.BRIGHT + "  References:" + Style.RESET_ALL)
+                output_to_terminal(Style.BRIGHT + "  References:" + Style.RESET_ALL)
                 for k, v in self.references.items():
-                    click.echo("    " + Style.DIM + k + ": " + Style.RESET_ALL + v)
+                    output_to_terminal(
+                        "    " + Style.DIM + k + ": " + Style.RESET_ALL + v
+                    )
 
         click.echo()
 
@@ -154,11 +170,58 @@ class FrecklesVarException(FrecklesException):
         return msg
 
 
-class FreckletException(FrecklesException):
-    def __init__(self, message, frecklet):
+class FreckletBuildException(FrecklesException):
+    def __init__(self, frecklet, msg, solution=None, reason=None, references=None):
 
-        super(FreckletException, self).__init__(message)
         self.frecklet = frecklet
+        super(FreckletBuildException, self).__init__(
+            msg, solution=solution, reason=reason, references=references
+        )
+
+
+class FreckletException(FrecklesException):
+    def __init__(self, frecklet, parent_exception):
+
+        self.frecklet = frecklet
+        self.parent_exception = parent_exception
+
+        msg = "Can't process frecklet: '{}'".format(self.frecklet.id)
+
+        if isinstance(parent_exception, TingException):
+
+            if len(parent_exception.attribute_chain) == 1:
+                reason = "Error when processing frecklet property:\n"
+            else:
+                reason = "Error when processing frecklet properties:\n"
+            for index, attr in enumerate(parent_exception.attribute_chain):
+
+                padding = "  " * (index + 1)
+                reason = reason + "\n{}-> {}".format(padding, attr)
+
+            reason = reason + ": {}".format(parent_exception.root_exc)
+
+            if hasattr(parent_exception.root_exc, "solution"):
+                solution = parent_exception.root_exc.solution
+            else:
+                solution = "Check format of frecklet '{}'.".format(
+                    parent_exception.ting.id
+                )
+            if hasattr(parent_exception.root_exc, "references"):
+                references = parent_exception.root_exc.references
+            else:
+                references = {
+                    "frecklet documentation": "https://freckles.io/doc/frecklets"
+                }
+
+        else:
+            solution = "Check format of frecklet '{}' and all of its childs.".format(
+                self.frecklet.id
+            )
+            references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}
+            reason = None
+        super(FreckletException, self).__init__(
+            msg, solution=solution, reason=reason, references=references
+        )
 
 
 class FrecklesPermissionException(FrecklesException):

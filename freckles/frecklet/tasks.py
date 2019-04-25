@@ -1,6 +1,8 @@
 import logging
+import os
 from collections import Mapping
 
+from colorama import Style
 from six import string_types
 from treelib import Tree
 
@@ -12,7 +14,7 @@ from freckles.defaults import (
     DEFAULT_FRECKLES_JINJA_ENV,
     FRECKLETS_KEY,
 )
-from freckles.exceptions import FrecklesConfigException, FreckletException
+from freckles.exceptions import FrecklesConfigException, FreckletBuildException
 from frkl import FrklProcessor, Frkl
 from frkl.defaults import (
     CHILD_MARKER_NAME,
@@ -282,11 +284,30 @@ class TaskTreeAttribute(TingAttribute):
 
             task_ting = ting._meta_parent_repo.get(task_name)
             if task_ting is None:
-                raise FreckletException(
-                    "Can't build frecklet '{}': no child named '{}' available".format(
-                        ting.id, task_name
-                    ),
+                if os.path.exists(ting.id):
+                    f_name = os.path.basename(ting.id)
+                else:
+                    f_name = ting.id
+                raise FreckletBuildException(
                     frecklet=ting.id,
+                    msg="No child-frecklet named '{}' in context.".format(task_name),
+                    solution="""Make sure the frecklet '{}' is contained in one of the repos of this context.
+
+If the frecklet is in the current path, you can add the current path to the context via the '--repo' argument:
+
+    {}frecklecute {}--repo .{} {}{} <arg> ...{}
+""".format(
+                        task_name,
+                        Style.DIM,
+                        Style.BRIGHT,
+                        Style.RESET_ALL,
+                        Style.DIM,
+                        f_name,
+                        Style.RESET_ALL,
+                    ),
+                    references={
+                        "Context documentation": "https://freckles.io/doc/configuration#context"
+                    },
                 )
 
             counter.up()
