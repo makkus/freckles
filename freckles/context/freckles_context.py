@@ -416,9 +416,6 @@ class FrecklesContext(object):
 
         return self._adapters
 
-    # @property
-    # def config(self):
-    #     return self._config
 
     def add_config_interpreter(self, interpreter_name, schema):
 
@@ -587,7 +584,7 @@ class FrecklesContext(object):
                 if url is None:
                     url = str(repo)
                 raise FrecklesPermissionException(
-                    msg="Use of repo '{}' not allowed.".format(url),
+                    msg="Use of repo '{}' is not allowed.".format(url),
                     reason="Repo not in 'allow_remote_whitelist' or 'allow_remote' not set to 'true'.",
                     key="repos",
                     solution="Add the repo to the 'allow_remote_whiltelist', or set configuration option 'allow_remote' to 'true'.",
