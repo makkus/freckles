@@ -601,7 +601,8 @@ class Frecklecutable(object):
                     parent_task=root_run_task,
                 )
 
-                root_run_task.finish()
+                if not root_run_task.finished:
+                    root_run_task.finish()
 
                 run_result = FrecklesRun(
                     run_id=run_nr,
@@ -621,7 +622,8 @@ class Frecklecutable(object):
                 else:
                     msg = str(e)
 
-                root_run_task.finish(success=False, error_msg=msg)
+                if not root_run_task.finished:
+                    root_run_task.finish(success=False, error_msg=msg)
                 # click.echo("frecklecutable run failed: {}".format(e))
                 log.debug(e, exc_info=1)
                 break
