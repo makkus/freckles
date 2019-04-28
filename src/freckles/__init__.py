@@ -2,11 +2,22 @@
 
 from __future__ import absolute_import, division, print_function
 
+from pkg_resources import get_distribution, DistributionNotFound
+
 """Top-level package for freckles."""
 
 __author__ = """Markus Binsteiner"""
-__email__ = "makkus@frkl.io"
-__version__ = "1.0.0b1"
+__email__ = 'markus@frkl.io'
+
+try:
+    # Change here if project is renamed and does not equal the package name
+    dist_name = __name__
+    __version__ = get_distribution(dist_name).version
+except DistributionNotFound:
+    __version__ = "unknown"
+finally:
+    del get_distribution, DistributionNotFound
+
 
 import click
 from .freckles import Freckles  # noqa
