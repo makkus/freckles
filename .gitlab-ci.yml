@@ -96,6 +96,7 @@ build:
   stage: build
   only:
     - develop
+    - before_0.9
   script:
     - pip install devpi-client
     - rm -rf dist build
