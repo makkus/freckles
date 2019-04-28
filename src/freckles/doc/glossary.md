@@ -11,7 +11,7 @@ The one slight disadvantage is that people might also become a bit confused. Hen
 
 adapter
 :    *freckles* can execute tasks using different backends (shell, Ansible, etc.). An adapter implements an interface
-     to that backend *freckles* can query and use. 
+     to that backend *freckles* can query and use.
 
 frecklecute
 :    One of the command-line application that ship with *freckles*. Takes a *frecklecutable* and executes it. Can auto-generate command-line arguments and help-text.

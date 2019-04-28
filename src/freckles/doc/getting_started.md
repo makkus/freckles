@@ -27,7 +27,7 @@ ln -s freckles ~/.local/bin/frecklecute
 # adjust PATH (optional)
 echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
 source ~/.profile
-``` 
+```
 
 ``` console tab="Mac OS X"
 # download and install on Mac OS X
@@ -41,7 +41,7 @@ ln -s freckles ~/.local/bin/frecklecute
 # adjust PATH (optional)
 echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
 source ~/.profile
-``` 
+```
 
 For the purpose of getting started quickly, you could also use the [*freckles* bootstrap script](https://gitlab.com/freckles-io/freck), which achieves something similar to the above:
 
@@ -133,7 +133,7 @@ Let's get a list of all the *frecklets* that are supported out of the box, use t
 <div class="code-max-height" markdown="1">
 
 ```console
-> frecklecute --list              
+> frecklecute --list  
 
 frecklet                             description
 -----------------------------------  ----------------------------------------
@@ -355,7 +355,7 @@ Options:
   --mode MODE           The mode the file should have, in octal (e.g. 0755).
   --owner USER          The owner of the target file.
   --help                Show this message and exit.
-  
+
 ```
 
 </div>
@@ -426,7 +426,7 @@ SSH PASS: ****
 </div>
 <!-- section executing a command -->
 
-<!-- begin section writing your own frecklet --> 
+<!-- begin section writing your own frecklet -->
 ## Writing your own *frecklets* {: .section-title}
 <div class="section-block" markdown="1">
 
@@ -439,21 +439,21 @@ But maybe you'd like to combine a few of those *frecklets*, and create your own 
 <div class="section-block" markdown="1">
 
 To demonstrate how to combine multiple (pre-existing) *frecklets* into a new one, let's do some basic filesystem manipulation
-that does not require root permissions. This example does not make a whole lot of sense, but demonstrates a few basic 
- concepts. 
- 
+that does not require root permissions. This example does not make a whole lot of sense, but demonstrates a few basic
+ concepts.
+
  So, for the sake of argument let's assume we need to have an archive of a folder that contains a downloaded file, a
  readme file with certain content, and another file that contains the directory listing at the point just before the archiving.
- 
+
  This is what needs to happen:
- 
+
  - we need to create the directory that needs to be archived
  - we need to download a file into it
  - we need to create the text file inside the folder
  - we need to create the directory listing file inside the folder
  - we need to create the archive
  - we also should delete the directory, once the archive was created
- 
+
 After perusing the [frecklet index](/frecklets/default), we found we can use those *frecklets* for what we have to do:
 
 - [file-downloaded](/frecklets/default/filesystem/file-downloaded/)
@@ -463,11 +463,11 @@ After perusing the [frecklet index](/frecklets/default), we found we can use tho
 - [path-is-absent](/frecklets/default/filesystem/path-is-absent/)
 
 We don't need to actually create the directory, because a few of those *frecklets* would implicitly do that for us. For example the
-[file-downloaded](/frecklets/default/filesystem/file-downloaded) *frecklet* will automatically create the (parent) directory that is indirectly specified with that *frecklets* ``dest`` parameter. 
+[file-downloaded](/frecklets/default/filesystem/file-downloaded) *frecklet* will automatically create the (parent) directory that is indirectly specified with that *frecklets* ``dest`` parameter.
 
-The most basic *frecklet* is a text file containing a list of other frecklets and their configuration, 
+The most basic *frecklet* is a text file containing a list of other frecklets and their configuration,
 in either 'yaml', 'json', or 'toml' format (for more details, head over to the [frecklet documentation](/doc/frecklets/)
-section). 
+section).
 
 Let's use the 'yaml' format, and create a file called ``my-first.frecklet``, with the following content:
 
@@ -518,26 +518,26 @@ Once saved, we can execute this file with the ``frecklecute`` command:
 │  │  ╰╼ ok
 │  ╰╼ ok
 ╰╼ ok
-``` 
- 
+```
+
  **Hint**: for fun and giggles, try the ``--describe`` flag (``frecklecute --describe my-first.frecklet``)
- 
+
  Now, if you know some shell scripting, you'll probably agree that this is nothing a small script could not have done
  equally well. So if you don't think this whole thing makes any sense so far, head on down to the next examples.
-  
+
  The *frecklet* schema is designed to be easy and quick to read, understand and write. Whether the above
  code fits that bill or not is up to you to decide. One thing to point out though is the absence of any intermediate (sub-)tasks that
- are implied in a (parent-)task. 
- 
+ are implied in a (parent-)task.
+
  Take, for example, ``file-downloaded``. As we always need a target folder for our downloaded file to exist,
  and as that target folder path is clear from the ``dest`` parameter the user provides, it (arguably -- there are some caveats)
-  makes sense to always create that folder automatically. Similarly, had we set the  ``owner`` parameter of the same *frecklet*, it would have been 
+  makes sense to always create that folder automatically. Similarly, had we set the  ``owner`` parameter of the same *frecklet*, it would have been
  implicit that a user with that name needs to exist on the system, and *freckles* had created that user. That would have required
  'root' or 'sudo' permissions, though.
- 
+
  On a side-note: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
  *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written in a way so *frecklets*
- require as little information and manual specification as possible, and they will just do the sensible thing. 
+ require as little information and manual specification as possible, and they will just do the sensible thing.
  You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitly.
 
 
@@ -626,7 +626,7 @@ Now try to actually provide those new arguments:
 </div>
 
 There is a lot more you can do to make the script more usable, for example add documentation, and specify argument types
-so *freckles* can validate user input. Check out the [documentation](/frecklets) to learn more. 
+so *freckles* can validate user input. Check out the [documentation](/frecklets) to learn more.
 
 <!-- end block your first parameters -->
 
@@ -639,18 +639,18 @@ setting up machine so it can host a static web-page? It's a fairly simple task w
 considerable determination to reliably script in bash.
 
 What needs to be done? Here's a list:
- 
+
 - install a web-server (Nginx, in this instance)
 - configure it properly for our task (serve a folder of static html pages)
 - upload our html page(s)
 
 Again, we check the [default](/frecklets/default) and [community](/frecklets/community) frecklet indexes for any pre-written
-*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/webserver-static-site/) 
+*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/webserver-static-site/)
 . But let's pretend it did not and go a tiny bit lower level.
 
 So, here are the *frecklets* we are going to use:
 
-- [``nginx-vhost-from-folder``](/frecklets/default/service/nginx-vhost-from-folder/), to create the vhost/server-block configuration file 
+- [``nginx-vhost-from-folder``](/frecklets/default/service/nginx-vhost-from-folder/), to create the vhost/server-block configuration file
 - [``service-webserver``](/frecklets/default/service/service-webserver/), to setup and configure Nginx
 - [``file-with-content``](/frecklets/default/filesystem/file-with-content/), to create the html file
 
@@ -658,15 +658,15 @@ So, here are the *frecklets* we are going to use:
 Here's what our new *frecklet* looks like (let's save it to a file called ``my-webserver.frecklet``):
 
 ```yaml
-- nginx-vhost-from-folder:                                                     
-    hostname: "{{:: hostname ::}}"                                                
-- service-webserver:                                                           
-    webserver: nginx                                                           
-- file-with-content:                                                           
-    owner: www-data                                                            
-    path: /var/www/html/index.html                                             
-    content: |                                                                 
-      <h1><i>freckles</i> says "hello", {{:: helloee ::}}!</h1>                            
+- nginx-vhost-from-folder:  
+    hostname: "{{:: hostname ::}}"  
+- service-webserver:  
+    webserver: nginx  
+- file-with-content:  
+    owner: www-data  
+    path: /var/www/html/index.html  
+    content: |  
+      <h1><i>freckles</i> says "hello", {{:: helloee ::}}!</h1>  
 ```
 
 As in the example above, we made some of our script configurable via arguments (the 'hostname', and part of the html page content, 'helloee') and we could
@@ -734,4 +734,4 @@ Check out the [Documentation]('/doc) if you want to learn more!
 </div>
 
 </div>
-<!-- end section writing your own frecklet --> 
+<!-- end section writing your own frecklet -->

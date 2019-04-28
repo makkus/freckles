@@ -6,4 +6,3 @@ frecklets:
       type: ansible-module
     vars:
       msg: "{{ ansible_env.USER }}"
-

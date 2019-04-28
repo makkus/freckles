@@ -9,4 +9,3 @@ frecklets:
       msg: grand-child 3
     vars:
       msg: "{{:: grand_child_3_var_1 ::}}"
-

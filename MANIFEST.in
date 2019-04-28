@@ -2,13 +2,12 @@ include AUTHORS.rst
 include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
-include README.rst
+include README.md
+
+include src/freckles/frkl.info
 
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
-recursive-include freckles/external *
-recursive-include freckles/templates *
-recursive-include freckles/doc *
+recursive-include docs *.rst conf.py Makefile *.jpg *.png *.gif

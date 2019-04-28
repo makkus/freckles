@@ -111,7 +111,7 @@ The (single-key dicts) example from above can also be expressed as a list of dic
       - markus
 ```
 
-This by itself is not useful, as it's just a more verbose, and less readable way of saying the same thing. It makes more 
+This by itself is not useful, as it's just a more verbose, and less readable way of saying the same thing. It makes more
 sense once we add another keyword though: ``target`` (as in the ``--target`` option of the ``frecklecute`` command).
 
 This enables us to have tasks that are executed on different targets, in the same *frecklet*. By default, a *frecklet* executes on the target
@@ -131,15 +131,15 @@ will override both options. Here's how that would look:
       - markus
 ```
 
-This example is a bit nonsensical, but where this comes in really handy, for example, is when you want to provision a 
-new VM from a cloud provider. The first task would be executed locally, and talk to the providers API to create a new VM. 
+This example is a bit nonsensical, but where this comes in really handy, for example, is when you want to provision a
+new VM from a cloud provider. The first task would be executed locally, and talk to the providers API to create a new VM.
 The second one would connect to that VM (probably as root), and does some initial setup (like provisioning an admin user, disabling password-login for ssh, etc.).
 
 There is a further evolution step to double-key dictionary *frecklet*-items. This is only usable in advanced use-cases,
-so we'll ignore that for now, and come back to it later, at the end of the page. For now, le'ts look into metadata to 
+so we'll ignore that for now, and come back to it later, at the end of the page. For now, le'ts look into metadata to
 improve our *frecklets* usability (and usefulness).
 
-</div> 
+</div>
 <!-- end list of tasks>
 
 ### The metadata dictionary
@@ -233,7 +233,7 @@ This is how we run this minimal *frecklet* now:
 ``` console
 > frecklecute --ask-sudo-pass my-create-user.frecklet --username admin
 
-SUDO PASS: 
+SUDO PASS:
 
 ╭╼ starting run
 │  ├╼ running frecklet: /home/markus/my-create-user.frecklet (on: localhost)
@@ -295,8 +295,8 @@ Every variable we want to ask the user needs to be present as key under the ``ar
 
 Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
 
----   
-                                    
+---  
+
 Notice how we use ``required: no`` for our ``uid`` value. This is a good way to specify optional arguments. If a 'none' value or empty string is passed to a key in a dict, it won't be forwarded to the child *frecklet* that is called. Also, we have specified the type of the argument as an integer under ``args``. This causes the variable to be validated, and if successful, converted into the proper type.
 
 Let's see what ``frecklecute`` makes of this:
@@ -352,16 +352,16 @@ Ok, here's the *frecklet* we'll be working with:
     name: markus
 ```
 
-Very simple, one task, makes sure a user exists on a system. You can use *freckles* to display the fully-exploded, 
+Very simple, one task, makes sure a user exists on a system. You can use *freckles* to display the fully-exploded,
 internally used data structure of a *frecklet*. Here's how:
 
 ```console
 > freckles frecklet explode example.frecklet
 
 doc: {}
-  
+
 args: {}
-  
+
 frecklets:
 
   - frecklet:
@@ -399,14 +399,14 @@ frecklets:
       password: "{{:: password | sha512_crypt ::}}"
       shell: "{{:: shell ::}}"
 ```
- 
+
 You could put this into a file and call it with ``frecklecute <filename> --help``, and you'd get a basic help message, similar to the one we saw above, with all of the arguments being required (and strings).
 
 The 'vars' value works like in any of the other examples we've looked at so far, so I'll not go into that again here. The interesting stuff happens in ``frecklet``, and ``task``.
 
 #### The ``frecklet`` (sub-)key
 
-The important key in this part of the configuration is ``type``. This lets *freckles* know which one of the available [freckles adapters](/doc/adapters) to use to process this item. Every adapter registers with *freckles* with a list of supported types. In this case (``ansible-module``) the [nsbl](/doc/adapters/nsbl) one will be used. 
+The important key in this part of the configuration is ``type``. This lets *freckles* know which one of the available [freckles adapters](/doc/adapters) to use to process this item. Every adapter registers with *freckles* with a list of supported types. In this case (``ansible-module``) the [nsbl](/doc/adapters/nsbl) one will be used.
 
 There are other keys you can put into ``frecklet``, the most important one being ``skip``, which lets you skip a task in certain situations. Here we are also showing ``msg``, which is the message the user sees when this task is executed.  
 
@@ -417,7 +417,7 @@ This one lets you fine-tune the behaviour of this (dynamically created) *freckle
 The content of this sub-key is highly dependent on the adapter used, so you'll have to refer to the documentation of the adapter in question for details.
 
 That's all folks. Check out the other docs, or head over to the [friends of freckles](https://friends.of.freckles) if you have questions!
- 
+
 </div>
 <!-- end fully flexible -->
 

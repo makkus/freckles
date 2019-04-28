@@ -1,7 +1,0 @@
-flake8
-black
-pytest-runner
-pytest==4.0.2
-bumpversion
-wheel
-pytest-cov

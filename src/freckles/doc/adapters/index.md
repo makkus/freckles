@@ -9,4 +9,3 @@ draft: false
 *Adapters* are basically wrappers around languages or frameworks, and they abstract those languages' instructions and augment them with metadata, so *freckles* can use them as atomic 'task' building blocks.
 
 DOCUMENTATION STILL TO BE DONE - CHECK BACK LATER
-

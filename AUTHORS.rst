@@ -1,13 +1,5 @@
-=======
-Credits
-=======
-
-Development Lead
-----------------
+============
+Contributors
+============
 
 * Markus Binsteiner <markus@frkl.io>
-
-Contributors
-------------
-
-None yet. Why not be the first?

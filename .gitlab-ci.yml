@@ -1,72 +1,101 @@
+---
+
+cache:
+  paths:
+    - vendor/python
+    - vendor/node
+
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 image: python
 
 stages:
-- test
-- build
-- release
+  - test
+  - build
+  - release
 
 before_script:
-- curl -O https://bootstrap.pypa.io/get-pip.py
-- python get-pip.py
+ - curl -O https://bootstrap.pypa.io/get-pip.py
+ - python get-pip.py
+ - pip install -U setuptools
 
-python2:
+python27:
   image: python:2.7
   stage: test
   script:
-   - pip install tox
-   - tox -e py27
+    - pip install tox
+    - tox -e py27
 
-python34:
-  image: python:3.4
-  stage: test
-  script:
-   - pip install tox
-   - tox -e py34
+#python34:
+#  image: python:3.4
+#  stage: test
+#  script:
+#    - pip install tox
+#    - tox -e py34
 
 python35:
   image: python:3.5
   stage: test
   script:
-   - pip install tox
-   - tox -e py35
+    - pip install tox
+    - tox -e py35
 
 python36:
   image: python:3.6
   stage: test
   script:
-   - pip install tox
-   - tox -e py36
+    - pip install tox
+    - tox -e py36
+
+python37:
+  image: python:3.7
+  stage: test
+  script:
+    - pip install tox
+    - tox -e py37
+
+#docs:
+#  before_script:
+#    - pip install Sphinx
+#  script:
+#    - python setup.py docs
 
 flake8:
   image: python
   stage: test
   script:
-   - pip install tox
-   - tox -e flake8
+    - pip install tox
+    - tox -e flake8
 
-#python37:
-#  image: python:3.7-rc
-#  stage: test
-#  script: tox -e py37
+commitlint:
+  stage: test
+  image: node:8
+  only:
+    - master
+    - merge_requests
+    - develop
+  script:
+    - npm install -g @commitlint/cli @commitlint/config-conventional
+    - echo CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}
+    - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}
+    - echo CI_MERGE_REQUEST_TARGET_BRANCH_SHA=${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}
+    - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+    - echo CI_MERGE_REQUEST_TARGET_BRANCH_NAME=${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+    - (if [[ ${CI_COMMIT_REF_NAME} = "master" ]] || [[ ${CI_COMMIT_REF_NAME} = "develop" ]]; then commitlint --from 6519d2fa; fi)
 
-#linters:
-#  image: python:3.5
-#  stage: test
-#  script: tox -e linters
 
-#docs:
-#  stage: test
-#  script: tox -e docs
+#      else
+#        git fetch origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME};
+#        git fetch origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME};
+#        commitlint --from=origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} -to=origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME};
+#      fi
 
-#dogfood:
-#  stage: test
-#  script: tox -e dogfood
 
 build:
   stage: build
+  only:
+    - develop
   script:
     - pip install devpi-client
     - rm -rf dist build
@@ -76,18 +105,5 @@ build:
     - devpi upload
   artifacts:
     paths:
-    - dist/
+      - dist/
     expire_in: 1 month
-
-release:
-  stage: release
-  script:
-    - pip install twine
-    - rm -rf dist
-    - python setup.py sdist bdist_wheel
-    - twine upload dist/*
-  artifacts:
-    paths:
-    - dist/
-  only:
-  - tags

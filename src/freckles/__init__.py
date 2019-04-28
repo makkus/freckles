@@ -7,7 +7,7 @@ from pkg_resources import get_distribution, DistributionNotFound
 """Top-level package for freckles."""
 
 __author__ = """Markus Binsteiner"""
-__email__ = 'markus@frkl.io'
+__email__ = "markus@frkl.io"
 
 try:
     # Change here if project is renamed and does not equal the package name

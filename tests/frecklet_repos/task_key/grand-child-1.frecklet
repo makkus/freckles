@@ -6,4 +6,3 @@ frecklets:
       msg: grand-child 1
     vars:
       msg: "{{ ansible_env.USER }}"
-

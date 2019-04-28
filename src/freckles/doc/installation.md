@@ -13,7 +13,7 @@ The most straightforward way of installing *freckles* is to download the executa
     - [freckles](https://pkgs.frkl.io/downloads/linux-gnu/freckles)
 - Mac OS X
     - [freckles](https://pkgs.frkl.io/downloads/darwin15/freckles)
-  
+
 
 After download, place the executable somewhere in your path (I usually use ``$HOME/.local/bin`` -- but you might have to add that to your ``$PATH`` environment variable) and make it executable:
 
@@ -21,13 +21,13 @@ After download, place the executable somewhere in your path (I usually use ``$HO
 mv ~/Downloads/freckles ~/.local/bin
 chmod +x ~/.local/bin/freckles
 ```
-  
+
  If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications):
- 
+
 ```console
 ln -s freckles ~/.local/bin/frecklecute
 ```
- 
+
 </div>
 
 ## 'Curly' bootstrap script {: .section-title}

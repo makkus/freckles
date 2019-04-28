@@ -5,4 +5,3 @@ frecklets:
       msg: grand-child 1
     vars:
       msg: "{{:: grand_child_2_var_1 ::}}"
-

@@ -50,8 +50,20 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
+flake: ## check style with flake8
 	flake8 freckles tests
+
+requirements: ## create requirements/requirements.txt
+	pip-compile --extra-index-url=https://pkgs.frkl.io/frkl/dev -o requirements/requirements.txt requirements/base.in
+
+docs-requirements: ## create requirements/docs.txt
+	pip-compile --extra-index-url=https://pkgs.frkl.io/frkl/dev -o requirements/docs.txt requirements/docs.in
+
+test-requirements: ## create requirements/testing.txt
+	pip-compile --extra-index-url=https://pkgs.frkl.io/frkl/dev -o requirements/testing.txt requirements/testing.in
+
+black: ## run black
+	black --config black-config.toml setup.py src/freckles tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -60,7 +72,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source freckles -m pytest
+	coverage run --source src/freckles -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
@@ -68,16 +80,13 @@ coverage: ## check code coverage quickly with the default Python
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/freckles.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ freckles
+	sphinx-apidoc -o docs/ src/freckles
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
-
-release: dist ## package and upload a release
-	twine upload dist/*
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
