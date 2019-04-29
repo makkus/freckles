@@ -7,7 +7,6 @@
 #
 
 --extra-index-url https://pkgs.frkl.io/frkl/dev --pre
-
 asn1crypto==0.24.0        # via cryptography
 atomicwrites==1.3.0       # via pytest
 attrs==19.1.0             # via pytest
@@ -28,6 +27,11 @@ dogpile.cache==0.7.1
 filelock==3.0.10          # via tox
 flake8==3.7.7
 future==0.17.1
+git+https://gitlab.com/frkl/frkl-pkg@develop#egg=frkl-pkg
+git+https://gitlab.com/frkl/frkl@develop#egg=frkl
+
+git+https://gitlab.com/frkl/frutils@develop#egg=frutils
+git+https://gitlab.com/frkl/ting@develop#egg=ting
 halo==0.0.24
 idna==2.8                 # via requests
 jinja2==2.10.1            # via click-completion

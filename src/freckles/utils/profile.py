@@ -1,4 +1,5 @@
 #!/home/markus/.virtualenvs/frkl/bin/python2.7
+# -*- coding: utf-8 -*-
 # EASY-INSTALL-ENTRY-SCRIPT: 'freckles','console_scripts','frecklecute'
 
 __requires__ = "freckles"

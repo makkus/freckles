@@ -1,7 +1,7 @@
 [![PyPI status](https://img.shields.io/pypi/status/freckles.svg)](https://pypi.python.org/pypi/freckles/)
 [![PyPI version](https://img.shields.io/pypi/v/freckles.svg)](https://pypi.python.org/pypi/freckles/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/freckles.svg)](https://pypi.python.org/pypi/freckles/)
-[![Pipeline status](https://gitlab.com/frkl/freckles/badges/develop/pipeline.svg)](https://gitlab.com/frkl/freckles/pipelines)
+[![Pipeline status](https://gitlab.com/frkl/freckles/badges/develop/pipeline.svg)](https://gitlab.com/freckles-io/freckles/pipelines)
 [![Code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 # freckles
@@ -11,7 +11,7 @@
 
 ## Description
 
-Documentation still to be done. 
+Documentation still to be done.
 
 # Development
 

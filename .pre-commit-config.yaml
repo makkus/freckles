@@ -33,6 +33,7 @@ repos:
   - id: debug-statements
   - id: end-of-file-fixer
   - id: requirements-txt-fixer
+  - id: fix-encoding-pragma
   - id: mixed-line-ending
     args: ['--fix=no']
   - id: flake8

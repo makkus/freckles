@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .defaults import FRECKLES_RUN_DIR, FRECKLES_CURRENT_RUN_SYMLINK
 
 # schema to load '*.context' files in $HOME/.config/freckles
