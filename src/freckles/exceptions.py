@@ -99,7 +99,7 @@ class FrecklesException(Exception):
 
 class FrecklesConfigException(FrecklesException):
     def __init__(
-        self, keys=None, msg=None, solution=None, reason=None, addition_references=None
+        self, keys=None, msg=None, solution=None, reason=None, references=None
     ):
 
         if keys and isinstance(keys, string_types):
@@ -122,11 +122,11 @@ class FrecklesConfigException(FrecklesException):
                     ", ".join(keys)
                 )
 
-        references = {
+        references_default = {
             "freckles configuration documentation": "https://freckles.io/doc/configuration"
         }
-        if addition_references:
-            references.update(addition_references)
+        if references:
+            references.update(references_default)
 
         super(FrecklesConfigException, self).__init__(
             msg=message, solution=solution, references=references, reason=reason
