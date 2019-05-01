@@ -183,7 +183,7 @@ class FrecklesVarException(FrecklesException):
         if self.task is not None:
             msg = msg + "\n  frecklet:\n    "
             msg = msg + readable(self.task["frecklet"], out="yaml", indent=4).strip()
-        msg = msg + "\n  error: {}".format(str(self.error))
+        msg = msg + "\n  error: {}".format(str(self.errors))
         return msg
 
 
