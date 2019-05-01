@@ -37,14 +37,14 @@ Each list item needs to be the name of another frecklet that exists in the curre
 
 Here's an example:
 ```yaml
-- pkg-docker
+- service-docker
 ```
 
 Let's put that into a file called ``my-docker-install.frecklet``. Issuing:
 ```bash
 > frecklecute my-docker-install.frecklet
 ```
-would install *Docker* on the local machine (by executing [this frecklet](/frecklets/default/virtualization/pkg-docker/)).
+would install *Docker* on the local machine (by executing [this frecklet](/frecklets/default/virtualization/service-docker/)).
 
 #### A list of single-key dicts
 
@@ -81,16 +81,16 @@ We can easily mix and match those two types:
 ```yaml
 - user-exists:
     name: markus
-- pkg-docker
+- service-docker
 ```
 
 Or, if we want to make sure the newly created user is in the group
-that is allowed to user 'docker', we could write (after checking the [``pkg-docker``](/frecklets/default/virtualization/pkg-docker/) documentation):
+that is allowed to user 'docker', we could write (after checking the [``service-docker``](/frecklets/default/virtualization/service-docker/) documentation):
 
 ```yaml
 - user-exists:
     name: markus
-- pkg-docker:
+- service-docker:
     users:
       - markus
 
@@ -105,7 +105,7 @@ The (single-key dicts) example from above can also be expressed as a list of dic
 - frecklet: user-exists
   vars:
     name: markus
-- frecklet: pkg-docker
+- frecklet: service-docker
   vars:
     users:
       - markus
@@ -124,7 +124,7 @@ will override both options. Here's how that would look:
     path: /tmp/upload.log
     content: |
       Installed Docker on host 'dev.frkl.io'.
-- frecklet: pkg-docker
+- frecklet: service-docker
   target: admin@dev.frkl.io
   vars:
     users:

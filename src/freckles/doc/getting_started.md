@@ -228,7 +228,6 @@ pkg-apache                           ensures the Apache web server is
 pkg-arp                              install the sshpass package
 pkg-devpi                            ensures the devpi service is installed
                                      and running
-pkg-docker                           makes sure Docker is installed
 pkg-nginx                            ensures the nginx web server is
                                      installed and running
 pkg-nmap                             install the sshpass package
@@ -255,6 +254,7 @@ service-devpi                        installs a complete devpi server,
 service-devpi-standalone             installs a complete devpi server,
                                      including nginx proxy & lets-encrypt
                                      certs
+service-docker                           makes sure Docker is installed
 service-grafana                      installs the grafana service
 service-mariadb                      ensures MariaDB service is installed
 service-netdata                      makes sure netdata service is installed
