@@ -124,7 +124,7 @@ will override both options. Here's how that would look:
 ```yaml
 - frecklet: file-with-content
   vars:
-    path: /tmp/upload.log
+    path: /tmp/install.log
     content: |
       Installed Docker on host 'dev.frkl.io'.
 - frecklet: service-docker
@@ -143,7 +143,7 @@ so we'll ignore that for now, and come back to it later, at the end of the page.
 improve our *frecklets* usability (and usefulness).
 
 </div>
-<!-- end list of tasks>
+<!-- end list of tasks -->
 
 ### The metadata dictionary
 <div class="section-block" markdown="1">
