@@ -84,17 +84,20 @@ We can easily mix and match those two types:
 - service-docker
 ```
 
-Or, if we want to make sure the newly created user is in the group
+Or, if we want to make sure the newly created user with a specific id is in the group
 that is allowed to user 'docker', we could write (after checking the [``service-docker``](/frecklets/default/virtualization/service-docker/) documentation):
 
 ```yaml
 - user-exists:
     name: markus
+    uid: 1010
 - service-docker:
     users:
       - markus
 
 ```
+
+Note: if we didn't need the custom ``uid`` for our user, the ``service-docker`` user would have created the user automatically, and ``user-exists`` would not have been necessary.
 
 
 #### Single-and double-key dictionaries
