@@ -401,7 +401,7 @@ For local usage, you don't need to do anything special:
 
 For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do password-less sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).
 
-To login to a remote server, add the ``--host <user>@<hostname>`` flag before the *frecklet* name, e.g.:
+To login to a remote server, add the ``--target <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
 ```console
 >  frecklecute --ask-ssh-pass --target pi@10.0.0.209 file-downloaded --dest /tmp/my/remote/download/path/logo.svg https://frkl.io/images/frkl-logo-black.svg
