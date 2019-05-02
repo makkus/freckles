@@ -13,12 +13,12 @@ There are several ways to install *freckles*. The simplest one is to just downlo
 - [Mac OS X](https://pkgs.frkl.io/downloads/dev/darwin/binaries/freckles)
 - Windows is not supported directly, but you can use the [Linux version](https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles) on [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux)
 
-Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this (on Linux):
+Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this:
 
 ``` console tab="Linux"
 # download and install on Linux
 
-wget https://pkgs.frkl.io/downloads/linux-gnu/freckles
+wget https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles
 chmod +x freckles
 mkdir -p ~/.local/bin
 mv freckles ~/.local/bin
@@ -32,7 +32,7 @@ source ~/.profile
 ``` console tab="Mac OS X"
 # download and install on Mac OS X
 
-wget https://pkgs.frkl.io/downloads/darwin15/freckles
+wget https://pkgs.frkl.io/downloads/dev/darwin/binaries/freckles
 chmod +x freckles
 mkdir -p ~/.local/bin
 mv freckles ~/.local/bin
