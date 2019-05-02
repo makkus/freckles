@@ -432,7 +432,7 @@ SSH PASS: ****
 
 You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](https://TODO).
 
-But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file (let's call it ``hello-world.frecklet``), and assemble the tasks you need done.
+But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file, and assemble the tasks you need done.
 
 <!-- begin block your first frecklet -->
 ### Your first *frecklet*
@@ -467,9 +467,9 @@ We don't need to actually create the directory, because a few of those *frecklet
 
 The most basic *frecklet* is a text file containing a list of other frecklets and their configuration,
 in either 'yaml', 'json', or 'toml' format (for more details, head over to the [frecklet documentation](/doc/frecklets/)
-section).
+section, and esp. the [Anatomy of a frecklet](/doc/frecklets/anatomy) page to learn the different ways a *frecklet* can look like).
 
-Let's use the 'yaml' format, and create a file called ``my-first.frecklet``, with the following content:
+Let's create a YAML file called ``my-first.frecklet``, with the following content:
 
 ```yaml
 - file-downloaded:
@@ -536,7 +536,8 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  'root' or 'sudo' permissions, though.
 
  On a side-note: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
- *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written in a way so *frecklets*
+ *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written with an eye
+ on [immutable infrastructure](https://www.digitalocean.com/community/tutorials/what-is-immutable-infrastructure), in a way so *frecklets*
  require as little information and manual specification as possible, and they will just do the sensible thing.
  You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitly.
 
@@ -626,7 +627,8 @@ Now try to actually provide those new arguments:
 </div>
 
 There is a lot more you can do to make the script more usable, for example add documentation, and specify argument types
-so *freckles* can validate user input. Check out the [documentation](/frecklets) to learn more.
+so *freckles* can validate user input. Check out the [frecklet documentation](/doc/frecklets) and particularly the page about
+[the evolution of a *frecklet*](/doc/frecklets/evolution) to learn more.
 
 <!-- end block your first parameters -->
 
@@ -654,6 +656,7 @@ So, here are the *frecklets* we are going to use:
 - [``service-webserver``](/frecklets/default/service/service-webserver/), to setup and configure Nginx
 - [``file-with-content``](/frecklets/default/filesystem/file-with-content/), to create the html file
 
+**Note**: Under the hood we are taking advantage of a few [Ansible roles](https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) (particularly [``geerlingguy.nginx``](https://github.com/geerlingguy/ansible-role-nginx)) to do the hard work for us.
 
 Here's what our new *frecklet* looks like (let's save it to a file called ``my-webserver.frecklet``):
 
@@ -726,7 +729,7 @@ freckles says "hello", World!
 ```
 
 It'd be really easy to change this *frecklet* to, for example, upload a local folder with html files instead of creating the single
-file on the server, support https via [Let's encrypt](https://letsencrypt.org), add a firewall, etc. All this exceeds the scope of this 'getting started'-guide though.
+file on the server, support https via [Let's encrypt](https://letsencrypt.org), add a firewall, etc. The *frecklet* would only grow by a few lines. All this exceeds the scope of this 'getting started'-guide though.
 Check out the [Documentation]('/doc) if you want to learn more!
 
 <!-- end block real-life example -->
