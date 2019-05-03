@@ -20,4 +20,4 @@ except VersionConflict:
 
 
 if __name__ in ["__main__", "builtins", "__builtin__"]:
-    setup(use_scm_version=True)
+    setup(use_scm_version={"write_to": "src/freckles/version.txt"})

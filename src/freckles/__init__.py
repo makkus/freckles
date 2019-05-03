@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import, division, print_function
 
+import io
+import os
+
 from pkg_resources import get_distribution, DistributionNotFound
 
 """Top-level package for freckles."""
@@ -14,7 +17,22 @@ try:
     dist_name = __name__
     __version__ = get_distribution(dist_name).version
 except DistributionNotFound:
-    __version__ = "unknown"
+
+    try:
+        version_file = os.path.join(os.path.dirname(__file__), "version.txt")
+
+        if os.path.exists(version_file):
+            with io.open(version_file, encoding="utf-8") as vf:
+                __version__ = vf.read()
+        else:
+            __version__ = "unknown"
+
+    except (Exception):
+        pass
+
+    if __version__ is None:
+        __version__ = "unknown"
+
 finally:
     del get_distribution, DistributionNotFound
 
