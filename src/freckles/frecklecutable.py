@@ -19,7 +19,8 @@ from .defaults import (
     FRECKLES_DEFAULT_ARG_SCHEMA,
     PASSWORD_ASK_MARKER,
 )
-from .exceptions import FrecklesVarException, FrecklesException
+from .exceptions import FrecklesVarException
+from frutils.exceptions import FrklException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
@@ -664,7 +665,7 @@ class Frecklecutable(object):
 
             except (Exception) as e:
 
-                if isinstance(e, FrecklesException):
+                if isinstance(e, FrklException):
                     msg = e.message
                 else:
                     msg = str(e)
