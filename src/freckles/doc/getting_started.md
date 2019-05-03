@@ -538,7 +538,7 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  On a side-note: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
  *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written with an eye
  on [immutable infrastructure](https://www.digitalocean.com/community/tutorials/what-is-immutable-infrastructure), in a way so *frecklets*
- require as little information and manual specification as possible, and they will just do the sensible thing.
+ require as little information and manual specification as possible from the user, and they will just do the sensible thing.
  You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitly.
 
 
@@ -584,6 +584,7 @@ directly. Let's create a new file, ``my-second.frecklet``:
 arguments. By default, all jinja variables will be turned into an argument that is non-optional, and can't be empty. Let's see:
 
 ```console
+> chmod +x my-second.frecklet   # to make the file executable
 > ./my-second.frecklet --help
 
 Usage: frecklecute ./my-second.frecklet [OPTIONS]
