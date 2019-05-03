@@ -673,7 +673,7 @@ Here's what our new *frecklet* looks like (let's save it to a file called ``my-w
 ```
 
 As in the example above, we made some of our script configurable via arguments (the 'hostname', and part of the html page content, 'helloee') and we could
-use the ``--help`' flag on our *frecklet* to see that.
+use the ``--help`` flag on our *frecklet* to see that.
 
 For this example, I don't want to run it on my local machine, as it would install a web-server that I have no use for on there. So I went to a VPS (Virtual private server) provider and rented a machine in the cloud, set up DNS and security so there's an admin user that has password-less sudo permissions, and that I can access using my local ssh key. All this goes to far for this tutorial, but I'll write up instructions sometime soon (or, rather, a few *frecklets* to do it for you), in a different place. For now, just peruse your favourite search engine if you want to know more.
 
