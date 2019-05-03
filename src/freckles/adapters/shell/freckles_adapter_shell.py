@@ -296,7 +296,14 @@ class FrecklesAdapterShell(FrecklesAdapter):
         pass
 
     def run(
-        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        run_secrets,
+        run_env,
+        result_callback,
+        parent_task,
     ):
 
         # import pp

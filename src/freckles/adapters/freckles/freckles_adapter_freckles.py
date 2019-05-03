@@ -87,6 +87,18 @@ args:
       param_decls:
         - "--target"
         - "-t"
+  ssh_pass:
+    doc:
+      short_help: "The ssh password to connect to the password."
+    type: string
+    secret: true
+    required: false
+  become_pass:
+    doc:
+      short_help: "The password to gain elevated privileges on the password."
+    type: string
+    secret: true
+    required: false
   vars:
     doc:
       short_help: The parameters for this frecklet.
@@ -101,6 +113,8 @@ frecklets:
    vars:
      frecklet: "{{:: frecklet ::}}"
      target: "{{:: target ::}}"
+     become_pass: "{{:: become_pass ::}}"
+     ssh_pass: "{{:: ssh_pass ::}}"
      elevated: "{{:: elevated ::}}"
      vars: "{{:: vars ::}}"
 """
@@ -114,7 +128,14 @@ frecklets:
         pass
 
     def _run(
-        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        run_secrets,
+        run_env,
+        result_callback,
+        parent_task,
     ):
 
         tl = copy.deepcopy(tasklist)
@@ -123,13 +144,21 @@ frecklets:
             tasklist=tl,
             run_vars=run_vars,
             run_config=run_config,
+            run_secrets=run_secrets,
             run_env=run_env,
             result_callback=result_callback,
             parent_task=parent_task,
         )
 
     def run(
-        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        run_secrets,
+        run_env,
+        result_callback,
+        parent_task,
     ):
 
         run_elevated = run_config["elevated"]
@@ -151,6 +180,8 @@ frecklets:
             target = vars_dict.get("target", "localhost")
 
             run_target = FrecklesRunTarget(target)
+            run_target.ssh_pass = vars_dict.get("ssh_pass", None)
+            run_target.become_pass = vars_dict.get("become_pass", None)
 
             task_run_config = dict_merge(run_config, run_target.config, copy_dct=True)
 
@@ -159,7 +190,6 @@ frecklets:
             vars = vars_dict.get(VARS_KEY, {})
 
             run_env_task = copy.deepcopy(run_env)
-
             env_dir = os.path.join(run_env_task["env_dir"], "task_{}".format(task_nr))
 
             result = fx.run(

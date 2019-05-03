@@ -8,7 +8,7 @@ import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from treelib import Tree
 
-from frutils import replace_strings_in_obj, get_template_keys
+from frutils import replace_strings_in_obj, get_template_keys, can_passwordless_sudo
 from frutils.tasks.tasks import Tasks
 from ting.defaults import TingValidator
 from .defaults import (
@@ -396,6 +396,27 @@ class Frecklecutable(object):
 
         return processed_tree
 
+    def check_become_pass(self, run_config, run_secrets, parent_task):
+
+        if parent_task is not None:
+            return
+
+        if run_config.get("host", None) != "localhost":
+            return
+
+        if can_passwordless_sudo():
+            return
+
+        if run_secrets.get("become_pass", None) is not None:
+            return
+
+        msg = ""
+        if run_config.get("user", None):
+            msg = "{}@".format(run_config["user"])
+        msg = msg + run_config.get("host", "localhost")
+        prompt = "SUDO PASS (for '{}')".format(msg)
+        run_secrets["become_pass"] = ask_password(prompt)
+
     def run(
         self,
         inventory,
@@ -403,8 +424,6 @@ class Frecklecutable(object):
         run_vars=None,
         parent_task=None,
         elevated=None,
-        ask_sudo_pass=False,
-        ask_ssh_pass=False,
         env_dir=None,
     ):
 
@@ -422,7 +441,17 @@ class Frecklecutable(object):
             if arg.secret:
                 secret_args.append(arg)
 
+        paused = False
+        if parent_task is not None and (
+            secret_args
+            or run_config.get("become_pass", None)
+            or run_config.get("ssh_pass", None)
+        ):
+            parent_task.pause()
+            paused = True
+
         if secret_args:
+
             asked = False
             for arg in secret_args:
 
@@ -438,6 +467,43 @@ class Frecklecutable(object):
 
             if asked:
                 click.echo()
+
+        asked = False
+
+        run_secrets = {}
+        if parent_task is not None:
+            parent_task.pause()
+
+        run_secrets["become_pass"] = run_config.pop("become_pass", None)
+        if run_secrets["become_pass"] == "ask":
+
+            msg = ""
+            if run_config.get("user", None):
+                msg = "{}@".format(run_config["user"])
+            msg = msg + run_config.get("host", "localhost")
+
+            prompt = "SUDO PASS (for '{}')".format(msg)
+
+            run_secrets["become_pass"] = ask_password(prompt)
+            asked = True
+
+        run_secrets["ssh_pass"] = run_config.pop("ssh_pass", None)
+        if run_secrets["ssh_pass"] == "ask":
+            msg = ""
+            if run_config.get("user", None):
+                msg = "{}@".format(run_config["user"])
+            msg = msg + run_config.get("host", "localhost")
+
+            prompt = "SSH PASS (for '{}')".format(msg)
+
+            run_secrets["ssh_pass"] = ask_password(prompt)
+            asked = True
+
+        if paused:
+            parent_task.resume()
+
+        if asked:
+            click.echo()
 
         frecklet_name = self.frecklet.id
         log.debug("Running frecklecutable: {}".format(frecklet_name))
@@ -478,12 +544,21 @@ class Frecklecutable(object):
 
             if current_adapter != adapter_name:
 
-                task_lists.append(
-                    {"tasklist": current_tasklist, "adapter": current_adapter}
-                )
+                if elevated is not None:
+                    tasks_elevated = elevated
+
+                new_tasklist = {
+                    "tasklist": current_tasklist,
+                    "adapter": current_adapter,
+                    "elevated": tasks_elevated,
+                }
+                if tasks_elevated:
+                    self.check_become_pass(run_config, run_secrets, parent_task)
+                task_lists.append(new_tasklist)
                 current_adapter = adapter_name
                 idempotent_cache = []
                 current_tasklist = []
+                tasks_elevated = False
 
             if is_duplicate_task(task, idempotent_cache):
                 log.debug(
@@ -494,59 +569,29 @@ class Frecklecutable(object):
                 continue
             current_tasklist.append(task)
 
-            # adapter = self.context._adapters[adapter_name]
-            # resources = adapter.get_resources_for_task(task)
-            #
-            # if not resources:
-            #     resources = {}
-            #
-            # sup = adapter.get_supported_resource_types()
-            # for resource_type, paths in resources.items():
-            #
-            #     if resource_type not in sup:
-            #         raise Exception(
-            #             "Invalid resource type '{}' for adapter '{}'".format(
-            #                 resource_type, adapter_name.name
-            #             )
-            #         )
-            #     current = all_resources.setdefault(resource_type, [])
-            #     for path in paths:
-            #         if path not in current:
-            #             current.append(path)
-        task_lists.append({"tasklist": current_tasklist, "adapter": current_adapter})
+        if elevated is not None:
+            tasks_elevated = elevated
+        new_tasklist = {
+            "tasklist": current_tasklist,
+            "adapter": current_adapter,
+            "elevated": tasks_elevated,
+        }
+        if tasks_elevated:
+            self.check_become_pass(run_config, run_secrets, parent_task)
+        task_lists.append(new_tasklist)
+
         runs_result = []
 
         for run_nr, tl_details in enumerate(task_lists):
 
             current_adapter = tl_details["adapter"]
             current_tasklist = tl_details["tasklist"]
+            run_elevated = tl_details["elevated"]
 
             adapter = self.context._adapters[current_adapter]
             run_env_properties = self.context.create_run_environment(
                 adapter, env_dir=env_dir
             )
-
-            sudo_pass = run_vars.get("__freckles_run__", {}).get("sudo_pass", None)
-            ssh_pass = run_vars.get("__freckles_run__", {}).get("ssh_pass", None)
-
-            run_elevated = tasks_elevated
-
-            if elevated is not None:
-                # we overwrite with whatever the user explicitely provided
-                run_elevated = elevated
-
-            asked = False
-            if ask_sudo_pass and sudo_pass is None:
-                sudo_pass = ask_password("SUDO PASS")
-                run_vars["__freckles_run__"]["sudo_pass"] = sudo_pass
-                asked = True
-            if ask_ssh_pass and ssh_pass is None:
-                ssh_pass = ask_password("SSH PASS")
-                run_vars["__freckles_run__"]["ssh_pass"] = ssh_pass
-                asked = True
-
-            if asked:
-                click.echo()
 
             # preparing execution environment...
             self._context._run_info.get("prepared_execution_environments", {}).get(
@@ -597,6 +642,7 @@ class Frecklecutable(object):
                     tasklist=current_tasklist,
                     run_vars=run_vars,
                     run_config=run_config,
+                    run_secrets=run_secrets,
                     run_env=run_env_properties,
                     result_callback=result_callback,
                     parent_task=root_run_task,

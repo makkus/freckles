@@ -230,7 +230,7 @@ class FrecklesRunTarget(object):
         else:
             target_dict = target_or_target_dict
 
-        self.config = target_dict
+        self._config = target_dict
 
         self.protocol = target_dict.get("protocol", None)
         self.user = target_dict.get("user", None)
@@ -238,3 +238,28 @@ class FrecklesRunTarget(object):
         self.host = target_dict.get("host", None)
         self.connection_type = target_dict.get("connection_type", None)
         self.ssh_key = target_dict.get("ssh_key", None)
+        self.become_pass = target_dict.get("become_pass", None)
+        self.ssh_pass = target_dict.get("ssh_pass", None)
+
+    @property
+    def config(self):
+
+        result = {}
+        if self.protocol is not None:
+            result["protocol"] = self.protocol
+        if self.user is not None:
+            result["user"] = self.user
+        if self.port is not None:
+            result["port"] = self.port
+        if self.host is not None:
+            result["host"] = self.host
+        if self.connection_type is not None:
+            result["connection_type"] = self.connection_type
+        if self.ssh_key is not None:
+            result["ssh_key"] = self.ssh_key
+        if self.become_pass is not None:
+            result["become_pass"] = self.become_pass
+        if self.ssh_pass is not None:
+            result["ssh_key"] = self.ssh_pass
+
+        return result

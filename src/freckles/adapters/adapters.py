@@ -140,13 +140,27 @@ class FrecklesAdapter(object):
 
     @abc.abstractmethod
     def run(
-        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        run_secrets,
+        run_env,
+        result_callback,
+        parent_task,
     ):
 
         pass
 
     def _run(
-        self, tasklist, run_vars, run_config, run_env, result_callback, parent_task
+        self,
+        tasklist,
+        run_vars,
+        run_config,
+        run_secrets,
+        run_env,
+        result_callback,
+        parent_task,
     ):
 
         final_run_config = self.run_config(run_config)
@@ -157,6 +171,7 @@ class FrecklesAdapter(object):
             tasklist=tasklist,
             run_vars=run_vars,
             run_config=final_run_config,
+            run_secrets=run_secrets,
             run_env=run_env,
             result_callback=result_callback,
             parent_task=parent_task,
