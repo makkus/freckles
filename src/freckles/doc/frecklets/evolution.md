@@ -32,7 +32,7 @@ Without any additional metadata, a minimal *frecklet* is just a list of strings 
 #### A list of (one or more) strings
 
 In it's most basic form, a *frecklet* is a text file that contains a list of strings where each string represents a command (a.k.a. other *frecklet*) that does not require any arguments.
-Each list item needs to be the name of another frecklet that exists in the current [context](/doc/contexts)
+Each list item needs to be the name of another frecklet that exists in the current [context](/doc/configuration)
 (get a list of all possible ones with: ``freckles list``).
 
 Here's an example:
@@ -296,7 +296,7 @@ Every variable we want to ask the user needs to be present as key under the ``ar
 
 **Note**:
 
-Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.pocoo.org/) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
+Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.palletsprojects.com) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
 
 ---  
 
@@ -329,7 +329,7 @@ Error: Invalid value for "--uid": markus is not a valid integer
 
 And that's basically it. There are more details you can adjust, both in terms how the *frecklet* presents itself to
 its users, and in terms of specifying exactly which tasks to execute, and in which manner. For more details on those,
-please refer to the [*freckles* documentation](https://docs.freckles.io).
+please refer to the [*freckles* documentation](https://freckles.io/doc).
 
 </div>
 <!-- end metadata dictionary -->
@@ -419,7 +419,7 @@ This one lets you fine-tune the behaviour of this (dynamically created) *freckle
 
 The content of this sub-key is highly dependent on the adapter used, so you'll have to refer to the documentation of the adapter in question for details.
 
-That's all folks. Check out the other docs, or head over to the [friends of freckles](https://friends.of.freckles) if you have questions!
+That's all folks. Check out the other docs, or head over to the [friends of freckles](https://friends.of.freckles.io) if you have questions!
 
 </div>
 <!-- end fully flexible -->

@@ -1,6 +1,6 @@
 ---
 url_path_prio: 1
-title: Getting started
+title: Getting starte
 ---
 
 ## Installing *freckles* {: .section-title}
@@ -290,7 +290,7 @@ zile-config-file                     configuration for the 'zile' text editor
 ```
 </div>
 
-The same list of *frecklets* can also be found online in the [default frecklet repository](https://freckles.io/contexts/default/overview/).
+The same list of *frecklets* can also be found online in the [default frecklet repository](https://freckles.io/frecklets/default).
 
 If you want to see all tasks that are related to one (or several) search terms, use:
 
@@ -399,7 +399,7 @@ For local usage, you don't need to do anything special:
 ### ...remotely {: .block-title}
 <div class="section-block" markdown="1">
 
-For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do password-less sudo (for which, of course, there also exists a [frecklet](//frecklets/default/system/passwordless-sudo-users)).
+For this, you should have a ssh-server running on the target box. If you need root/sudo permissions for the task you want to run, you also need to connect as root, or have an account setup that can do password-less sudo (for which, of course, there also exists a [frecklet](/frecklets/default/system/passwordless-sudo-users)).
 
 To login to a remote server, add the ``--target <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
@@ -430,7 +430,7 @@ SSH PASS: ****
 ## Writing your own *frecklets* {: .section-title}
 <div class="section-block" markdown="1">
 
-You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](https://TODO).
+You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](/frecklets/community).
 
 But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file, and assemble the tasks you need done.
 
@@ -731,7 +731,7 @@ freckles says "hello", World!
 
 It'd be really easy to change this *frecklet* to, for example, upload a local folder with html files instead of creating the single
 file on the server, support https via [Let's encrypt](https://letsencrypt.org), add a firewall, etc. The *frecklet* would only grow by a few lines. All this exceeds the scope of this 'getting started'-guide though.
-Check out the [Documentation]('/doc) if you want to learn more!
+Check out the [Documentation](/doc) if you want to learn more!
 
 <!-- end block real-life example -->
 
