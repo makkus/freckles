@@ -1,5 +1,5 @@
 ---
-title: Adapter: nsbl
+title: Adapter ``nsbl``
 url_path_prio: 200
 draft: false
 ---
