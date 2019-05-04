@@ -12,7 +12,7 @@ Most commonly, a *frecklet* is a text file in [YAML](http://yaml.org/) format. O
 
 Here are some resources to find out more about *frecklets*, how they are called, work, and look like:
 
-[Getting started](https://freckles.io/doc/getting_started)
+[Getting started](/doc/getting_started)
 :    The recommended guide to get started with using *freckles*. Read this first.
 
 [The evolution of a frecklet](/doc/frecklets/evolution)
@@ -21,8 +21,8 @@ Here are some resources to find out more about *frecklets*, how they are called,
 [The anatomy of a frecklet](/doc/frecklets/anatomy)
 :    For when you want to create your own, non-trivial *frecklets*. Non essential reading if you just want to use *freckles* to run existing *frecklets*, or cobble together a few simple ones of your own.
 
-[Default frecklet index](https://freckles.io/frecklets/default)
+[Default frecklet index](frecklets/default)
 :    The repository containing the default set of *frecklets* that which is included in the *freckles* application.
 
-[Community frecklet index](https://freckles.io/frecklets/community)
+[Community frecklet index](/frecklets/community)
 :    The repository containing a *frecklets* that were created, improved and maintained by the community.
