@@ -31,7 +31,7 @@ ln -s freckles ~/.local/bin/frecklecute
 
 </div>
 
-## 'Curly' bootstrap script {: .section-title}
+## [freck](https://gitlab.com/freckles-io/freck), the curly bootstrap script for *freckles* {: .section-title}
 <div class="section-block" markdown="1">
 
 A good way of bootstrapping *freckles* on vanilla boxes is by utilizing [``freck``](https://gitlab.com/freckles-io/freck), the official *freckles* bootstrap script.
@@ -52,7 +52,7 @@ Using `wget`:
 wget -O - https://freckles.sh | bash
 ```
 
-You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
+This will download the approriate binary into ``$HOME/.local/share/freckles/bin``. You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
 
 ### What does this do?
 
