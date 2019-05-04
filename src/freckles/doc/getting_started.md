@@ -7,13 +7,13 @@ title: Getting started
 <div class="section-block" markdown="1">
 
 
-There are several ways to install *freckles*. The simplest one is to just download the binary for your platform:
+There are several ways to install *freckles*. The most straight-forward one is to just download the binary for your platform:
 
 - [Linux](https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles)
 - [Mac OS X](https://pkgs.frkl.io/downloads/dev/darwin/binaries/freckles)
 - Windows is not supported directly, but you can use the [Linux version](https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles) on [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux)
 
-Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this:
+Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this (manually):
 
 ``` console tab="Linux"
 # download and install on Linux
