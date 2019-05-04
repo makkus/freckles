@@ -1,6 +1,6 @@
 ---
 url_path_prio: 1
-title: Getting starte
+title: Getting started
 ---
 
 ## Installing *freckles* {: .section-title}
