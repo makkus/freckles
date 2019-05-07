@@ -3,6 +3,8 @@ title: Installation
 url_path_prio: 4
 ---
 
+DOCUMENTATION STILL TO BE DONE
+
 There are several options for installing *freckles*. The two easiest ones are:
 
 ## Binary file download {: .section-title}

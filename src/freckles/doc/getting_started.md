@@ -6,58 +6,14 @@ title: Getting started
 ## Installing *freckles* {: .section-title}
 <div class="section-block" markdown="1">
 
-
-There are several ways to install *freckles*. The most straight-forward one is to just download the binary for your platform:
-
-- [Linux](https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles)
-- [Mac OS X](https://pkgs.frkl.io/downloads/dev/darwin/binaries/freckles)
-- Windows is not supported directly, but you can use the [Linux version](https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles) on [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux)
-
-Make the file executable and copy it into a folder on your ``PATH``. If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications). Here's how you could do all this (manually):
-
-``` console tab="Linux"
-# download and install on Linux
-
-wget https://pkgs.frkl.io/downloads/dev/linux/binaries/freckles
-chmod +x freckles
-mkdir -p ~/.local/bin
-mv freckles ~/.local/bin
-ln -s freckles ~/.local/bin/frecklecute
-
-# adjust PATH (optional)
-echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
-source ~/.profile
-```
-
-``` console tab="Mac OS X"
-# download and install on Mac OS X
-
-wget https://pkgs.frkl.io/downloads/dev/darwin/binaries/freckles
-chmod +x freckles
-mkdir -p ~/.local/bin
-mv freckles ~/.local/bin
-ln -s freckles ~/.local/bin/frecklecute
-
-# adjust PATH (optional)
-echo 'export PATH=$PATH:~/.local/bin' >> "~/.profile"
-source ~/.profile
-```
-
-For the purpose of getting started quickly, you could also use the [*freckles* bootstrap script](https://gitlab.com/freckles-io/freck), which achieves something similar to the above:
+There are several ways to get *freckles* installed. The easiest one is to use the [*freckles* bootstrap script](https://gitlab.com/freckles-io/freck):
 
 ```console
 curl https://freckles.sh | bash
-# or
-wget -O- https://freckles.sh | bash
-```
-
-This adds a section to your ``$HOME/.profile`` to make *freckles* available in your ``$PATH``. For that to be the case, you either have to logout and re-login to your session, or source the ``.profile`` file:
-
-```console
 source ~/.profile
 ```
 
-For other install options, check [here](/doc/installation).
+For details what exactly the bootstrap script does, and for other options to get *freckles* onto your machine, please check out the [Downloads page](/downloads) and the [install documentation](/doc/installation).
 
 </div>
 
