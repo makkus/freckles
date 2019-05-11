@@ -89,160 +89,174 @@ Let's get a list of all the *frecklets* that are supported out of the box, use t
 <div class="code-max-height" markdown="1">
 
 ```console
-> frecklecute --list  
+> freckles list  
 
 frecklet                             description
 -----------------------------------  ----------------------------------------
-admin-user-exists                    ensure an admin user with a specified
-                                     username exists
-ansible-module                       execute a specific Ansible module
-ansible-role                         execute an arbitrary role from Ansible
-                                     Galaxy
-apache-vhost-file                    apache vhost configuration
-apache-vhost-from-folder             configure a Nginx vhost for static site
-archive-extracted                    extracts an archive
-basic-hardening                      basic security set-up for a newly
-                                     installed server
-command-output-to-file               execute a command, write the output to
-                                     file
-config-value-in-file                 adds a key/value pair to a file
-config-values-in-file                adds key/value pairs to a file
-debug-msg                            display a debug message
-debug-var                            displays the content of an (internal)
-                                     Ansible variable
-debug-vars                           displays the content of an (internal)
-                                     Ansible variable
-devpi-create-backup                  backs-up a devpi service
-devpi-import-from-backup             restores up a devpi service backup
-devpi-nginx-vhost-config             creates a vhost for devpi on Nginx
-dotfiles                             setup dotfiles and associated apps
-execute-ad-hoc-script                create an executable file from a
-                                     template, execute it, delete it
-execute-command                      execute a one-off command
-execute-shell                        execute a one-off shell command
-file-downloaded                      download a file
-file-fetched                         fetches a file from a remote (target)
-                                     host
-file-is-present                      ensure a file exists
-file-with-content                    ensure a file exists and has a certain
-                                     content
-folder-exists                        ensure a folder exists
-folder-is-empty                      ensure a folder exists
-folder-stowed                        stow (symlink) a folder
-folders-intermingled                 merge a target folder with another
-frecklecute                          execute a frecklet indirectly
-git-repo-synced                      check out or pulls a git repo
-group-exists                         ensure a group exists
-hostname                             set the hosts hostname
-inaugurate-custom-script             generate a custom inaugurate script
-init-service-configured              configure an init service
-init-service-disabled                disable init-service
-init-service-enabled                 enable init-service
-init-service-reloaded                reload init service
-init-service-restarted               restart init-service
-init-service-started                 start init-service
-init-service-stopped                 stop init-service
-initial-system-setup                 basic security setup for a new server,
-                                     incl. setup of admin user."
-ipv4-address-assigned                make sure an IPv4 address is assigned to
-                                     an interface
-lang-go                              make sure Go is available
-lang-java                            install OpenJDK if not already available
-lang-php                             make sure PHP is installed
-lang-python                          install a Python runtime for a user
-letsencrypt-cert-exists              ensures a letsencrypt https certificate
-                                     for a hostname exists
-link-exists                          ensure a filesystem link exists
-locales-generated                    ensure a set of locales is generated on
-                                     a system
-mariadb-database-exists              installs MariaDB (if necessary), and
-                                     makes sure a specified database exists
-matomo-service-standalone            install Matomo analytics service
-nginx-inaugurate-vhost               creates a vhost to host a 'inaugurate'
-                                     bootstrap script
-nginx-server-block-file              nginx server configuration
-nginx-vhost-from-folder              configure a Nginx vhost for static site
-package-installed                    install a single packages
-package-managers                     install one or several package managers
-packages-installed                   install a list of packages
-parent-folder-exists                 ensure the parent folder of a path
-                                     exists
-passwordless-sudo-enabled-for-users  grant passwordless sudo permission to a
-                                     user
-path-archived                        archives a file or folder
-path-attributes                      makes sure a file/folder has a certain
-                                     owner/group
-path-has-mode                        make sure a file/folder has a certain
-                                     mode
-path-is-absent                       ensure a file or folder is absent
-path-is-owned-by                     make sure a file/folder has a certain
-                                     owner/group
-path-is-synced                       make sure a file or folder is synced
-                                     between two locations
-pkg-apache                           ensures the Apache web server is
-                                     installed
-pkg-arp                              install the sshpass package
-pkg-devpi                            ensures the devpi service is installed
-                                     and running
-pkg-nginx                            ensures the nginx web server is
-                                     installed and running
-pkg-nmap                             install the sshpass package
-pkg-osx-command-line-tools           install Mac OS X command-line tools
-pkg-sshpass                          install the sshpass package
-pkg-stow                             install the stow package
-pkg-vagrant                          ensures Vagrant is installed
-pkg-virtualbox                       ensures Virtualbox is installed
-pkg_mgr-asdf                         ensures 'asdf' is installed
-pkg_mgr-asdf-plugin                  install a plugin for asdf
-pkg_mgr-conda                        install the 'conda' package manager
-pkg_mgr-homebrew                     ensure the 'homebrew' package manager is
-                                     installed
-pkg_mgr-nix                          ensure the 'nix' package manager is
-                                     installed
-postgresql-database-exists           installs PostgreSQL (if necessary), and
-                                     makes sure a specified database exists
-python-virtualenv                    create a Python virtualenv
-python-virtualenv-execute-shell      executes a command inside a virtualenv
-runtime-python                       n/a
-service-devpi                        installs a complete devpi server,
-                                     including nginx proxy & lets-encrypt
-                                     certs
-service-devpi-standalone             installs a complete devpi server,
-                                     including nginx proxy & lets-encrypt
-                                     certs
-service-docker                           makes sure Docker is installed
-service-grafana                      installs the grafana service
-service-mariadb                      ensures MariaDB service is installed
-service-netdata                      makes sure netdata service is installed
-                                     and running
-service-postgresql                   ensures PostgrSQL service is installed
-service-prometheus                   installs the Prometheus monitoring
-                                     service
-service-prometheus-mysqld-exporter   installs the Prometheus mysqld exporter
-service-prometheus-node-exporter     installs the Prometheus node exporter
-service-webserver                    ensures a webserver is installed and
-                                     running
-shell-output-to-file                 execute a shell command, write the
-                                     output to file
-sysctl-value                         set a sysctl value
-systemd-service-unit                 create and configure a certain systemd
-                                     service unit exists
-systemd-services-started             a list of init-service to start (if they
-                                     exist) using Ansible
-systemd-services-stopped             a list of init-service to stop (if they
-                                     exist) using Ansible
-user-exists                          make sure a user exists
-webserver-static-site                install and configure webserver for
-                                     static site
-wordpress-folder-prepared            prepares wordpress project folders
-wordpress-standalone                 sets up a single-site wordpress instance
-wordpress-vhost-apache               create Apache wordpress virtual host
-                                     config
-wordpress-vhost-nginx                create Nginx wordpress virtual host
-                                     config
-zerotier-network-member              add and authorize a new member to an
-                                     existing zerotier network
-zile-config-file                     configuration for the 'zile' text editor
+admin-user-exists                   ensure an admin user with elevated
+                                    permissions exists
+ansible-module                      execute a specific Ansible module
+ansible-role                        execute an arbitrary role from Ansible
+                                    Galaxy
+apache-vhost-from-folder            configure an Apache vhost for static
+                                    site
+archive-extracted                   extracts an archive
+basic-hardening                     basic security set-up for a newly
+                                    installed server
+command-output-to-file              execute a command, write the output to
+                                    file
+config-value-in-file                adds a key/value pair to a file
+config-values-in-file               adds key/value pairs to a file
+debug-msg                           display a debug message
+debug-var                           displays the content of an (internal)
+                                    Ansible variable
+debug-vars                          displays the content of an (internal)
+                                    Ansible variable
+devpi-create-backup                 backs-up a devpi service
+devpi-import-from-backup            restores up a devpi service backup
+devpi-nginx-vhost-config            creates a vhost for devpi on Nginx
+devpi-service                       installs a complete devpi server,
+                                    including nginx proxy & lets-encrypt
+                                    certs
+devpi-standalone                    installs a complete devpi server,
+                                    including nginx proxy & lets-encrypt
+                                    certs
+docker-service                      makes sure Docker is installed
+dotfiles                            setup dotfiles and associated apps
+execute-ad-hoc-script               create an executable file from a
+                                    template, execute it, delete it
+execute-command                     execute a one-off command
+execute-shell                       execute a one-off shell command
+file-downloaded                     download a file
+file-fetched                        fetches a file from a remote (target)
+                                    host
+file-is-present                     ensure a file exists
+file-with-content                   ensure a file exists and has a certain
+                                    content
+folder-exists                       ensure a folder exists
+folder-is-empty                     ensure a folder exists
+folder-stowed                       stow (symlink) a folder
+folders-intermingled                merge a target folder with another
+frecklecute                         execute a frecklet indirectly
+git-repo-synced                     check out or pulls a git repo
+gitlab-deploy-key-present           add a deploy key to a Gitlab server
+grafana-service                     installs the grafana service
+group-exists                        ensure a group exists
+hostname                            set the hosts hostname
+inaugurate-custom-script            generate a custom inaugurate script
+init-service-configured             configure an init service
+init-service-disabled               disable init-service
+init-service-enabled                enable init-service
+init-service-reloaded               reload init service
+init-service-restarted              restart init-service
+init-service-started                start init-service
+init-service-stopped                stop init-service
+initial-system-setup                basic security setup for a new server,
+                                    incl. setup of admin user."
+ipv4-address-assigned               make sure an IPv4 address is assigned to
+                                    an interface
+lang-go                             make sure Go is available
+lang-java                           install OpenJDK if not already available
+lang-php                            make sure PHP is installed
+lang-python                         install a Python runtime for a user
+letsencrypt-cert-exists             ensures a letsencrypt https certificate
+                                    for a hostname exists
+link-exists                         ensure a filesystem link exists
+locales-generated                   ensure a set of locales is generated on
+                                    a system
+mariadb-database-exists             installs MariaDB (if necessary), and
+                                    makes sure a specified database exists
+mariadb-service                     ensures MariaDB service is installed
+matomo-standalone                   install Matomo analytics service
+netdata-service                     makes sure netdata service is installed
+                                    and running
+nginx-inaugurate-vhost              creates a vhost to host a 'inaugurate'
+                                    bootstrap script
+nginx-reverse-proxy-vhost-config    n/a
+nginx-vhost-from-folder             configure a Nginx vhost for static site
+package-installed                   install a single packages
+package-managers                    install one or several package managers
+packages-installed                  install a list of packages
+parent-folder-exists                ensure the parent folder of a path
+                                    exists
+passwordless-sudo-users             grant passwordless sudo permission to a
+                                    user
+path-archived                       archives a file or folder
+path-attributes                     makes sure a file/folder has a certain
+                                    owner/group
+path-has-mode                       make sure a file/folder has a certain
+                                    mode
+path-is-absent                      ensure a file or folder is absent
+path-is-owned-by                    make sure a file/folder has a certain
+                                    owner/group
+path-is-synced                      make sure a file or folder is synced
+                                    between two locations
+pip-requirements-present            install dependencies so 'pip' can be
+                                    used by Ansible
+pkg-apache                          ensures the Apache web server is
+                                    installed
+pkg-arp                             install the sshpass package
+pkg-devpi                           ensures the devpi service is installed
+                                    and running
+pkg-nginx                           ensures the nginx web server is
+                                    installed and running
+pkg-nmap                            install the sshpass package
+pkg-osx-command-line-tools          install Mac OS X command-line tools
+pkg-pyenv                           install a Python runtime for a user
+pkg-sshpass                         install the sshpass package
+pkg-stow                            install the stow package
+pkg-vagrant                         ensures Vagrant is installed
+pkg-virtualbox                      ensures Virtualbox is installed
+pkg_mgr-asdf                        ensures 'asdf' is installed
+pkg_mgr-asdf-plugin                 install a plugin for asdf
+pkg_mgr-conda                       install the 'conda' package manager
+pkg_mgr-homebrew                    ensure the 'homebrew' package manager is
+                                    installed
+pkg_mgr-nix                         ensure the 'nix' package manager is
+                                    installed
+postgresql-database-exists          installs PostgreSQL (if necessary), and
+                                    makes sure a specified database exists
+postgresql-service                  ensures PostgrSQL service is installed
+prometheus-mysqld-exporter-service  installs the Prometheus mysqld exporter
+prometheus-node-exporter-service    installs the Prometheus node exporter
+prometheus-service                  installs the Prometheus monitoring
+                                    service
+python-dev-project                  (Optionally) clone a Python project git
+                                    repo, install the right version of
+                                    Python using pyenv, create a virtualenv
+                                    for the
+python-packages-in-virtualenv       installs Python packages into a
+                                    Virtualenv
+python-virtualenv                   create a Python virtualenv
+python-virtualenv-execute-shell     executes a command inside a virtualenv
+python-virtualenv-exists            create a Python virtualenv
+python-virtualenv-service           setup a service executing an application
+                                    from within a virtualenv
+runtime-python                      n/a
+shell-output-to-file                execute a shell command, write the
+                                    output to file
+ssh-key-exists                      ensures an ssh key exists for a user
+ssh-key-is-absent                   ensures an ssh key is absent for a user
+sysctl-value                        set a sysctl value
+systemd-service-unit                create and configure a certain systemd
+                                    service unit exists
+systemd-services-started            a list of init-service to start (if they
+                                    exist) using Ansible
+systemd-services-stopped            a list of init-service to stop (if they
+                                    exist) using Ansible
+user-exists                         make sure a user exists
+webserver-service                   ensures a webserver is installed and
+                                    running
+webserver-static-site               install and configure webserver for
+                                    static site
+wordpress-folder-prepared           prepares wordpress project folders
+wordpress-standalone                sets up a single-site wordpress instance
+wordpress-vhost-apache              create Apache wordpress virtual host
+                                    config
+wordpress-vhost-nginx               create Nginx wordpress virtual host
+                                    config
+zerotier-network-member             add and authorize a new member to an
+                                    existing zerotier network
 ```
 </div>
 
@@ -261,16 +275,18 @@ So, as an example, for everything related to the term 'nginx', we'd see:
 
 frecklet                  description
 ------------------------  -------------------------------------------------
-devpi-nginx-vhost-config  creates a vhost for devpi on Nginx
-nginx-server-block-file   nginx server configuration
-nginx-vhost-from-folder   configure a Nginx vhost for static site
-pkg-nginx                 ensures the nginx web server is installed and
-                          running
-service-devpi             installs a complete devpi server, including nginx
-                          proxy & lets-encrypt certs
-service-devpi-standalone  installs a complete devpi server, including nginx
-                          proxy & lets-encrypt certs
-wordpress-vhost-nginx     create Nginx wordpress virtual host config
+devpi-nginx-vhost-config          creates a vhost for devpi on Nginx
+devpi-service                     installs a complete devpi server,
+                                  including nginx proxy & lets-encrypt certs
+devpi-standalone                  installs a complete devpi server,
+                                  including nginx proxy & lets-encrypt certs
+nginx-inaugurate-vhost            creates a vhost to host a 'inaugurate'
+                                  bootstrap script
+nginx-reverse-proxy-vhost-config  n/a
+nginx-vhost-from-folder           configure a Nginx vhost for static site
+pkg-nginx                         ensures the nginx web server is installed
+                                  and running
+wordpress-vhost-nginx             create Nginx wordpress virtual host config
 ```
 
 </div>
@@ -610,7 +626,7 @@ Again, we check the [default](/frecklets/default) and [community](/frecklets/com
 So, here are the *frecklets* we are going to use:
 
 - [``nginx-vhost-from-folder``](/frecklets/default/service/nginx-vhost-from-folder/), to create the vhost/server-block configuration file
-- [``service-webserver``](/frecklets/default/service/service-webserver/), to setup and configure Nginx
+- [``webserver-service``](/frecklets/default/service/webserver-service/), to setup and configure Nginx
 - [``file-with-content``](/frecklets/default/filesystem/file-with-content/), to create the html file
 
 **Note**: Under the hood we are taking advantage of a few [Ansible roles](https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html) (particularly [``geerlingguy.nginx``](https://github.com/geerlingguy/ansible-role-nginx)) to do the hard work for us.
@@ -620,7 +636,7 @@ Here's what our new *frecklet* looks like (let's save it to a file called ``my-w
 ```yaml
 - nginx-vhost-from-folder:  
     hostname: "{{:: hostname ::}}"  
-- service-webserver:  
+- webserver-service:  
     webserver: nginx  
 - file-with-content:  
     owner: www-data  

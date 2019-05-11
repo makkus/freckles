@@ -37,14 +37,14 @@ Each list item needs to be the name of another frecklet that exists in the curre
 
 Here's an example:
 ```yaml
-- service-docker
+- docker-service
 ```
 
 Let's put that into a file called ``my-docker-install.frecklet``. Issuing:
 ```bash
 > frecklecute my-docker-install.frecklet
 ```
-would install *Docker* on the local machine (by executing [this frecklet](/frecklets/default/virtualization/service-docker/)).
+would install *Docker* on the local machine (by executing [this frecklet](/frecklets/default/virtualization/docker-service/)).
 
 #### A list of single-key dicts
 
@@ -81,23 +81,23 @@ We can easily mix and match those two types:
 ```yaml
 - user-exists:
     name: markus
-- service-docker
+- docker-service
 ```
 
 Or, if we want to make sure the newly created user with a specific id is in the group
-that is allowed to user 'docker', we could write (after checking the [``service-docker``](/frecklets/default/virtualization/service-docker/) documentation):
+that is allowed to user 'docker', we could write (after checking the [``docker-service``](/frecklets/default/virtualization/docker-service/) documentation):
 
 ```yaml
 - user-exists:
     name: markus
     uid: 1010
-- service-docker:
+- docker-service:
     users:
       - markus
 
 ```
 
-Note: if we didn't need the custom ``uid`` for our user, the ``service-docker`` user would have created the user automatically, and ``user-exists`` would not have been necessary.
+Note: if we didn't need the custom ``uid`` for our user, the ``docker-service`` user would have created the user automatically, and ``user-exists`` would not have been necessary.
 
 
 #### Single-and double-key dictionaries
@@ -108,7 +108,7 @@ The (single-key dicts) example from above can also be expressed as a list of dic
 - frecklet: user-exists
   vars:
     name: markus
-- frecklet: service-docker
+- frecklet: docker-service
   vars:
     users:
       - markus
@@ -127,7 +127,7 @@ will override both options. Here's how that would look:
     path: /tmp/install.log
     content: |
       Installed Docker on host 'dev.frkl.io'.
-- frecklet: service-docker
+- frecklet: docker-service
   target: admin@dev.frkl.io
   vars:
     users:
