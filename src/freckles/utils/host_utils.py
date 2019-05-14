@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-import subprocess
 import sys
+from distutils.spawn import find_executable
 
 import click
 from plumbum import local
@@ -47,9 +47,13 @@ def get_vagrant_details(target_string):
         if not hosts[host]:
             raise Exception("Vagrant host '{}' not running.".format(host))
 
-    config = subprocess.check_output(["vagrant", "ssh-config", host]).decode(
-        "utf-8"
-    )  # nosec
+    vagrant_path = find_executable("vagrant")
+    vagrant_exe = local[vagrant_path]
+    rc, config, stderr = vagrant_exe.run(["ssh-config", host])
+    # config = subprocess.check_output(["vagrant", "ssh-config", host]).decode(
+    #     "utf-8"
+    # )  # nosec
+
     host_details = parse_vagrant_ssh_config_string(config)
     host_details["connection_type"] = "ssh"
     host_details["is_vagrant"] = True
@@ -91,13 +95,18 @@ def parse_vagrant_ssh_config_string(config_string):
 
 def list_vagrant_hosts():
     try:
-        status_out = (
-            subprocess.check_output(  # nosec
-                ["vagrant", "status", "--machine-readable"]
-            )
-            .decode("utf-8")
-            .rstrip()
-        )
+        vagrant_path = find_executable("vagrant")
+        vagrant_exe = local[vagrant_path]
+        rc, stdout, stderr = vagrant_exe.run(["status", "--machine-readable"])
+
+        status_out = stdout.rstrip()
+        # status_out = (
+        #     subprocess.check_output(  # nosec
+        #         ["vagrant", "status", "--machine-readable"]
+        #     )
+        #     .decode("utf-8")
+        #     .rstrip()
+        # )
     except (Exception):
         return None
 
