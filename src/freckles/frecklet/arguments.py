@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
-from collections import OrderedDict
+from collections import OrderedDict, Sequence
 
 import click
+from jinja2 import TemplateSyntaxError
+from six import string_types
 
 from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
-from freckles.exceptions import FreckletBuildException
+from freckles.exceptions import FreckletBuildException, FreckletException
 from frutils import get_template_keys, dict_merge
 from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
@@ -102,9 +104,15 @@ class CliArgumentsAttribute(TingAttribute):
         # setting type
         cerberus_type = var.type
 
-        replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
-            cerberus_type, None
-        )
+        if not isinstance(cerberus_type, string_types) and isinstance(
+            cerberus_type, Sequence
+        ):
+            replacement = None
+            cerberus_type = "multi"
+        else:
+            replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
+                cerberus_type, None
+            )
         if replacement is not None:
             if replacement == bool:
                 option_properties["type"] = None
@@ -137,7 +145,7 @@ class CliArgumentsAttribute(TingAttribute):
                     and "default" not in option_properties.keys()
                 ):
                     option_properties["nargs"] = -1
-        else:
+        elif cerberus_type != "multi":
             raise Exception("Type '{}' not implemented yet.".format(cerberus_type))
 
         if var.secret:
@@ -359,7 +367,10 @@ class VariablesAttribute(TingAttribute):
         else:
 
             root_task = last_node.data["task"]
-            tks = get_template_keys(root_task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+            try:
+                tks = get_template_keys(root_task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+            except (TemplateSyntaxError) as e:
+                raise FreckletException(ting, e, ting.id)
 
             root_tks = {}
             for tk in tks:

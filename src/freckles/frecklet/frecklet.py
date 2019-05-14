@@ -6,6 +6,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
+from ting.ting_attributes import MultiCacheResult
 from .tasks import *  # noqa
 
 log = logging.getLogger("freckles")
@@ -71,7 +72,7 @@ class FreckletValidAttribute(TingAttribute):
         pass
 
     def provides(self):
-        return ["valid"]
+        return ["valid", "invalid_exception"]
 
     def requires(self):
         return ["exploded"]
@@ -81,11 +82,13 @@ class FreckletValidAttribute(TingAttribute):
         try:
             exploded = ting.exploded
             log.debug("checking exploded data structure: {}".format(exploded))
+            result = {"valid": True, "invalid_exception": None}
         except (Exception) as e:
             log.debug("Validation for frecklet failed.")
             log.debug(e, exc_info=1)
-            return False
-        return True
+            result = {"valid": False, "invalid_exception": e}
+
+        return MultiCacheResult(**result)
 
 
 class FreckletExplodedAttribute(TingAttribute):
@@ -106,6 +109,7 @@ class FreckletExplodedAttribute(TingAttribute):
         result["doc"] = ting.doc.exploded_dict()
 
         result["args"] = CommentedMap()
+
         for k, arg in ting.vars_frecklet.items():
             details = arg.pretty_print_dict(full_details=True)
             result["args"][k] = details

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from colorama import Style
+from jinja2.exceptions import TemplateSyntaxError
 from six import string_types
 
-from frutils import readable
+from frutils import readable, reindent
 from frutils.exceptions import FrklException
 from ting.exceptions import TingException
 
@@ -128,11 +129,11 @@ class InvalidFreckletException(FrklException):
 
         reason = None
         if self.frecklet_name is not None:
-            solution = "Check '{}' is a frecklet in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.".format(
+            solution = "Check '{}' is a frecklet in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
                 frecklet_name
             )
         else:
-            solution = "Check frecklet is in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.".format(
+            solution = "Check frecklet is in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
                 frecklet_name
             )
         references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}
@@ -186,6 +187,17 @@ class FreckletException(FrklException):
                 references = {
                     "frecklet documentation": "https://freckles.io/doc/frecklets"
                 }
+        elif isinstance(parent_exception, TemplateSyntaxError):
+
+            reason = "Template syntax error: {}".format(str(parent_exception))
+            solution = "Check format of frecklet '{}' (probably line {}):\n\n".format(
+                frecklet.id, parent_exception.lineno
+            )
+            solution = solution + reindent(parent_exception.source, 4, line_nrs=1)
+            references = {
+                "frecklet documentation": "https://freckles.io/doc/frecklets",
+                "jinja2 documentation": "http://jinja.pocoo.org/docs",
+            }
 
         else:
             if self.frecklet_name == "n/a":
@@ -196,6 +208,7 @@ class FreckletException(FrklException):
                 )
             references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}
             reason = None
+
         super(FreckletException, self).__init__(
             msg, solution=solution, reason=reason, references=references
         )

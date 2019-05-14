@@ -73,6 +73,65 @@ def print_two_column_table(data, header_one, header_two):
             click.echo()
 
 
+def print_multi_column_table(data, headers):
+
+    max_width = 0
+    for row in data:
+        w = 0
+        for index, word in enumerate(row[0:-1]):
+
+            header_len = len(headers[index])
+            wl = len(str(word))
+            if header_len > wl:
+                wl = header_len
+            w = w + wl + 3
+        if w > max_width:
+            max_width = w
+
+    terminal_size = get_terminal_size()
+
+    rest_width = terminal_size[0] - max_width - 3
+    max_rest = 20
+
+    new_data = []
+    toggle = True
+    for row in data:
+        val = row[-1]
+
+        if rest_width > max_rest:
+            val = "\n".join(textwrap.wrap(val, rest_width))
+
+        if toggle:
+            new_row = []
+            for word in row[0:-1]:
+                new_row.append(Style.DIM + str(word) + Style.RESET_ALL)
+            new_row.append(Style.DIM + val + Style.RESET_ALL)
+            row = new_row
+        else:
+            new_row = row[0:-1]
+            new_row.append(val)
+            row = new_row
+
+        toggle = not toggle
+        new_data.append(row)
+
+    if rest_width > max_rest:
+
+        new_headers = []
+        for h in headers:
+            new_headers.append(Style.BRIGHT + h + Style.RESET_ALL)
+
+        click.echo(tabulate.tabulate(new_data, headers=new_headers))
+    else:
+        for row in new_data:
+
+            for index, word in enumerate(row):
+                header_str = "{}{}{}".format(Style.DIM, headers[index], Style.RESET_ALL)
+                click.secho(header_str, bold=True, nl=False)
+                click.echo(": {}".format(word).encode("utf-8"))
+            click.echo()
+
+
 def print_frecklet_list(frecklet_dict):
 
     data = {}

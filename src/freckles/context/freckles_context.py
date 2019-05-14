@@ -811,7 +811,14 @@ class FrecklesContext(object):
         result = self.frecklet_index.get(frecklet_name)
 
         if validate:
-            result.valid
+            valid = result.valid
+            if not valid:
+
+                raise FreckletException(
+                    frecklet=result,
+                    parent_exception=result.invalid_exception,
+                    frecklet_name=frecklet_name,
+                )
 
         return result
 

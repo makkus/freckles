@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 import os
 from collections import Mapping
@@ -14,6 +15,7 @@ from freckles.defaults import (
     VARS_KEY,
     DEFAULT_FRECKLES_JINJA_ENV,
     FRECKLETS_KEY,
+    FRECKLES_DEFAULT_ARG_SCHEMA,
 )
 from freckles.exceptions import FrecklesConfigException, FreckletBuildException
 from frkl import FrklProcessor, Frkl
@@ -75,12 +77,27 @@ def fill_defaults(task_item):
         task_item[FRECKLET_KEY_NAME]["type"] = "frecklet"
 
 
+class ExplodedArgsProcessor(ConfigProcessor):
+    """Sets the exploded args property."""
+
+    def __init__(self, **init_params):
+
+        self.args = init_params["args"]
+
+    def process_current_config(self):
+
+        new_config = self.current_input_config
+        new_config["args"] = self.args
+        return new_config
+
+
 class SpecialCaseProcessor(ConfigProcessor):
     """Makes sure that no keywords are in vars."""
 
     def process_current_config(self):
 
         new_config = self.current_input_config
+
         frecklets = new_config.pop("frecklets", [])
         new_config["frecklets"] = []
 
@@ -139,6 +156,54 @@ class CommandNameProcessor(ConfigProcessor):
         new_config = self.current_input_config
 
         fill_defaults(new_config)
+        return new_config
+
+
+class DirectParentArgsProcessor(ConfigProcessor):
+    """Adds arguments for 'direct' parents.
+
+    For example if a frecklet has something like:
+
+        - user-exists:
+           name: "{{:: name ::}}"
+
+    Where the variable name stays the same, and no filter is involved, the args will be inherited directly.
+    """
+
+    def __init__(self, **init_params):
+
+        self.index = init_params["index"]
+
+    def process_current_config(self):
+        new_config = self.current_input_config
+
+        args = new_config.setdefault("args", {})
+
+        vars = new_config.get("vars", {})
+        for k, v in vars.items():
+
+            if k in args.keys():
+                continue
+
+            if "{{{{:: {} ::}}}}".format(k) == v:
+
+                parent_name = new_config[FRECKLET_KEY_NAME]["name"]
+                parent = self.index.get(parent_name)
+                if parent is None:
+                    raise FreckletBuildException(
+                        "Can't assemble frecklet.",
+                        reason="Parent frecklet '{}' not available.".format(
+                            parent_name
+                        ),
+                    )
+
+                p_args = parent.args
+                a = p_args.get(k, None)
+                if a is not None:
+                    args[k] = a
+                else:
+                    args[k] = copy.deepcopy(FRECKLES_DEFAULT_ARG_SCHEMA)
+
         return new_config
 
 
@@ -351,8 +416,10 @@ class TaskListDetailedAttribute(TingAttribute):
 
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
         chain = [
+            ExplodedArgsProcessor(args=ting.args),
             SpecialCaseProcessor(),
             FrklProcessor(**TaskListDetailedAttribute.FRECKLET_FORMAT),
+            # DirectParentArgsProcessor(index=ting._meta_parent_repo),
             CommandNameProcessor(),
             TaskTypePrefixProcessor(),
             MoveEmbeddedTaskKeysProcessor(),
@@ -364,10 +431,13 @@ class TaskListDetailedAttribute(TingAttribute):
         f = Frkl([ting._metadata], chain)
         tasklist_detailed = f.process()
 
+        # import pp
+        # pp(tasklist_detailed)
+
         return tasklist_detailed
 
 
-def prettyfiy_task(task_detailed):
+def prettyfiy_task(task_detailed, arg_map):
 
     t = {}
     t[FRECKLET_KEY_NAME] = task_detailed[FRECKLET_KEY_NAME]
@@ -378,8 +448,10 @@ def prettyfiy_task(task_detailed):
 
     tks = get_template_keys(t, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
     args = {}
+
     for tk in tks:
-        temp = task_detailed[ARGS_KEY][tk]
+        temp = arg_map[tk]
+        # temp = task_detailed[ARGS_KEY][tk]
         args[tk] = special_dict_to_dict(temp)
     t[ARGS_KEY] = args
 
@@ -397,9 +469,10 @@ class TaskListAttribute(TingAttribute):
     def get_attribute(self, ting, attribute_name=None):
 
         tasklist = []
+
         for td_node in ting.tasklist_detailed:
             td = td_node["task"]
-            t = prettyfiy_task(td)
+            t = prettyfiy_task(td, ting.vars_frecklet)
             tasklist.append(t)
 
         return tasklist
@@ -418,7 +491,7 @@ class TaskListResolvedAttribute(TingAttribute):
         tasklist = []
         for td_node in ting.task_tree.leaves():
             td = td_node.data["task"]
-            t = prettyfiy_task(td)
+            t = prettyfiy_task(td, ting.vars_frecklet)
             tasklist.append(t)
 
         return tasklist
