@@ -12,10 +12,10 @@ from frutils.frutils_cli import check_local_executable
 log = logging.getLogger("freckles")
 
 
-def parse_target_string(target_string):
+def parse_target_string(target_string, context):
 
     if target_string == "vagrant" or target_string.startswith("vagrant:"):
-        details = get_vagrant_details(target_string)
+        details = get_vagrant_details(target_string, context)
 
     elif "find-pi" in target_string:
         details = get_pi_details(target_string)
@@ -26,7 +26,7 @@ def parse_target_string(target_string):
     return details
 
 
-def get_vagrant_details(target_string):
+def get_vagrant_details(target_string, context):
 
     if target_string == "vagrant":
         host = "default"
@@ -47,9 +47,9 @@ def get_vagrant_details(target_string):
         if not hosts[host]:
             raise Exception("Vagrant host '{}' not running.".format(host))
 
-    vagrant_path = find_executable("vagrant")
-    vagrant_exe = local[vagrant_path]
-    rc, config, stderr = vagrant_exe.run(["ssh-config", host])
+    rc, config, stderr = context.execute_external_command(
+        "vagrant", args=["ssh-config", host]
+    )
     # config = subprocess.check_output(["vagrant", "ssh-config", host]).decode(
     #     "utf-8"
     # )  # nosec
@@ -232,8 +232,9 @@ def get_host_details(host_string):
 
 
 class FrecklesRunTarget(object):
-    def __init__(self, target_dict=None, target_string=None):
+    def __init__(self, context, target_dict=None, target_string=None):
 
+        self.context = context
         self._target_string = target_string
         if target_dict is None:
             target_dict = {"host": "localhost"}
@@ -255,7 +256,9 @@ class FrecklesRunTarget(object):
     def _init_config(self):
 
         if self._target_string is not None:
-            self._target_dict_base = parse_target_string(self._target_string)
+            self._target_dict_base = parse_target_string(
+                self._target_string, context=self.context
+            )
         else:
             self._target_dict_base = {}
 

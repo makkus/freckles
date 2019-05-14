@@ -179,7 +179,7 @@ frecklets:
                 elevated = run_elevated
             target = vars_dict.get("target", "localhost")
 
-            run_target = FrecklesRunTarget(target_string=target)
+            run_target = FrecklesRunTarget(context=self.context, target_string=target)
             run_target.ssh_pass = vars_dict.get("ssh_pass", None)
             run_target.become_pass = vars_dict.get("become_pass", None)
 
