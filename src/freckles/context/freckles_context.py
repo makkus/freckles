@@ -415,6 +415,12 @@ class FrecklesContext(object):
 
         return self._adapters
 
+    def execute_external_command(self, command, args=None, parent_task=None):
+
+        return self.frkl_pkg.execute_external_comand(
+            command, args=args, parent_task=parent_task
+        )
+
     def add_config_interpreter(self, interpreter_name, schema):
 
         return self._config.add_cnf_interpreter(

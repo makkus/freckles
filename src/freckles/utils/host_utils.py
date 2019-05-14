@@ -5,8 +5,8 @@ from distutils.spawn import find_executable
 
 import click
 from plumbum import local
-from six import string_types
 
+from frutils import dict_merge
 from frutils.frutils_cli import check_local_executable
 
 log = logging.getLogger("freckles")
@@ -232,26 +232,114 @@ def get_host_details(host_string):
 
 
 class FrecklesRunTarget(object):
-    def __init__(self, target_or_target_dict):
+    def __init__(self, target_dict=None, target_string=None):
 
-        if isinstance(target_or_target_dict, string_types):
-            target_dict = parse_target_string(target_or_target_dict)
+        self._target_string = target_string
+        if target_dict is None:
+            target_dict = {"host": "localhost"}
+        self._target_dict = target_dict
+
+        self._target_dict_base = None
+
+        self._config = None
+
+        self._protocol = None
+        self._user = None
+        self._port = None
+        self._host = None
+        self._connection_type = None
+        self._ssh_key = None
+        self._become_pass = None
+        self._ssh_pass = None
+
+    def _init_config(self):
+
+        if self._target_string is not None:
+            self._target_dict_base = parse_target_string(self._target_string)
         else:
-            target_dict = target_or_target_dict
+            self._target_dict_base = {}
 
-        self._config = target_dict
+        self._config = dict_merge(
+            self._target_dict_base, self._target_dict, copy_dct=False
+        )
 
-        self.protocol = target_dict.get("protocol", None)
-        self.user = target_dict.get("user", None)
-        self.port = target_dict.get("port", None)
-        self.host = target_dict.get("host", None)
-        self.connection_type = target_dict.get("connection_type", None)
-        self.ssh_key = target_dict.get("ssh_key", None)
-        self.become_pass = target_dict.get("become_pass", None)
-        self.ssh_pass = target_dict.get("ssh_pass", None)
+        self._protocol = self._config.get("protocol", None)
+        self._user = self._config.get("user", None)
+        self._port = self._config.get("port", None)
+        self._host = self._config.get("host", None)
+        self._connection_type = self._config.get("connection_type", None)
+        self._ssh_key = self._config.get("ssh_key", None)
+        self._become_pass = self._config.get("become_pass", None)
+        self._ssh_pass = self._config.get("ssh_pass", None)
+
+    @property
+    def connection_type(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._connection_type
+
+    @property
+    def ssh_key(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._ssh_key
+
+    @property
+    def become_pass(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._become_pass
+
+    @property
+    def ssh_pass(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._ssh_pass
+
+    @property
+    def protocol(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+        return self._protocol
+
+    @property
+    def user(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._user
+
+    @property
+    def port(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._port
+
+    @property
+    def host(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        return self._host
 
     @property
     def config(self):
+
+        if self._target_dict_base is None:
+            self._init_config()
 
         result = {}
         if self.protocol is not None:
