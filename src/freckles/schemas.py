@@ -45,7 +45,7 @@ PROFILE_LOAD_CONFIG_SCHEMA = {
 FRECKLES_CONTEXT_SCHEMA = {
     "adapters": {
         "type": "list",
-        "default": ["nsbl", "templing", "freckles"],
+        "default": ["nsbl", "tempting", "freckles"],
         "doc": "A list of freckles adapters to use in this context.",
     },
     "repos": {
