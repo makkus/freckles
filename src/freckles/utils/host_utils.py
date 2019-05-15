@@ -237,7 +237,7 @@ class FrecklesRunTarget(object):
         self.context = context
         self._target_string = target_string
         if target_dict is None:
-            target_dict = {"host": "localhost"}
+            target_dict = {}
         self._target_dict = target_dict
 
         self._target_dict_base = None
@@ -265,6 +265,9 @@ class FrecklesRunTarget(object):
         self._config = dict_merge(
             self._target_dict_base, self._target_dict, copy_dct=False
         )
+
+        if "host" not in self._config.keys():
+            self._config["host"] = "localhost"
 
         self._protocol = self._config.get("protocol", None)
         self._user = self._config.get("user", None)
@@ -299,6 +302,15 @@ class FrecklesRunTarget(object):
 
         return self._become_pass
 
+    @become_pass.setter
+    def become_pass(self, become_pass):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        self._become_pass = become_pass
+        self._config["become_pass"] = become_pass
+
     @property
     def ssh_pass(self):
 
@@ -306,6 +318,15 @@ class FrecklesRunTarget(object):
             self._init_config()
 
         return self._ssh_pass
+
+    @ssh_pass.setter
+    def ssh_pass(self, ssh_pass):
+
+        if self._target_dict_base is None:
+            self._init_config()
+
+        self._ssh_pass = ssh_pass
+        self._config["ssh_pass"] = ssh_pass
 
     @property
     def protocol(self):

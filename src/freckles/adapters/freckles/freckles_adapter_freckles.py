@@ -184,7 +184,7 @@ frecklets:
             run_target.become_pass = vars_dict.get("become_pass", None)
 
             task_run_config = dict_merge(run_config, run_target.config, copy_dct=True)
-
+            print(frecklet)
             fx = frecklet.create_frecklecutable(self.context)
 
             vars = vars_dict.get(VARS_KEY, {})
