@@ -180,6 +180,7 @@ class Frecklecutable(object):
             schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
         valid = validator.validated(var_value_map)
+
         if valid is None:
             if vars_pre_clean is None:
                 vars_pre_clean = var_value_map
@@ -242,7 +243,13 @@ class Frecklecutable(object):
 
             # task_name = task_node[FRECKLET_KEY_NAME]["name"]
 
-            args = task_tree.get_node(task_id).data["root_frecklet"].args
+            # args = task_tree.get_node(task_id).data["root_frecklet"].args
+            args = {}
+            for k, v in (
+                task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet.items()
+            ):
+                args[k] = v.schema
+
             parent_id = task_tree.parent(task_id).identifier
             if parent_id == 0:
                 parent = {}
@@ -350,6 +357,7 @@ class Frecklecutable(object):
             template_keys = get_template_keys(
                 task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
             )
+
             schema, secret_keys = self._generate_schema(
                 var_value_map=task, args=args, template_keys=template_keys
             )

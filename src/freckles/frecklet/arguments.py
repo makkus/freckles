@@ -252,7 +252,15 @@ class VariablesAttribute(TingAttribute):
 
             for arg_name, arg in args.items():
 
-                if arg in result.keys():
+                if (
+                    arg_name in result.keys()
+                    and not result[arg_name].is_auto_arg
+                    and not arg.is_auto_arg
+                    and result[arg_name].schema != arg.schema
+                ):
+                    # import pp
+                    # pp(arg.__dict__)
+                    # pp(result[arg_name].__dict__)
                     raise FreckletBuildException(
                         frecklet=ting,
                         msg="Duplicate arg '{}'.".format(arg_name),
@@ -262,7 +270,8 @@ class VariablesAttribute(TingAttribute):
                         },
                     )
 
-                result[arg_name] = arg
+                if arg_name not in result.keys() or not arg.is_auto_arg:
+                    result[arg_name] = arg
 
         ordered = OrderedDict()
         for k in sorted(result.keys()):
@@ -315,8 +324,10 @@ class VariablesAttribute(TingAttribute):
                 continue
             else:
                 parent_var = vars[key]
+
                 # print("PARENT VAR: {}".format(parent_var))
                 if parent_var == "{{{{:: {} ::}}}}".format(key):
+
                     # this means the var is just being carried forward, from the point of view of the parent frecklet task
                     arg_config = available_args.get(key, None)
                     if arg_config is None:
@@ -341,7 +352,10 @@ class VariablesAttribute(TingAttribute):
                                 new_arg = arg
                             else:
                                 new_arg = Arg(
-                                    tk, {}, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                                    tk,
+                                    {},
+                                    default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                                    is_auto_arg=True,
                                 )
                                 new_arg.add_child(arg)
                         else:
@@ -357,13 +371,15 @@ class VariablesAttribute(TingAttribute):
 
         if current_node_id != 0:
 
-            return self.resolve_vars(
+            r = self.resolve_vars(
                 current_args=args,
                 rest_path=rest_path,
                 last_node=current_node,
                 tree=tree,
                 ting=ting,
             )
+
+            return r
         else:
 
             root_task = last_node.data["task"]
@@ -379,6 +395,8 @@ class VariablesAttribute(TingAttribute):
 
                 # add a template key that is under either 'frecklet' or 'task' of the root task of a frecklet
                 arg = available_args.get(tk, None)
+
+                auto_arg = False
                 if arg is None:
                     if self.default_argument_description is None:
                         f_name = current_node.data.id
@@ -389,8 +407,14 @@ class VariablesAttribute(TingAttribute):
                         )
                     else:
                         arg = self.default_argument_description
+                        auto_arg = True
 
-                arg = Arg(tk, arg, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA)
+                arg = Arg(
+                    tk,
+                    arg,
+                    default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                    is_auto_arg=auto_arg,
+                )
                 root_tks[tk] = arg
 
             dict_merge(args, root_tks, copy_dct=False)
