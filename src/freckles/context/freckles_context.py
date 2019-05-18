@@ -453,7 +453,19 @@ class FrecklesContext(object):
             )
             sync_root_task = sync_tasks.start()
 
-            for repo in to_download:
+            cleaned = []
+            for r in to_download:
+                url = r["url"]
+                path = r["path"]
+                branch = r.get("branch", None)
+                temp = {"url": url, "path": path}
+                if branch is not None:
+                    temp["branch"] = branch
+
+                if temp not in cleaned:
+                    cleaned.append(temp)
+
+            for repo in cleaned:
 
                 self.download_repo(repo, task_parent=sync_root_task)
 
@@ -529,6 +541,7 @@ class FrecklesContext(object):
                 valid = self.config_value("remote_cache_valid_time")
 
                 if valid < 0:
+                    pull_task.finish(success=True, skipped=True)
                     log.debug(
                         "Not pulling again, updating repo disabled: {}".format(url)
                     )
