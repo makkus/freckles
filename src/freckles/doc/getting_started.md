@@ -193,20 +193,6 @@ path-is-synced                      make sure a file or folder is synced
                                     between two locations
 pip-requirements-present            install dependencies so 'pip' can be
                                     used by Ansible
-pkg-apache                          ensures the Apache web server is
-                                    installed
-pkg-arp                             install the sshpass package
-pkg-devpi                           ensures the devpi service is installed
-                                    and running
-pkg-nginx                           ensures the nginx web server is
-                                    installed and running
-pkg-nmap                            install the sshpass package
-pkg-osx-command-line-tools          install Mac OS X command-line tools
-pkg-pyenv                           install a Python runtime for a user
-pkg-sshpass                         install the sshpass package
-pkg-stow                            install the stow package
-pkg-vagrant                         ensures Vagrant is installed
-pkg-virtualbox                      ensures Virtualbox is installed
 pkg_mgr-asdf                        ensures 'asdf' is installed
 pkg_mgr-asdf-plugin                 install a plugin for asdf
 pkg_mgr-conda                       install the 'conda' package manager
