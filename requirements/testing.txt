@@ -29,7 +29,6 @@ flake8==3.7.7
 future==0.17.1
 git+https://gitlab.com/frkl/frkl-pkg@develop#egg=frkl-pkg
 git+https://gitlab.com/frkl/frkl@develop#egg=frkl
-
 git+https://gitlab.com/frkl/frutils@develop#egg=frutils
 git+https://gitlab.com/frkl/ting@develop#egg=ting
 halo==0.0.24
