@@ -1,0 +1,24 @@
+## Examples
+{% for example in examples %}
+    {% set i = loop.index %}
+    {% set title = example.get("title", "Example {{ i }}") %}
+    {% set link_id =  "example_{}".format(i) %}
+#### Example {{ i }}: {{ title }}
+{% set desc = example.get("desc", None) %}
+{% if desc %}
+##### Description
+
+{{ desc }}
+{% endif %}
+{% set example_vars = example.get("vars", {}) %}
+{% if example_vars %}
+##### Code
+    - {{ frecklet_name}}:
+        {{ example_vars | to_yaml | indent(8) }}
+
+{% endif %}
+
+{% if loop.index < loop.length %}
+--
+{% endif %}
+{% endfor %}

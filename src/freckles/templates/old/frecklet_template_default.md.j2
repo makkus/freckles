@@ -1,0 +1,50 @@
+# {{== frecklet_name ==}}
+
+{{== frecklet.get_help_string() ==}}
+
+{{%= if show.get("further_reading", True) and frecklet.get_doc().get_further_reading() =%}}
+## References
+
+{{%= if frecklet.get_doc().get_further_reading() =%}}
+{{%= for r in frecklet.get_doc().get_further_reading() =%}}
+- {{== r ==}}
+{{%= endfor =%}}
+{{%= endif =%}}
+{{%= endif =%}}
+
+{{%= if show.get("variables", False) =%}}
+
+## Variables
+
+{{%= for arg in frecklet.args | dictsort =%}}
+{{== arg[0] ==}}     | <i></i>
+-------------------- | -----------------------------------
+desc                 | {{== arg[1].get("doc", {}).get("short_help", "n/a") ==}}
+type                 | {{== arg[1].get("type", "string") ==}}
+required             | {{== arg[1].get("required", True) ==}}
+default              | {{== arg[1].get("default", "-") | sanitize_rst ==}}
+
+{{%= endfor =%}}
+{{%= endif =%}}
+
+{{%= if frecklet.get_doc().get_notes() =%}}
+
+{{%= for n in frecklet.get_doc().get_notes() =%}}
+!!! note
+    {{== n ==}}
+{{%= endfor =%}}
+{{%= endif =%}}
+
+{{%= if show.get("cli_help", False) and extra.get("cli", False) =%}}
+## Command-line
+
+```Bash
+frecklecute {{== frecklet_name ==}} --help
+```
+
+??? Abstract "help output"
+    ```
+    {{== extra.get("cli").get("help", "n/a") | indent(4, False) ==}}
+    ```
+
+{{%= endif =%}}

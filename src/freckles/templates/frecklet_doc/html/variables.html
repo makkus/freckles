@@ -1,0 +1,39 @@
+<h2 class="section-title" id="variables">Variables</h2>
+
+<div class="section-block">
+    <div class="table-responsive">
+        {% set vars_required = frecklet.vars_required %}
+        {% set vars_optional = frecklet.vars_optional %}
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for l in [vars_required, vars_optional] %}
+            {% for name, param in l.items() %}
+            {% set _help = param._doc.get_help() %}
+            {% set _req = ' **Required**' if param.required else '' %}
+            <tr>
+                <th style="white-space: nowrap;"><h3 id="var_{{ param.name }}"><code>{{
+                    name
+                    }}</code></h3></th>
+                <td>{{ param._schema.get("type", "n/a") }}</td>
+                <td>{{ param._schema.get("default", "--") }}</td>
+                {% if _req %}
+                <td>{{ (_help + _req) | from_markdown }}</td>
+                {% else %}
+                <td>{{ _help | from_markdown }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

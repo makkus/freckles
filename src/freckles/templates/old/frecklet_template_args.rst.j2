@@ -1,0 +1,16 @@
+{{%= for arg in frecklet.args | dictsort =%}}
+{{%= if not show.get("arg_list_filter", []) or arg[0] in show.get("arg_list_filter", []) =%}}
+{{%= if show.get("only_names", False) =%}}
+{{== arg[0] ==}}
+{{%= else =%}}
+**{{== arg[0] ==}}**
+    **desc:**        {{== arg[1].get("doc", {}).get("short_help", "n/a") ==}}
+
+    **type:**        {{== arg[1].get("type", "string") ==}}
+
+    **required:**    {{== arg[1].get("required", True) ==}}
+
+    **default:**     {{== arg[1].get("default", "-") | sanitize_rst ==}}
+{{%= endif =%}}
+{{%= endif =%}}
+{{%= endfor =%}}

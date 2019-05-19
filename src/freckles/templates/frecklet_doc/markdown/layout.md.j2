@@ -1,0 +1,24 @@
+{% set doc = frecklet.doc %}
+{% set help = doc.get_help(default=None, use_short_help=False) %}
+{% set examples = doc.get_examples() %}
+{% set further_reading = doc.get_further_reading() %}
+{% if help %}
+## Description
+{{ help }}
+{% endif %}
+
+{% if further_reading %}
+## Resources
+{% for d, l in further_reading.items() %}
+  - [{{ d }}]({{ l }})
+{% endfor %}
+{% endif %}
+
+{% set vars = frecklet.vars_frecklet %}
+{% if vars %}
+{% include 'variables.md.j2' %}
+{% endif %}
+
+{% if examples %}
+{% include 'examples.md.j2' %}
+{% endif %}

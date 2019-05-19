@@ -1,0 +1,128 @@
+---
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+image: python
+
+stages:
+  - test
+  - release
+
+before_script:
+ - curl -O https://bootstrap.pypa.io/get-pip.py
+ - python get-pip.py
+ - pip install -U setuptools
+
+python27:
+  image: python:2.7
+  stage: test
+  script:
+    - pip install tox
+    - tox -e py27
+
+#python34:
+#  image: python:3.4
+#  stage: test
+#  script:
+#    - pip install tox
+#    - tox -e py34
+
+python35:
+  image: python:3.5
+  stage: test
+  script:
+    - pip install tox
+    - tox -e py35
+
+python36:
+  image: python:3.6
+  stage: test
+  script:
+    - pip install tox
+    - tox -e py36
+
+python37:
+  image: python:3.7
+  stage: test
+  script:
+    - pip install tox
+    - tox -e py37
+
+#docs:
+#  before_script:
+#    - pip install Sphinx
+#  script:
+#    - python setup.py docs
+
+flake8:
+  image: python
+  stage: test
+  script:
+    - pip install tox
+    - tox -e flake8
+
+commitlint:
+  stage: test
+  image: node:8
+  only:
+    - master
+    - merge_requests
+    - develop
+  script:
+    - npm install -g @commitlint/cli @commitlint/config-conventional
+    - export LAST_TAG=$(git describe --abbrev=0 --tags) # get last tag
+    - commitlint --from=$LAST_TAG   # check commit convention from last tag
+
+build:
+  stage: release
+  only:
+    - develop
+    - before_0.9
+  script:
+    - pip install devpi-client
+    - rm -rf dist build
+    - devpi use https://pkgs.frkl.io/
+    - devpi login frkl --password="${DEVPI_PASSWORD}"
+    - devpi use /frkl/dev
+    - devpi upload
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 month
+
+build_stable:
+  stage: release
+  only:
+    - /^\d+\.\d+\.\d+$/
+  except:
+    - branches
+  script:
+    - pip install devpi-client
+    - rm -rf dist build
+    - devpi use https://pkgs.frkl.io/
+    - devpi login frkl --password="${DEVPI_PASSWORD}"
+    - devpi use /frkl/stable
+    - devpi upload
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 month
+
+build_beta:
+  stage: release
+  only:
+    - /^\d+\.\d+\.\d+b\d+$/
+  except:
+    - branches
+  script:
+    - pip install devpi-client
+    - rm -rf dist build
+    - devpi use https://pkgs.frkl.io/
+    - devpi login frkl --password="${DEVPI_PASSWORD}"
+    - devpi use /frkl/beta
+    - devpi upload
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 month

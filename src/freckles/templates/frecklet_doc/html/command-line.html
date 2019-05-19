@@ -1,0 +1,7 @@
+<h2 class="section-title" id="command_line">Command-line</h2>
+
+<div class="section-block">
+    {{ ['```console\n', 'frecklecute', frecklet_name, '--help\n\n', frecklet |
+    to_cli_help_string, '\n```'] | join(' ') | from_markdown }}
+
+</div>

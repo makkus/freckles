@@ -1,0 +1,36 @@
+<h2 class="section-title" id="variables">Variables</h2>
+
+{{%= if params.get_required_vars() or params.get_optional_vars() =%}}
+<div class="section-block">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{%= for param in params.get_required_vars() + params.get_optional_vars() =%}}
+            {{%= set _help = param.doc.get_help() =%}}
+            {{%= set _req = ' **Required**' if param.required else '' =%}}
+            <tr>
+                <th style="white-space: nowrap;"><h3 id="var_{{== param.name ==}}"><code>{{==
+                    param.name
+                    ==}}</code></h3></th>
+                <td>{{== param.type.get("type", "n/a") ==}}</td>
+                <td>{{== param.scheme.get("default", "--") ==}}</td>
+                {{%= if _req =%}}
+                <td>{{== (_help + _req) | from_markdown ==}}</td>
+                {{%= else =%}}
+                <td>{{== _help | from_markdown ==}}</td>
+                {{%= endif =%}}
+            </tr>
+            {{%= endfor =%}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{%= endif =%}}

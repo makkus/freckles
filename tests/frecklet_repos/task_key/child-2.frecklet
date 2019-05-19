@@ -1,0 +1,3 @@
+frecklets:
+  - grand-child-1:
+      frecklet::skip: "{{:: skip | true_if_equal('x') ::}}"

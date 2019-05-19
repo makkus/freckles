@@ -1,0 +1,7 @@
+args:
+  child_4_var_2:
+    type: integer
+frecklets:
+  - grand-child-4:
+      grand_child_4_var_1: "{{:: child_4_var_1_1 ::}} - {{:: child_4_var_1_2 ::}}"
+      grand_child_4_var_2: "{{:: child_4_var_2 ::}}"

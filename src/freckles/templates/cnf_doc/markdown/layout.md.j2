@@ -1,0 +1,20 @@
+# Configuration
+
+```yaml
+{{== context.cnf.config_dict ==}}
+```
+
+# Interpreters
+
+{{%= for c_name, interpreter_details in context.get_interpreter_map().items() =%}}
+
+{{%= set validated = interpreter_details["interpreter"].get_validated_cnf() =%}}
+{{%= if validated =%}}
+## {{== c_name ==}}
+
+```yaml
+{{== validated ==}}
+```
+
+{{%= endif =%}}
+{{%= endfor =%}}

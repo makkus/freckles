@@ -1,0 +1,58 @@
+============================================================================
+{{== frecklet_name ==}}
+============================================================================
+
+{{%= if show.get("variables", False) or show.get("show_links", False) =%}}
+{{== frecklet.get_short_help_string() | make_sentence ==}}
+
+{{%= if show.get("variables", False) =%}}
+---------
+Variables
+---------
+
+{{%= for arg in frecklet.args | dictsort =%}}
+**{{== arg[0] ==}}**
+    **desc:**        {{== arg[1].get("doc", {}).get("short_help", "n/a") ==}}
+
+    **type:**        {{== arg[1].get("type", "string") ==}}
+
+    **required:**    {{== arg[1].get("required", True) ==}}
+
+    **default:**     {{== arg[1].get("default", "-") | sanitize_rst ==}}
+{{%= endfor =%}}
+{{%= endif =%}}
+{{%= endif =%}}
+
+{{%= if show.get("desc", True) =%}}
+{{%= if show.get("variables", False) or show.get("show_links", False) =%}}
+-----------
+Description
+-----------
+{{%= endif =%}}
+
+{{== frecklet.get_help_string(out_format="rst") ==}}
+
+{{%= if frecklet.get_doc().get_notes() =%}}
+-----
+Notes
+-----
+
+{{%= for n in frecklet.get_doc().get_notes() =%}}
+- {{== n ==}}
+{{%= endfor =%}}
+{{%= endif =%}}
+{{%= endif =%}}
+
+{{%= if show.get("show_links", False) =%}}
+---------------
+Further reading
+---------------
+
+{{%= if frecklet.get_doc().get_further_reading() =%}}
+{{%= for r in frecklet.get_doc().get_further_reading() =%}}
+- `<{{== r ==}}>`_
+{{%= endfor =%}}
+{{%= else =%}}
+n/a
+{{%= endif =%}}
+{{%= endif =%}}

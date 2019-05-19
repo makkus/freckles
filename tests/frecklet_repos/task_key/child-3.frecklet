@@ -1,0 +1,8 @@
+args:
+  skip:
+    type: boolean
+    default: true
+
+frecklets:
+  - grand-child-1:
+      frecklet::skip: "{{:: skip ::}}"

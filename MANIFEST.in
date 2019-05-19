@@ -1,0 +1,16 @@
+include AUTHORS.rst
+include CONTRIBUTING.rst
+include HISTORY.rst
+include LICENSE
+include README.md
+
+include src/freckles/frkl.info
+reverse-include src/freckles/external *
+reverse-include src/freckles/doc *
+reverse-include src/freckles/templates *
+
+recursive-include tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+recursive-include docs *.rst conf.py Makefile *.jpg *.png *.gif

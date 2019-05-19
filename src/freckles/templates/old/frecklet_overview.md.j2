@@ -1,0 +1,20 @@
+# Task overview for {{== frecklet_name ==}}
+
+{{%= for item in extra.task_hierarchy recursive -=%}}
+{{%= set no_indent = 1 * (item["level"] + 2) -=%}}
+{{%= set heading = "#" * no_indent -=%}}
+{{== heading ==}} {{== item["desc"] ==}}
+
+{{%= if item["children"] =%}}
+{{%= if show.details =%}}
+
+{{== item["child"].get("doc", {}).get("help", "n/a") ==}}
+{{%= endif =%}}
+{{== loop(item["children"]) -==}}
+{{%= else =%}}
+
+*frecklet* source:
+
+{{== item["doc"] | indent(4, True, True) ==}}
+{{%= endif =%}}
+{{%= endfor -=%}}

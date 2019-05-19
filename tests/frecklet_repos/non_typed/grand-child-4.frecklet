@@ -1,0 +1,7 @@
+frecklets:
+  - frecklet:
+      name: debug
+      type: ansible-module
+      msg: grand-child 1
+    vars:
+      msg: "{{:: grand_child_4_var_1 ::}} - {{:: grand_child_4_var_2 ::}}"

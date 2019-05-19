@@ -1,0 +1,22 @@
+<div class="doc-section">
+<h2 class="section-title" id="configuration-section">Configuration</h2>
+<div class="section-block">
+{{== context.cnf.config_dict | to_yaml | to_code_block | from_markdown ==}}
+</div>
+</div>
+{{%= if show_interpreters =%}}
+<div class="doc-section">
+<h2 class="section-title">Interpreters</h2>
+<div class="section-block">
+{{%= for c_name, interpreter_details in context.get_interpreter_map().items() =%}}
+{{%= set validated = interpreter_details["interpreter"].get_validated_cnf() =%}}
+{{%= if validated =%}}
+<h3 class="block-title"> {{== c_name ==}}</h3>
+
+{{== validated | to_yaml | to_code_block | from_markdown ==}}
+
+{{%= endif =%}}
+{{%= endfor =%}}
+</div>
+</div>
+{{%= endif =%}}

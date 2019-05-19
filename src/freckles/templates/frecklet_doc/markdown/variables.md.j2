@@ -1,0 +1,4 @@
+## Parameters
+{% set vars_required = frecklet.vars_required %}
+{% set vars_optional = frecklet.vars_optional %}
+{{ vars_required | vars_markdown_table(vars_optional) }}
