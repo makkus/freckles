@@ -16,7 +16,6 @@ from .defaults import (
     VARS_KEY,
     TASK_KEY_NAME,
     DEFAULT_FRECKLES_JINJA_ENV,
-    FRECKLES_DEFAULT_ARG_SCHEMA,
     PASSWORD_ASK_MARKER,
 )
 from .exceptions import FrecklesVarException
@@ -61,7 +60,7 @@ def is_duplicate_task(new_task, idempotency_cache):
         return False
 
 
-def remove_none_values(input, args=None):
+def remove_none_values(input):
 
     if isinstance(input, (list, tuple, set, CommentedSeq)):
         result = []
@@ -156,10 +155,12 @@ class Frecklecutable(object):
         secret_keys = set()
 
         for key in template_keys:
-            schema[key] = copy.copy(args.get(key, FRECKLES_DEFAULT_ARG_SCHEMA))
-            schema[key].pop("doc", None)
-            schema[key].pop("cli", None)
-            secret = schema[key].pop("secret", False)
+            arg_obj = args[key]
+
+            schema[key] = copy.copy(arg_obj.schema)
+            # schema[key].pop("doc", None)
+            # schema[key].pop("cli", None)
+            secret = arg_obj.secret
             if secret is True:
                 secret_keys.add(key)
 
@@ -243,12 +244,12 @@ class Frecklecutable(object):
 
             # task_name = task_node[FRECKLET_KEY_NAME]["name"]
 
-            # args = task_tree.get_node(task_id).data["root_frecklet"].args
-            args = {}
-            for k, v in (
-                task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet.items()
-            ):
-                args[k] = v.schema
+            root_vars = task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet
+            # args = {}
+            # for k, v in (
+            #     root_vars.items()
+            # ):
+            #     args[k] = v.schema
 
             parent_id = task_tree.parent(task_id).identifier
             if parent_id == 0:
@@ -359,7 +360,7 @@ class Frecklecutable(object):
             )
 
             schema, secret_keys = self._generate_schema(
-                var_value_map=task, args=args, template_keys=template_keys
+                var_value_map=task, args=root_vars, template_keys=template_keys
             )
 
             secret_keys.update(parent_secret_keys)
@@ -388,7 +389,7 @@ class Frecklecutable(object):
             task_processed = self._replace_templated_var_value(
                 var_value=task, repl_dict=validated_val_map, inventory=inventory
             )
-            task_processed = remove_none_values(task_processed, args=args)
+            task_processed = remove_none_values(task_processed)
 
             task_processed[FRECKLET_KEY_NAME]["secret_vars"] = list(new_secret_keys)
 

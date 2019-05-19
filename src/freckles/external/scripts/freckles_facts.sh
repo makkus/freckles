@@ -21,7 +21,8 @@ then
   export FRECKLES_CHECK_PYTHON_MODULES="zipfile"
 fi
 
-DEFAULT_CHECK_PYTHON_EXES="/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
+DEFAULT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python3:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python3:/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
+#DEFAULT_CHECK_PYTHON_EXES="/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
 
 # from: https://stackoverflow.com/questions/3963716/how-to-manually-expand-a-special-variable-ex-tilde-in-bash/29310477#29310477
 function expand_path () {
