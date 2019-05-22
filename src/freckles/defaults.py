@@ -19,7 +19,18 @@ MIXED_CONTENT_TYPE = "hodgepodge"
 ACCEPT_FRECKLES_LICENSE_KEYNAME = "accept_freckles_license"
 USE_COMMUNITY_KEYNAME = "use_community"
 
+FRECKLES_DESC_METADATA_KEY = "desc"
+FRECKLES_DESC_SHORT_METADATA_KEY = "short"
+FRECKLES_DESC_LONG_METADATA_KEY = "long"
+FRECKLES_DESC_REFERENCES_METADATA_KEY = "references"
+FRECKLES_PROPERTIES_METADATA_KEY = "properties"
+FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY = "idempotent"
+FRECKLES_PROPERTIES_INTERNET_METADATA_KEY = "internet"
+FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY = "elevated"
+
+
 FRECKLES_DEFAULT_ARG_SCHEMA = {"required": True, "empty": False}
+
 
 # ---------------------------------------------------------------
 # folder / filesystem defaults

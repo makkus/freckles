@@ -4,7 +4,15 @@ from collections import Mapping
 
 import click
 
-from freckles.defaults import FRECKLET_KEY_NAME, VARS_KEY, TASK_KEY_NAME
+from freckles.defaults import (
+    FRECKLET_KEY_NAME,
+    VARS_KEY,
+    TASK_KEY_NAME,
+    FRECKLES_DESC_METADATA_KEY,
+    FRECKLES_DESC_LONG_METADATA_KEY,
+    FRECKLES_DESC_SHORT_METADATA_KEY,
+    FRECKLES_DESC_REFERENCES_METADATA_KEY,
+)
 from freckles.frecklet.vars import VarsInventory
 from frutils import dict_merge, reindent, readable
 from frutils.doc import Doc
@@ -69,10 +77,10 @@ def describe_frecklet(context, frecklet, vars, auto_vars=False):
         name = task[FRECKLET_KEY_NAME]["name"]
 
         f_doc = Doc(
-            task[FRECKLET_KEY_NAME],
-            short_help_key="msg",
-            help_key="desc",
-            further_reading_key="references",
+            task[FRECKLET_KEY_NAME].get(FRECKLES_DESC_METADATA_KEY, {}),
+            short_help_key=FRECKLES_DESC_SHORT_METADATA_KEY,
+            help_key=FRECKLES_DESC_LONG_METADATA_KEY,
+            further_reading_key=FRECKLES_DESC_REFERENCES_METADATA_KEY,
         )
 
         title = f_doc.get_short_help(

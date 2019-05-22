@@ -6,7 +6,6 @@ import os
 from collections import Mapping, Iterable
 
 from ruamel.yaml import YAML
-from six import string_types
 
 from freckles.defaults import ACCEPT_FRECKLES_LICENSE_KEYNAME, FRECKLES_CONFIG_DIR
 from freckles.exceptions import FrecklesConfigException, FrecklesUnlockException

@@ -6,7 +6,11 @@ import os
 from ruamel.yaml import YAML
 
 from freckles.adapters import FrecklesAdapter
-from freckles.defaults import VARS_KEY
+from freckles.defaults import (
+    VARS_KEY,
+    FRECKLES_PROPERTIES_METADATA_KEY,
+    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
+)
 from freckles.frecklet.vars import VarsInventory
 from freckles.utils.host_utils import FrecklesRunTarget
 from frutils import dict_merge
@@ -174,7 +178,9 @@ frecklets:
 
             # f_type = task["type"]  # always 'frecklecute' for now
 
-            elevated = vars_dict.get("elevated", None)
+            elevated = vars_dict.get(FRECKLES_PROPERTIES_METADATA_KEY, {}).get(
+                FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, None
+            )
             if elevated is None:
                 elevated = run_elevated
             target = vars_dict.get("target", "localhost")

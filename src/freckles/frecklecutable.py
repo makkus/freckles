@@ -6,9 +6,11 @@ from collections import OrderedDict
 
 import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
+from six import string_types
 from treelib import Tree
 
 from frutils import replace_strings_in_obj, get_template_keys, can_passwordless_sudo
+from frutils.exceptions import FrklException
 from frutils.tasks.tasks import Tasks
 from ting.defaults import TingValidator
 from .defaults import (
@@ -17,9 +19,12 @@ from .defaults import (
     TASK_KEY_NAME,
     DEFAULT_FRECKLES_JINJA_ENV,
     PASSWORD_ASK_MARKER,
+    FRECKLES_DESC_METADATA_KEY,
+    FRECKLES_PROPERTIES_METADATA_KEY,
+    FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY,
+    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
 )
 from .exceptions import FrecklesVarException
-from frutils.exceptions import FrklException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
@@ -41,13 +46,17 @@ class FrecklecutableMixin(object):
 
 def is_duplicate_task(new_task, idempotency_cache):
 
-    if not new_task[FRECKLET_KEY_NAME].get("idempotent", False):
+    if (
+        not new_task[FRECKLET_KEY_NAME]
+        .get(FRECKLES_PROPERTIES_METADATA_KEY, {})
+        .get(FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY, False)
+    ):
         return False
 
     temp = {}
     temp[FRECKLET_KEY_NAME] = copy.copy(new_task[FRECKLET_KEY_NAME])
-    temp[FRECKLET_KEY_NAME].pop("msg", None)
-    temp[FRECKLET_KEY_NAME].pop("desc", None)
+    temp[FRECKLET_KEY_NAME].pop(FRECKLES_DESC_METADATA_KEY, None)
+    temp[FRECKLET_KEY_NAME].pop(FRECKLES_PROPERTIES_METADATA_KEY, None)
     temp[FRECKLET_KEY_NAME].pop("skip", None)
 
     temp[TASK_KEY_NAME] = copy.copy(new_task[TASK_KEY_NAME])
@@ -530,8 +539,20 @@ class Frecklecutable(object):
         task_lists = []
 
         for task in tasks:
+            elv = (
+                task[FRECKLET_KEY_NAME]
+                .get(FRECKLES_PROPERTIES_METADATA_KEY, {})
+                .get(FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, False)
+            )
+            if isinstance(elv, string_types):
+                if elv.lower() in ["true", "1", "yes"]:
+                    elv = True
 
-            if task[FRECKLET_KEY_NAME].get("elevated", False):
+                task[FRECKLET_KEY_NAME][FRECKLES_PROPERTIES_METADATA_KEY][
+                    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY
+                ] = True
+
+            if elv:
                 tasks_elevated = True
 
             tt = task[FRECKLET_KEY_NAME]["type"]

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 from collections import Sequence
 
 from ruamel.yaml.comments import CommentedMap

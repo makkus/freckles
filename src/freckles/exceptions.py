@@ -5,7 +5,7 @@ from jinja2.exceptions import TemplateSyntaxError
 from six import string_types
 
 from frutils import readable, reindent
-from frutils.exceptions import FrklException
+from frutils.exceptions import FrklException, FrklParseException
 from ting.exceptions import TingException
 
 
@@ -162,12 +162,32 @@ class FreckletException(FrklException):
             self.frecklet_name = "n/a"
 
         msg = "Can't process frecklet: '{}'".format(self.frecklet_name)
+
+        # print(parent_exception.__dict__.keys())
+        # print(parent_exception.root_exc)
+
         if isinstance(parent_exception, TingException):
 
-            if len(parent_exception.attribute_chain) == 1:
-                reason = "Error when processing frecklet property:\n"
+            root_exc = parent_exception.root_exc
+            if root_exc is not None and isinstance(root_exc, FrklParseException):
+                problem_frecklet = root_exc.content_origin
             else:
-                reason = "Error when processing frecklet properties:\n"
+                problem_frecklet = None
+
+            if len(parent_exception.attribute_chain) == 1:
+                if problem_frecklet is not None:
+                    reason = "Error when processing property of frecklet '{}':\n".format(
+                        problem_frecklet.id
+                    )
+                else:
+                    reason = "Error when processing frecklet property:\n"
+            else:
+                if problem_frecklet is not None:
+                    reason = "Error when processing properties of frecklet '{}':\n".format(
+                        problem_frecklet.id
+                    )
+                else:
+                    reason = "Error when processing frecklet properties:\n"
             for index, attr in enumerate(parent_exception.attribute_chain):
 
                 padding = "  " * (index + 1)

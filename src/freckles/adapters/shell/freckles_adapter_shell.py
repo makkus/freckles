@@ -11,6 +11,8 @@ from freckles.defaults import (
     TASK_KEY_NAME,
     VARS_KEY,
     FRECKLET_KEY_NAME,
+    FRECKLES_DESC_METADATA_KEY,
+    FRECKLES_DESC_SHORT_METADATA_KEY,
 )
 from frutils import dict_merge
 from frutils.config import Cnf
@@ -324,7 +326,11 @@ class FrecklesAdapterShell(FrecklesAdapter):
 
             processed["_id"] = task[FRECKLET_KEY_NAME]["_task_id"]
             processed["_name"] = task[FRECKLET_KEY_NAME]["name"]
-            processed["_msg"] = task[FRECKLET_KEY_NAME].get("msg", processed["_name"])
+            processed["_msg"] = (
+                task[FRECKLET_KEY_NAME]
+                .get(FRECKLES_DESC_METADATA_KEY, {})
+                .get(FRECKLES_DESC_SHORT_METADATA_KEY, processed["_name"])
+            )
 
             # tasks = processed["tasks"]
             # functions = processed["functions"]

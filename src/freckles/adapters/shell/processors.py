@@ -4,7 +4,13 @@ import logging
 
 import six
 
-from freckles.defaults import TASK_KEY_NAME, VARS_KEY, FRECKLET_KEY_NAME
+from freckles.defaults import (
+    TASK_KEY_NAME,
+    VARS_KEY,
+    FRECKLET_KEY_NAME,
+    FRECKLES_DESC_SHORT_METADATA_KEY,
+    FRECKLES_DESC_METADATA_KEY,
+)
 
 log = logging.getLogger("freckles")
 
@@ -46,14 +52,16 @@ class ShellCommandProcessor(ShellTaskTypeProcessor):
             if vars[token]:
                 args.append(vars[token])
 
-        msg = task[FRECKLET_KEY_NAME].get("msg", command)
+        desc = task[FRECKLET_KEY_NAME].get(
+            FRECKLES_DESC_METADATA_KEY, {FRECKLES_DESC_SHORT_METADATA_KEY: command}
+        )
         return {
             "tasks": [
                 {
                     "command": command,
                     "args": args,
                     "type": task[FRECKLET_KEY_NAME]["type"],
-                    "msg": msg,
+                    FRECKLES_DESC_METADATA_KEY: desc,
                     "id": task_id,
                 }
             ],

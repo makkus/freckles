@@ -4,12 +4,11 @@ import os
 import shutil
 import time
 import uuid
-from collections import Mapping, Sequence
+from collections import Mapping
 from datetime import datetime
 
 from plumbum import local
 from ruamel.yaml import YAML
-from six import string_types
 
 from freckles.adapters.adapters import create_adapter
 from freckles.defaults import (
