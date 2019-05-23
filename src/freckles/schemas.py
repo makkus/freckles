@@ -154,7 +154,9 @@ There are 3 special repository aliases that can be used instead of a path:
             "required",
             "required_always",
             "always",
-            "required_secret" "required_secret_always",
+            "required_secret",
+            "required_secret_always",
+            "never",
         ],
         "doc": {
             "short_help": "when to ask the user for interactive input",
