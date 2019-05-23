@@ -56,6 +56,15 @@ def to_yaml_filter(obj, empty_string=None, indent=0):
     return readable(obj, out="yaml", ignore_aliases=True, indent=indent)
 
 
+def to_repo_alias_filter(frecklet):
+
+    repo_name = frecklet._parent_repo.repo_name
+    if repo_name == "community":
+        return "--community "
+    else:
+        return ""
+
+
 def to_cli_help_string_filter(frecklet):
     cli_paramters = frecklet.cli_arguments
 
@@ -77,6 +86,7 @@ HTML_TEMPLATE_FILTERS = {
     "to_code_block": to_code_block_filter,
     "to_yaml": to_yaml_filter,
     "to_cli_help_string": to_cli_help_string_filter,
+    "to_repo_alias": to_repo_alias_filter,
 }
 
 
