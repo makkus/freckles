@@ -127,7 +127,7 @@ frecklets:
 
         return extra
 
-    def prepare_execution_requirements(self, run_config, parent_task):
+    def prepare_execution_requirements(self, run_config, task_list, parent_task):
 
         pass
 

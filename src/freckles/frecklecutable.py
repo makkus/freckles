@@ -452,6 +452,11 @@ class Frecklecutable(object):
         env_dir=None,
     ):
 
+        if parent_task is None:
+            i_am_root = True
+        else:
+            i_am_root = False
+
         if run_vars is None:
             run_vars = {}
 
@@ -529,7 +534,7 @@ class Frecklecutable(object):
             parent_task.pause()
 
         run_secrets["become_pass"] = run_config.pop("become_pass", None)
-        if run_secrets["become_pass"] == "ask":
+        if run_secrets["become_pass"] == "::ask::":
 
             msg = ""
             if run_config.get("user", None):
@@ -542,7 +547,7 @@ class Frecklecutable(object):
             asked = True
 
         run_secrets["ssh_pass"] = run_config.pop("ssh_pass", None)
-        if run_secrets["ssh_pass"] == "ask":
+        if run_secrets["ssh_pass"] == "::ask::":
             msg = ""
             if run_config.get("user", None):
                 msg = "{}@".format(run_config["user"])
@@ -683,7 +688,9 @@ class Frecklecutable(object):
 
             try:
                 adapter.prepare_execution_requirements(
-                    run_config=run_config, parent_task=prepare_root_task
+                    run_config=run_config,
+                    task_list=current_tasklist,
+                    parent_task=prepare_root_task,
                 )
                 prepare_root_task.finish(success=True)
 
@@ -750,7 +757,8 @@ class Frecklecutable(object):
                 keep_run_folder = self.context.config_value(
                     "keep_run_folder", "context"
                 )
-                if parent_task is None and not keep_run_folder:
+
+                if i_am_root and not keep_run_folder:
 
                     env_dir = run_env_properties["env_dir"]
                     env_dir_link = run_env_properties.get("env_dir_link", None)
