@@ -431,9 +431,6 @@ class TaskListDetailedAttribute(TingAttribute):
         f = Frkl([ting._metadata], chain)
         tasklist_detailed = f.process()
 
-        # import pp
-        # pp(tasklist_detailed)
-
         return tasklist_detailed
 
 

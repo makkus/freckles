@@ -272,11 +272,15 @@ class Frecklecutable(object):
                         repl_vars[tk] = v
                 task_path = []
                 parent_secret_keys = set()
+                parent_desc = {}
             else:
                 parent = processed_tree.get_node(parent_id).data
                 repl_vars = parent["processed"].get("vars", {})
                 parent_secret_keys = parent["processed"][FRECKLET_KEY_NAME].get(
                     "secret_vars", set()
+                )
+                parent_desc = parent["processed"][FRECKLET_KEY_NAME].get(
+                    FRECKLES_DESC_METADATA_KEY, {}
                 )
 
             # level = task_tree.level(task_id)
@@ -363,6 +367,7 @@ class Frecklecutable(object):
                     continue
 
             # now we replace the whole rest of the task
+            frecklet.setdefault(FRECKLES_DESC_METADATA_KEY, {}).update(parent_desc)
             task = {FRECKLET_KEY_NAME: frecklet, TASK_KEY_NAME: task, VARS_KEY: vars}
 
             template_keys = get_template_keys(

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import abc
 import logging
+import secrets
 import sys
 
 import click
@@ -65,9 +66,21 @@ class VarAdapter(object):
         pass
 
 
-class AskVarAdapter(object):
+class RandomPasswordVarAdapter(VarAdapter):
     def __init__(self):
+        pass
 
+    def retrieve_value(
+        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+    ):
+
+        pw = secrets.token_urlsafe(24)
+
+        return pw
+
+
+class AskVarAdapter(VarAdapter):
+    def __init__(self):
         pass
 
     def retrieve_value(
@@ -113,7 +126,7 @@ class AskVarAdapter(object):
 
         short_help = arg.doc.get_short_help(list_item_format=True, use_help=True)
         click.echo(
-            "Input needed for '"
+            "Input needed for value '"
             + Style.BRIGHT
             + key_name
             + Style.RESET_ALL
@@ -124,6 +137,14 @@ class AskVarAdapter(object):
         )
 
         arg_default = arg.default
+
+        if (
+            arg_default
+            and isinstance(arg_default, six.string_types)
+            and arg_default.lstrip().startswith("::")
+            and arg_default.rstrip().endswith("::")
+        ):
+            arg_default = None
 
         if arg_default:
             value = click.prompt(

@@ -79,8 +79,8 @@ class CliArgumentsAttribute(TingAttribute):
 
         param_type = option_properties.pop("param_type")
 
-        if var.default_user_input is not None:
-            option_properties["default"] = var.default_user_input
+        if var.default_user_input() is not None:
+            option_properties["default"] = var.default_user_input()
 
         option_properties["required"] = var.required
 
