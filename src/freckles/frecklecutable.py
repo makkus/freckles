@@ -10,6 +10,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
+from freckles.frecklet.vars import VarsInventory, VAR_ADAPTERS
 from frutils import replace_strings_in_obj, get_template_keys, can_passwordless_sudo
 from frutils.exceptions import FrklException
 from frutils.tasks.tasks import Tasks
@@ -19,7 +20,6 @@ from .defaults import (
     VARS_KEY,
     TASK_KEY_NAME,
     DEFAULT_FRECKLES_JINJA_ENV,
-    PASSWORD_ASK_MARKER,
     FRECKLES_DESC_METADATA_KEY,
     FRECKLES_PROPERTIES_METADATA_KEY,
     FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY,
@@ -459,7 +459,7 @@ class Frecklecutable(object):
         for arg_name, arg in self.frecklet.vars_frecklet.items():
 
             if arg.secret:
-                secret_args.append(arg)
+                secret_args.append(arg_name)
 
         paused = False
         if parent_task is not None and (
@@ -470,23 +470,52 @@ class Frecklecutable(object):
             parent_task.pause()
             paused = True
 
-        if secret_args:
+        run_inventory = VarsInventory()
 
-            asked = False
-            for arg in secret_args:
+        asked = False
+        inventory_secrets = inventory.secret_keys()
 
-                v = inventory.retrieve_value(arg.key)
+        for key, arg in self.frecklet.vars_frecklet.items():
 
-                if v == PASSWORD_ASK_MARKER:
-                    asked = True
-                    new_val = click.prompt(
-                        "Please provide secret value for '{}'".format(arg.key),
-                        hide_input=True,
-                    )
-                    inventory.set_value(arg.key, new_val, is_secret=True)
+            value = inventory.retrieve_value(key)
+            secret = key in secret_args or key in inventory_secrets
 
-            if asked:
-                click.echo()
+            # if value is None:
+            #     dui = arg.default_user_input()
+            #     d = arg.default
+            #     if dui is not None and dui != d and isinstance(dui, string_types) and dui.lstrip().startswith("::") and dui.rstrip().endswith("::"):
+            #         value = dui
+
+            if (
+                not isinstance(value, string_types)
+                or not value.lstrip().startswith("::")
+                or not value.rstrip().endswith("::")
+            ):
+                run_inventory.set_value(key, value, is_secret=secret)
+                continue
+
+            # otherwise, we load the var adapter and execute its 'retrive' method
+
+            var_adapter_name = value.strip()[2:-2]
+
+            if var_adapter_name not in VAR_ADAPTERS.keys():
+                raise FrecklesVarException(
+                    frecklet=self.frecklet,
+                    var_name=key,
+                    errors={key: "No var adapter '{}'.".format(var_adapter_name)},
+                    solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(
+                        var_adapter_name
+                    ),
+                )
+
+            var_adapter_obj = VAR_ADAPTERS[var_adapter_name]
+            value = var_adapter_obj.retrieve_value(
+                key_name=key, arg=arg, frecklet=self.frecklet, is_secret=secret
+            )
+            run_inventory.set_value(key, value, is_secret=secret)
+
+        if asked:
+            click.echo()
 
         asked = False
 
@@ -528,7 +557,7 @@ class Frecklecutable(object):
         frecklet_name = self.frecklet.id
         log.debug("Running frecklecutable: {}".format(frecklet_name))
 
-        tasks = self.process_tasks(inventory=inventory)
+        tasks = self.process_tasks(inventory=run_inventory)
 
         current_tasklist = []
         idempotent_cache = []
@@ -716,7 +745,7 @@ class Frecklecutable(object):
                 keep_run_folder = self.context.config_value(
                     "keep_run_folder", "context"
                 )
-                if not keep_run_folder:
+                if parent_task is None and not keep_run_folder:
 
                     env_dir = run_env_properties["env_dir"]
                     env_dir_link = run_env_properties.get("env_dir_link", None)

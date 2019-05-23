@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 from collections import OrderedDict, Sequence
 
@@ -15,18 +16,18 @@ from ting.ting_cast import MultiCacheResult
 
 log = logging.getLogger("freckles")
 
+FRECKLES_CLICK_CEREBUS_ARG_MAP = {
+    "string": str,
+    "float": float,
+    "integer": int,
+    "boolean": bool,
+    "dict": VarsTypeSimple(),
+    "password": str,
+    # "list": list
+}
+
 
 class CliArgumentsAttribute(TingAttribute):
-
-    CLICK_CEREBUS_ARG_MAP = {
-        "string": str,
-        "float": float,
-        "integer": int,
-        "boolean": bool,
-        "dict": VarsTypeSimple(),
-        "password": str,
-        # "list": list
-    }
 
     DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
@@ -78,8 +79,8 @@ class CliArgumentsAttribute(TingAttribute):
 
         param_type = option_properties.pop("param_type")
 
-        if var.default is not None:
-            option_properties["default"] = var.default
+        if var.default_user_input is not None:
+            option_properties["default"] = var.default_user_input
 
         option_properties["required"] = var.required
 
@@ -110,9 +111,7 @@ class CliArgumentsAttribute(TingAttribute):
             replacement = None
             cerberus_type = "multi"
         else:
-            replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
-                cerberus_type, None
-            )
+            replacement = FRECKLES_CLICK_CEREBUS_ARG_MAP.get(cerberus_type, None)
         if replacement is not None:
             if replacement == bool:
                 option_properties["type"] = None
@@ -133,9 +132,7 @@ class CliArgumentsAttribute(TingAttribute):
         elif cerberus_type == "list":
             arg_schema = var.schema.get("schema", {})
             schema_type = arg_schema.get("type", "string")
-            replacement = CliArgumentsAttribute.CLICK_CEREBUS_ARG_MAP.get(
-                schema_type, click.STRING
-            )
+            replacement = FRECKLES_CLICK_CEREBUS_ARG_MAP.get(schema_type, click.STRING)
             option_properties["type"] = replacement
             if param_type == "option":
                 option_properties["multiple"] = True
@@ -151,7 +148,7 @@ class CliArgumentsAttribute(TingAttribute):
         if var.secret:
             if "default" not in option_properties.keys():
                 if option_properties["required"]:
-                    option_properties["default"] = "ask"
+                    option_properties["default"] = "::ask::"
                     option_properties["show_default"] = True
 
         if param_type == "option":
@@ -212,11 +209,15 @@ class VariablesFilterAttribute(TingAttribute):
 
 class VariablesAttribute(TingAttribute):
     def __init__(
-        self, target_attr_name="vars_frecklet", default_argument_description=None
+        self,
+        target_attr_name="vars_frecklet",
+        default_argument_description=None,
+        interactive_input_strategy=None,
     ):
 
         self.target_attr_name = target_attr_name
         self.default_argument_description = default_argument_description
+        self.interactive_input_strategy = interactive_input_strategy
 
     def provides(self):
 
@@ -335,7 +336,10 @@ class VariablesAttribute(TingAttribute):
                         new_arg = arg
                     else:
                         new_arg = Arg(
-                            key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                            key,
+                            arg_config,
+                            default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                            interactive_input_strategy=self.interactive_input_strategy,
                         )
                         new_arg.add_child(arg)
                         new_arg.var_template = parent_var
@@ -356,6 +360,7 @@ class VariablesAttribute(TingAttribute):
                                     {},
                                     default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                                     is_auto_arg=True,
+                                    interactive_input_strategy=self.interactive_input_strategy,
                                 )
                                 new_arg.add_child(arg)
                         else:
@@ -363,6 +368,7 @@ class VariablesAttribute(TingAttribute):
                                 tk,
                                 arg_config,
                                 default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                                interactive_input_strategy=self.interactive_input_strategy,
                             )
                             new_arg.add_child(arg)
 
@@ -406,7 +412,7 @@ class VariablesAttribute(TingAttribute):
                             )
                         )
                     else:
-                        arg = self.default_argument_description
+                        arg = copy.copy(self.default_argument_description)
                         auto_arg = True
 
                 arg = Arg(
@@ -414,6 +420,7 @@ class VariablesAttribute(TingAttribute):
                     arg,
                     default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                     is_auto_arg=auto_arg,
+                    interactive_input_strategy=self.interactive_input_strategy,
                 )
                 root_tks[tk] = arg
 
@@ -431,7 +438,10 @@ class VariablesAttribute(TingAttribute):
         template_keys = root_node.data["root_frecklet"].template_keys
 
         args = Arg.from_keys(
-            template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+            template_keys,
+            available_args,
+            default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+            interactive_input_strategy=self.interactive_input_strategy,
         )
         rest_path = reversed(path_to_leaf[0:-1])
 

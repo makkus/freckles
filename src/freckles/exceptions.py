@@ -52,11 +52,13 @@ class FrecklesVarException(FrklException):
         self,
         frecklet=None,
         var_name=None,
-        message=None,
         errors=None,
         task_path=None,
         vars=None,
         task=None,
+        msg=None,
+        solution=None,
+        references=None,
     ):
 
         self.var_name = var_name
@@ -66,7 +68,8 @@ class FrecklesVarException(FrklException):
         self.vars = vars
         self.task = task
 
-        msg = "Error validating input for frecklet '{}'.".format(frecklet.id)
+        if msg is None:
+            msg = "Error validating input for frecklet '{}'.".format(frecklet.id)
 
         if len(self.errors) == 1:
             reason = Style.BRIGHT + "Var:" + Style.RESET_ALL + "\n\n"
@@ -74,6 +77,8 @@ class FrecklesVarException(FrklException):
             reason = Style.BRIGHT + "Vars:" + Style.RESET_ALL + "\n\n"
 
         for var, error in self.errors.items():
+            if isinstance(error, string_types):
+                error = [error]
             reason = "  " + Style.DIM + "{}:".format(var) + Style.RESET_ALL
             if len(error) == 1:
                 reason = reason + " " + error[0]
@@ -82,7 +87,9 @@ class FrecklesVarException(FrklException):
                 for e in error:
                     reason = reason + "    - {}".format(e)
 
-        super(FrecklesVarException, self).__init__(msg=msg, reason=reason)
+        super(FrecklesVarException, self).__init__(
+            msg=msg, reason=reason, solution=solution, references=references
+        )
 
     def __str__(self):
 

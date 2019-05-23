@@ -400,6 +400,20 @@ class FrecklesContext(object):
 
         self._frkl_pkg = FrklPkg(extra_lookup_paths=FRECKLES_EXTRA_LOOKUP_PATHS)
 
+        self._frecklet_load_config = copy.deepcopy(FRECKLET_LOAD_CONFIG)
+
+        # ----------------------------------
+        # changing load_config using context config
+
+        interactive_input_strategy = self.config_value("ask_user", "context")
+
+        for attr in self._frecklet_load_config["attributes"]:
+            if isinstance(attr, Mapping) and "VariablesAttribute" in attr.keys():
+                attr["VariablesAttribute"][
+                    "interactive_input_strategy"
+                ] = interactive_input_strategy
+                break
+
     def update_repos(self, force=False, timeout=-1):
 
         self.ensure_local_repos(self._resource_repo_list)
@@ -788,7 +802,7 @@ class FrecklesContext(object):
         self._frecklet_index = TingTings.from_config(
             "frecklets",
             folder_index_conf,
-            FRECKLET_LOAD_CONFIG,
+            self._frecklet_load_config,
             indexes=["frecklet_name"],
         )
         return self._frecklet_index
@@ -863,7 +877,7 @@ class FrecklesContext(object):
                 index = TingTings.from_config(
                     "frecklecutable",
                     [index_conf],
-                    FRECKLET_LOAD_CONFIG,
+                    self._frecklet_load_config,
                     indexes=["frecklet_name"],
                 )
 
@@ -898,7 +912,7 @@ class FrecklesContext(object):
                 index = TingTings.from_config(
                     "frecklecutable",
                     [index_conf],
-                    FRECKLET_LOAD_CONFIG,
+                    self._frecklet_load_config,
                     indexes=["frecklet_name"],
                 )
 
