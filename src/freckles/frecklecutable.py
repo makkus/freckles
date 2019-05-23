@@ -2,6 +2,7 @@
 import copy
 import logging
 import os
+import shutil
 from collections import OrderedDict
 
 import click
@@ -711,5 +712,27 @@ class Frecklecutable(object):
             finally:
                 if parent_task_empty:
                     root_task.finish()
+
+                keep_run_folder = self.context.config_value(
+                    "keep_run_folder", "context"
+                )
+                if not keep_run_folder:
+
+                    env_dir = run_env_properties["env_dir"]
+                    env_dir_link = run_env_properties.get("env_dir_link", None)
+
+                    if env_dir_link and os.path.realpath(env_dir_link) == env_dir:
+                        log.debug("removing env dir symlink: {}".format(env_dir_link))
+                        os.unlink(env_dir_link)
+
+                    try:
+                        log.debug("removing env dir: {}".format(env_dir))
+                        shutil.rmtree(env_dir)
+                    except (Exception) as e:
+                        log.warning(
+                            "Could not remove environment folder '{}': {}".format(
+                                env_dir, e
+                            )
+                        )
 
         return runs_result

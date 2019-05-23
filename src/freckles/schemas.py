@@ -138,6 +138,14 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {"short_help": "a list of callbacks to attach to a freckles run"},
         "tags": ["safe"],
     },
+    "keep_run_folder": {
+        "type": "boolean",
+        "default": False,
+        "doc": {
+            "short_help": "whether to keep the run folder with the adapter environment after a run"
+        },
+        "tags": ["safe"],
+    },
 }
 
 
