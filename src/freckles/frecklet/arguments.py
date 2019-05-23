@@ -145,11 +145,20 @@ class CliArgumentsAttribute(TingAttribute):
         elif cerberus_type != "multi":
             raise Exception("Type '{}' not implemented yet.".format(cerberus_type))
 
-        if var.secret:
-            if "default" not in option_properties.keys():
-                if option_properties["required"]:
-                    option_properties["default"] = "::ask::"
-                    option_properties["show_default"] = True
+        # if var.secret:
+        #     if "default" not in option_properties.keys():
+        #         if option_properties["required"]:
+        #             option_properties["default"] = "::ask::"
+        #             option_properties["show_default"] = True
+
+        if option_properties.get("default", None) is not None:
+            default_val = option_properties["default"]
+            if (
+                isinstance(default_val, string_types)
+                and default_val.lstrip().startswith("::")
+                and default_val.rstrip().endswith("::")
+            ):
+                option_properties["type"] = str
 
         if param_type == "option":
             option_properties["help"] = var.doc.get_short_help()
