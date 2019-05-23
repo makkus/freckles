@@ -49,3 +49,4 @@ MANIFEST
 .venv*/
 pip-wheel-metadata/
 .python-version
+src/freckles/version.txt
