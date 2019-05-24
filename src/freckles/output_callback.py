@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-from collections import OrderedDict
 
 import colorama
+from ruamel.yaml.comments import CommentedMap
 
 from frutils import readable_yaml, dict_merge
 
@@ -29,6 +29,7 @@ class FrecklesRun(object):
         run_config,
         run_env,
         run_properties,
+        result,
     ):
 
         self.run_id = run_id
@@ -39,6 +40,8 @@ class FrecklesRun(object):
         self.run_env = run_env
 
         self.run_properties = run_properties
+
+        self.result = result
 
     def __str__(self):
 
@@ -51,9 +54,6 @@ class FrecklesRun(object):
         )
 
 
-RESULT_STRATEGIES = ["merge", "update", "append", "ordered_merge", "ordered_update"]
-
-
 class FrecklesResultCallback(object):
     """ Class to gather results of a frecklecute run.
 
@@ -61,31 +61,15 @@ class FrecklesResultCallback(object):
         add_strategy:
     """
 
-    def __init__(self, result_strategy="merge"):
+    def __init__(self):
 
-        if result_strategy not in RESULT_STRATEGIES:
-            raise Exception(
-                "result_stragegy '{}' not supported.".format(result_strategy)
-            )
+        self._result = CommentedMap()
 
-        self.result_strategy = result_strategy
-        if result_strategy == "append":
-            self.result = []
-        else:
-            if "ordered" in result_strategy:
-                self.result = OrderedDict()
-            else:
-                self.result = {}
+    def add_result(self, result_var, result):
 
-    def add_result(self, overlay_dict):
+        result_key_val = self._result.setdefault(result_var, CommentedMap())
+        dict_merge(result_key_val, result, copy_dct=False)
 
-        if "merge" in self.result_strategy:
-            dict_merge(self.result, overlay_dict, copy_dct=False)
-        elif "update" in self.result_strategy:
-            self.result.update(overlay_dict)
-        else:
-            self.result.append(overlay_dict)
-
-    def finish_up(self):
-
-        pass
+    @property
+    def result(self):
+        return self._result

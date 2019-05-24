@@ -11,7 +11,12 @@ from six import string_types
 from treelib import Tree
 
 from freckles.frecklet.vars import VarsInventory, VAR_ADAPTERS
-from frutils import replace_strings_in_obj, get_template_keys, can_passwordless_sudo
+from frutils import (
+    replace_strings_in_obj,
+    get_template_keys,
+    can_passwordless_sudo,
+    dict_merge,
+)
 from frutils.exceptions import FrklException
 from frutils.tasks.tasks import Tasks
 from ting.defaults import TingValidator
@@ -24,6 +29,7 @@ from .defaults import (
     FRECKLES_PROPERTIES_METADATA_KEY,
     FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY,
     FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
+    DEFAULT_RUN_CONFIG_JINJA_ENV,
 )
 from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
@@ -367,7 +373,9 @@ class Frecklecutable(object):
                     continue
 
             # now we replace the whole rest of the task
-            frecklet.setdefault(FRECKLES_DESC_METADATA_KEY, {}).update(parent_desc)
+            desc = frecklet.get(FRECKLES_DESC_METADATA_KEY, {})
+            desc = dict_merge(desc, parent_desc, copy_dct=False)
+            frecklet[FRECKLES_DESC_METADATA_KEY] = desc
             task = {FRECKLET_KEY_NAME: frecklet, TASK_KEY_NAME: task, VARS_KEY: vars}
 
             template_keys = get_template_keys(
@@ -442,20 +450,24 @@ class Frecklecutable(object):
         prompt = "SUDO PASS (for '{}')".format(msg)
         run_secrets["become_pass"] = ask_password(prompt)
 
-    def run(
+    def run_frecklecutable(
         self,
         inventory,
         run_config,
         run_vars=None,
         parent_task=None,
+        result_callback=None,
         elevated=None,
         env_dir=None,
     ):
 
         if parent_task is None:
             i_am_root = True
+            result_callback = FrecklesResultCallback()
         else:
             i_am_root = False
+            if result_callback is None:
+                raise Exception("No result callback. This is a bug")
 
         if run_vars is None:
             run_vars = {}
@@ -490,11 +502,8 @@ class Frecklecutable(object):
             value = inventory.retrieve_value(key)
             secret = key in secret_args or key in inventory_secrets
 
-            # if value is None:
-            #     dui = arg.default_user_input()
-            #     d = arg.default
-            #     if dui is not None and dui != d and isinstance(dui, string_types) and dui.lstrip().startswith("::") and dui.rstrip().endswith("::"):
-            #         value = dui
+            if value is None and arg.default_user_input() is not None:
+                value = arg.default_user_input()
 
             if (
                 not isinstance(value, string_types)
@@ -530,6 +539,7 @@ class Frecklecutable(object):
         asked = False
 
         run_secrets = {}
+
         if parent_task is not None:
             parent_task.pause()
 
@@ -652,129 +662,156 @@ class Frecklecutable(object):
         task_lists.append(new_tasklist)
 
         runs_result = []
+        root_task = None
+        run_env_properties = None
 
-        for run_nr, tl_details in enumerate(task_lists):
+        try:
+            for run_nr, tl_details in enumerate(task_lists):
 
-            current_adapter = tl_details["adapter"]
-            current_tasklist = tl_details["tasklist"]
-            run_elevated = tl_details["elevated"]
+                current_adapter = tl_details["adapter"]
+                current_tasklist = tl_details["tasklist"]
+                run_elevated = tl_details["elevated"]
 
-            adapter = self.context._adapters[current_adapter]
-            run_env_properties = self.context.create_run_environment(
-                adapter, env_dir=env_dir
-            )
+                if not current_tasklist:
+                    continue
 
-            # preparing execution environment...
-            self._context._run_info.get("prepared_execution_environments", {}).get(
-                current_adapter, None
-            )
-
-            parent_task_empty = False
-            if parent_task is None:
-                parent_task_empty = True
-                root_task = Tasks(
-                    "env_prepare_adapter_{}".format(adapter_name),
-                    msg="starting run",
-                    category="run",
-                    callbacks=self._callbacks,
-                    is_utility_task=False,
-                )
-                parent_task = root_task.start()
-
-            prepare_root_task = parent_task.add_subtask(
-                task_name="env_prepare_adapter_{}".format(adapter_name),
-                msg="preparing adapter: {}".format(adapter_name),
-            )
-
-            try:
-                adapter.prepare_execution_requirements(
-                    run_config=run_config,
-                    task_list=current_tasklist,
-                    parent_task=prepare_root_task,
-                )
-                prepare_root_task.finish(success=True)
-
-            except (Exception) as e:
-                prepare_root_task.finish(success=False, error_msg=str(e))
-                raise e
-
-            result_callback = FrecklesResultCallback()
-
-            host = run_config["host"]
-
-            if adapter_name == "freckles":
-                msg = "running frecklecutable: {}".format(frecklet_name)
-            else:
-                msg = "running frecklet: {} (on: {})".format(frecklet_name, host)
-            root_run_task = parent_task.add_subtask(task_name=frecklet_name, msg=msg)
-
-            run_config["elevated"] = run_elevated
-
-            try:
-                run_properties = adapter._run(
-                    tasklist=current_tasklist,
-                    run_vars=run_vars,
-                    run_config=run_config,
-                    run_secrets=run_secrets,
-                    run_env=run_env_properties,
-                    result_callback=result_callback,
-                    parent_task=root_run_task,
+                adapter = self.context._adapters[current_adapter]
+                run_env_properties = self.context.create_run_environment(
+                    adapter, env_dir=env_dir
                 )
 
-                if not root_run_task.finished:
-                    root_run_task.finish()
-
-                run_result = FrecklesRun(
-                    run_id=run_nr,
-                    adapter_name=adapter_name,
-                    task_list=current_tasklist,
-                    run_vars=run_vars,
-                    run_config=run_config,
-                    run_env=run_env_properties,
-                    run_properties=run_properties,
+                # preparing execution environment...
+                self._context._run_info.get("prepared_execution_environments", {}).get(
+                    current_adapter, None
                 )
-                runs_result.append(run_result)
 
-            except (Exception) as e:
+                if parent_task is None:
+                    root_task = Tasks(
+                        "env_prepare_adapter_{}".format(adapter_name),
+                        msg="starting run",
+                        category="run",
+                        callbacks=self._callbacks,
+                        is_utility_task=False,
+                    )
+                    parent_task = root_task.start()
 
-                if isinstance(e, FrklException):
-                    msg = e.message
+                prepare_root_task = parent_task.add_subtask(
+                    task_name="env_prepare_adapter_{}".format(adapter_name),
+                    msg="preparing adapter: {}".format(adapter_name),
+                )
+
+                try:
+                    adapter.prepare_execution_requirements(
+                        run_config=run_config,
+                        task_list=current_tasklist,
+                        parent_task=prepare_root_task,
+                    )
+                    prepare_root_task.finish(success=True)
+
+                except (Exception) as e:
+                    prepare_root_task.finish(success=False, error_msg=str(e))
+                    raise e
+
+                host = run_config["host"]
+
+                if adapter_name == "freckles":
+                    msg = "running frecklecutable: {}".format(frecklet_name)
                 else:
-                    msg = str(e)
-
-                if not root_run_task.finished:
-                    root_run_task.finish(success=False, error_msg=msg)
-                # click.echo("frecklecutable run failed: {}".format(e))
-                log.debug(e, exc_info=1)
-                break
-                # import traceback
-                #
-                # traceback.print_exc()
-            finally:
-                if parent_task_empty:
-                    root_task.finish()
-
-                keep_run_folder = self.context.config_value(
-                    "keep_run_folder", "context"
+                    msg = "running frecklet: {} (on: {})".format(frecklet_name, host)
+                root_run_task = parent_task.add_subtask(
+                    task_name=frecklet_name, msg=msg
                 )
 
-                if i_am_root and not keep_run_folder:
+                run_config["elevated"] = run_elevated
 
-                    env_dir = run_env_properties["env_dir"]
-                    env_dir_link = run_env_properties.get("env_dir_link", None)
+                run_vars = dict_merge(result_callback.result, run_vars, copy_dct=True)
 
-                    if env_dir_link and os.path.realpath(env_dir_link) == env_dir:
-                        log.debug("removing env dir symlink: {}".format(env_dir_link))
-                        os.unlink(env_dir_link)
+                if not i_am_root:
+                    r_tks = get_template_keys(
+                        run_config, jinja_env=DEFAULT_RUN_CONFIG_JINJA_ENV
+                    )
+                    if r_tks:
+                        for k in r_tks:
+                            if k not in result_callback.result.keys():
+                                raise Exception(
+                                    "Could not find result key for subsequent run: {}".format(
+                                        k
+                                    )
+                                )
 
-                    try:
-                        log.debug("removing env dir: {}".format(env_dir))
-                        shutil.rmtree(env_dir)
-                    except (Exception) as e:
-                        log.warning(
-                            "Could not remove environment folder '{}': {}".format(
-                                env_dir, e
-                            )
+                        run_config = replace_strings_in_obj(
+                            run_config,
+                            replacement_dict=result_callback.result,
+                            jinja_env=DEFAULT_RUN_CONFIG_JINJA_ENV,
                         )
+
+                try:
+                    run_properties = adapter._run(
+                        tasklist=current_tasklist,
+                        run_vars=run_vars,
+                        run_config=run_config,
+                        run_secrets=run_secrets,
+                        run_env=run_env_properties,
+                        result_callback=result_callback,
+                        parent_task=root_run_task,
+                    )
+
+                    if not root_run_task.finished:
+                        root_run_task.finish()
+
+                    run_result = FrecklesRun(
+                        run_id=run_nr,
+                        adapter_name=adapter_name,
+                        task_list=current_tasklist,
+                        run_vars=run_vars,
+                        run_config=run_config,
+                        run_env=run_env_properties,
+                        run_properties=run_properties,
+                        result=copy.deepcopy(result_callback.result),
+                    )
+                    runs_result.append(run_result)
+
+                except (Exception) as e:
+
+                    if isinstance(e, FrklException):
+                        msg = e.message
+                    else:
+                        msg = str(e)
+
+                    if not root_run_task.finished:
+                        root_run_task.finish(success=False, error_msg=msg)
+                    # click.echo("frecklecutable run failed: {}".format(e))
+                    log.debug(e, exc_info=1)
+                    break
+                    # import traceback
+                    #
+                    # traceback.print_exc()
+        finally:
+            if root_task is None:
+                return runs_result
+
+            if i_am_root:
+                root_task.finish()
+
+            keep_run_folder = self.context.config_value("keep_run_folder", "context")
+
+            if i_am_root and not keep_run_folder:
+
+                env_dir = run_env_properties["env_dir"]
+                env_dir_link = run_env_properties.get("env_dir_link", None)
+
+                if env_dir_link and os.path.realpath(env_dir_link) == env_dir:
+                    log.debug("removing env dir symlink: {}".format(env_dir_link))
+                    os.unlink(env_dir_link)
+
+                try:
+                    log.debug("removing env dir: {}".format(env_dir))
+                    shutil.rmtree(env_dir)
+                except (Exception) as e:
+                    log.warning(
+                        "Could not remove environment folder '{}': {}".format(
+                            env_dir, e
+                        )
+                    )
 
         return runs_result

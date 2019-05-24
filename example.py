@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import json, subprocess  # noqa: E401
+import json  # noqa: E401
+import subprocess
 
 hosts = ["dev.cutecode.co"]
 tasks = []

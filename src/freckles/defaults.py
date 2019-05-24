@@ -94,3 +94,5 @@ PASSWORD_ASK_MARKER = "ask"
 DEFAULT_FRECKLES_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["freckles"])
 for filter_name, filter_details in jinja2_filters.ALL_FRUTIL_FILTERS.items():
     DEFAULT_FRECKLES_JINJA_ENV.filters[filter_name] = filter_details["func"]
+
+DEFAULT_RUN_CONFIG_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["default"])

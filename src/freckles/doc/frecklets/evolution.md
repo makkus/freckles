@@ -389,7 +389,8 @@ frecklets:
   - frecklet:
       name: user
       type: ansible-module
-      msg: "ensure user '{{:: name ::}}' exists"
+      desc:
+        short: "ensure user '{{:: name ::}}' exists"
     task:
       become: true
     vars:
@@ -411,7 +412,7 @@ The 'vars' value works like in any of the other examples we've looked at so far,
 
 The important key in this part of the configuration is ``type``. This lets *freckles* know which one of the available [freckles adapters](/doc/adapters) to use to process this item. Every adapter registers with *freckles* with a list of supported types. In this case (``ansible-module``) the [nsbl](/doc/adapters/nsbl) one will be used.
 
-There are other keys you can put into ``frecklet``, the most important one being ``skip``, which lets you skip a task in certain situations. Here we are also showing ``msg``, which is the message the user sees when this task is executed.  
+There are other keys you can put into ``frecklet``, the most important one being ``skip``, which lets you skip a task in certain situations. Here we are also showing ``desc``, which contains the message the user sees when this task is executed.  
 
 #### The ``task`` (sub)-key
 

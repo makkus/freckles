@@ -347,6 +347,7 @@ class FrecklesContext(object):
 
             callback_config = temp
 
+        self.print_result = False
         if not isinstance(callback_config, Sequence):
             callback_config = [callback_config]
             # raise Exception(
@@ -355,23 +356,28 @@ class FrecklesContext(object):
             #     )
             # )
 
-        for cc in callback_config:
-            if isinstance(cc, string_types):
-                c = load_callback(cc)
-            elif isinstance(cc, Mapping):
-                if len(cc) != 1:
-                    raise Exception(
-                        "Invalid callback configuration, only one key allowed: {}".format(
-                            cc
-                        )
-                    )
-                c_name = list(cc.keys())[0]
-                c_config = cc[c_name]
-                c = load_callback(c_name, callback_config=c_config)
-            else:
-                raise Exception("Invalid callback config: {}".format(cc))
+        if callback_config == ["result"]:
+            self._callbacks.append(load_callback("silent"))
+            self.print_result = True
+        else:
 
-            self._callbacks.append(c)
+            for cc in callback_config:
+                if isinstance(cc, string_types):
+                    c = load_callback(cc)
+                elif isinstance(cc, Mapping):
+                    if len(cc) != 1:
+                        raise Exception(
+                            "Invalid callback configuration, only one key allowed: {}".format(
+                                cc
+                            )
+                        )
+                    c_name = list(cc.keys())[0]
+                    c_config = cc[c_name]
+                    c = load_callback(c_name, callback_config=c_config)
+                else:
+                    raise Exception("Invalid callback config: {}".format(cc))
+
+                self._callbacks.append(c)
 
         self._adapters = {}
         self._adapter_tasktype_map = {}

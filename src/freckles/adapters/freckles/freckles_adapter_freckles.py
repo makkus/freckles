@@ -198,13 +198,14 @@ frecklets:
             run_env_task = copy.deepcopy(run_env)
             env_dir = os.path.join(run_env_task["env_dir"], "task_{}".format(task_nr))
 
-            result = fx.run(
+            result = fx.run_frecklecutable(
                 inventory=VarsInventory(vars),
                 run_config=task_run_config,
                 run_vars=run_vars,
                 parent_task=parent_task,
                 elevated=elevated,
                 env_dir=env_dir,
+                result_callback=result_callback,
             )
 
             result_list.append(result)
