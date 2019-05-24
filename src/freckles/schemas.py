@@ -50,7 +50,7 @@ FRECKLES_CONTEXT_SCHEMA = {
     },
     "repos": {
         "empty": False,
-        "default": ["default", "user"],
+        "default": ["default", "user", "./.freckles"],
         "type": "list",
         "schema": {"type": "string"},
         "doc": {
@@ -76,11 +76,11 @@ There are 3 special repository aliases that can be used instead of a path:
     "allow_remote": {
         "type": "boolean",
         "default": False,
-        "doc": "Allow all remote repositories (except ones that match an item in 'allow_remote_blacklist').",
+        "doc": "Allow all remote repositories.",
     },
     "allow_remote_whitelist": {
         "type": "list",
-        "default": [],
+        "default": ["https://gitlab.com/frecklets/*"],
         "doc": "List of urls (or url regexes) of allowed remote repositories.",
     },
     "ignore_empty_repos": {

@@ -124,16 +124,19 @@ class AskVarAdapter(VarAdapter):
                 references=references,
             )
 
-        short_help = arg.doc.get_short_help(list_item_format=True, use_help=True)
+        short_help = arg.doc.get_short_help(
+            list_item_format=True, use_help=True, default=""
+        )
+        if not short_help:
+            ending = "'"
+        else:
+            ending = "': " + Style.DIM + short_help + Style.RESET_ALL
         click.echo(
             "Input needed for value '"
             + Style.BRIGHT
             + key_name
             + Style.RESET_ALL
-            + "': "
-            + Style.DIM
-            + short_help
-            + Style.RESET_ALL
+            + ending
         )
 
         arg_default = arg.default

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import fnmatch
 import io
 import os
 import shutil
@@ -595,7 +596,7 @@ class FrecklesContext(object):
 
         if not repo["remote"]:
 
-            if not os.path.exists(repo["path"]):
+            if not os.path.exists(repo["path"]) and repo["path"] != "./.freckles":
 
                 if self.config_value("ignore_empty_repos"):
                     log.warning(
@@ -613,20 +614,33 @@ class FrecklesContext(object):
             return None
 
         # remote repo
-        if not self.config_value("allow_remote"):
+        if self.config_value("allow_remote"):
+            return repo
 
-            if repo.get("alias", None) != "community":
-                url = repo.get("url", None)
-                if url is None:
-                    url = str(repo)
-                raise FrecklesPermissionException(
-                    msg="Use of repo '{}' is not allowed.".format(url),
-                    reason="Repo not in 'allow_remote_whitelist' or 'allow_remote' not set to 'true'.",
-                    key="repos",
-                    solution="Add the repo to the 'allow_remote_whiltelist', or set configuration option 'allow_remote' to 'true'.",
-                )
+        if repo.get("alias", None) == "community":
+            return repo
 
-        return repo
+        url = repo.get("url", None)
+        if url is not None:
+
+            whitelist = self.config_value("allow_remote_whitelist")
+            matches = False
+            for entry in whitelist:
+                if fnmatch.fnmatch(url, entry):
+                    matches = True
+                    break
+
+            if matches:
+                return repo
+
+        if url is None:
+            url = str(repo)
+        raise FrecklesPermissionException(
+            msg="Use of repo '{}' is not allowed.".format(url),
+            reason="Repo not in 'allow_remote_whitelist' or 'allow_remote' not set to 'true'.",
+            key="repos",
+            solution="Add the repo to the 'allow_remote_whiltelist', or set configuration option 'allow_remote' to 'true'.",
+        )
 
     def augment_repos(self, repo_list):
 
