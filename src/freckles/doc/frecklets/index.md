@@ -4,7 +4,7 @@ title: frecklets
 ---
 
 *frecklets* are building blocks for the *freckles* framework. Each *frecklet* is
-designed to achieve one, fairly narrowly defined, purpose. This can be a small, atomic operation like 'create a directory', or something quite involved, like: 'setup a Wordpress server'.  
+designed to achieve one, fairly narrowly defined, purpose. This can be a small, atomic operation like 'create a directory', or something quite involved, like: 'setup a standalone Wordpress server'.  
 
 At their core, *frecklets* are either list- or dictionary-type data structures, with a sort of ['loose' schema](/doc/frecklets/evolution/#the-elastic-non-schema).
 

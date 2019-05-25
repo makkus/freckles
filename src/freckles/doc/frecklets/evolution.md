@@ -296,7 +296,7 @@ Every variable we want to ask the user needs to be present as key under the ``ar
 
 **Note**:
 
-Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.palletsprojects.com) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries (details [here](https://TODO)), so please peruse their respective documentation for details if necessary.
+Internally, *freckles* uses the [Cerberus](https://docs.python-cerberus.org) and [Click](https://click.palletsprojects.com) Python libraries to validate the arguments, as well as create the command-line interface for ``frecklecute``. The configuration under the ``args`` key is forwarded more or less unchanged to those libraries, so please peruse their respective documentation for details if necessary (for now, at least).
 
 ---  
 

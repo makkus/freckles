@@ -13,7 +13,7 @@ curl https://freckles.sh | bash
 source ~/.profile
 ```
 
-For details what exactly the bootstrap script does, and for other options to get *freckles* onto your machine, please check out the [Downloads page](/downloads) and the [install documentation](/doc/installation).
+For details what exactly the bootstrap script does, and for other options to get *freckles* onto your machine, please check out the [Downloads page](/download) and the [install documentation](/doc/installation).
 
 </div>
 
@@ -21,7 +21,7 @@ For details what exactly the bootstrap script does, and for other options to get
 ## Getting help {: .section-title}
 <div class="section-block" markdown="1">
 
-*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a Wordpress instance'). You will be dealing mostly with the former, at least initially.
+*freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a backend-specific low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a standalone Wordpress instance'). You will be dealing mostly with the latter, at least initially.
 
 The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
 
@@ -494,7 +494,7 @@ Once saved, we can execute this file with the ``frecklecute`` command:
  'root' or 'sudo' permissions, though.
 
  On a side-note: whether all of those implicit tasks are done automatically or not depends entirely on how the 'child'
- *frecklets* in a [freckles context](https:/TODO) are implemented. The *freckles* default context is written with an eye
+ *frecklets* in a [freckles context](/doc/configuration/contexts) are implemented. The *freckles* default context is written with an eye
  on [immutable infrastructure](https://www.digitalocean.com/community/tutorials/what-is-immutable-infrastructure), in a way so *frecklets*
  require as little information and manual specification as possible from the user, and they will just do the sensible thing.
  You could write your own *context* though, with *frecklets* that needs all of those steps specified explicitly.
