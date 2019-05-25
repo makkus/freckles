@@ -30,7 +30,7 @@ Once this is done, the user can use custom configuration options via the command
 <div class="section-block" markdown="1">
 
 
-The ``freckles`` command-line application comes with a ``context`` subcommand:
+The ``freckles`` command-line application comes with a ``context`` sub-command:
 
 ```console
 freckles context --help
@@ -224,7 +224,7 @@ freckles -c latest -c dev -c callback=result context show
 ...
 ```
 
-More interesting output -- but also way more verbose -- is produced by using the '--show-interpreters' flag. This incorporates the same information as the ``freckles context doc`` command, but also shows the current (somtimes post-processed) value for every *freckles* sub-system:
+More interesting output -- but also way more verbose -- is produced by using the '--show-interpreters' flag. This incorporates the same information as the ``freckles context doc`` command, but also shows the current (sometimes post-processed) value for every *freckles* sub-system:
 
 <div class="code-max-height" markdown="1">
 

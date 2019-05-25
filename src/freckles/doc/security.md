@@ -14,7 +14,7 @@ other sources for anything that is not covered here. Probably good idea to do th
 ### *freckles* installation {: .block-title}
 <div class="section-block" markdown="1">
 
-Quite deliberatly, *freckles* will never require any sudo/root permissions when installed or run by itself. It will only ask you for a sudo password
+Quite deliberately, *freckles* will never require any sudo/root permissions when installed or run by itself. It will only ask you for a sudo password
 when you tell it to run tasks that require them.
 
 The *freckles* application is a single binary, and thus can be downloaded and placed anywhere on the filesystem. It is usually a good idea
@@ -26,8 +26,8 @@ You can either download it manually, or use the [freck](https://gitlab.com/freck
 #### The bootstrap script
 <div class="section-block" markdown="1">
 
-'Curly boostrap scripts' like the *freckles* one are sometimes frowned up as being inherently less secure than any alternatives. I don't think
-thats actually true in a lot of cases, but if you don't want to take any chances, just do everything manually and don't think about it.
+'Curly bootstrap scripts' like the *freckles* one are sometimes frowned up as being inherently less secure than any alternatives. I don't think
+that is actually true in a lot of cases, but if you don't want to take any chances, just do everything manually and don't think about it.
 
 In my mind, if you trust somebody enough to run their application, you might as well trust their bootstrap script, and that they wrote it, and set it up
 using the same common sense they use when writing their application. There are edge cases, and its up to you to decide whether you are ok with them.
@@ -35,9 +35,9 @@ using the same common sense they use when writing their application. There are e
 In the case of *freckles*, the one advantage manually downloading the binary to using the bootstrap script I can see is that the bootstrap script
 could have been modified by a 3rd party. But, if that 3rd party has access to the bootstrap script, they would have also have had access to the binary, so there is really not much gained here.
 
-The script itself offers some neat features, first and foremost it lets you execute *freckles* straight away, in the same command you download it, and also, if you want, it can delete *freckles* and any intermedite files there were created during a run after it finished. This is really convenient for one-of install runs on vanilla servers that don't need to be touched again after, or when building Docker images.
+The script itself offers some neat features, first and foremost it lets you execute *freckles* straight away, in the same command you download it, and also, if you want, it can delete *freckles* and any intermediate files there were created during a run after it finished. This is really convenient for one-of install runs on vanilla servers that don't need to be touched again after, or when building Docker images.
 
-If you use that a lot, I'd recommend you host the script yourself though, and maybe also the *freckles* binary. It is not finished yet, but I'm working on a *frecklet* that can setup a webserver to host *freckles* and a customizable bootstrap script, that is tailored to your environment and requirements. Stay tuned, and ping me if that interests you.
+If you use that a lot, I'd recommend you host the script yourself though, and maybe also the *freckles* binary. It is not finished yet, but I'm working on a *frecklet* that can setup a web-server to host *freckles* and a customizable bootstrap script, that is tailored to your environment and requirements. Stay tuned, and ping me if that interests you.
 
 </div>
 
@@ -62,7 +62,7 @@ To somewhat mitigate users executing harmful *frecklets*, *freckles* comes with 
 
 #### Remote repo permission config
 
-Related to that, by default *freckles* does not allow any outside *frecklets* to be run, it does not even allow you to change the configuration to allow them, unless you [unlock the configuration](/configuration/contexts). After that, you can add repositories to the 'allow_remote_whitelist', or set the 'allow_remote' configuration value to 'true'. Again, this is your own descicion, and you should make an informed one.
+Related to that, by default *freckles* does not allow any outside *frecklets* to be run, it does not even allow you to change the configuration to allow them, unless you [unlock the configuration](/configuration/contexts). After that, you can add repositories to the 'allow_remote_whitelist', or set the 'allow_remote' configuration value to 'true'. Again, this is your own decision, and you should make an informed one.
 
 #### Entering passwords
 
@@ -81,7 +81,7 @@ frecklecute user-exists --password password123 markus
 
 Even though *freckles* will internally handle this value in a secure manner, this command will show up in your shell history file (including the password string), so you should prefer to never do that. One option you have is to use the ``freckles`` or ``frecklecute`` ``-v vars_file`` argument, point it to a file that is only readable by you (``chmod 0700 vars_file``), and include your password there. This is by no means ideal, as your password is still available in plain text in that file, but it's better than the first option.
 
-The best way, at the moment, is to let the ``freckles`` application prompt you for the pasword. *freckles* has a feature called 'vars adapters' (which, in the future will be used to connect to password manages and the like, among other things). They can be activated by specifying the name (between two sets of '::'s) of the adapter as the argument value. The var adapter we use here is called 'ask'. So, in our example from before, we'd do:
+The best way, at the moment, is to let the ``freckles`` application prompt you for the password. *freckles* has a feature called 'vars adapters' (which, in the future will be used to connect to password manages and the like, among other things). They can be activated by specifying the name (between two sets of '::'s) of the adapter as the argument value. The var adapter we use here is called 'ask'. So, in our example from before, we'd do:
 
   ```console
 frecklecute user-exists --password ::ask:: markus
@@ -98,7 +98,7 @@ As I said, there are plains to improve on all this, but nothing is implemented y
 
 This is a topic you can do nothing about, but I think you should know how *freckles* internally handles passwords. Most importantly, to be able to make an informed decision on whether you want to trust *freckles* with your passwords at all.
 
-This behavious is highly [adapter](/doc/adapters) dependent. As  the [nsbl adapter](/doc/adapters/nsbl) is the only functional one at the moment, I'll just describe that on here:
+This behaviour is highly [adapter](/doc/adapters) dependent. As  the [nsbl adapter](/doc/adapters/nsbl) is the only functional one at the moment, I'll just describe that on here:
 
 - you enter the password in one of the ways described above
 - *freckles* keeps it in memory, and eventually hands it off to the adapter that runs the *frecklet* in question
@@ -112,7 +112,7 @@ This is not 100% ideal, but the best I could come up with for now. It means that
 I do think it's an acceptable situation, but I would say that, wouldn't I? :-)
 
 
-Last, but not least, *freckles* is written in Python, which does not allow to overwrite strings in memory to 'destroy' passwords once they are no longer meeded (as far as I know -- do let me know if I'm wrong!!!). So this is a limitation we'll all have to live with, unfortunately.
+Last, but not least, *freckles* is written in Python, which does not allow to overwrite strings in memory to 'destroy' passwords once they are no longer needed (as far as I know -- do let me know if I'm wrong!!!). So this is a limitation we'll all have to live with, unfortunately.
 
 </div>
 

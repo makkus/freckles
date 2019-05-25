@@ -52,7 +52,7 @@ Using `wget`:
 wget -O - https://freckles.sh | bash
 ```
 
-This will download the approriate binary into ``$HOME/.local/share/freckles/bin``. You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
+This will download the appropriate binary into ``$HOME/.local/share/freckles/bin``. You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
 
 ### What does this do?
 

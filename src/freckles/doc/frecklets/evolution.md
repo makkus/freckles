@@ -97,7 +97,7 @@ that is allowed to user 'docker', we could write (after checking the [``docker-s
 
 ```
 
-Note: if we didn't need the custom ``uid`` for our user, the ``docker-service`` user would have created the user automatically, and ``user-exists`` would not have been necessary.
+Note: if we did not need the custom ``uid`` for our user, the ``docker-service`` user would have created the user automatically, and ``user-exists`` would not have been necessary.
 
 
 #### Single-and double-key dictionaries
