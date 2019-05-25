@@ -13,6 +13,9 @@ adapter
 :    *freckles* can execute tasks using different backends (shell, Ansible, etc.). An adapter implements an interface
      to that backend *freckles* can query and use.
 
+freck
+:    The *freckles* bootstrap script, used to install *freckles*, has a few nice extra features.
+
 frecklecute
 :    One of the command-line application that ship with *freckles*. Takes a *frecklecutable* and executes it. Can auto-generate command-line arguments and help-text.
 
@@ -25,3 +28,9 @@ frecklet
 frecklecutable
 :    Technically also a *frecklet*, but used to refer to high-level *frecklets* that most likely will only be called directly
      by a user or script, not other frecklets. Basically a *frecklet* that has reached drinking-age.
+
+tempting
+:    A Python [library](https://gitlab.com/frkl/tempting) that does fancy staff with jinja templates. It is used by *freckles* to dynamically create *frecklets* out of template files. Needs documentation.
+
+variable adapter
+:    plugins that can fetch values for variables, are specified lie: ``::<adapter_name>::``. Most important one is the ``::ask::`` one, which can be used to let freckles prompt you for the value on the command-line
