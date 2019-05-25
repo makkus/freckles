@@ -3,8 +3,6 @@ title: Installation
 url_path_prio: 4
 ---
 
-DOCUMENTATION STILL TO BE DONE
-
 There are several options for installing *freckles*. The two easiest ones are:
 
 ## Binary file download {: .section-title}
@@ -65,6 +63,21 @@ Check out the [``freck`` README file](https://gitlab.com/freckles-io/freck#how-d
 ## Python virtualenv / manual {: .section-title}
 <div class="section-block" markdown="1">
 
-TODO
+There will be more details on this later, for now, just quickly:
+
+```console
+# for python >= 3.4
+python -m venv ~/.virtualenvs/freckles
+source . ~/.virtualenvs/freckles/bin/activate
+pip install freckles-cli
+
+freckles --help
+```
+
+## Via a *frecklet*
+
+```
+freckles --time-jump-forward 60s --no-recurse freckles-installed
+```
 
 </div>
