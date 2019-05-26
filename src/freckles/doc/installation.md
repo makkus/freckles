@@ -18,14 +18,14 @@ The most straightforward way of installing *freckles* is to download the executa
 
 After download, place the executable somewhere in your path (I usually use ``$HOME/.local/bin`` -- but you might have to add that to your ``$PATH`` environment variable) and make it executable:
 
-```console
+```
 mv ~/Downloads/freckles ~/.local/bin
 chmod +x ~/.local/bin/freckles
 ```
 
  If you intend to also use the ``frecklecute`` application (and you probably want to), also link the file to that name (as the binary contains both the ``freckles`` and ``frecklecute`` applications):
 
-```console
+```
 ln -s freckles ~/.local/bin/frecklecute
 ```
 
@@ -52,7 +52,9 @@ Using `wget`:
 wget -O - https://freckles.sh | bash
 ```
 
-This will download the appropriate binary into ``$HOME/.local/share/freckles/bin``. You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck)
+This will download the appropriate binary into ``$HOME/.local/share/freckles/bin``. You can configure the install process with environment variables, more details can be found in the [freck documentation](https://gitlab.com/freckles-io/freck).
+
+If you have security concerns using this, please visit the [security section](/doc/security#the-bootstrap-script).
 
 ### What does this do?
 
@@ -74,7 +76,10 @@ pip install freckles-cli
 freckles --help
 ```
 
+</div>
+
 ## Via a *frecklet*
+<div class="section-block" markdown="1">
 
 ```
 freckles --time-jump-forward 60s --no-recurse freckles-installed

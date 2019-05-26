@@ -55,7 +55,7 @@ Options:
   -c, --context TEXT    select context/config profile(s)
   --no-run              create the run environment (if applicable), but don't
                         run the frecklet
-  --ask-sudo-pass       ask for the sudo password
+  --ask-become-pass       ask for the sudo password
   --ask-ssh-pass        ask for the connection password
   -e, --elevated        indicate that this run needs elevated permissions
   -ne, --not-elevated   indicate that this run doesn't need elevated
