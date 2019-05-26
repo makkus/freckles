@@ -8,7 +8,7 @@ Security is an important topic, even more so when sudo/root permissions are invo
 
 I don't think I'll be able to do the topic justice here, there are just too many variables and scenarios to take into account. I'll try my best though. So, on this page I'll list all the security-relevant patterns and strategies that *freckles* uses, and, if possible, point out options you have, and their implications.
 
-If you encounter any seucrity-related questions or issues that are not mentioned here, please visit the [Security](https://friends.of.freckles.io/c/security) category on the [friends of freckles](https://friends.of.freckles.io) forum, and create a topic.
+If you encounter any security-related questions or issues that are not mentioned here, please visit the [Security](https://friends.of.freckles.io/c/security) category on the [friends of freckles](https://friends.of.freckles.io) forum, and create a topic.
 
 Make sure you use *freckles* carefully, it is a powerful tool, and those usually come with a 'shoot-yourself-in-the-foot'-button. Make sure you know where that is, and try to stay away from that general area...
 
@@ -34,9 +34,9 @@ sudo freckles ...
 - if local:
     - check the username in the 'target' variable
         - if the user in the target variable is the same as the one running *freckles*
-            - check if the current user can do 'passwordless sudo'
+            - check if the current user can do 'password-less sudo'
                 - if it can, do no further check and use that to get elevated privileges whenever necessary
-            - if it can't do passwordless sudo, ask for the users password and use that down the line (if the user does not have sudo permissions at all, the run will fail eventually)
+            - if it can't do password-less sudo, ask for the users password and use that down the line (if the user does not have sudo permissions at all, the run will fail eventually)
         - if the user in the target var is different than the one running *freckles*
             - use/change 'ssh' as connection type instead of 'local'
             - assume the login user will have password-less sudo access (or is 'root', in which case the question is moot)
@@ -111,7 +111,7 @@ After that, you can add repositories to the 'allow_remote_whitelist', or set the
 <div class="section-block" markdown="1">
 
 Some *frecklets* need passwords as user input. This is a difficult thing to do securely. *freckles* still misses a few features that will make handling
-passwords better, easier, and more secure. In the future there will be integration to password stores (e.g. Hashicorp Vault, Bitlocker, the OS keychain, ...). For now, there are only a few (more basic) options, so it's a good idea you know about them, and can pick the best one for your scenario.
+passwords better, easier, and more secure. In the future there will be integration to password stores (e.g. Hashicorp Vault, Bitwarden, the OS keychain, ...). For now, there are only a few (more basic) options, so it's a good idea you know about them, and can pick the best one for your scenario.
 
 When writing a *frecklet*, you can mark arguments ``secret``, which will tell *freckles* to handle them differently to 'normal' ones. It looks like this:
 
