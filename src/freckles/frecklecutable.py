@@ -374,7 +374,16 @@ class Frecklecutable(object):
 
             # now we replace the whole rest of the task
             desc = frecklet.get(FRECKLES_DESC_METADATA_KEY, {})
-            desc = dict_merge(desc, parent_desc, copy_dct=False)
+
+            if parent_desc:
+                spd = parent_desc.get("short", None)
+                if spd:
+                    desc["short"] = spd
+
+                lpd = parent_desc.get("long", None)
+                if lpd:
+                    desc["long"] = lpd
+
             frecklet[FRECKLES_DESC_METADATA_KEY] = desc
             task = {FRECKLET_KEY_NAME: frecklet, TASK_KEY_NAME: task, VARS_KEY: vars}
 
