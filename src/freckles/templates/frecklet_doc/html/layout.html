@@ -27,7 +27,7 @@
     <div class="section-block">
         <ul>
             {% for d, l in further_reading.items() %}
-            <li><a href="{{ l }}">{{ d | from_markdown }}</a></li>
+            <li><a href="{{ l }}">{{ d }}</a></li>
             {% endfor %}
         </ul>
     </div>
