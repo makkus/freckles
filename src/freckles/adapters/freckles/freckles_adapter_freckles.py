@@ -91,9 +91,9 @@ args:
       param_decls:
         - "--target"
         - "-t"
-  ssh_pass:
+  login_pass:
     doc:
-      short_help: "The ssh password to connect to the password."
+      short_help: "The login/ssh password of the user when connecting to the target."
     type: string
     secret: true
     required: false
@@ -118,7 +118,7 @@ frecklets:
      frecklet: "{{:: frecklet ::}}"
      target: "{{:: target ::}}"
      become_pass: "{{:: become_pass ::}}"
-     ssh_pass: "{{:: ssh_pass ::}}"
+     login_pass: "{{:: login_pass ::}}"
      elevated: "{{:: elevated ::}}"
      vars: "{{:: vars ::}}"
 """
@@ -186,7 +186,7 @@ frecklets:
             target = vars_dict.get("target", "localhost")
 
             run_target = FrecklesRunTarget(context=self.context, target_string=target)
-            run_target.ssh_pass = vars_dict.get("ssh_pass", None)
+            run_target.login_pass = vars_dict.get("login_pass", None)
             run_target.become_pass = vars_dict.get("become_pass", None)
 
             task_run_config = dict_merge(run_config, run_target.config, copy_dct=True)

@@ -496,7 +496,7 @@ class Frecklecutable(object):
         if parent_task is not None and (
             secret_args
             or run_config.get("become_pass", None)
-            or run_config.get("ssh_pass", None)
+            or run_config.get("login_pass", None)
         ):
             parent_task.pause()
             paused = True
@@ -565,16 +565,16 @@ class Frecklecutable(object):
             run_secrets["become_pass"] = ask_password(prompt)
             asked = True
 
-        run_secrets["ssh_pass"] = run_config.pop("ssh_pass", None)
-        if run_secrets["ssh_pass"] == "::ask::":
+        run_secrets["login_pass"] = run_config.pop("login_pass", None)
+        if run_secrets["login_pass"] == "::ask::":
             msg = ""
             if run_config.get("user", None):
                 msg = "{}@".format(run_config["user"])
             msg = msg + run_config.get("host", "localhost")
 
-            prompt = "SSH PASS (for '{}')".format(msg)
+            prompt = "LOGIN/SSH PASS (for '{}')".format(msg)
 
-            run_secrets["ssh_pass"] = ask_password(prompt)
+            run_secrets["login_pass"] = ask_password(prompt)
             asked = True
 
         if paused:

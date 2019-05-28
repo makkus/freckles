@@ -251,7 +251,7 @@ class FrecklesRunTarget(object):
         self._connection_type = None
         self._ssh_key = None
         self._become_pass = None
-        self._ssh_pass = None
+        self._login_pass = None
 
     def _init_config(self):
 
@@ -276,7 +276,7 @@ class FrecklesRunTarget(object):
         self._connection_type = self._config.get("connection_type", None)
         self._ssh_key = self._config.get("ssh_key", None)
         self._become_pass = self._config.get("become_pass", None)
-        self._ssh_pass = self._config.get("ssh_pass", None)
+        self._login_pass = self._config.get("login_pass", None)
 
     @property
     def connection_type(self):
@@ -312,21 +312,21 @@ class FrecklesRunTarget(object):
         self._config["become_pass"] = become_pass
 
     @property
-    def ssh_pass(self):
+    def login_pass(self):
 
         if self._target_dict_base is None:
             self._init_config()
 
-        return self._ssh_pass
+        return self._login_pass
 
-    @ssh_pass.setter
-    def ssh_pass(self, ssh_pass):
+    @login_pass.setter
+    def login_pass(self, login_pass):
 
         if self._target_dict_base is None:
             self._init_config()
 
-        self._ssh_pass = ssh_pass
-        self._config["ssh_pass"] = ssh_pass
+        self._login_pass = login_pass
+        self._config["login_pass"] = login_pass
 
     @property
     def protocol(self):
@@ -380,7 +380,7 @@ class FrecklesRunTarget(object):
             result["ssh_key"] = self.ssh_key
         if self.become_pass is not None:
             result["become_pass"] = self.become_pass
-        if self.ssh_pass is not None:
-            result["ssh_key"] = self.ssh_pass
+        if self.login_pass is not None:
+            result["ssh_key"] = self.login_pass
 
         return result
