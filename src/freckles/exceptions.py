@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 
 from colorama import Style
 from jinja2.exceptions import TemplateSyntaxError
 from six import string_types
 
-from frutils import readable, reindent
+from frutils import readable, reindent, readable_yaml
 from frutils.exceptions import FrklException, FrklParseException
 from ting.exceptions import TingException
 
@@ -201,6 +202,37 @@ class FreckletException(FrklException):
                 reason = reason + "\n{}-> {}".format(padding, attr)
 
             reason = reason + ": {}".format(parent_exception.root_exc)
+
+            extra_reason = OrderedDict()
+            if hasattr(parent_exception.root_exc, "exception_map"):
+                for k, v in parent_exception.root_exc.exception_map.items():
+                    potential_attrs = ["problem", "problem_mark", "msg"]
+
+                    for a in potential_attrs:
+                        if hasattr(v, a):
+                            extra_reason.setdefault(k, OrderedDict())[a] = str(
+                                getattr(v, a)
+                            )
+
+            if extra_reason:
+                text = ""
+                for t, details in extra_reason.items():
+                    text = (
+                        text
+                        + "if type: {}{}{}".format(Style.BRIGHT, t, Style.RESET_ALL)
+                        + "\n\n"
+                    )
+                    text = (
+                        text
+                        + Style.DIM
+                        + readable_yaml(
+                            details, ignore_aliases=True, safe=False, indent=2
+                        )
+                        + Style.RESET_ALL
+                        + "\n"
+                    )
+
+                reason = reason + "\n\n" + reindent(text, 2)
 
             if hasattr(parent_exception.root_exc, "solution"):
                 solution = parent_exception.root_exc.solution
