@@ -4,19 +4,18 @@ url_path_prio: 200
 draft: false
 ---
 
-Security is an important topic, even more so when sudo/root permissions are involved.
+Security is important, even more so when sudo/root permissions are involved. I don't think I am able to do the topic justice, there are just too many variables and scenarios to take into account, so please use your own judgment and get relevant information from other sources.
 
-I don't think I'll be able to do the topic justice here, there are just too many variables and scenarios to take into account. I'll try my best though. So, on this page I'll list all the security-relevant patterns and strategies that *freckles* uses, and, if possible, point out options you have, and their implications.
+On here I'll list all relevant patterns and strategies that are implemented in *freckles*, and -- if possible -- point out options you have, and their implications.
 
-If you encounter any security-related questions or issues that are not mentioned here, please visit the [Security](https://friends.of.freckles.io/c/security) category on the [friends of freckles](https://friends.of.freckles.io) forum, and create a topic.
+If you encounter any security-related questions or issues that are not discussed here, please visit the [Security](https://friends.of.freckles.io/c/security) category on the [friends of freckles](https://friends.of.freckles.io) forum, and create a topic.
 
-Make sure you use *freckles* carefully, it is a powerful tool, and those usually come with a 'shoot-yourself-in-the-foot'-button. Make sure you know where that is, and try to stay away from that general area...
+Make sure you use *freckles* responsibly, it is a powerful tool, and those usually come with a 'shoot-yourself-in-the-foot'-button. Make sure you know where that is, and try to stay away from that general area unless you know what you are doing...
 
 ### Root permissions {: .section-title}
 <div class="section-block" markdown="1">
 
-Quite deliberately, *freckles* will never require any sudo/root permissions when installed or run by itself. It will only ask you for a sudo password
-when you tell it to run tasks that require them. So, there is never a need to do something like:
+Quite deliberately, *freckles* will never require any sudo/root permissions when installed or run by itself. It will only ask you for a sudo password when you tell it to run tasks that require them. So, there will never a need to do something like:
 
 ```console
 sudo freckles ...
@@ -28,18 +27,20 @@ sudo freckles ...
     - if no elevated permissions are needed, don't do any further checks
 - check if the '--ask-become-pass' flag is set
     - if it is, ask for the password and use that in the run
+- check if the target user is 'root'
+    - if it is, nothing further will be done  
 - check if the target is local or remote
-- if remote:
-    - assume the login user will have password-less sudo access (or is 'root', in which case the question is moot)
-- if local:
-    - check the username in the 'target' variable
-        - if the user in the target variable is the same as the one running *freckles*
-            - check if the current user can do 'password-less sudo'
-                - if it can, do no further check and use that to get elevated privileges whenever necessary
-            - if it can't do password-less sudo, ask for the users password and use that down the line (if the user does not have sudo permissions at all, the run will fail eventually)
-        - if the user in the target var is different than the one running *freckles*
-            - use/change 'ssh' as connection type instead of 'local'
-            - assume the login user will have password-less sudo access (or is 'root', in which case the question is moot)
+    - if remote:
+        - assume the login user will have password-less sudo access (or is 'root', in which case the question is moot)
+    - if local:
+        - check the username in the 'target' variable
+            - if the user in the target variable is the same as the one running *freckles*
+                - check if the current user can do 'password-less sudo'
+                    - if it can, do no further check and use that to get elevated privileges whenever necessary
+                - if it can't do password-less sudo, ask for the users password and use that down the line (if the user does not have sudo permissions at all, the run will fail eventually)
+            - if the user in the target var is different than the one running *freckles*
+                - use/change 'ssh' as connection type instead of 'local' (if no ssh server is running, this will fail)
+                - assume the login user will have password-less sudo access (or is 'root', in which case the question is moot)
 
 So, what this means in practice is that if you have a task that requires elevated permissions, and the task runs locally as the same user that runs *freckles* ('-t localhost', or no '-t' flat at all), , *freckles* will do the right thing, and will only ask for a password if necessary.
 
@@ -58,25 +59,21 @@ to put it in a folder that is in your sessions [``PATH``](https://www.cs.purdue.
 
 You can either download *freckles* manually, or use [freck](https://gitlab.com/freckles-io/freck), the *freckles bootstrap script*, to do it for you.
 
-'Curly bootstrap scripts' like the *freck* are sometimes frowned upon as being inherently less secure than any alternatives. I don't think
+'Curly bootstrap scripts' like *freck* are sometimes frowned upon as being inherently less secure than any alternatives. I don't think
 that is actually true in a lot of cases, but if you don't want to take any chances, just do everything manually and don't think about it.
 
 In my mind, if you trust somebody enough to run their application, you might as well trust the bootstrap script they provide, esp. if it is hosted from the same location.
 
-In the case of *freckles*, the one advantage manually downloading the binary to using the bootstrap script I can see is that the bootstrap script
-could have been modified by a 3rd party. But, if that 3rd party has access to the bootstrap script, they would most likely also have had access to the binary or potentially the build process, so there is really not much gained here.
+The script itself offers some neat features, first and foremost it lets you execute *freckles* straight away, within the same invocation you use to download it. It also, optionally, can delete *freckles* and any intermediate files that were created during a run after the execution finishes. This is convenient for one-off provisioning runs, or when building Docker images.
 
-The script itself offers some neat features, first and foremost it lets you execute *freckles* straight away, within the same invocation you use to download it. It also, optionally, can delete *freckles* and any intermediate files that were created during a run after the run finishes. This is really convenient for one-off provisioning runs, or when building Docker images.
-
-If you use *freck* a lot, I'd recommend you host the script yourself, and maybe also the *freckles* binary. It is not finished yet, but I'm working on a *frecklet* that can setup a web-server to host *freckles* and a customizable bootstrap script, as well as your *frecklet* repositories. This will allow for you to tailor everything to your environment and requirements. Stay tuned, and ping me if that interests you.
+If you use *freck* a lot, I'd recommend you host the script yourself, and maybe also the *freckles* binary. It is not finished yet, but I'm working on a *frecklet* that can setup a web-server to host *freckles* and a customized -- to your needs -- freck bootstrap script, as well as your *frecklet* repositories. That way everyone in your company, or project, has direct, easy access to all the tasks that are relevant in your environment. Stay tuned, and ping me if that interests you.
 
 </div>
 
 #### Binary signing {: .block-title}
 <div class="section-block" markdown="1">
 
-Currently, only the Mac binary of *freckles* is signed. The plan is to also sign the Linux binary, or at least provide hashes, but public opinion seems to be
-split on whether that really provides any advantage over just serving the binaries via https. I'm not really sure myself, so I'd be happy to get some input if you have some.
+Currently, only the Mac binary of *freckles* is signed. The plan is to also sign the Linux binary, or at least provide hashes, but public opinion seems to be split on whether that really provides any advantage over just serving the binaries via https. I'm not really sure myself, so I'd be happy to get some input if you have some.
 
 </div>
 </div>
@@ -84,16 +81,14 @@ split on whether that really provides any advantage over just serving the binari
 ### Running *freckles* {: .section-title}
 <div class="section-block" markdown="1">
 
-As was mentioned above, *freckles* only asks you for sudo/root passwords when the task you want it to execute requires it. Sometimes *freckles* will be
-run as the root user, for example when run inside a Docker build process. Sometimes a system is setup so that there exists an admin user who has
-access to sudo without having to provide a password. In fact, *freckles* comes with [a *frecklet*](/frecklets/system/passwordless-sudo-users) to setup just that.
+As was mentioned above, *freckles* only asks you for sudo/root passwords when the task you are about to run requires it. Sometimes *freckles* itself will be run as the root user, for example when run inside a Docker build process. Sometimes, as is the normal case, a system is setup so that there exists an admin user who has access to sudo without having to provide a password. In fact, *freckles* comes with [a *frecklet*](/frecklets/system/passwordless-sudo-users) to setup just that.
 
-The only 'real' advice I can give without knowing any further details: try to run *freckles* always with the minimum amount of privileges that are needed for a certain task.
+In any way, be extra diligent when root permissions are required (which is basically 90% of the time, unfortunately).
 
 #### 'Trusted' *frecklets* {: .block-title}
 <div class="section-block" markdown="1">
 
-To somewhat mitigate users using harmful *frecklets*, *freckles* comes with two 'officially sanctioned' sets of *frecklets*. Those come with their own sort of 'trust levels'. The items from the [default](/frecklets/default) repository are vetted by the *freckles* developer himself (aka, me), so if you trust *freckles*, can also trust those. The [community](/frecklets/community) *frecklet* repository is created and curated by the community. There will hopefully be a lot of eyes on the contents of the *frecklets* in there, which will make it harder for somebody to sneak in something malicious.
+To somewhat mitigate users executing harmful *frecklets*, *freckles* comes with two 'officially approved' sets of *frecklets*. Those come with their own sort of 'trust levels'. The items from the [default](/frecklets/default) repository are vetted by the *freckles* developer himself (aka, me), so if you trust *freckles*, you can also trust those. The [community](/frecklets/community) *frecklet* repository is created and curated by the community. Those will hopefully receive enough scrutiny by the repository contributors, which should make it harder for somebody to sneak in something malicious. This is for you to decide though, if you want to use them, add the ``--community`` flag to your *freckles* runs (or add it to your [context](/doc/configuration/contexts)).
 
 </div>
 
@@ -102,7 +97,7 @@ To somewhat mitigate users using harmful *frecklets*, *freckles* comes with two 
 
 Related to the above, by default *freckles* does not allow any outside *frecklets* to be run, it does not even allow you to change the configuration to allow them, unless you [unlock the configuration](/configuration/contexts) first.
 
-After that, you can add repositories to the 'allow_remote_whitelist', or set the 'allow_remote' configuration value to 'true'. Again, this is your own decision, and you should make an informed one. If you host your own repositories of *frecklets*, please include a Readme pointing out those issues, and maybe put a link to here in it.
+After that, you can add repositories to the 'allow_remote_whitelist', or set the 'allow_remote' configuration value to 'true'. Again, this is your own decision, and you should make an informed one. If you host your own repositories of *frecklets* for others to use, please include a Readme pointing out those issues, and maybe put a link to this page in it.
 
 </div>
 </div>
@@ -110,8 +105,7 @@ After that, you can add repositories to the 'allow_remote_whitelist', or set the
 ### Password entry {: .section-title}
 <div class="section-block" markdown="1">
 
-Some *frecklets* need passwords as user input. This is a difficult thing to do securely. *freckles* still misses a few features that will make handling
-passwords better, easier, and more secure. In the future there will be integration to password stores (e.g. Hashicorp Vault, Bitwarden, the OS keychain, ...). For now, there are only a few (more basic) options, so it's a good idea you know about them, and can pick the best one for your scenario.
+Some *frecklets* need passwords as user input. This is a difficult thing to do securely. *freckles* still misses a few features that will make handling passwords better, easier, and more secure. In the future there will be integration to password stores (e.g. Hashicorp Vault, Bitwarden, the OS keychain, ...). For now, there are only a few basic options, so it's a good idea you know about them, so you can choose the best one for your scenario.
 
 When writing a *frecklet*, you can mark arguments ``secret``, which will tell *freckles* to handle them differently to 'normal' ones. It looks like this:
 
@@ -137,7 +131,7 @@ It is not a good idea to just use passwords as normal cli arguments, ala:
 frecklecute user-exists --password password123 markus
 ```
 
-Even though *freckles* will internally handle this value in a secure manner, this command will show up in your shell history file (including the password string), so you should prefer to never do that.
+Even though *freckles* will internally handle this value in a secure manner, this command will show up in your shell history file (including the password string), so you should prefer to never do that except when developing *frecklets*.
 
 </div>
 
@@ -153,7 +147,7 @@ This is by no means ideal, as your password is still available in plain text in 
 #### Using the '::ask::' var adapter {: .block-title}
 <div class="section-block" markdown="1">
 
-The best way that is still straight-forward, at the moment, is to let the ``freckles`` application prompt you for the password. *freckles* has a feature called 'vars adapters' (which, in the future will be used to connect to password manages and the like, among other things). They can be activated by specifying the name of the adapter (between two sets of '::') as the argument value. The var adapter we use here is called 'ask'. So, in our example from before, we'd do:
+The best way (that is still straight-forward) at the moment is to let the ``freckles`` application prompt you for the password. *freckles* has a feature called 'vars adapters' (which, in the future will be used to connect to password manages and the like, among other things). They can be activated by specifying the name of the adapter as the argument value (between two sets of '::'). The var adapter we use here is called 'ask'. So, in our example from before, we'd do:
 
 ```console
 frecklecute user-exists --password ::ask:: markus
@@ -162,7 +156,7 @@ Input needed for value 'password': the user password in plain text
   password:
 ```
 
-This way the password never hits the hard disk, nor is it exposed in plain text. The one advantage this has is that you now have an interactive script, which is not ideal if you want to use *freckles* within an automated pipeline or similar.
+This way the password never hits the hard disk, nor is it exposed in plain text in your environment. The one disadvantage this has is that you now have an interactive script, which is not ideal if you want to use *freckles* within an automated pipeline or similar.
 
 </div>
 
@@ -200,7 +194,7 @@ Those two examples don't improve on our password security situation at all thoug
 frecklecute user-exists --password "{{ lookup('keyring', 'my_user_passwords markus') }}" markus
 ```
 
-Some of those lookup plugins need extra Python packages in the virtualenv that runs Ansible. This will be a 'context' specific setting soon, but is not implemented yet. You'll have to figure out how to do that manually for now.
+Some of those lookup plugins need extra Python packages in the virtualenv that runs Ansible. *freckles* will try to automatically install those when it comes across lookup plugins, but this is not very well tested yet. Submit an issue if you encounter problems!
 
 </div>
 </div>
@@ -210,17 +204,18 @@ Some of those lookup plugins need extra Python packages in the virtualenv that r
 
 This is a topic you can do nothing about, but I think you should know how *freckles* internally handles passwords. Most importantly, to be able to make an informed decision on whether you want to trust *freckles* with your passwords at all.
 
-This behaviour is highly [adapter](/doc/adapters) dependent. As  the [nsbl adapter](/doc/adapters/nsbl) is the only functional one at the moment, I'll just describe that on here:
+This behaviour is highly [adapter](/doc/adapters) dependent. As the [nsbl adapter](/doc/adapters/nsbl) is the only functional one at the moment, I'll only describe that one here:
 
 - you enter the password in one of the ways described above
 - *freckles* keeps it in memory, and eventually hands it off to the adapter that runs the *frecklet* in question
 - the 'nsbl' adapter takes the var_name/password map and replaces the password with a string like: ``{{ __secret_<variable_name>__ }}``
-- it creates an Ansible vault file, using a randomly generated key and puts it into the playbook directory (using [this bash script](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/scripts/create-vault.sh) -- secret vars are provided by piping them via stdin)
-- the ansible-playbook run is kicked off using '--vault-id=freckles_run@<vault_key_file>' (where vault_key_file is a named pipe) and the vault file we created earlier (here's the script that calls ansible-playbook: [wrapper script](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/run_all_plays.sh))
-- after the run is finished (or failed), both named pipes (the vault_key_file as well as the vault itself) are deleted
+- it creates an Ansible vault file, using a randomly generated key and puts it into the playbook directory (using [this bash script](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/create-vault.sh) -- secret vars are provided by piping them via stdin)
+- a vault key file (with only read permissions for the current users) with the random password is written in the Ansible playbook directory
+- the ansible-playbook run is kicked off using [``--vault-id=freckles_run@<vault_key_file> --extra-vars=@$<vault_file>``](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/run_all_plays.sh#L24)
+- as a first thing done in the Ansible run after reading them, both key file and vault file are being deleted
+- after the run finishes, *freckles* tries in two more places to delete those two files, in case there was an error and Ansible could not delete the files itself
 
-This is still not 100% ideal, as there is a chance that somebody with access to your account can do a sort of man-in-the-middle
-attack in the milli-seconds when the named pipes are created. But if that actually happens you would be way beyond the point where you would worry about *freckles* security...
+This is still not 100% ideal, as there is a chance that when the *freckles* run is interrupted at just the right place, the files might not have been deleted and local users who have access to your user account could read them. I do think this is an acceptable trade-off, because, chances are, that if that's the case you have bigger things to worry about anyway. But that decision is up to you.
 
 Last, but not least, *freckles* is written in Python, which does not allow to overwrite strings in memory to 'destroy' passwords once they are no longer needed (as far as I know -- do let me know if I'm wrong!!!). So this is a limitation we'll all have to live with, unfortunately.
 

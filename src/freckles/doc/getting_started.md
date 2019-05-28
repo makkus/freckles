@@ -56,7 +56,7 @@ Options:
   --no-run              create the run environment (if applicable), but don't
                         run the frecklet
   --ask-become-pass       ask for the sudo password
-  --ask-ssh-pass        ask for the connection password
+  --ask-login-pass        ask for the connection password
   -e, --elevated        indicate that this run needs elevated permissions
   -ne, --not-elevated   indicate that this run doesn't need elevated
                         permissions
@@ -362,7 +362,7 @@ For this, you should have a ssh-server running on the target box. If you need ro
 To login to a remote server, add the ``--target <user>@<hostname>`` flag before the *frecklet* name, e.g.:
 
 ```console
->  frecklecute --ask-ssh-pass --target pi@10.0.0.209 file-downloaded --dest /tmp/my/remote/download/path/logo.svg https://frkl.io/images/frkl-logo-black.svg
+>  frecklecute --ask-login-pass --target pi@10.0.0.209 file-downloaded --dest /tmp/my/remote/download/path/logo.svg https://frkl.io/images/frkl-logo-black.svg
 
 SSH PASS: ****
 
