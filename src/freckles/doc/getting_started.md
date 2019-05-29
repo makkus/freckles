@@ -233,7 +233,7 @@ systemd-services-stopped            a list of init-service to stop (if they
 user-exists                         make sure a user exists
 webserver-service                   ensures a webserver is installed and
                                     running
-webserver-static-site               install and configure webserver for
+static-website-from-folder               install and configure webserver for
                                     static site
 wordpress-folder-prepared           prepares wordpress project folders
 wordpress-standalone                sets up a single-site wordpress instance
@@ -606,7 +606,7 @@ What needs to be done? Here's a list:
 - upload our html page(s)
 
 Again, we check the [default](/frecklets/default) and [community](/frecklets/community) frecklet indexes for any pre-written
-*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/webserver-static-site/)
+*frecklets* we can use. Actually, there is already a [*frecklet* to setup and configure a static website](/frecklets/default/web/static-website-from-folder/)
 . But let's pretend it did not and go a tiny bit lower level.
 
 So, here are the *frecklets* we are going to use:
