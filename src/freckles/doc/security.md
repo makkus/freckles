@@ -81,7 +81,7 @@ Currently, only the Mac binary of *freckles* is signed. The plan is to also sign
 ### Running *freckles* {: .section-title}
 <div class="section-block" markdown="1">
 
-As was mentioned above, *freckles* only asks you for sudo/root passwords when the task you are about to run requires it. Sometimes *freckles* itself will be run as the root user, for example when run inside a Docker build process. Sometimes, as is the normal case, a system is setup so that there exists an admin user who has access to sudo without having to provide a password. In fact, *freckles* comes with [a *frecklet*](/frecklets/system/passwordless-sudo-users) to setup just that.
+As was mentioned above, *freckles* only asks you for sudo/root passwords when the task you are about to run requires it. Sometimes *freckles* itself will be run as the root user, for example when run inside a Docker build process. Sometimes, as is the normal case, a system is setup so that there exists an admin user who has access to sudo without having to provide a password. In fact, *freckles* comes with a [*frecklet*](/frecklets/default/system/passwordless-sudo-users) to setup just that.
 
 In any way, be extra diligent when root permissions are required (which is basically 90% of the time, unfortunately).
 
@@ -95,7 +95,7 @@ To somewhat mitigate users executing harmful *frecklets*, *freckles* comes with 
 #### Remote repo permission config {: .block-title}
 <div class="section-block" markdown="1">
 
-Related to the above, by default *freckles* does not allow any outside *frecklets* to be run, it does not even allow you to change the configuration to allow them, unless you [unlock the configuration](/configuration/contexts) first.
+Related to the above, by default *freckles* does not allow any outside *frecklets* to be run, it does not even allow you to change the configuration to allow them, unless you [unlock the configuration](/doc/configuration/contexts) first.
 
 After that, you can add repositories to the 'allow_remote_whitelist', or set the 'allow_remote' configuration value to 'true'. Again, this is your own decision, and you should make an informed one. If you host your own repositories of *frecklets* for others to use, please include a Readme pointing out those issues, and maybe put a link to this page in it.
 

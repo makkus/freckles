@@ -21,10 +21,10 @@ Here are some resources to find out more about *frecklets*, how they are called,
 [The anatomy of a frecklet](/doc/frecklets/anatomy)
 :    For when you want to create your own, non-trivial *frecklets*. Non essential reading if you just want to use *freckles* to run existing *frecklets*, or cobble together a few simple ones of your own.
 
-[Resources](/doc/freckles/resources)
+[Resources](/doc/frecklets/resources)
 :    Depending on the adapter used, *freckles* can be accompanied by adapter-specific resources. In the case of the default 'nsbl' adapter, that would be Ansible roles and task-lists. This page gives a bit of background how that works.
 
-[Default frecklet index](frecklets/default)
+[Default frecklet index](/frecklets/default)
 :    The repository containing the default set of *frecklets* that which is included in the *freckles* application.
 
 [Community frecklet index](/frecklets/community)
