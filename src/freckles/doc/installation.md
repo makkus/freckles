@@ -89,7 +89,7 @@ freckles --help
 ### Manual {: .block-title}
 <div class="section-block" markdown="1">
 
-Just re-download the file from you downloaded earlier. That's all
+Just re-download the file from you downloaded earlier, and replace the older binary. That's all.
 
 ### Bootstrap script {: .block-title}
 
