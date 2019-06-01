@@ -1,11 +1,14 @@
 ---
-title: Installation
+title: Installation & update
 url_path_prio: 4
 ---
 
 There are several options for installing *freckles*. The two easiest ones are:
 
-## Binary file download {: .section-title}
+## Installation {: .section-title}
+<div class="section-block" markdown="1">
+
+### Binary file download {: .block-title}
 <div class="section-block" markdown="1">
 
 The most straightforward way of installing *freckles* is to download the executable of the command you need:
@@ -31,14 +34,14 @@ ln -s freckles ~/.local/bin/frecklecute
 
 </div>
 
-## [freck](https://gitlab.com/freckles-io/freck), the curly bootstrap script for *freckles* {: .section-title}
+### Bootstrap script {: .block-title}
 <div class="section-block" markdown="1">
 
 A good way of bootstrapping *freckles* on vanilla boxes is by utilizing [``freck``](https://gitlab.com/freckles-io/freck), the official *freckles* bootstrap script.
 
 For how it exactly works, and why you should or should not trust it, head over to it's [homepage](https://gitlab.com/freckles-io/freck). This method of bootstrapping is the easiest, and fricktionlessest. One of the main reasons for creating *freckles* was that I wanted a way to setup a new box (physical or virtual) by executing only one (easy-ish to remember) line in a terminal. ``freck`` provides that functionality.
 
-### Commands
+#### Commands
 
 Using `curl`:
 
@@ -56,13 +59,13 @@ This will download the appropriate binary into ``$HOME/.local/share/freckles/bin
 
 If you have security concerns using this, please visit the [security section](/doc/security#the-bootstrap-script).
 
-### What does this do?
+#### What does this do?
 
 Check out the [``freck`` README file](https://gitlab.com/freckles-io/freck#how-does-this-work-what-does-it-do).
 
 </div>
 
-## Python virtualenv / manual {: .section-title}
+### Python virtualenv {: .block-title}
 <div class="section-block" markdown="1">
 
 There will be more details on this later, for now, just quickly:
@@ -78,11 +81,32 @@ freckles --help
 
 </div>
 
-## Via a *frecklet*
+</div>
+
+## Update {: .section-title}
 <div class="section-block" markdown="1">
 
+### Manual {: .block-title}
+<div class="section-block" markdown="1">
+
+Just re-download the file from you downloaded earlier. That's all
+
+### Bootstrap script {: .block-title}
+
+If you have used the bootstrap script to install *freckles*, you can also use it for updating. Just add the ``UPDATE=true`` environment variable:
+
+
+Using `curl`:
+
 ```
-freckles --time-jump-forward 60s --no-recurse freckles-installed
+curl https://freckles.sh | UPDATE=true bash
 ```
 
+Using `wget`:
+
+```
+wget -O - https://freckles.sh | UPDATE=true bash
+```
+
+</div>
 </div>
