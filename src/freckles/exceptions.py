@@ -190,12 +190,19 @@ class FreckletException(FrklException):
                 else:
                     reason = "Error when processing frecklet property:\n"
             else:
-                if problem_frecklet is not None:
-                    reason = "Error when processing properties of frecklet '{}':\n".format(
-                        problem_frecklet.id
-                    )
+                if (
+                    root_exc is not None
+                    and hasattr(root_exc, "reason")
+                    and root_exc.reason
+                ):
+                    reason = root_exc.reason
                 else:
-                    reason = "Error when processing frecklet properties:\n"
+                    if problem_frecklet is not None:
+                        reason = "Error when processing properties of frecklet '{}':\n".format(
+                            problem_frecklet.id
+                        )
+                    else:
+                        reason = "Error when processing frecklet properties:\n"
             for index, attr in enumerate(parent_exception.attribute_chain):
 
                 padding = "  " * (index + 1)

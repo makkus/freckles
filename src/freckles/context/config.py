@@ -67,7 +67,7 @@ class ContextConfigs(TingTings):
     DEFAULT_TING_CAST = ContextConfigTingCast
 
     @classmethod
-    def load_configs(cls):
+    def load_configs(cls, repos):
 
         cnf = Cnf({})
         cnf.add_interpreter("root_config", FRECKLES_CONTEXT_SCHEMA)
@@ -75,11 +75,9 @@ class ContextConfigs(TingTings):
         profile_load_config = cnf.add_interpreter(
             "profile_load", PROFILE_LOAD_CONFIG_SCHEMA
         )
+
         configs = ContextConfigs.from_folders(
-            "cnf_profiles",
-            FRECKLES_CONFIG_DIR,
-            load_config=profile_load_config,
-            cnf=cnf,
+            "cnf_profiles", repos, load_config=profile_load_config, cnf=cnf
         )
 
         return configs
@@ -181,24 +179,29 @@ class ContextConfigs(TingTings):
                             )
                         )
                 else:
+
                     if "=" not in config:
-                        raise FrecklesConfigException(
-                            msg="Could not assemble context configuration.",
-                            reason="No configuration file '{}.context' in config dir.".format(
+                        if config == "default":
+                            config = {}
+                        else:
+                            raise FrecklesConfigException(
+                                msg="Could not assemble context configuration.",
+                                reason="No configuration file '{}.context' in config dir.".format(
+                                    config
+                                ),
+                                solution="Create context config '{}.context' in '{}' or use correct configuration syntax if that is not what you intended.".format(
+                                    config, FRECKLES_CONFIG_DIR
+                                ),
+                                references={
+                                    "freckles configuration documentation": "https://freckles.io/doc/configuration"
+                                },
+                            )
+                    else:
+                        raise Exception(
+                            "Can't create profile configuration, invalid config: {}.".format(
                                 config
-                            ),
-                            solution="Create context config '{}.context' in '{}' or use correct configuration syntax if that is not what you intended.".format(
-                                config, FRECKLES_CONFIG_DIR
-                            ),
-                            references={
-                                "freckles configuration documentation": "https://freckles.io/doc/configuration"
-                            },
+                            )
                         )
-                    raise Exception(
-                        "Can't create profile configuration, invalid config: {}.".format(
-                            config
-                        )
-                    )
 
             if isinstance(config, Mapping):
                 dict_chain.append(config)

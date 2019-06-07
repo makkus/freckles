@@ -3,6 +3,7 @@ import fnmatch
 import io
 import os
 import shutil
+import sys
 import time
 import uuid
 from collections import Mapping
@@ -24,6 +25,7 @@ from freckles.defaults import (
 from freckles.exceptions import FrecklesConfigException, FrecklesPermissionException
 from freckles.frecklet.arguments import *  # noqa
 from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
+from freckles.utils.utils import augment_meta_loader_conf
 from frkl.utils import expand_string_to_git_details
 from frkl_pkg import FrklPkg
 from frutils import (
@@ -420,6 +422,10 @@ class FrecklesContext(object):
                     "interactive_input_strategy"
                 ] = interactive_input_strategy
                 break
+
+        self.dynamic_frecklet_loader = augment_meta_loader_conf(
+            self._frecklet_load_config
+        )
 
     def update_repos(self, force=False, timeout=-1):
 
@@ -834,22 +840,24 @@ class FrecklesContext(object):
         to find a frecklet with the provided name. If that doesn't exists either, it tries to interprete the string as frecklet content.
         """
 
-        full_path = os.path.realpath(
-            os.path.expanduser(frecklet_full_path_or_name_or_content)
-        )
+        if isinstance(frecklet_full_path_or_name_or_content, string_types):
 
-        if os.path.isfile(frecklet_full_path_or_name_or_content):
-            frecklet_name = self.add_dynamic_frecklet(
-                path_or_frecklet_content=full_path, validate=validate
+            full_path = os.path.realpath(
+                os.path.expanduser(frecklet_full_path_or_name_or_content)
             )
-            frecklet = self.get_frecklet(frecklet_name, validate=validate)
-            return (frecklet, frecklet_name)
 
-        if frecklet_full_path_or_name_or_content in self.get_frecklet_names():
-            frecklet = self.get_frecklet(
-                frecklet_full_path_or_name_or_content, validate=validate
-            )
-            return (frecklet, frecklet_full_path_or_name_or_content)
+            if os.path.isfile(frecklet_full_path_or_name_or_content):
+                frecklet_name = self.add_dynamic_frecklet(
+                    path_or_frecklet_content=full_path, validate=validate
+                )
+                frecklet = self.get_frecklet(frecklet_name, validate=validate)
+                return (frecklet, frecklet_name)
+
+            if frecklet_full_path_or_name_or_content in self.get_frecklet_names():
+                frecklet = self.get_frecklet(
+                    frecklet_full_path_or_name_or_content, validate=validate
+                )
+                return (frecklet, frecklet_full_path_or_name_or_content)
 
         frecklet_name = self.add_dynamic_frecklet(frecklet_full_path_or_name_or_content)
         if frecklet_name:
@@ -883,7 +891,7 @@ class FrecklesContext(object):
     ):
 
         local_frecklet_name = None
-        if check_path:
+        if isinstance(path_or_frecklet_content, string_types) and check_path:
             full_path = os.path.realpath(os.path.expanduser(path_or_frecklet_content))
 
             if os.path.isfile(full_path):
@@ -897,7 +905,7 @@ class FrecklesContext(object):
                 index = TingTings.from_config(
                     "frecklecutable",
                     [index_conf],
-                    self._frecklet_load_config,
+                    self.dynamic_frecklet_loader,
                     indexes=["frecklet_name"],
                 )
 
@@ -915,7 +923,10 @@ class FrecklesContext(object):
 
             # try to parse string into a dict/list
             try:
-                frecklet_data = auto_parse_string(path_or_frecklet_content)
+                if isinstance(path_or_frecklet_content, string_types):
+                    frecklet_data = auto_parse_string(path_or_frecklet_content)
+                else:
+                    frecklet_data = path_or_frecklet_content
 
                 id = str(uuid.uuid4())
 
@@ -932,7 +943,7 @@ class FrecklesContext(object):
                 index = TingTings.from_config(
                     "frecklecutable",
                     [index_conf],
-                    self._frecklet_load_config,
+                    self.dynamic_frecklet_loader,
                     indexes=["frecklet_name"],
                 )
 
@@ -1075,3 +1086,12 @@ class FrecklesContext(object):
         #             shutil.copyfile(path, target)
 
         return result
+
+    def load_as_python_object(self, frecklet_name):
+
+        f = self.get_frecklet(frecklet_name=frecklet_name)
+        from types import ModuleType
+
+        mod = ModuleType("mymodule")
+        sys.modules["mymodule"] = mod
+        exec(f.python_src, mod.__dict__)

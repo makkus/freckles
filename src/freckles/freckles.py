@@ -1,27 +1,47 @@
 # -*- coding: utf-8 -*-
-
+from freckles.defaults import FRECKLES_CONFIG_DIR
 from .context.config import ContextConfigs
 from .context.freckles_context import FrecklesContext
 
 
 class Freckles(object):
+    """The main class to encapsulate most things a developer would want to achieve with 'freckles'.
+
+       This has a fairly complex configuration processing mechanism in-built, which is mainly used to enable maximum
+       flexibility when building user-facing apps on top of 'freckles'. In most cases, you can safely ignore all that, and
+       set the 'config_repos' value to 'None', and use 'default_context_config' to set the context defaults you want to
+       use.
+
+       In case you want to utilize the config processing feature (but really, best to just ignore it, it is probably too
+       complex for what it does and will be re-written and simplified at some stage):
+
+       The 'default_context_config', can be either a string, a dict or a dict. If a list, every element will be merged
+       on-top of the previous (merged) dict. If a string, the 'config_repos' will be checked whether they contain a file
+       with that name and a '.context' file extension, if there is, the content of that file will be used, if not, the string
+       must either be 'default', in which case an empty dict will be returned, or it must contain a '=', in which case a
+       one-item dict will be created with the left side (before '=') used as key, and the right one as value (some simple
+       auto-parsing will be used to determine whether the value is a bool or integer).
+
+       Args:
+         use_community (bool): whether to use the community repo
+         default_context_config: the default configuration that underlies everything
+         extra_repos (list): a list of extra repositories to search for frecklets and resources (see above for format)
+         config_repos (dict, string): a single path or a dictionary of alias/path to point to folders containing context configurations
+    """
+
     def __init__(
-        self, use_community=False, default_context_config=None, extra_repos=None
+        self,
+        use_community=False,
+        default_context_config=None,
+        extra_repos=None,
+        config_repos=None,
     ):
 
-        # self._root_config = Cnf(init_dict)
-        # profile_load_config = self._root_config.add_interpreter(
-        #     "profile_load", PROFILE_LOAD_CONFIG_SCHEMA
-        # )
-        # self._root_config.add_interpreter("root_config", FRECKLES_DEFAULT_CONFIG_SCHEMA)
+        if config_repos is None:
+            config_repos = {}
 
-        self._context_configs = ContextConfigs.load_configs()
-        # self._cnf_profiles = CnfProfiles.from_folders(
-        #     "cnf_profiles",
-        #     FRECKLES_CONFIG_DIR,
-        #     load_config=profile_load_config,
-        #     cnf=self._root_config,
-        # )
+        config_repos = FRECKLES_CONFIG_DIR
+        self._context_configs = ContextConfigs.load_configs(repos=config_repos)
 
         self._contexts = {}
         self._current_context = None

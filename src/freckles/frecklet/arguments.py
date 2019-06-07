@@ -9,7 +9,7 @@ from six import string_types
 
 from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
 from freckles.exceptions import FreckletBuildException, FreckletException
-from frutils import get_template_keys, dict_merge
+from frutils import get_template_keys, dict_merge, readable_yaml
 from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
 from ting.ting_cast import MultiCacheResult
@@ -216,6 +216,9 @@ class VariablesFilterAttribute(TingAttribute):
         return result
 
 
+ALLOWED_ARG_INHERIT_STRATEGIES = ["strict", "required"]
+
+
 class VariablesAttribute(TingAttribute):
     def __init__(
         self,
@@ -269,12 +272,23 @@ class VariablesAttribute(TingAttribute):
                     and result[arg_name].schema != arg.schema
                 ):
                     # import pp
-                    # pp(arg.__dict__)
                     # pp(result[arg_name].__dict__)
+                    # pp(arg.__dict__)
+                    reason = (
+                        "Two different argument schemes for the same argument name:\n\n"
+                    )
+                    reason = (
+                        reason
+                        + readable_yaml(result[arg_name].schema, indent=2)
+                        + "\n  -------------------------------\n\n"
+                    )
+                    reason = reason + readable_yaml(arg.schema, indent=2)
+
                     raise FreckletBuildException(
                         frecklet=ting,
                         msg="Duplicate arg '{}'.".format(arg_name),
                         solution="Check format of frecklet '{}'.".format(ting.id),
+                        reason=reason,
                         references={
                             "frecklet documentation": "https://freckles.io/doc/frecklets/anatomy"
                         },
@@ -289,7 +303,9 @@ class VariablesAttribute(TingAttribute):
 
         return ordered
 
-    def resolve_vars(self, current_args, rest_path, last_node, tree, ting):
+    def resolve_vars(
+        self, current_args, rest_path, last_node, tree, ting, is_root_level
+    ):
 
         current_node_id = next(rest_path)
 
@@ -315,74 +331,82 @@ class VariablesAttribute(TingAttribute):
 
             if key not in vars.keys():
 
-                if arg.required and arg.default is None:
-                    # relevant frecklet root name: tree.get_node(0).tag,
-                    raise FreckletBuildException(
-                        frecklet=ting,
-                        msg="Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(
-                            current_node.tag, tree.get_node(0).tag, key, last_node.tag
-                        ),
-                        solution="Check format of frecklet '{}'.".format(
-                            current_node.tag
-                        ),
-                        references={
-                            "frecklet documentation": "https://freckles.io/doc/frecklets/anatomy"
-                        },
+                inherit = ting.meta.get("vars", {}).get("inherit", False)
+                if inherit:
+                    vars[key] = "{{{{:: {} ::}}}}".format(key)
+                else:
+
+                    if arg.required and arg.default is None:
+
+                        # relevant frecklet root name: tree.get_node(0).tag,
+                        raise FreckletBuildException(
+                            frecklet=ting,
+                            msg="Invalid frecklet-task '{}' in '{}': does not provide required/non-defaulted var '{}' for child frecklet '{}'.".format(
+                                current_node.tag,
+                                tree.get_node(0).tag,
+                                key,
+                                last_node.tag,
+                            ),
+                            solution="Check format of frecklet '{}'.".format(
+                                current_node.tag
+                            ),
+                            references={
+                                "frecklet documentation": "https://freckles.io/doc/frecklets/anatomy"
+                            },
+                        )
+                    else:
+                        continue
+
+            parent_var = vars[key]
+
+            # print("PARENT VAR: {}".format(parent_var))
+            if parent_var == "{{{{:: {} ::}}}}".format(key):
+
+                # this means the var is just being carried forward, from the point of view of the parent frecklet task
+                arg_config = available_args.get(key, None)
+                if arg_config is None:
+                    # print("USING CHILD ARG")
+                    new_arg = arg
+                else:
+                    new_arg = Arg(
+                        key,
+                        arg_config,
+                        default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                        interactive_input_strategy=self.interactive_input_strategy,
                     )
+                    new_arg.add_child(arg)
+                    new_arg.var_template = parent_var
 
-                # means we don't have to worry about this key, as it is not used and not required
-                continue
+                args[key] = new_arg
             else:
-                parent_var = vars[key]
-
-                # print("PARENT VAR: {}".format(parent_var))
-                if parent_var == "{{{{:: {} ::}}}}".format(key):
-
-                    # this means the var is just being carried forward, from the point of view of the parent frecklet task
-                    arg_config = available_args.get(key, None)
+                template_keys = get_template_keys(
+                    parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+                )
+                for tk in template_keys:
+                    arg_config = available_args.get(tk, None)
                     if arg_config is None:
-                        # print("USING CHILD ARG")
-                        new_arg = arg
+                        if tk == key:
+                            new_arg = arg
+                        else:
+                            new_arg = Arg(
+                                tk,
+                                {},
+                                default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                                is_auto_arg=True,
+                                interactive_input_strategy=self.interactive_input_strategy,
+                            )
+                            new_arg.add_child(arg)
                     else:
                         new_arg = Arg(
-                            key,
+                            tk,
                             arg_config,
                             default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                             interactive_input_strategy=self.interactive_input_strategy,
                         )
                         new_arg.add_child(arg)
-                        new_arg.var_template = parent_var
 
-                    args[key] = new_arg
-                else:
-                    template_keys = get_template_keys(
-                        parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-                    )
-                    for tk in template_keys:
-                        arg_config = available_args.get(tk, None)
-                        if arg_config is None:
-                            if tk == key:
-                                new_arg = arg
-                            else:
-                                new_arg = Arg(
-                                    tk,
-                                    {},
-                                    default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-                                    is_auto_arg=True,
-                                    interactive_input_strategy=self.interactive_input_strategy,
-                                )
-                                new_arg.add_child(arg)
-                        else:
-                            new_arg = Arg(
-                                tk,
-                                arg_config,
-                                default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-                                interactive_input_strategy=self.interactive_input_strategy,
-                            )
-                            new_arg.add_child(arg)
-
-                        new_arg.var_template = parent_var
-                        args[tk] = new_arg
+                    new_arg.var_template = parent_var
+                    args[tk] = new_arg
 
         if current_node_id != 0:
 
@@ -392,6 +416,7 @@ class VariablesAttribute(TingAttribute):
                 last_node=current_node,
                 tree=tree,
                 ting=ting,
+                is_root_level=False,
             )
 
             return r
@@ -460,4 +485,5 @@ class VariablesAttribute(TingAttribute):
             last_node=root_node,
             tree=tree,
             ting=ting,
+            is_root_level=True,
         )

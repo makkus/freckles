@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import copy
 import textwrap
+from collections import Mapping
 
 import click
 import tabulate
@@ -156,3 +158,16 @@ def print_frecklet_list(frecklet_dict):
     click.echo()
     print_two_column_table(data, "frecklet", "desc")
     click.echo()
+
+
+def augment_meta_loader_conf(loader_conf_orig):
+
+    loader_conf = copy.deepcopy(loader_conf_orig)
+    for attr in loader_conf["attributes"]:
+        if isinstance(attr, Mapping) and "FreckletMetaAttribute" in attr.keys():
+            attr["FreckletMetaAttribute"].setdefault("default", {}).setdefault(
+                "vars", {}
+            )["inherit"] = True
+            break
+
+    return loader_conf

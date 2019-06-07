@@ -148,9 +148,9 @@ There are 3 special repository aliases that can be used instead of a path:
     },
     "ask_user": {
         "type": "string",
-        "default": "none",
+        "default": "default",
         "allowed": [
-            "none",
+            "default",
             "required",
             "required_always",
             "always",

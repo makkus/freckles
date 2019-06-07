@@ -5,8 +5,10 @@ from ruamel.yaml.comments import CommentedMap
 
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
+from frutils import dict_merge
 from ting.ting_attributes import MultiCacheResult
 from .tasks import *  # noqa
+from ting.attributes.rendering import JinjaTemplateAttribute  # noqa
 
 log = logging.getLogger("freckles")
 
@@ -126,17 +128,26 @@ class FreckletExplodedAttribute(TingAttribute):
         return result
 
 
-class FreckletMetaAttribute(ValueAttribute):
-    def __init__(self):
+class FreckletMetaAttribute(TingAttribute):
+    def __init__(self, default=None):
 
-        super(FreckletMetaAttribute, self).__init__(
-            target_attr_name="meta_frecklet", source_attr_name="_metadata", default={}
-        )
+        if default is None:
+            default = {}
+
+        self.default = default
+
+    def requires(self):
+        return ["_metadata"]
+
+    def provides(self):
+        return ["meta"]
 
     def get_attribute(self, ting, attribute_name=None):
 
-        result = ValueAttribute.get_attribute(self, ting, attribute_name=attribute_name)
-        return result
+        metadata = ting._metadata.get("meta", {})
+
+        merged = dict_merge(self.default, metadata, copy_dct=True)
+        return merged
 
 
 class FreckletHtmlAttribute(TingAttribute):
@@ -272,7 +283,7 @@ FRECKLET_LOAD_CONFIG = {
             }
         },
         {"DocAttribute": {"source_attr_name": "_metadata"}},
-        "FreckletMetaAttribute",
+        {"FreckletMetaAttribute": {"default": {}}},
         "FreckletAugmentMetadataAttribute",
         "FreckletsAttribute",
         "TaskListDetailedAttribute",
@@ -285,7 +296,7 @@ FRECKLET_LOAD_CONFIG = {
             "VariablesAttribute": {
                 "target_attr_name": "vars_frecklet",
                 "default_argument_description": FRECKLES_DEFAULT_ARG_SCHEMA,
-                "interactive_input_strategy": "none",
+                "interactive_input_strategy": "default",
             }
         },
         {
@@ -300,6 +311,20 @@ FRECKLET_LOAD_CONFIG = {
                 "target_attr_name": "vars_optional",
                 "source_attr_name": "vars_frecklet",
                 "required": False,
+            }
+        },
+        {
+            "JinjaTemplateAttribute": {
+                "template": "python_src.j2",
+                "template_dir": "/home/markus/projects/freckles-dev/freckles/src/freckles/templates/src",
+                "target_attr_name": "python_src",
+                "required_attrs": [
+                    "id",
+                    # "args",
+                    "vars_frecklet",
+                    "vars_required",
+                    "vars_optional",
+                ],
             }
         },
         "FreckletsTemplateKeysAttribute",

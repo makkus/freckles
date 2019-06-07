@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+
+from freckles.codegen.runnable import FreckletWrapper
+
+class {{ id | camelize(replace_dashes=True) }}(FreckletWrapper):
+
+  FRECKLET_ID = "{{ id }}"
+
+  def __init__(self,
+{% for arg_name, arg in vars_required %}
+
+
+  ):
+    super({{ id | camelize(replace_dashes=True) }}, self).__init__(var_names=[{{ vars_frecklet.keys() | map('quote') | join(', ') }}])
+{% for arg_name, arg in vars_frecklet.items() %}    self._{{ arg_name }} = {{ arg_name }}
+{% endfor %}
+
+{% for arg_name, arg in vars_frecklet.items() %}
+  @property
+  def {{ arg_name }}(self):
+    return self._{{ arg_name }}
+
+  @{{ arg_name }}.setter
+  def {{ arg_name }}(self, {{ arg_name }}):
+    self._{{ arg_name }} = {{ arg_name }}
+{% endfor %}

@@ -261,6 +261,7 @@ class Frecklecutable(object):
             # task_name = task_node[FRECKLET_KEY_NAME]["name"]
 
             root_vars = task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet
+
             # args = {}
             # for k, v in (
             #     root_vars.items()
@@ -333,7 +334,7 @@ class Frecklecutable(object):
             # pp(repl_vars)
             # print('---------------------------')
 
-            # first we get our target variable, as this will most likley determine the value of the var later on
+            # first we get our target variable, as this will most likely determine the value of the var later on
             target = frecklet.get("target", None)
             if target is not None:
                 template_keys = get_template_keys(
@@ -397,10 +398,15 @@ class Frecklecutable(object):
 
             secret_keys.update(parent_secret_keys)
             val_map = {}
+
             for tk in template_keys:
                 val = repl_vars.get(tk, None)
                 if val is not None:
                     val_map[tk] = val
+
+            for k, v in inventory.get_vars().items():
+                if k not in val_map.keys() and v is not None and v != "":
+                    val_map[k] = v
 
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
@@ -603,6 +609,7 @@ class Frecklecutable(object):
                 .get(FRECKLES_PROPERTIES_METADATA_KEY, {})
                 .get(FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, False)
             )
+            # just converting from string to boolean
             if isinstance(elv, string_types):
                 if elv.lower() in ["true", "1", "yes"]:
                     elv = True
@@ -657,6 +664,7 @@ class Frecklecutable(object):
                     )
                 )
                 continue
+
             current_tasklist.append(task)
 
         if elevated is not None:
