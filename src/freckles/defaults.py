@@ -88,7 +88,6 @@ FRECKLES_EXTRA_LOOKUP_PATHS = [
     ),
 ]
 
-PASSWORD_ASK_MARKER = "ask"
 # ---------------------------------------------------------------
 # jinja-related defaults
 

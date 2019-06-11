@@ -12,7 +12,7 @@ from freckles.defaults import (
     FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
 )
 from freckles.frecklet.vars import VarsInventory
-from freckles.utils.host_utils import FrecklesRunTarget
+from freckles.context.run_config import FrecklesRunTarget
 from frutils import dict_merge
 
 log = logging.getLogger("freckles")
@@ -185,7 +185,7 @@ frecklets:
                 elevated = run_elevated
             target = vars_dict.get("target", "localhost")
 
-            run_target = FrecklesRunTarget(context=self.context, target_string=target)
+            run_target = FrecklesRunTarget(target_string=target)
             run_target.login_pass = vars_dict.get("login_pass", None)
             run_target.become_pass = vars_dict.get("become_pass", None)
 

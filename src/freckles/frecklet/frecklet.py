@@ -6,9 +6,10 @@ from ruamel.yaml.comments import CommentedMap
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
 from frutils import dict_merge
+from frutils.jinja2_filters import camelize_filter
 from ting.ting_attributes import MultiCacheResult
 from .tasks import *  # noqa
-from ting.attributes.rendering import JinjaTemplateAttribute  # noqa
+from ting.attributes.rendering import JinjaTemplateMixin  # noqa
 
 log = logging.getLogger("freckles")
 
@@ -242,6 +243,21 @@ class PagelingContentAttribute(TingAttribute):
         return str(frecklet.doc)
 
 
+class FreckletClassNameAttribute(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return ["class_name"]
+
+    def requires(self):
+        return ["id"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        return camelize_filter(ting.id, replace_dashes=True)
+
+
 class PagelingNavPathAttribute(TingAttribute):
     def __init__(self):
 
@@ -284,6 +300,7 @@ FRECKLET_LOAD_CONFIG = {
         },
         {"DocAttribute": {"source_attr_name": "_metadata"}},
         {"FreckletMetaAttribute": {"default": {}}},
+        "FreckletClassNameAttribute",
         "FreckletAugmentMetadataAttribute",
         "FreckletsAttribute",
         "TaskListDetailedAttribute",
@@ -313,27 +330,28 @@ FRECKLET_LOAD_CONFIG = {
                 "required": False,
             }
         },
-        {
-            "JinjaTemplateAttribute": {
-                "template": "python_src.j2",
-                "template_dir": "/home/markus/projects/freckles-dev/freckles/src/freckles/templates/src",
-                "target_attr_name": "python_src",
-                "required_attrs": [
-                    "id",
-                    # "args",
-                    "vars_frecklet",
-                    "vars_required",
-                    "vars_optional",
-                ],
-            }
-        },
+        # {
+        #     "JinjaTemplateAttribute": {
+        #         "template": "python_src.j2",
+        #         "template_dir": "/home/markus/projects/freckles-dev/freckles/src/freckles/templates/src",
+        #         "target_attr_name": "python_src",
+        #         "required_attrs": [
+        #             "class_name",
+        #             "id",
+        #             # "args",
+        #             "vars_frecklet",
+        #             "vars_required",
+        #             "vars_optional",
+        #         ],
+        #     }
+        # },
         "FreckletsTemplateKeysAttribute",
         "CliArgumentsAttribute",
         "TaskListAttribute",
         "TaskListResolvedAttribute",
     ],
     "ting_id_attr": "frecklet_name",
-    "mixins": [FrecklecutableMixin],
+    "mixins": [FrecklecutableMixin, JinjaTemplateMixin],
     "loaders": {
         "frecklet_files": {
             "class": "ting.tings.FileTings",

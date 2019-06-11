@@ -11,6 +11,7 @@ from six import string_types
 from treelib import Tree
 
 from freckles.frecklet.vars import VarsInventory, VAR_ADAPTERS
+from freckles.context.run_config import FrecklesRunConfig
 from frutils import (
     replace_strings_in_obj,
     get_template_keys,
@@ -476,6 +477,9 @@ class Frecklecutable(object):
         env_dir=None,
     ):
 
+        if isinstance(run_config, FrecklesRunConfig):
+            run_config = run_config.config
+
         if parent_task is None:
             i_am_root = True
             result_callback = FrecklesResultCallback()
@@ -500,9 +504,7 @@ class Frecklecutable(object):
 
         paused = False
         if parent_task is not None and (
-            secret_args
-            or run_config.get("become_pass", None)
-            or run_config.get("login_pass", None)
+            secret_args or run_config.become_pass or run_config.login_pass
         ):
             parent_task.pause()
             paused = True

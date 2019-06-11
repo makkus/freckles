@@ -122,6 +122,19 @@ class FrecklesAdapter(object):
 
         pass
 
+    def copy_resource(self, resource_name, resource_type, dest_path):
+        """Copy the specified resource to a target path.
+
+        Args:
+            resource_name: the name of the resource
+            resource_type: the type of the resource
+            dest_path: the destination path
+
+        Returns (bool): whether the resource was copied or not
+        """
+
+        return False
+
     def get_resources_for_task(self, task):
         """Return a map of paths to all resources that are necessary for this task."""
 

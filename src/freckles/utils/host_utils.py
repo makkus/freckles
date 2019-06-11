@@ -6,16 +6,15 @@ from distutils.spawn import find_executable
 import click
 from plumbum import local
 
-from frutils import dict_merge
 from frutils.frutils_cli import check_local_executable
 
 log = logging.getLogger("freckles")
 
 
-def parse_target_string(target_string, context):
+def parse_target_string(target_string):
 
     if target_string == "vagrant" or target_string.startswith("vagrant:"):
-        details = get_vagrant_details(target_string, context)
+        details = get_vagrant_details(target_string)
 
     elif "find-pi" in target_string:
         details = get_pi_details(target_string)
@@ -26,7 +25,7 @@ def parse_target_string(target_string, context):
     return details
 
 
-def get_vagrant_details(target_string, context):
+def get_vagrant_details(target_string):
 
     if target_string == "vagrant":
         host = "default"
@@ -47,9 +46,9 @@ def get_vagrant_details(target_string, context):
         if not hosts[host]:
             raise Exception("Vagrant host '{}' not running.".format(host))
 
-    rc, config, stderr = context.execute_external_command(
-        "vagrant", args=["ssh-config", host]
-    )
+    vagrant = local["vagrant"]
+    rc, config, stderr = vagrant.run(["ssh-config", host])
+
     # config = subprocess.check_output(["vagrant", "ssh-config", host]).decode(
     #     "utf-8"
     # )  # nosec
@@ -229,158 +228,3 @@ def get_host_details(host_string):
         result["port"] = int(port)
 
     return result
-
-
-class FrecklesRunTarget(object):
-    def __init__(self, context, target_dict=None, target_string=None):
-
-        self.context = context
-        self._target_string = target_string
-        if target_dict is None:
-            target_dict = {}
-        self._target_dict = target_dict
-
-        self._target_dict_base = None
-
-        self._config = None
-
-        self._protocol = None
-        self._user = None
-        self._port = None
-        self._host = None
-        self._connection_type = None
-        self._ssh_key = None
-        self._become_pass = None
-        self._login_pass = None
-
-    def _init_config(self):
-
-        if self._target_string is not None:
-            self._target_dict_base = parse_target_string(
-                self._target_string, context=self.context
-            )
-        else:
-            self._target_dict_base = {}
-
-        self._config = dict_merge(
-            self._target_dict_base, self._target_dict, copy_dct=False
-        )
-
-        if "host" not in self._config.keys():
-            self._config["host"] = "localhost"
-
-        self._protocol = self._config.get("protocol", None)
-        self._user = self._config.get("user", None)
-        self._port = self._config.get("port", None)
-        self._host = self._config.get("host", None)
-        self._connection_type = self._config.get("connection_type", None)
-        self._ssh_key = self._config.get("ssh_key", None)
-        self._become_pass = self._config.get("become_pass", None)
-        self._login_pass = self._config.get("login_pass", None)
-
-    @property
-    def connection_type(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._connection_type
-
-    @property
-    def ssh_key(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._ssh_key
-
-    @property
-    def become_pass(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._become_pass
-
-    @become_pass.setter
-    def become_pass(self, become_pass):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        self._become_pass = become_pass
-        self._config["become_pass"] = become_pass
-
-    @property
-    def login_pass(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._login_pass
-
-    @login_pass.setter
-    def login_pass(self, login_pass):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        self._login_pass = login_pass
-        self._config["login_pass"] = login_pass
-
-    @property
-    def protocol(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-        return self._protocol
-
-    @property
-    def user(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._user
-
-    @property
-    def port(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._port
-
-    @property
-    def host(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        return self._host
-
-    @property
-    def config(self):
-
-        if self._target_dict_base is None:
-            self._init_config()
-
-        result = {}
-        if self.protocol is not None:
-            result["protocol"] = self.protocol
-        if self.user is not None:
-            result["user"] = self.user
-        if self.port is not None:
-            result["port"] = self.port
-        if self.host is not None:
-            result["host"] = self.host
-        if self.connection_type is not None:
-            result["connection_type"] = self.connection_type
-        if self.ssh_key is not None:
-            result["ssh_key"] = self.ssh_key
-        if self.become_pass is not None:
-            result["become_pass"] = self.become_pass
-        if self.login_pass is not None:
-            result["ssh_key"] = self.login_pass
-
-        return result

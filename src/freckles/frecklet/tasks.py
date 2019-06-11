@@ -2,7 +2,7 @@
 import copy
 import logging
 import os
-from collections import Mapping
+from collections import Mapping, Sequence
 
 from colorama import Style
 from six import string_types
@@ -28,7 +28,7 @@ from frkl.defaults import (
 )
 from frkl.processors import ConfigProcessor
 from frutils import add_key_to_dict, get_template_keys, special_dict_to_dict
-from ting.ting_attributes import ValueAttribute, TingAttribute
+from ting.ting_attributes import ValueAttribute, TingAttribute, MultiCacheResult
 
 log = logging.getLogger("freckles")
 
@@ -313,7 +313,7 @@ class NodeCounter(object):
 class TaskTreeAttribute(TingAttribute):
     def provides(self):
 
-        return ["task_tree"]
+        return ["task_tree", "task_leaves", "resources"]
 
     def requires(self):
 
@@ -327,7 +327,25 @@ class TaskTreeAttribute(TingAttribute):
         task_tree.create_node(identifier=counter.current_count, tag=ting.id, data=ting)
         self._build_tree(task_tree=task_tree, ting=ting, counter=counter)
 
-        return task_tree
+        temp_leaves = task_tree.leaves()
+        task_leaves = []
+        requirements = {}
+        for t in temp_leaves:
+            leaf = t.data["task"]
+            task_leaves.append(leaf)
+            req = leaf[FRECKLET_KEY_NAME].get("resources", {})
+            for k, v in req.items():
+                if isinstance(v, string_types) or not isinstance(v, Sequence):
+                    v = [v]
+                requirements.setdefault(k, []).extend(v)
+
+        result = {
+            "task_tree": task_tree,
+            "task_leaves": task_leaves,
+            "resources": requirements,
+        }
+
+        return MultiCacheResult(**result)
 
     def _build_tree(self, task_tree, ting, counter):
 
