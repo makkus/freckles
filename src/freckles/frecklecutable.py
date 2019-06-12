@@ -468,14 +468,23 @@ class Frecklecutable(object):
 
     def run_frecklecutable(
         self,
-        inventory,
-        run_config,
+        inventory=None,
+        run_config=None,
         run_vars=None,
         parent_task=None,
         result_callback=None,
         elevated=None,
         env_dir=None,
     ):
+
+        if inventory is None:
+            inventory = VarsInventory()
+
+        if run_config is None:
+            run_config = FrecklesRunConfig()
+
+        if isinstance(run_config, string_types):
+            run_config = FrecklesRunConfig(target_string=run_config)
 
         if isinstance(run_config, FrecklesRunConfig):
             run_config = run_config.config
