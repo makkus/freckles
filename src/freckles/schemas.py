@@ -47,12 +47,14 @@ FRECKLES_CONTEXT_SCHEMA = {
         "type": "list",
         "default": ["nsbl", "tempting", "freckles"],
         "doc": "A list of freckles adapters to use in this context.",
+        "tags": ["safe"],
     },
     "repos": {
         "empty": False,
         "default": ["default", "user", "./.freckles"],
         "type": "list",
         "schema": {"type": "string"},
+        "tags": ["safe"],
         "doc": {
             "short_help": "A list of repositories containing frecklets and/or associated resources.",
             "help": """"A list of repositories containing frecklets and/or associated resources.
