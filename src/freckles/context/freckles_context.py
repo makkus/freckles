@@ -168,6 +168,7 @@ class FrecklesContext(object):
         for adapter in self._adapters.values():
 
             resource_types = adapter.get_supported_resource_types()
+
             map = {}
             for rt in resource_types:
                 folders = self._get_resources_of_type(rt)

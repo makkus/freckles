@@ -167,7 +167,7 @@ def augment_meta_loader_conf(loader_conf_orig):
         if isinstance(attr, Mapping) and "FreckletMetaAttribute" in attr.keys():
             attr["FreckletMetaAttribute"].setdefault("default", {}).setdefault(
                 "vars", {}
-            )["inherit"] = True
+            )["inherit"] = False
             break
 
     return loader_conf
