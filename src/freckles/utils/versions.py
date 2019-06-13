@@ -40,6 +40,10 @@ def get_versions():
         from freckles_cli import __version__ as freckles_cli_version
     except (Exception):
         freckles_cli_version = "0.0.0"
+    try:
+        from pyckles import __version__ as pyckles_cli_version
+    except (Exception):
+        pyckles_cli_version = "0.0.0"
 
     versions = CommentedMap()
     versions["freckles"] = freckles_version
@@ -51,5 +55,6 @@ def get_versions():
     versions["tempting"] = tempting_version
     versions["freckles_adapter_nsbl"] = freckles_adapter_nsbl_version
     versions["freckles_cli"] = freckles_cli_version
+    versions["pyckles"] = pyckles_cli_version
 
     return versions
