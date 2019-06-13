@@ -21,7 +21,7 @@ cursor==1.2.0
 decorator==4.4.0          # via dogpile.cache
 dogpile.cache==0.7.1
 future==0.17.1
-halo==0.0.24
+halo==0.0.26
 idna==2.8                 # via requests
 jinja2==2.10.1
 log-symbols==0.0.14       # via halo
