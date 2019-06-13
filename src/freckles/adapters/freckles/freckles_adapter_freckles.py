@@ -2,6 +2,7 @@
 import copy
 import logging
 import os
+import sys
 
 from ruamel.yaml import YAML
 
@@ -39,7 +40,25 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
 
     def get_folders_for_alias(self, alias):
 
-        return []
+        if alias != "default":
+            return []
+
+        if not hasattr(sys, "frozen"):
+            frecklet_dir = os.path.realpath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "..",
+                    "external",
+                    "freckles_frecklets",
+                )
+            )
+        else:
+            frecklet_dir = os.path.join(
+                sys._MEIPASS, "freckles", "external", "freckles_frecklets"
+            )
+
+        return ["frecklet::{}".format(frecklet_dir)]
 
     def get_supported_resource_types(self):
 
@@ -51,81 +70,7 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
 
     def get_extra_frecklets(self):
 
-        extra = {}
-
-        frecklecutable_string = """---
-doc:
-  short_help: Execute a frecklet indirectly.
-  help: |
-    Execute a frecklet within another frecklet.
-
-    This is useful, for example, to do some basic installation
-    tasks on a freshly installed machine, harden it, add an admin user. After this, 'normal' frecklet tasks can be run.
-args:
-  frecklet:
-    doc:
-      short_help: The name of the frecklet.
-    type: string
-    required: true
-    empty: false
-    cli:
-      param_decls:
-        - "--frecklet"
-        - "-f"
-  elevated:
-    doc:
-      short_help: "Whether this frecklet needs elevated permissions."
-    type: boolean
-    required: false
-    cli:
-      param_decls:
-        - "--elevated/--not-elevated"
-        - "-e/-ne"
-  target:
-    doc:
-      short_help: "The target string for this run."
-    type: string
-    required: false
-    default: localhost
-    cli:
-      param_decls:
-        - "--target"
-        - "-t"
-  login_pass:
-    doc:
-      short_help: "The login/ssh password of the user when connecting to the target."
-    type: string
-    secret: true
-    required: false
-  become_pass:
-    doc:
-      short_help: "The password to gain elevated privileges on the password."
-    type: string
-    secret: true
-    required: false
-  vars:
-    doc:
-      short_help: The parameters for this frecklet.
-    type: dict
-    required: false
-    empty: true
-frecklets:
- - frecklet:
-     name: frecklecute
-     type: frecklecutable
-     elevated: "{{:: elevated ::}}"
-   vars:
-     frecklet: "{{:: frecklet ::}}"
-     target: "{{:: target ::}}"
-     become_pass: "{{:: become_pass ::}}"
-     login_pass: "{{:: login_pass ::}}"
-     elevated: "{{:: elevated ::}}"
-     vars: "{{:: vars ::}}"
-"""
-
-        extra["frecklecute"] = yaml.load(frecklecutable_string)
-
-        return extra
+        return {}
 
     def prepare_execution_requirements(self, run_config, task_list, parent_task):
 

@@ -1,0 +1,67 @@
+doc:
+  short_help: Execute a frecklet indirectly.
+  help: |
+    Execute a frecklet within another frecklet.
+
+    This is useful, for example, to do some basic installation
+    tasks on a freshly installed machine, harden it, add an admin user. After this, 'normal' frecklet tasks can be run.
+args:
+  frecklet:
+    doc:
+      short_help: The name of the frecklet.
+    type: string
+    required: true
+    empty: false
+    cli:
+      param_decls:
+        - "--frecklet"
+        - "-f"
+  elevated:
+    doc:
+      short_help: "Whether this frecklet needs elevated permissions."
+    type: boolean
+    required: false
+    cli:
+      param_decls:
+        - "--elevated/--not-elevated"
+        - "-e/-ne"
+  target:
+    doc:
+      short_help: "The target string for this run."
+    type: string
+    required: false
+    default: localhost
+    cli:
+      param_decls:
+        - "--target"
+        - "-t"
+  login_pass:
+    doc:
+      short_help: "The login/ssh password of the user when connecting to the target."
+    type: string
+    secret: true
+    required: false
+  become_pass:
+    doc:
+      short_help: "The password to gain elevated privileges on the password."
+    type: string
+    secret: true
+    required: false
+  vars:
+    doc:
+      short_help: The parameters for this frecklet.
+    type: dict
+    required: false
+    empty: true
+frecklets:
+ - frecklet:
+     name: frecklecute
+     type: frecklecutable
+     elevated: "{{:: elevated ::}}"
+   vars:
+     frecklet: "{{:: frecklet ::}}"
+     target: "{{:: target ::}}"
+     become_pass: "{{:: become_pass ::}}"
+     login_pass: "{{:: login_pass ::}}"
+     elevated: "{{:: elevated ::}}"
+     vars: "{{:: vars ::}}"
