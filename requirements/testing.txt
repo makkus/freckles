@@ -34,7 +34,7 @@ git+https://gitlab.com/frkl/ting@develop#egg=ting
 halo==0.0.26
 idna==2.8                 # via requests
 jinja2==2.10.1            # via click-completion
-log-symbols==0.0.14       # via halo
+log-symbols==0.0.13       # via halo
 markdown==3.1             # via mdv
 markupsafe==1.1.1         # via jinja2
 mdv==1.7.4
