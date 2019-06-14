@@ -128,27 +128,38 @@ class FrecklesContext(object):
             # )
 
         if callback_config == ["result"]:
-            self._callbacks.append(load_callback("silent"))
+            callback_config.append("silent")
+
+        _print_result = False
+        for _cc in callback_config:
+            if _cc == "result":
+                _print_result = True
+                break
+
+        if _print_result:
             self.print_result = True
-        else:
+            callback_config.remove("result")
 
-            for cc in callback_config:
-                if isinstance(cc, string_types):
-                    c = load_callback(cc)
-                elif isinstance(cc, Mapping):
-                    if len(cc) != 1:
-                        raise Exception(
-                            "Invalid callback configuration, only one key allowed: {}".format(
-                                cc
-                            )
+        for cc in callback_config:
+            if isinstance(cc, string_types):
+                c = load_callback(cc)
+            elif isinstance(cc, Mapping):
+                if len(cc) != 1:
+                    raise Exception(
+                        "Invalid callback configuration, only one key allowed: {}".format(
+                            cc
                         )
-                    c_name = list(cc.keys())[0]
-                    c_config = cc[c_name]
-                    c = load_callback(c_name, callback_config=c_config)
-                else:
-                    raise Exception("Invalid callback config: {}".format(cc))
+                    )
+                c_name = list(cc.keys())[0]
+                c_config = cc[c_name]
+                c = load_callback(c_name, callback_config=c_config)
+            else:
+                raise Exception("Invalid callback config: {}".format(cc))
 
-                self._callbacks.append(c)
+            if self.print_result:
+                c.use_stderr = True
+
+            self._callbacks.append(c)
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
