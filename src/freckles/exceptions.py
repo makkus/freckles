@@ -117,7 +117,7 @@ class FreckletBuildException(FrklException):
 
 
 class InvalidFreckletException(FrklException):
-    def __init__(self, frecklet, parent_exception, frecklet_name=None):
+    def __init__(self, frecklet=None, parent_exception=None, frecklet_name=None):
 
         self.frecklet = frecklet
         self.parent_exception = parent_exception

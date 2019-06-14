@@ -57,7 +57,6 @@ frecklets:
  - frecklet:
      name: frecklecute
      type: frecklecutable
-     elevated: "{{:: elevated ::}}"
    vars:
      frecklet: "{{:: frecklet ::}}"
      target: "{{:: target ::}}"

@@ -196,12 +196,7 @@ class FrecklesRunTarget(object):
 
 class FrecklesRunConfig(FrecklesRunTarget):
     def __init__(
-        self,
-        target_dict=None,
-        target_string=None,
-        elevated=False,
-        no_run=False,
-        callback="freckles_callback",
+        self, target_dict=None, target_string=None, elevated=None, no_run=False
     ):
 
         super(FrecklesRunConfig, self).__init__(
@@ -239,6 +234,7 @@ class FrecklesRunConfig(FrecklesRunTarget):
 
         temp = super(FrecklesRunConfig, self).config
         temp["no_run"] = self.no_run
-        temp["elevated"] = self.elevated
+        if self.elevated is not None:
+            temp["elevated"] = self.elevated
 
         return temp

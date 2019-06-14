@@ -513,8 +513,11 @@ class Frecklecutable(object):
 
         paused = False
         if parent_task is not None and (
-            secret_args or run_config.become_pass or run_config.login_pass
+            secret_args
+            or run_config.get("become_pass", None) == "::ask::"
+            or run_config.get("login_pass", None) == "::ask::"
         ):
+            # we need to pause our task callback because of user input
             parent_task.pause()
             paused = True
 
@@ -774,6 +777,7 @@ class Frecklecutable(object):
                         )
 
                 try:
+
                     run_properties = adapter._run(
                         tasklist=current_tasklist,
                         run_vars=run_vars,

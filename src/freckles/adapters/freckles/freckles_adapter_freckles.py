@@ -7,11 +7,8 @@ import sys
 from ruamel.yaml import YAML
 
 from freckles.adapters import FrecklesAdapter
-from freckles.defaults import (
-    VARS_KEY,
-    FRECKLES_PROPERTIES_METADATA_KEY,
-    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
-)
+from freckles.defaults import VARS_KEY, FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY
+from freckles.exceptions import InvalidFreckletException
 from freckles.frecklet.vars import VarsInventory
 from freckles.context.run_config import FrecklesRunTarget
 from frutils import dict_merge
@@ -110,22 +107,24 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
         parent_task,
     ):
 
-        run_elevated = run_config["elevated"]
+        # run_elevated = run_config["elevated"]
+        # we are not using the forwarded elevated here, better to let freckles figure it out
+        run_elevated = None
 
         result_list = []
 
         for task_nr, task in enumerate(tasklist):
-
             vars_dict = task[VARS_KEY]
 
             frecklet_name = vars_dict["frecklet"]
             frecklet = self.context.get_frecklet(frecklet_name=frecklet_name)
 
+            if frecklet is None:
+                raise InvalidFreckletException(frecklet_name=frecklet_name)
+
             # f_type = task["type"]  # always 'frecklecute' for now
 
-            elevated = vars_dict.get(FRECKLES_PROPERTIES_METADATA_KEY, {}).get(
-                FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, None
-            )
+            elevated = vars_dict.get(FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, None)
             if elevated is None:
                 elevated = run_elevated
             target = vars_dict.get("target", "localhost")
