@@ -189,7 +189,7 @@ class FrecklesRunTarget(object):
         if self.become_pass is not None:
             result["become_pass"] = self.become_pass
         if self.login_pass is not None:
-            result["ssh_key"] = self.login_pass
+            result["login_pass"] = self.login_pass
 
         return result
 

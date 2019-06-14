@@ -476,7 +476,6 @@ class Frecklecutable(object):
         elevated=None,
         env_dir=None,
     ):
-
         if inventory is None:
             inventory = VarsInventory()
 
@@ -573,6 +572,7 @@ class Frecklecutable(object):
             parent_task.pause()
 
         run_secrets["become_pass"] = run_config.pop("become_pass", None)
+
         if run_secrets["become_pass"] == "::ask::":
 
             msg = ""
@@ -777,7 +777,6 @@ class Frecklecutable(object):
                         )
 
                 try:
-
                     run_properties = adapter._run(
                         tasklist=current_tasklist,
                         run_vars=run_vars,
