@@ -209,15 +209,28 @@ This behaviour is highly [adapter](/doc/adapters) dependent. As the [nsbl adapte
 - you enter the password in one of the ways described above
 - *freckles* keeps it in memory, and eventually hands it off to the adapter that runs the *frecklet* in question
 - the 'nsbl' adapter takes the var_name/password map and replaces the password with a string like: ``{{ __secret_<variable_name>__ }}``
-- it creates an Ansible vault file, using a randomly generated key and puts it into the playbook directory (using [this bash script](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/create-vault.sh) -- secret vars are provided by piping them via stdin)
+- it creates an Ansible vault file, using a randomly generated key and puts it into the playbook directory (using [this bash script](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/create-vault.sh))
 - a vault key file (with only read permissions for the current users) with the random password is written in the Ansible playbook directory
 - the ansible-playbook run is kicked off using [``--vault-id=freckles_run@<vault_key_file> --extra-vars=@$<vault_file>``](https://gitlab.com/nsbl/nsbl/blob/develop/src/nsbl/external/nsbl-environment-template/%7B%7Bcookiecutter.env_dir%7D%7D/run_all_plays.sh#L24)
-- as a first thing done in the Ansible run after reading them, both key file and vault file are being deleted
+- as a first thing done in the Ansible run after reading them, the key file is being deleted
 - after the run finishes, *freckles* tries in two more places to delete those two files, in case there was an error and Ansible could not delete the files itself
 
 This is still not 100% ideal, as there is a chance that when the *freckles* run is interrupted at just the right place, the files might not have been deleted and local users who have access to your user account could read them. I do think this is an acceptable trade-off, because, chances are, that if that's the case you have bigger things to worry about anyway. But that decision is up to you.
 
 Last, but not least, *freckles* is written in Python, which does not allow to overwrite strings in memory to 'destroy' passwords once they are no longer needed (as far as I know -- do let me know if I'm wrong!!!). So this is a limitation we'll all have to live with, unfortunately.
+
+</div>
+
+### Secrets in results {: .section-title}
+<div class="section-block" markdown="1">
+
+Currently, there is only very basic support for returning results from tasks. Often results are not necessary, because
+all the information necessary is in the input variables of a task. In some cases it is important though, for example
+when creating a virtual machine in the cloud, and you need to know the public IP address for the machine to be able to
+connect to it. This can be done with *freckles*, but in some cases the information sent back contains secret information
+(like for example a root password if no ssh-key was specified when creating the server). For now, *freckles* does nothing
+to hide those secrets, and it is the users responsibility to either make sure those secrets aren't sent in the first place
+(in our example by providing a ssh key when creating the server), or by other means (changing the password instantly etc.).
 
 </div>
 
