@@ -10,13 +10,14 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
-from freckles.frecklet.vars import VarsInventory, VAR_ADAPTERS
-from freckles.context.run_config import FrecklesRunConfig
+from .frecklet.vars import VarsInventory, VAR_ADAPTERS
+from .context.run_config import FrecklesRunConfig
 from frutils import (
     replace_strings_in_obj,
     get_template_keys,
     can_passwordless_sudo,
     dict_merge,
+    special_dict_to_dict,
 )
 from frutils.exceptions import FrklException
 from frutils.tasks.tasks import Tasks
@@ -194,10 +195,14 @@ class Frecklecutable(object):
         task=None,
     ):
 
+        _schema = copy.deepcopy(schema)
+        _var_value_map = copy.deepcopy(var_value_map)
+        _schema = special_dict_to_dict(schema)
+        _var_value_map = special_dict_to_dict(_var_value_map)
         validator = TingValidator(
-            schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
+            _schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
-        valid = validator.validated(var_value_map)
+        valid = validator.validated(_var_value_map)
 
         if valid is None:
             if vars_pre_clean is None:

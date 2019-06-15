@@ -242,9 +242,12 @@ class Inventory(object):
 
 
 class VarsInventory(Inventory):
-    def __init__(self, *vars, secret_keys=None):
+    def __init__(self, vars=None, secret_keys=None):
 
         super(VarsInventory, self).__init__()
+
+        if vars is None:
+            vars = []
 
         self._init_vars_list = vars
         if secret_keys is None:

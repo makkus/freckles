@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from freckles.defaults import FRECKLES_CONFIG_DIR
+from .defaults import FRECKLES_CONFIG_DIR
 from .context.config import ContextConfigs
 from .context.freckles_context import FrecklesContext
 
