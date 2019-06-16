@@ -3,6 +3,7 @@ import abc
 import logging
 import secrets
 import sys
+from collections import Sequence
 
 import click
 import six
@@ -249,12 +250,16 @@ class VarsInventory(Inventory):
         if vars is None:
             vars = []
 
+        if not isinstance(vars, Sequence):
+            vars = [vars]
+
         self._init_vars_list = vars
         if secret_keys is None:
             secret_keys = []
         self._secrets = secret_keys
 
         self._vars = {}
+
         for v in self._init_vars_list:
             dict_merge(self._vars, v, copy_dct=False)
 
