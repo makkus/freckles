@@ -86,6 +86,7 @@ build:
     - devpi login frkl --password="${DEVPI_PASSWORD}"
     - devpi use /frkl/dev
     - devpi upload
+    - "curl -F package=@dist/frutils-*.tar.gz https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
   artifacts:
     paths:
       - dist/
@@ -104,6 +105,10 @@ build_stable:
     - devpi login frkl --password="${DEVPI_PASSWORD}"
     - devpi use /frkl/stable
     - devpi upload
+    - UPLOAD_FILE=(dist/freckles-*.tar.gz)
+    - "curl -F package=@${UPLOAD_FILE} https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
+    - UPLOAD_FILE=(dist/freckles-*.whl)
+    - "curl -F package=@${UPLOAD_FILE} https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
   artifacts:
     paths:
       - dist/
@@ -122,6 +127,10 @@ build_beta:
     - devpi login frkl --password="${DEVPI_PASSWORD}"
     - devpi use /frkl/beta
     - devpi upload
+    - UPLOAD_FILE=(dist/freckles-*.tar.gz)
+    - "curl -F package=@${UPLOAD_FILE} https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
+    - UPLOAD_FILE=(dist/freckles-*.whl)
+    - "curl -F package=@${UPLOAD_FILE} https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
   artifacts:
     paths:
       - dist/
