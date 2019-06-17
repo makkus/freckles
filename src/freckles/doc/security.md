@@ -122,7 +122,7 @@ args:
 
 All the *frecklets* in the 'default' and 'community' repositories use this marker. If you use a *frecklet* from a 3rd party, have a look at it's content and make sure this is done properly. This is probably also a good indicator on the quality of the *frecklet* in question...
 
-#### Plain password via command-line arg {: .block-title}
+#### Plain password via cli arg {: .block-title}
 <div class="section-block" markdown="1">
 
 It is not a good idea to just use passwords as normal cli arguments, ala:
