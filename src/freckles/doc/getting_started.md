@@ -473,9 +473,7 @@ SSH PASS: ****
 ## Writing your own *frecklets* {: .section-title}
 <div class="section-block" markdown="1">
 
-You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *frecklets*, or are available via the [community repository](/frecklets/community).
-
-But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file, and assemble the tasks you need done.
+You might very well be happy enough to be able to run any of the prepared *frecklets* that ship with *freckles*. But maybe you'd like to combine a few of those *frecklets*, and create your own re-usable, share-able scripts, to do custom tasks? This is quite easy to do with *freckles*. All you need to know is how to create a [YAML](https://yaml.org) file, and assemble the tasks you need done.
 
 <!-- begin block your first frecklet -->
 ### Your first *frecklet*
@@ -497,7 +495,7 @@ that does not require root permissions. This example does not make a whole lot o
  - we need to create the archive
  - we also should delete the directory, once the archive was created
 
-After perusing the [frecklet index](/frecklets/default), we found we can use those *frecklets* for what we have to do:
+After perusing the [frecklet index](/frecklets/default), we found a few *frecklets* we can use to solve our problem:
 
 - [file-downloaded](/frecklets/default/filesystem/file-downloaded/)
 - [file-with-content](/frecklets/default/filesystem/file-with-content/)
