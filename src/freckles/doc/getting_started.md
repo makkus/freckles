@@ -17,13 +17,19 @@ For details what exactly the bootstrap script does, and for other options to get
 
 </div>
 
+## Applications
+
+The *freckles* package comes with several commandline applications. The default application is also called ``freckles``, and it can be used to run and develop *frecklets*, manage contexts, and a few other things.
+
+The command you'll probably use the most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
+
+
 <!-- getting help -->
 ## Getting help {: .section-title}
 <div class="section-block" markdown="1">
 
 *freckles* operates on lists of tasks, each such list of tasks is called a *frecklet*. A *frecklet* contains one or more task items, of which each one can either be a backend-specific low-level, atomic operation (e.g. 'create a directory'), or another *frecklet* (which typically encapsulates a higher-level objective, like for example 'setup a standalone Wordpress instance'). You will be dealing mostly with the latter, at least initially.
 
-The *freckles* package comes with several commandline applications, the one you'll probably use most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
 
 To display help for ``frecklecute`` (as well as any of the other included applications), use the ``--help`` flag:
 
