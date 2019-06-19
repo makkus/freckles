@@ -97,7 +97,7 @@ Let's get a list of all the *frecklets* that are supported out of the box, use t
 <div class="code-max-height" markdown="1">
 
 ```console
-> freckles list
+> frecklecute --list
 
 frecklet                            description
 --------------------------------    ----------------------------
