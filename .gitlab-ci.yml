@@ -86,7 +86,6 @@ build:
     - devpi login frkl --password="${DEVPI_PASSWORD}"
     - devpi use /frkl/dev
     - devpi upload
-    - "curl -F package=@dist/frutils-*.tar.gz https://${GEMFURY_TOKEN}@push.fury.io/frkl/"
   artifacts:
     paths:
       - dist/
