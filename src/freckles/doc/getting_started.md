@@ -17,12 +17,14 @@ For details what exactly the bootstrap script does, and for other options to get
 
 </div>
 
-## Applications
+## Applications {: .section-title}
+<div class="section-block" markdown="1">
 
 The *freckles* package comes with several commandline applications. The default application is also called ``freckles``, and it can be used to run and develop *frecklets*, manage contexts, and a few other things.
 
 The command you'll probably use the most in the beginning is called ``frecklecute`` and it lets you execute one out of a set of *frecklets* that are shipped with *freckles* by default, as well as your own, local ones. A typical purpose would be installing and configuring a service, or setting up the environment for a development project.
 
+</div>
 
 <!-- getting help -->
 ## Getting help {: .section-title}
