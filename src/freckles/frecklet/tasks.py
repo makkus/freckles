@@ -219,7 +219,7 @@ class TaskTypePrefixProcessor(ConfigProcessor):
 
         if "::" in command_name:
 
-            if task_type is not None:
+            if task_type is not None and task_type != "frecklet":
                 raise FrecklesConfigException(
                     "Invalid task item '{}': command name contains '::', but type is already specified.".format(
                         new_config
