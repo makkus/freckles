@@ -915,7 +915,7 @@ class FrecklesContext(object):
                     shutil.rmtree(env_dir)
 
         os.makedirs(env_dir)
-        os.chmod(0o0700)
+        os.chmod(env_dir, 0o0700)
         result["env_dir"] = env_dir
 
         if symlink:
