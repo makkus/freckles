@@ -166,7 +166,7 @@ There are 3 special repository aliases that can be used instead of a path:
         },
         "tags": ["safe"],
     },
-    "keep_ssh_session": {
+    "keep_ssh_agent": {
         "type": "boolean",
         "default": False,
         "doc": {
