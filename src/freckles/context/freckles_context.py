@@ -72,7 +72,7 @@ def startup_housekeeping():
                 )
             )
 
-    os.chmod(FRECKLES_SHARE_DIR, 0o0700)
+    os.chmod(FRECKLES_SHARE_DIR, 0o0755)
 
     if os.path.exists(FRECKLES_CONFIG_DIR):
         os.chmod(FRECKLES_CONFIG_DIR, 0o0700)
@@ -915,6 +915,7 @@ class FrecklesContext(object):
                     shutil.rmtree(env_dir)
 
         os.makedirs(env_dir)
+        os.chmod(0o0700)
         result["env_dir"] = env_dir
 
         if symlink:
