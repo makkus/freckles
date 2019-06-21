@@ -166,6 +166,15 @@ There are 3 special repository aliases that can be used instead of a path:
         },
         "tags": ["safe"],
     },
+    "keep_ssh_session": {
+        "type": "boolean",
+        "default": False,
+        "doc": {
+            "short_help": "whether to keep a 'separate' ssh-agent session open between freckles runs, to prevent having to enter a ssh key password multiiple times",
+            "help": "if set to true, the user is responsible for terminating the ssh-agent process in question",
+        },
+        "tags": ["safe"],
+    },
 }
 
 

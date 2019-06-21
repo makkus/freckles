@@ -96,3 +96,8 @@ for filter_name, filter_details in jinja2_filters.ALL_FRUTIL_FILTERS.items():
     DEFAULT_FRECKLES_JINJA_ENV.filters[filter_name] = filter_details["func"]
 
 DEFAULT_RUN_CONFIG_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["default"])
+
+
+DEFAULT_FRECKLES_SSH_SESSION_SOCK = os.path.join(
+    FRECKLES_SHARE_DIR, "ssh", "freckles_ssh_sock"
+)
