@@ -2,9 +2,11 @@
 import logging
 
 import colorama
+import dpath
 from ruamel.yaml.comments import CommentedMap
 
 from frutils import readable_yaml, dict_merge
+from frutils.exceptions import FrklException
 
 colorama.init()
 
@@ -56,18 +58,30 @@ class FrecklesRun(object):
 
 class FrecklesResultCallback(object):
     """ Class to gather results of a frecklecute run.
-
-    Args:
-        add_strategy:
     """
 
     def __init__(self):
 
         self._result = CommentedMap()
 
-    def add_result(self, result_var, result):
+    def add_result(self, result_var, result, query=None):
 
         result_key_val = self._result.setdefault(result_var, CommentedMap())
+
+        if query is not None:
+            try:
+                result = dpath.util.get(result, query)
+            except (Exception):
+                raise FrklException(
+                    msg="Could not query registered result using query string '{}'".format(
+                        query
+                    ),
+                    solution="Check query string and make sure the format of the result is supported",
+                    references={
+                        "dpath documentation": "https://github.com/akesterson/dpath-python"
+                    },
+                )
+
         dict_merge(result_key_val, result, copy_dct=False)
 
     @property

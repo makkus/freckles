@@ -813,7 +813,6 @@ class Frecklecutable(object):
                         msg = e.message
                     else:
                         msg = str(e)
-
                     if not root_run_task.finished:
                         root_run_task.finish(success=False, error_msg=msg)
                     # click.echo("frecklecutable run failed: {}".format(e))
