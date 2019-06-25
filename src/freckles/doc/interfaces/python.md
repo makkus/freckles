@@ -37,7 +37,7 @@ ec2.aws_access_key = "<your aws access key>"
 ec2.aws_secret_key = "<your aws secret key>"
 ec2.key_name = "yubi"               # ssh-key-pair name
 ec2.region = "eu-west-1"
-ec2.register = "wp_box"
+ec2.register_var = "wp_box"
 ec2.image_id = "ami-440d4837"          # Debian stretch
 ec2.security_groups = ["web-traffic"]  # already exists
 
