@@ -82,7 +82,13 @@ class CliArgumentsAttribute(TingAttribute):
         if var.default_user_input() is not None:
             option_properties["default"] = var.default_user_input()
 
-        option_properties["required"] = var.required
+        if not var.required:
+            option_properties["required"] = False
+        else:
+            if var.schema.get("excludes", []):
+                option_properties["required"] = False
+            else:
+                option_properties["required"] = True
 
         auto_param_decls = False
         if "param_decls" not in option_properties.keys():
