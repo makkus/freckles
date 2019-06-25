@@ -320,7 +320,7 @@ class FrecklesContext(object):
                         break
 
                 if not copied:
-                    if dest_path_res_type in ignore_types:
+                    if res_type in ignore_types:
                         continue
                     raise Exception(
                         "Could not copy resource (type: {}): {}".format(res_type, u)
