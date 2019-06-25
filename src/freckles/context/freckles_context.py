@@ -297,6 +297,8 @@ class FrecklesContext(object):
 
         os.makedirs(dest_path, exist_ok=True)
 
+        ignore_types = ["python-package"]
+
         for res_type, urls in self.get_frecklet(frecklet_name).resources.items():
 
             for u in urls:
@@ -318,6 +320,8 @@ class FrecklesContext(object):
                         break
 
                 if not copied:
+                    if dest_path_res_type in ignore_types:
+                        continue
                     raise Exception(
                         "Could not copy resource (type: {}): {}".format(res_type, u)
                     )
