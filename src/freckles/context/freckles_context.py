@@ -27,6 +27,7 @@ from freckles.exceptions import FrecklesConfigException, FrecklesPermissionExcep
 from freckles.frecklet.arguments import *  # noqa
 from freckles.frecklet.frecklet import FRECKLET_LOAD_CONFIG
 from freckles.utils.utils import augment_meta_loader_conf
+from frkl import content_from_url
 from frkl.utils import expand_string_to_git_details
 from frkl_pkg import FrklPkg
 from frutils import (
@@ -717,6 +718,22 @@ class FrecklesContext(object):
                 )
                 frecklet = self.get_frecklet(frecklet_name, validate=validate)
                 return (frecklet, frecklet_name)
+
+            if self.config_value("allow_remote") and is_url_or_abbrev(
+                frecklet_full_path_or_name_or_content
+            ):
+                content = content_from_url(
+                    frecklet_full_path_or_name_or_content,
+                    update=True,
+                    cache_base=os.path.join(FRECKLES_CACHE_BASE, "remote_frecklets"),
+                )
+                frecklet_name = self.add_dynamic_frecklet(
+                    path_or_frecklet_content=content, validate=validate
+                )
+                frecklet = self.get_frecklet(frecklet_name, validate=validate)
+                return (frecklet, frecklet_name)
+
+            print(frecklet_full_path_or_name_or_content)
 
             if frecklet_full_path_or_name_or_content in self.get_frecklet_names():
                 frecklet = self.get_frecklet(
