@@ -733,8 +733,6 @@ class FrecklesContext(object):
                 frecklet = self.get_frecklet(frecklet_name, validate=validate)
                 return (frecklet, frecklet_name)
 
-            print(frecklet_full_path_or_name_or_content)
-
             if frecklet_full_path_or_name_or_content in self.get_frecklet_names():
                 frecklet = self.get_frecklet(
                     frecklet_full_path_or_name_or_content, validate=validate
