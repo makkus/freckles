@@ -550,21 +550,31 @@ class Frecklecutable(object):
 
             var_adapter_name = value.strip()[2:-2]
 
-            if var_adapter_name not in VAR_ADAPTERS.keys():
-                raise FrecklesVarException(
-                    frecklet=self.frecklet,
-                    var_name=key,
-                    errors={key: "No var adapter '{}'.".format(var_adapter_name)},
-                    solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(
-                        var_adapter_name
-                    ),
+            if var_adapter_name.startswith("value_from_"):
+                copy_var_name = var_adapter_name[11:]
+                value = inventory.retrieve_value(copy_var_name)
+                secret = (
+                    secret
+                    or copy_var_name in secret_args
+                    or copy_var_name in inventory_secrets
                 )
+                run_inventory.set_value(key, value, is_secret=secret)
+            else:
+                if var_adapter_name not in VAR_ADAPTERS.keys():
+                    raise FrecklesVarException(
+                        frecklet=self.frecklet,
+                        var_name=key,
+                        errors={key: "No var adapter '{}'.".format(var_adapter_name)},
+                        solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(
+                            var_adapter_name
+                        ),
+                    )
 
-            var_adapter_obj = VAR_ADAPTERS[var_adapter_name]
-            value = var_adapter_obj.retrieve_value(
-                key_name=key, arg=arg, frecklet=self.frecklet, is_secret=secret
-            )
-            run_inventory.set_value(key, value, is_secret=secret)
+                var_adapter_obj = VAR_ADAPTERS[var_adapter_name]
+                value = var_adapter_obj.retrieve_value(
+                    key_name=key, arg=arg, frecklet=self.frecklet, is_secret=secret
+                )
+                run_inventory.set_value(key, value, is_secret=secret)
 
         if asked:
             click.echo()
