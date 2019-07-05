@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 import sys
 from distutils.spawn import find_executable
 
@@ -46,12 +47,19 @@ def get_vagrant_details(target_string):
         if not hosts[host]:
             raise Exception("Vagrant host '{}' not running.".format(host))
 
-    vagrant = local["vagrant"]
-    rc, config, stderr = vagrant.run(["ssh-config", host])
+    env = dict(os.environ)  # make a copy of the environment
+    lp_key = "LD_LIBRARY_PATH"  # for Linux and *BSD.
+    lp_orig = env.get(lp_key + "_ORIG")  # pyinstaller >= 20160820 has this
 
-    # config = subprocess.check_output(["vagrant", "ssh-config", host]).decode(
-    #     "utf-8"
-    # )  # nosec
+    with local.env():
+
+        if lp_orig is not None:
+            local.env[lp_key] = lp_orig  # restore the original, unmodified value
+        else:
+            local.env.pop(lp_key, None)  # last resort: remove the env var
+
+        vagrant = local["vagrant"]
+        rc, config, stderr = vagrant.run(["ssh-config", host])
 
     host_details = parse_vagrant_ssh_config_string(config)
     host_details["connection_type"] = "ssh"
@@ -95,8 +103,20 @@ def parse_vagrant_ssh_config_string(config_string):
 def list_vagrant_hosts():
     try:
         vagrant_path = find_executable("vagrant")
-        vagrant_exe = local[vagrant_path]
-        rc, stdout, stderr = vagrant_exe.run(["status", "--machine-readable"])
+
+        env = dict(os.environ)  # make a copy of the environment
+        lp_key = "LD_LIBRARY_PATH"  # for Linux and *BSD.
+        lp_orig = env.get(lp_key + "_ORIG")  # pyinstaller >= 20160820 has this
+
+        with local.env():
+
+            if lp_orig is not None:
+                local.env[lp_key] = lp_orig  # restore the original, unmodified value
+            else:
+                local.env.pop(lp_key, None)  # last resort: remove the env var
+
+            vagrant_exe = local[vagrant_path]
+            rc, stdout, stderr = vagrant_exe.run(["status", "--machine-readable"])
 
         status_out = stdout.rstrip()
         # status_out = (
