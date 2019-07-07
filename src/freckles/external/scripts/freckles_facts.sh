@@ -22,7 +22,8 @@ then
 fi
 
 DEFAULT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python3:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python2:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python:/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
-#DEFAULT_CHECK_PYTHON_EXES="/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
+
+ALT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/conda/freckles/bin/python3:$HOME/.local/share/freckles/envs/conda/freckles/bin/python"
 
 # from: https://stackoverflow.com/questions/3963716/how-to-manually-expand-a-special-variable-ex-tilde-in-bash/29310477#29310477
 function expand_path () {
@@ -264,6 +265,29 @@ function check_python_exes () {
     IFS=${OLD_IFS}
 }
 
+function check_alt_python_exes () {
+
+    echo
+    echo "pythons_alt:"
+    OLD_IFS=${IFS}
+    IFS=:
+
+    for python_exe in ${ALT_CHECK_PYTHON_EXES}
+    do
+        echo "  ${python_exe}:"
+        path=$(which -a ${python_exe} 2> /dev/null)
+        if [[ -z ${path} ]]
+        then
+          echo "    exists: false"
+        else
+          echo "    exists: true"
+          check_python_modules_installed "${python_exe}"
+        fi
+
+    done
+    IFS=${OLD_IFS}
+}
+
 can_passwordless_sudo
 echo "can_passwordless_sudo: $?"
 echo "path: \"$PATH\""
@@ -275,6 +299,7 @@ get_home_directory
 get_username
 read_freckle_files
 check_python_exes
+check_alt_python_exes
 read_box_basics_file
 
 exit 0
