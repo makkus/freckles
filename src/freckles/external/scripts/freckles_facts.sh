@@ -21,7 +21,7 @@ then
   export FRECKLES_CHECK_PYTHON_MODULES="zipfile"
 fi
 
-DEFAULT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python3:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python2:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python:/usr/bin/python:/usr/bin/python2:/usr/bin/python3"
+DEFAULT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python3:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python2:$HOME/.local/share/freckles/envs/virtualenv/freckles/bin/python:/usr/bin/python3:/usr/bin/python:/usr/bin/python2"
 
 ALT_CHECK_PYTHON_EXES="$HOME/.local/share/freckles/envs/conda/freckles/bin/python3:$HOME/.local/share/freckles/envs/conda/freckles/bin/python"
 
