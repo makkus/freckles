@@ -7,6 +7,7 @@ from distutils.spawn import find_executable
 import click
 from plumbum import local
 
+from frutils.exceptions import FrklException
 from frutils.frutils_cli import check_local_executable
 
 log = logging.getLogger("freckles")
@@ -20,8 +21,30 @@ def parse_target_string(target_string):
     elif "find-pi" in target_string:
         details = get_pi_details(target_string)
 
+    elif "::" in target_string:
+        c_type, target_string = target_string.split("::", 1)
+
+        if c_type == "lxd":
+            details = get_lxd_details(target_string=target_string)
+        else:
+            raise FrklException(
+                msg="Can't parse target string.",
+                reason="Unknown connection type: {}".format(c_type),
+            )
+
+        return details
     else:
         details = get_host_details(target_string)
+
+    return details
+
+
+def get_lxd_details(target_string):
+
+    details = {}
+    details["connection_type"] = "lxd"
+    details["host"] = target_string
+    details["user"] = "root"
 
     return details
 
