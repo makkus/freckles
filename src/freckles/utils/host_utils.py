@@ -26,6 +26,8 @@ def parse_target_string(target_string):
 
         if c_type == "lxd":
             details = get_lxd_details(target_string=target_string)
+        elif c_type == "docker":
+            details = get_docker_details(target_string=target_string)
         else:
             raise FrklException(
                 msg="Can't parse target string.",
@@ -45,6 +47,22 @@ def get_lxd_details(target_string):
     details["connection_type"] = "lxd"
     details["host"] = target_string
     details["user"] = "root"
+
+    return details
+
+
+def get_docker_details(target_string):
+
+    if "@" in target_string:
+        user, host = target_string.split("@", 1)
+    else:
+        user = "root"
+        host = target_string
+
+    details = {}
+    details["connection_type"] = "docker"
+    details["host"] = host
+    details["user"] = user
 
     return details
 
