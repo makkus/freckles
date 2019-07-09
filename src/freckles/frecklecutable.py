@@ -814,6 +814,7 @@ class Frecklecutable(object):
                         run_env=run_env_properties,
                         run_properties=run_properties,
                         result=copy.deepcopy(result_callback.result),
+                        success=root_run_task.success,
                     )
                     runs_result.append(run_result)
 

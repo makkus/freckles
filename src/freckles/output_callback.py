@@ -32,6 +32,7 @@ class FrecklesRun(object):
         run_env,
         run_properties,
         result,
+        success,
     ):
 
         self.run_id = run_id
@@ -43,7 +44,17 @@ class FrecklesRun(object):
 
         self.run_properties = run_properties
 
-        self.result = result
+        self._result = result
+
+        self._success = success
+
+    @property
+    def result(self):
+        return self._result
+
+    @property
+    def success(self):
+        return self._success
 
     def __str__(self):
 
