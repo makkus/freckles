@@ -111,7 +111,7 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
         # we are not using the forwarded elevated here, better to let freckles figure it out
         run_elevated = None
 
-        result_list = []
+        current_result = None
 
         for task_nr, task in enumerate(tasklist):
             vars_dict = task[VARS_KEY]
@@ -142,7 +142,7 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
             run_env_task = copy.deepcopy(run_env)
             env_dir = os.path.join(run_env_task["env_dir"], "task_{}".format(task_nr))
 
-            result = fx.run_frecklecutable(
+            current_result = fx.run_frecklecutable(
                 inventory=VarsInventory(vars),
                 run_config=task_run_config,
                 run_vars=run_vars,
@@ -152,6 +152,4 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
                 result_callback=result_callback,
             )
 
-            result_list.append(result)
-
-        return {"subtask_results": result_list}
+        return current_result

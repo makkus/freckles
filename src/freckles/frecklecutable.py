@@ -513,6 +513,9 @@ class Frecklecutable(object):
         if isinstance(run_config, FrecklesRunConfig):
             run_config = run_config.config
 
+        default_run_config = {"host": "localhost"}
+        run_config = dict_merge(default_run_config, run_config, copy_dct=False)
+
         if parent_task is None:
             i_am_root = True
             result_callback = FrecklesResultCallback()
@@ -708,7 +711,7 @@ class Frecklecutable(object):
             self.check_become_pass(run_config, run_secrets, parent_task)
         task_lists.append(new_tasklist)
 
-        runs_result = []
+        current_run_result = None
         root_task = None
         run_env_properties = None
 
@@ -816,8 +819,13 @@ class Frecklecutable(object):
                         run_properties=run_properties,
                         result=copy.deepcopy(result_callback.result),
                         success=root_run_task.success,
+                        root_task=root_run_task,
+                        parent_result=current_run_result,
                     )
-                    runs_result.append(run_result)
+                    current_run_result = run_result
+
+                    if not root_run_task.success:
+                        break
 
                 except (Exception) as e:
 
@@ -835,7 +843,7 @@ class Frecklecutable(object):
                     # traceback.print_exc()
         finally:
             if root_task is None:
-                return runs_result
+                return current_run_result
 
             if i_am_root:
                 root_task.finish()
@@ -861,4 +869,4 @@ class Frecklecutable(object):
                         )
                     )
 
-        return runs_result
+        return current_run_result

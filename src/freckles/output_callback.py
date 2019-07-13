@@ -33,6 +33,8 @@ class FrecklesRun(object):
         run_properties,
         result,
         success,
+        parent_result,
+        root_task,
     ):
 
         self.run_id = run_id
@@ -44,23 +46,19 @@ class FrecklesRun(object):
 
         self.run_properties = run_properties
 
-        self._result = result
+        self.result = result
 
-        self._success = success
+        self.success = success
 
-    @property
-    def result(self):
-        return self._result
-
-    @property
-    def success(self):
-        return self._success
+        self.parent_result = parent_result
+        self.root_task = root_task
 
     def __str__(self):
 
         return readable_yaml(
             {
-                "name": self.frecklet_name,
+                "success": self.success,
+                "result": self.result,
                 "run_properties": self.run_properties,
                 "task_list": self.task_list,
             }

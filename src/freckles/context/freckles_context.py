@@ -3,12 +3,10 @@ import fnmatch
 import io
 import os
 import shutil
-import sys
 import time
 import uuid
 from collections import Mapping
 from datetime import datetime
-from types import ModuleType
 
 from plumbum import local
 from ruamel.yaml import YAML
@@ -975,11 +973,11 @@ class FrecklesContext(object):
 
         return result
 
-    def load_as_python_object(self, frecklet_name, module_path):
-
-        f = self.get_frecklet(frecklet_name=frecklet_name)
-
-        m = ModuleType(module_path)
-        sys.modules[module_path] = m
-
-        exec(f.python_src, m.__dict__)
+    # def load_as_python_object(self, frecklet_name, module_path):
+    #
+    #     f = self.get_frecklet(frecklet_name=frecklet_name)
+    #
+    #     m = ModuleType(module_path)
+    #     sys.modules[module_path] = m
+    #
+    #     exec(f.python_src, m.__dict__)
