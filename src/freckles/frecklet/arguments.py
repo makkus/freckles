@@ -9,22 +9,12 @@ from six import string_types
 
 from freckles.defaults import DEFAULT_FRECKLES_JINJA_ENV, FRECKLES_DEFAULT_ARG_SCHEMA
 from freckles.exceptions import FreckletBuildException, FreckletException
+from freckles.frecklet.vars import is_var_adapter, FRECKLES_CLICK_CEREBUS_ARG_MAP
 from frutils import get_template_keys, dict_merge, readable_yaml
-from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute, Arg
 from ting.ting_cast import MultiCacheResult
 
 log = logging.getLogger("freckles")
-
-FRECKLES_CLICK_CEREBUS_ARG_MAP = {
-    "string": str,
-    "float": float,
-    "integer": int,
-    "boolean": bool,
-    "dict": VarsTypeSimple(),
-    "password": str,
-    # "list": list
-}
 
 
 class CliArgumentsAttribute(TingAttribute):
@@ -54,6 +44,7 @@ class CliArgumentsAttribute(TingAttribute):
 
         result = []
         for var_name, var in vars.items():
+
             parameter = self.create_parameter(var_name, var)
             if parameter is not None:
                 result.append(parameter)
@@ -159,12 +150,12 @@ class CliArgumentsAttribute(TingAttribute):
 
         if option_properties.get("default", None) is not None:
             default_val = option_properties["default"]
-            if (
-                isinstance(default_val, string_types)
-                and default_val.lstrip().startswith("::")
-                and default_val.rstrip().endswith("::")
-            ):
+
+            if is_var_adapter(default_val):
                 option_properties["type"] = str
+
+        if var.secret:
+            option_properties["show_default"] = False
 
         if param_type == "option":
             option_properties["help"] = var.doc.get_short_help()
@@ -364,6 +355,9 @@ class VariablesAttribute(TingAttribute):
                         continue
 
             parent_var = vars[key]
+
+            # if is_var_adapter(parent_var):
+            #     parent_var = get_value_from_var_adapter(parent_var, key=key, arg=arg, frecklet=ting)
 
             # print("PARENT VAR: {}".format(parent_var))
             if parent_var == "{{{{:: {} ::}}}}".format(key):

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import abc
 import logging
+import os
+import re
 import secrets
 import sys
 from collections import Sequence
+from six import string_types
 
 import click
 import six
@@ -11,12 +14,24 @@ from colorama import Style
 from stevedore import ExtensionManager
 
 from freckles.exceptions import FrecklesVarException
-from freckles.frecklet.arguments import FRECKLES_CLICK_CEREBUS_ARG_MAP
 from frutils import dict_merge
+from frutils.exceptions import FrklException
+from frutils.parameters import VarsTypeSimple
 from ting.ting_attributes import TingAttribute
 from ting.ting_cast import TingCast
 
 log = logging.getLogger("freckles")
+
+
+FRECKLES_CLICK_CEREBUS_ARG_MAP = {
+    "string": str,
+    "float": float,
+    "integer": int,
+    "boolean": bool,
+    "dict": VarsTypeSimple(),
+    "password": str,
+    # "list": list
+}
 
 
 # extensions
@@ -53,6 +68,103 @@ def load_var_adapters():
     return result
 
 
+VAR_ADAPTER_REGEX = re.compile("(::[a-z_1-9]+::)", re.RegexFlag.MULTILINE)
+
+
+def is_var_adapter(value):
+
+    if not isinstance(value, string_types):
+        return False
+
+    m = re.findall(VAR_ADAPTER_REGEX, value)
+    return len(m) > 0
+
+
+def get_value_from_var_adapter_string(
+    var_adapter_name,
+    key,
+    arg,
+    frecklet=None,
+    frecklet_name=None,
+    is_secret=None,
+    inventory=None,
+):
+
+    m = re.findall(VAR_ADAPTER_REGEX, var_adapter_name)
+
+    result_string = var_adapter_name
+    is_sec = False
+    for match in m:
+        van = match[2:-2]
+        temp, sec = get_value_from_var_adapter(
+            van,
+            key,
+            arg,
+            frecklet=frecklet,
+            frecklet_name=frecklet_name,
+            is_secret=is_secret,
+            inventory=inventory,
+        )
+        if sec:
+            is_sec = True
+        result_string = result_string.replace(match, temp, 1)
+
+    return result_string, is_sec
+
+
+def get_value_from_var_adapter(
+    var_adapter_name,
+    key,
+    arg,
+    frecklet=None,
+    frecklet_name=None,
+    is_secret=None,
+    inventory=None,
+):
+
+    if not isinstance(var_adapter_name, six.string_types):
+        raise FrklException(
+            msg="Internal error",
+            reason="Not a var adapter: {}".format(var_adapter_name),
+        )
+
+    if var_adapter_name.startswith("value_from_"):
+
+        if inventory is None:
+            raise FrklException(
+                "Can't retrieve value for var_adapter '{}'.".format(var_adapter_name),
+                reason="No inventory provided.",
+                solution="Don't use the '{}' var adapter in a non parent frecklet.",
+            )
+
+        inventory_secrets = inventory.secret_keys()
+
+        copy_var_name = var_adapter_name[11:]
+        value = inventory.retrieve_value(copy_var_name)
+
+        secret = is_secret or copy_var_name in inventory_secrets
+        return value, secret
+    else:
+        if var_adapter_name not in VAR_ADAPTERS.keys():
+            raise FrecklesVarException(
+                frecklet=frecklet,
+                frecklet_name=frecklet_name,
+                var_name=key,
+                errors={key: "No var adapter '{}'.".format(var_adapter_name)},
+                solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(
+                    var_adapter_name
+                ),
+            )
+
+        var_adapter_obj = VAR_ADAPTERS[var_adapter_name]
+        if is_secret is None:
+            is_secret = arg.secret
+        value = var_adapter_obj.retrieve_value(
+            key_name=key, arg=arg, frecklet=frecklet, is_secret=is_secret
+        )
+        return value, is_secret
+
+
 @six.add_metaclass(abc.ABCMeta)
 class VarAdapter(object):
     def __init__(self):
@@ -65,6 +177,53 @@ class VarAdapter(object):
     ):
 
         pass
+
+
+class FreckletPathVarAdapter(VarAdapter):
+    def __init__(self):
+        pass
+
+    def retrieve_value(
+        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+    ):
+
+        if not hasattr(frecklet, "full_path"):
+            raise FrklException(
+                msg="Can't resolve variable value 'frecklet_path'.",
+                reason="frecklet in question is dynamic.",
+                solution="Only use the '::frecklet_path::' var adapter in combination with local frecklets.",
+            )
+
+        return frecklet.full_path
+
+
+class FreckletDirVarAdapter(VarAdapter):
+    def __init__(self):
+        pass
+
+    def retrieve_value(
+        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+    ):
+
+        if not hasattr(frecklet, "full_path"):
+            raise FrklException(
+                msg="Can't resolve variable value 'frecklet_dir'.",
+                reason="frecklet in question is dynamic.",
+                solution="Only use the '::frecklet_dir::' var adapter in combination with local frecklets.",
+            )
+
+        return os.path.dirname(frecklet.full_path)
+
+
+class PwdVarAdapter(VarAdapter):
+    def __init__(self):
+        pass
+
+    def retrieve_value(
+        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+    ):
+
+        return os.getcwd()
 
 
 class RandomPasswordVarAdapter(VarAdapter):
@@ -142,12 +301,7 @@ class AskVarAdapter(VarAdapter):
 
         arg_default = arg.default
 
-        if (
-            arg_default
-            and isinstance(arg_default, six.string_types)
-            and arg_default.lstrip().startswith("::")
-            and arg_default.rstrip().endswith("::")
-        ):
+        if arg_default and is_var_adapter(arg_default):
             arg_default = None
 
         if arg_default:

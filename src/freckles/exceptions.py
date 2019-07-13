@@ -52,6 +52,7 @@ class FrecklesVarException(FrklException):
     def __init__(
         self,
         frecklet=None,
+        frecklet_name=None,
         var_name=None,
         errors=None,
         task_path=None,
@@ -64,13 +65,18 @@ class FrecklesVarException(FrklException):
 
         self.var_name = var_name
         self.frecklet = frecklet
+        self.frecklet_name = frecklet_name
+
+        if self.frecklet is not None and self.frecklet_name is None:
+            self.frecklet_name = self.frecklet.id
+
         self.errors = errors
         self.task_path = task_path
         self.vars = vars
         self.task = task
 
         if msg is None:
-            msg = "Error validating input for frecklet '{}'.".format(frecklet.id)
+            msg = "Error validating input for frecklet '{}'.".format(self.frecklet_name)
 
         if len(self.errors) == 1:
             reason = Style.BRIGHT + "Var:" + Style.RESET_ALL + "\n\n"
@@ -95,7 +101,7 @@ class FrecklesVarException(FrklException):
     def __str__(self):
 
         msg = "Error processing variables:\n"
-        msg = msg + "  frecklet: {}\n".format(self.frecklet.id)
+        msg = msg + "  frecklet: {}\n".format(self.frecklet_name)
         if self.task_path is not None:
             msg = msg + "  task path: {}\n".format(self.task_path)
         msg = msg + "  vars:\n    "

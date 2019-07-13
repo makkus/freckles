@@ -10,7 +10,11 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
-from .frecklet.vars import VarsInventory, VAR_ADAPTERS
+from .frecklet.vars import (
+    VarsInventory,
+    is_var_adapter,
+    get_value_from_var_adapter_string,
+)
 from .context.run_config import FrecklesRunConfig
 from frutils import (
     replace_strings_in_obj,
@@ -202,13 +206,14 @@ class Frecklecutable(object):
         validator = TingValidator(
             _schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
+
         valid = validator.validated(_var_value_map)
 
         if valid is None:
             if vars_pre_clean is None:
                 vars_pre_clean = var_value_map
             raise FrecklesVarException(
-                self.frecklet,
+                frecklet=self.frecklet,
                 errors=validator.errors,
                 task_path=task_path,
                 vars=vars_pre_clean,
@@ -414,6 +419,21 @@ class Frecklecutable(object):
                 if k not in val_map.keys() and v is not None and v != "":
                     val_map[k] = v
 
+            # process var adapters
+            for k, v in val_map.items():
+                if is_var_adapter(v):
+                    arg = root_vars[k]
+                    v, is_sec = get_value_from_var_adapter_string(
+                        v,
+                        key=k,
+                        arg=arg,
+                        frecklet=root_frecklet.data,
+                        inventory=inventory,
+                    )
+                    if is_sec:
+                        secret_keys.add(k)
+                    val_map[k] = v
+
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
                 schema=schema,
@@ -538,43 +558,24 @@ class Frecklecutable(object):
             if value is None and arg.default_user_input() is not None:
                 value = arg.default_user_input()
 
-            if (
-                not isinstance(value, string_types)
-                or not value.lstrip().startswith("::")
-                or not value.rstrip().endswith("::")
-            ):
+            is_va = is_var_adapter(value)
+
+            if not is_va:
                 run_inventory.set_value(key, value, is_secret=secret)
                 continue
 
             # otherwise, we load the var adapter and execute its 'retrive' method
 
-            var_adapter_name = value.strip()[2:-2]
+            var_value, var_is_sec = get_value_from_var_adapter_string(
+                value,
+                key=key,
+                arg=arg,
+                frecklet=self.frecklet,
+                is_secret=secret,
+                inventory=inventory,
+            )
 
-            if var_adapter_name.startswith("value_from_"):
-                copy_var_name = var_adapter_name[11:]
-                value = inventory.retrieve_value(copy_var_name)
-                secret = (
-                    secret
-                    or copy_var_name in secret_args
-                    or copy_var_name in inventory_secrets
-                )
-                run_inventory.set_value(key, value, is_secret=secret)
-            else:
-                if var_adapter_name not in VAR_ADAPTERS.keys():
-                    raise FrecklesVarException(
-                        frecklet=self.frecklet,
-                        var_name=key,
-                        errors={key: "No var adapter '{}'.".format(var_adapter_name)},
-                        solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(
-                            var_adapter_name
-                        ),
-                    )
-
-                var_adapter_obj = VAR_ADAPTERS[var_adapter_name]
-                value = var_adapter_obj.retrieve_value(
-                    key_name=key, arg=arg, frecklet=self.frecklet, is_secret=secret
-                )
-                run_inventory.set_value(key, value, is_secret=secret)
+            run_inventory.set_value(key, var_value, is_secret=var_is_sec)
 
         if asked:
             click.echo()
