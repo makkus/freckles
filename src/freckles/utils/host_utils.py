@@ -43,6 +43,11 @@ def parse_target_string(target_string):
 
 def get_lxd_details(target_string):
 
+    if "@" in target_string:
+        log.warning(
+            "'@' detected in 'lxd' target string. Most likley this won't work, the 'lxd' connection plugin only supports the 'root' user."
+        )
+
     details = {}
     details["connection_type"] = "lxd"
     details["host"] = target_string
