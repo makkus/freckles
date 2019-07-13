@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import os
+import logging
 
 from freckles.adapters import FrecklesAdapter
 from freckles.adapters.shell.processors import ShellScriptProcessor
@@ -17,6 +18,8 @@ from freckles.defaults import (
 from frutils import dict_merge
 from frutils.config import Cnf
 from ting.tings import TingTings
+
+log = logging.getLogger("freckles")
 
 SHELL_CONFIG_SCHEMA = {}
 SHELL_RUN_CONFIG_SCHEMA = {
@@ -158,7 +161,9 @@ class ScriptlingContext(object):
         self._context_name = context_name
         self._cnf = cnf
         self.repos = repos
-        self.repos = ["/home/markus/projects/repos/shell/frecklets-default-shell"]
+        self.repos = [
+            "/home/markus/projects/freckles-dev/frecklets/shell/resources/scriptling"
+        ]
         self._scriptling_index = None
 
     @property
@@ -263,30 +268,35 @@ class FrecklesAdapterShell(FrecklesAdapter):
             scriptling,
         ) in self.shell_adapter_contex.scriptling_index.items():
 
-            frecklet = {}
-            frecklet["args"] = scriptling.meta.get("args", {})
-            frecklet["doc"] = scriptling.meta.get("doc", {})
+            try:
+                frecklet = {}
+                frecklet["args"] = scriptling.meta.get("args", {})
+                frecklet["doc"] = scriptling.meta.get("doc", {})
 
-            if scriptling.template_keys_content:
-                f_type = "scriptling-template"
-            else:
-                f_type = "scriptling"
+                if scriptling.template_keys_content:
+                    f_type = "scriptling-template"
+                else:
+                    f_type = "scriptling"
 
-            f_dict = copy.deepcopy(scriptling.frecklet)
-            dict_merge(
-                f_dict, {"type": f_type, "name": scriptling_name}, copy_dct=False
-            )
-            f = {
-                FRECKLET_KEY_NAME: f_dict,
-                TASK_KEY_NAME: scriptling.task,
-                VARS_KEY: {},
-            }
+                f_dict = copy.deepcopy(scriptling.frecklet)
+                dict_merge(
+                    f_dict, {"type": f_type, "name": scriptling_name}, copy_dct=False
+                )
+                f = {
+                    FRECKLET_KEY_NAME: f_dict,
+                    TASK_KEY_NAME: scriptling.task,
+                    VARS_KEY: {},
+                }
 
-            f[TASK_KEY_NAME]["script"] = scriptling.scriptling_content
+                f[TASK_KEY_NAME]["script"] = scriptling.scriptling_content
 
-            frecklet[FRECKLETS_KEY] = [f]
+                frecklet[FRECKLETS_KEY] = [f]
 
-            result[scriptling_name] = frecklet
+                result[scriptling_name] = frecklet
+            except (Exception) as e:
+                log.warning(
+                    "Could not process scriptling '{}': {}".format(scriptling_name, e)
+                )
 
         # import pp
         # pp(result)
