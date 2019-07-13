@@ -916,6 +916,7 @@ class FrecklesContext(object):
             force = self.config_value("force")
             add_timestamp = self.config_value("add_timestamp_to_env")
             adapter_name = self.config_value("add_adapter_name_to_env")
+            add_uuid = self.config_value("add_uuid_to_env")
 
             if adapter_name:
                 dirname, basename = os.path.split(env_dir)
@@ -926,6 +927,10 @@ class FrecklesContext(object):
                 date_string = start_date.strftime("%y%m%d_%H_%M_%S")
                 dirname, basename = os.path.split(env_dir)
                 env_dir = os.path.join(dirname, "{}_{}".format(basename, date_string))
+
+            if add_uuid:
+                u = str(uuid.uuid4())
+                env_dir = "{}_{}".format(env_dir, u)
 
             if os.path.exists(env_dir):
                 if not force:

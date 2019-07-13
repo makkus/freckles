@@ -134,6 +134,14 @@ There are 3 special repository aliases that can be used instead of a path:
         },
         "tags": ["safe"],
     },
+    "add_uuid_to_env": {
+        "type": "boolean",
+        "default": True,
+        "doc": {
+            "short_help": "whether to add a random uuid to the runtime environment folder name",
+            "help": "This is useful for when multiple freckles runs will be started at roughly the same time.",
+        },
+    },
     "callback": {
         "type": ["string", "dict", "list"],
         "default": ["auto"],
