@@ -77,8 +77,6 @@ class FrecklesResultCallback(object):
 
     def add_result(self, result_var, result, query=None):
 
-        result_key_val = self._result.setdefault(result_var, CommentedMap())
-
         if query is not None:
             try:
                 result = dpath.util.get(result, query)
@@ -93,7 +91,9 @@ class FrecklesResultCallback(object):
                     },
                 )
 
-        dict_merge(result_key_val, result, copy_dct=False)
+        new_value = {result_var: result}
+
+        dict_merge(self._result, new_value, copy_dct=False)
 
     @property
     def result(self):
