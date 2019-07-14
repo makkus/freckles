@@ -478,6 +478,9 @@ class Frecklecutable(object):
         if run_config.get("host", None) != "localhost":
             return
 
+        if run_config.get("no_run", False):
+            return
+
         if can_passwordless_sudo():
             return
 
@@ -591,9 +594,10 @@ class Frecklecutable(object):
             parent_task.pause()
 
         run_secrets["become_pass"] = run_config.pop("become_pass", None)
-
-        if run_secrets["become_pass"] == "::ask::":
-
+        if (
+            not run_config.get("no_run", False)
+            and run_secrets["become_pass"] == "::ask::"
+        ):
             msg = ""
             if run_config.get("user", None):
                 msg = "{}@".format(run_config["user"])
@@ -605,7 +609,10 @@ class Frecklecutable(object):
             asked = True
 
         run_secrets["login_pass"] = run_config.pop("login_pass", None)
-        if run_secrets["login_pass"] == "::ask::":
+        if (
+            not run_config.get("no_run", False)
+            and run_secrets["login_pass"] == "::ask::"
+        ):
             msg = ""
             if run_config.get("user", None):
                 msg = "{}@".format(run_config["user"])
