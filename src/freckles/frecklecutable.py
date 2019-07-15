@@ -13,7 +13,7 @@ from treelib import Tree
 from .frecklet.vars import (
     VarsInventory,
     is_var_adapter,
-    get_value_from_var_adapter_string,
+    get_resolved_var_adapter_object,
 )
 from .context.run_config import FrecklesRunConfig
 from frutils import (
@@ -238,9 +238,7 @@ class Frecklecutable(object):
             task = t.data["processed"]
             task[FRECKLET_KEY_NAME]["_task_id"] = task_id
             task_id = task_id + 1
-            # vars = t.data["args"]
-            # print(vars)
-            # output(task, output_type="yaml")
+
             result.append(task)
 
         return result
@@ -423,8 +421,8 @@ class Frecklecutable(object):
             for k, v in val_map.items():
                 if is_var_adapter(v):
                     arg = root_vars[k]
-                    v, is_sec = get_value_from_var_adapter_string(
-                        v,
+                    v, is_sec, _ = get_resolved_var_adapter_object(
+                        value=v,
                         key=k,
                         arg=arg,
                         frecklet=root_frecklet.data,
@@ -504,6 +502,7 @@ class Frecklecutable(object):
         elevated=None,
         env_dir=None,
     ):
+
         if inventory is None:
             inventory = VarsInventory()
 
@@ -572,8 +571,8 @@ class Frecklecutable(object):
 
             # otherwise, we load the var adapter and execute its 'retrive' method
 
-            var_value, var_is_sec = get_value_from_var_adapter_string(
-                value,
+            var_value, var_is_sec, _ = get_resolved_var_adapter_object(
+                value=value,
                 key=key,
                 arg=arg,
                 frecklet=self.frecklet,

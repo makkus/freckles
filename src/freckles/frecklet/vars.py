@@ -6,6 +6,9 @@ import re
 import secrets
 import sys
 from collections import Sequence
+from typing import Mapping
+
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 
 import click
@@ -73,26 +76,117 @@ VAR_ADAPTER_REGEX = re.compile("(::[a-z_1-9]+::)", re.RegexFlag.MULTILINE)
 
 def is_var_adapter(value):
 
-    if not isinstance(value, string_types):
-        return False
+    if isinstance(value, string_types):
+        m = re.findall(VAR_ADAPTER_REGEX, value)
+        return len(m) > 0
 
-    m = re.findall(VAR_ADAPTER_REGEX, value)
-    return len(m) > 0
+    elif isinstance(value, Sequence):
+        for v in value:
+            if is_var_adapter(v):
+                return True
+    elif isinstance(value, Mapping):
+        for k, v in value.items():
+            if is_var_adapter(k) or is_var_adapter(v):
+                return True
+
+    return False
+
+
+def get_resolved_var_adapter_object(
+    value,
+    key,
+    arg,
+    root_arg=True,
+    frecklet=None,
+    frecklet_name=None,
+    is_secret=None,
+    inventory=None,
+):
+    """Replaces string in object recursively, non-jinja-termplate version.
+
+    Args:
+        value: the object
+        key: the string to be replaced
+        repl: the replacement string
+
+    Returns:
+        tuple: the replaced object, and a boolean that indicates whether there was any change or not
+    """
+
+    changed_global = False
+    is_sec = False
+    if isinstance(value, Mapping):
+        result = CommentedMap()
+        for k, v in value.items():
+            repl_value, sec, changed = get_resolved_var_adapter_object(
+                value=v,
+                key=k,
+                arg=arg,
+                root_arg=False,
+                frecklet=frecklet,
+                frecklet_name=frecklet_name,
+                is_secret=is_secret,
+                inventory=inventory,
+            )
+            if changed:
+                changed_global = True
+            if sec:
+                is_sec = True
+            result[k] = repl_value
+    elif isinstance(value, (list, tuple, CommentedSeq)):
+        result = []
+        for v in value:
+            repl_value, sec, changed = get_resolved_var_adapter_object(
+                value=v,
+                key=key,
+                arg=arg,
+                root_arg=False,
+                frecklet=frecklet,
+                frecklet_name=frecklet_name,
+                is_secret=is_secret,
+                inventory=inventory,
+            )
+            if changed:
+                changed_global = True
+            if sec:
+                is_sec = True
+            result.append(repl_value)
+    elif isinstance(value, string_types):
+        result, is_sec, changed_global = get_value_from_var_adapter_string(
+            value,
+            key=key,
+            arg=arg,
+            root_arg=root_arg,
+            frecklet=frecklet,
+            frecklet_name=frecklet_name,
+            is_secret=is_secret,
+            inventory=inventory,
+        )
+    else:
+        result = value
+        is_sec = is_secret
+        changed_global = False
+
+    return result, is_sec, changed_global
 
 
 def get_value_from_var_adapter_string(
-    var_adapter_name,
+    value,
     key,
     arg,
+    root_arg=True,
     frecklet=None,
     frecklet_name=None,
     is_secret=None,
     inventory=None,
 ):
 
-    m = re.findall(VAR_ADAPTER_REGEX, var_adapter_name)
+    m = re.findall(VAR_ADAPTER_REGEX, value)
 
-    result_string = var_adapter_name
+    if not m:
+        return value, is_secret, False
+
+    result_string = value
     is_sec = False
     for match in m:
         van = match[2:-2]
@@ -100,6 +194,7 @@ def get_value_from_var_adapter_string(
             van,
             key,
             arg,
+            root_arg,
             frecklet=frecklet,
             frecklet_name=frecklet_name,
             is_secret=is_secret,
@@ -109,13 +204,14 @@ def get_value_from_var_adapter_string(
             is_sec = True
         result_string = result_string.replace(match, temp, 1)
 
-    return result_string, is_sec
+    return result_string, is_sec, True
 
 
 def get_value_from_var_adapter(
     var_adapter_name,
     key,
     arg,
+    root_arg,
     frecklet=None,
     frecklet_name=None,
     is_secret=None,
@@ -160,7 +256,11 @@ def get_value_from_var_adapter(
         if is_secret is None:
             is_secret = arg.secret
         value = var_adapter_obj.retrieve_value(
-            key_name=key, arg=arg, frecklet=frecklet, is_secret=is_secret
+            key_name=key,
+            arg=arg,
+            root_arg=root_arg,
+            frecklet=frecklet,
+            is_secret=is_secret,
         )
         return value, is_secret
 
@@ -173,7 +273,7 @@ class VarAdapter(object):
 
     @abc.abstractmethod
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
         pass
@@ -184,7 +284,7 @@ class FreckletPathVarAdapter(VarAdapter):
         pass
 
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
         if not hasattr(frecklet, "full_path"):
@@ -202,7 +302,7 @@ class FreckletDirVarAdapter(VarAdapter):
         pass
 
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
         if not hasattr(frecklet, "full_path"):
@@ -220,7 +320,7 @@ class PwdVarAdapter(VarAdapter):
         pass
 
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
         return os.getcwd()
@@ -231,7 +331,7 @@ class RandomPasswordVarAdapter(VarAdapter):
         pass
 
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
         pw = secrets.token_urlsafe(24)
@@ -244,10 +344,14 @@ class AskVarAdapter(VarAdapter):
         pass
 
     def retrieve_value(
-        self, key_name, arg, frecklet, is_secret=False, profile_names=None
+        self, key_name, arg, root_arg, frecklet, is_secret=False, profile_names=None
     ):
 
-        arg_type = arg.type
+        if root_arg:
+            arg_type = arg.type
+        else:
+            arg_type = "string"
+
         click_type = FRECKLES_CLICK_CEREBUS_ARG_MAP.get(arg_type, None)
 
         if click_type is None:
@@ -287,7 +391,7 @@ class AskVarAdapter(VarAdapter):
         short_help = arg.doc.get_short_help(
             list_item_format=True, use_help=True, default=""
         )
-        if not short_help:
+        if not short_help or not root_arg:
             ending = "'"
         else:
             ending = "': " + Style.DIM + short_help + Style.RESET_ALL
@@ -301,7 +405,7 @@ class AskVarAdapter(VarAdapter):
 
         arg_default = arg.default
 
-        if arg_default and is_var_adapter(arg_default):
+        if not root_arg or (arg_default and is_var_adapter(arg_default)):
             arg_default = None
 
         if arg_default:

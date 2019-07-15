@@ -364,6 +364,7 @@ class VariablesAttribute(TingAttribute):
 
                 # this means the var is just being carried forward, from the point of view of the parent frecklet task
                 arg_config = available_args.get(key, None)
+
                 if arg_config is None:
                     # print("USING CHILD ARG")
                     new_arg = arg

@@ -78,17 +78,17 @@ class FrecklesVarException(FrklException):
         if msg is None:
             msg = "Error validating input for frecklet '{}'.".format(self.frecklet_name)
 
-        if len(self.errors) == 1:
-            reason = Style.BRIGHT + "Var:" + Style.RESET_ALL + "\n\n"
-        else:
-            reason = Style.BRIGHT + "Vars:" + Style.RESET_ALL + "\n\n"
-
+        # if len(self.errors) == 1:
+        #     reason = Style.BRIGHT + "Var" + Style.RESET_ALL
+        # else:
+        #     reason = Style.BRIGHT + "Vars:" + Style.RESET_ALL + "\n"
+        reason = ""
         for var, error in self.errors.items():
             if isinstance(error, string_types):
                 error = [error]
-            reason = "  " + Style.DIM + "{}:".format(var) + Style.RESET_ALL
+            reason = reason + Style.DIM + "{}: ".format(var) + Style.RESET_ALL
             if len(error) == 1:
-                reason = reason + " " + error[0]
+                reason = reason + error[0]
             else:
                 reason = reason + "\n"
                 for e in error:
