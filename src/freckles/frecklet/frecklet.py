@@ -313,7 +313,6 @@ FRECKLET_LOAD_CONFIG = {
             "VariablesAttribute": {
                 "target_attr_name": "vars_frecklet",
                 "default_argument_description": FRECKLES_DEFAULT_ARG_SCHEMA,
-                "interactive_input_strategy": "default",
             }
         },
         {

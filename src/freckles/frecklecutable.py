@@ -246,6 +246,7 @@ class Frecklecutable(object):
     def _calculate_task_plan(self, inventory):
 
         task_tree = self.frecklet.task_tree
+
         processed_tree = Tree()
 
         root_frecklet = task_tree.get_node(0)
@@ -267,15 +268,7 @@ class Frecklecutable(object):
 
             task_node = tn.data["task"]
 
-            # task_name = task_node[FRECKLET_KEY_NAME]["name"]
-
             root_vars = task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet
-
-            # args = {}
-            # for k, v in (
-            #     root_vars.items()
-            # ):
-            #     args[k] = v.schema
 
             parent_id = task_tree.parent(task_id).identifier
             if parent_id == 0:
@@ -292,19 +285,13 @@ class Frecklecutable(object):
             else:
                 parent = processed_tree.get_node(parent_id).data
                 repl_vars = parent["processed"].get("vars", {})
+
                 parent_secret_keys = parent["processed"][FRECKLET_KEY_NAME].get(
                     "secret_vars", set()
                 )
                 parent_desc = parent["processed"][FRECKLET_KEY_NAME].get(
                     FRECKLES_DESC_METADATA_KEY, {}
                 )
-
-            # level = task_tree.level(task_id)
-            # padding = "    " * level
-            # print("{}vars:".format(padding))
-            # print(readable(repl_vars, out="yaml", indent=(level*4)+4).rstrip())
-            # print("{}task:".format(padding))
-            # print("{}    name: {}".format(padding, task_name))
 
             if (
                 parent.get("processed", {})
@@ -324,24 +311,25 @@ class Frecklecutable(object):
                 )
                 continue
 
+            for k, v in repl_vars.items():
+                if is_var_adapter(v):
+                    new_value, is_sec, changed = get_resolved_var_adapter_object(
+                        value=v,
+                        key=k,
+                        arg=root_vars[k],
+                        root_arg=True,
+                        frecklet=self.frecklet,
+                        is_secret=root_vars[k].secret,
+                        inventory=inventory,
+                    )
+                    repl_vars[k] = new_value
+
             # output(task_node, output_type="yaml")
             vars = copy.copy(task_node.get(VARS_KEY, {}))
             frecklet = copy.copy(task_node[FRECKLET_KEY_NAME])
             task = copy.copy(task_node.get(TASK_KEY_NAME, {}))
 
             skip = frecklet.get("skip", None)
-
-            # print('=======================')
-            # print("FRECKLET")
-            # output(frecklet, output_type="yaml")
-            # output(task, output_type="yaml")
-            # output(vars, output_type="yaml")
-            # print("PARENT")
-            # import pp
-            # pp(parent)
-            # print("REPL")
-            # pp(repl_vars)
-            # print('---------------------------')
 
             # first we get our target variable, as this will most likely determine the value of the var later on
             target = frecklet.get("target", None)
@@ -417,21 +405,13 @@ class Frecklecutable(object):
                 if k not in val_map.keys() and v is not None and v != "":
                     val_map[k] = v
 
-            # process var adapters
-            for k, v in val_map.items():
-                if is_var_adapter(v):
-                    arg = root_vars[k]
-                    v, is_sec, _ = get_resolved_var_adapter_object(
-                        value=v,
-                        key=k,
-                        arg=arg,
-                        frecklet=root_frecklet.data,
-                        inventory=inventory,
-                    )
-                    if is_sec:
-                        secret_keys.add(k)
-                    val_map[k] = v
-
+            # # process var adapters
+            # for k, v in val_map.items():
+            #     if is_var_adapter(v):
+            #
+            #         raise FrklException("Error when processing var '{}' with value '{}': this is a bug.".format(k, v))
+            # import pp
+            # pp(val_map)
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
                 schema=schema,
@@ -556,12 +536,8 @@ class Frecklecutable(object):
         inventory_secrets = inventory.secret_keys()
 
         for key, arg in self.frecklet.vars_frecklet.items():
-
             value = inventory.retrieve_value(key)
             secret = key in secret_args or key in inventory_secrets
-
-            if value is None and arg.default_user_input() is not None:
-                value = arg.default_user_input()
 
             is_va = is_var_adapter(value)
 

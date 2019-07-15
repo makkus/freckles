@@ -93,14 +93,7 @@ def is_var_adapter(value):
 
 
 def get_resolved_var_adapter_object(
-    value,
-    key,
-    arg,
-    root_arg=True,
-    frecklet=None,
-    frecklet_name=None,
-    is_secret=None,
-    inventory=None,
+    value, key, arg, root_arg=True, frecklet=None, is_secret=None, inventory=None
 ):
     """Replaces string in object recursively, non-jinja-termplate version.
 
@@ -124,7 +117,6 @@ def get_resolved_var_adapter_object(
                 arg=arg,
                 root_arg=False,
                 frecklet=frecklet,
-                frecklet_name=frecklet_name,
                 is_secret=is_secret,
                 inventory=inventory,
             )
@@ -142,7 +134,6 @@ def get_resolved_var_adapter_object(
                 arg=arg,
                 root_arg=False,
                 frecklet=frecklet,
-                frecklet_name=frecklet_name,
                 is_secret=is_secret,
                 inventory=inventory,
             )
@@ -158,7 +149,6 @@ def get_resolved_var_adapter_object(
             arg=arg,
             root_arg=root_arg,
             frecklet=frecklet,
-            frecklet_name=frecklet_name,
             is_secret=is_secret,
             inventory=inventory,
         )
@@ -171,14 +161,7 @@ def get_resolved_var_adapter_object(
 
 
 def get_value_from_var_adapter_string(
-    value,
-    key,
-    arg,
-    root_arg=True,
-    frecklet=None,
-    frecklet_name=None,
-    is_secret=None,
-    inventory=None,
+    value, key, arg, root_arg=True, frecklet=None, is_secret=None, inventory=None
 ):
 
     m = re.findall(VAR_ADAPTER_REGEX, value)
@@ -196,7 +179,6 @@ def get_value_from_var_adapter_string(
             arg,
             root_arg,
             frecklet=frecklet,
-            frecklet_name=frecklet_name,
             is_secret=is_secret,
             inventory=inventory,
         )
@@ -208,14 +190,7 @@ def get_value_from_var_adapter_string(
 
 
 def get_value_from_var_adapter(
-    var_adapter_name,
-    key,
-    arg,
-    root_arg,
-    frecklet=None,
-    frecklet_name=None,
-    is_secret=None,
-    inventory=None,
+    var_adapter_name, key, arg, root_arg, frecklet=None, is_secret=None, inventory=None
 ):
 
     if not isinstance(var_adapter_name, six.string_types):
@@ -244,7 +219,6 @@ def get_value_from_var_adapter(
         if var_adapter_name not in VAR_ADAPTERS.keys():
             raise FrecklesVarException(
                 frecklet=frecklet,
-                frecklet_name=frecklet_name,
                 var_name=key,
                 errors={key: "No var adapter '{}'.".format(var_adapter_name)},
                 solution="Double-check the var adapter name '{}', maybe there's a typo?\n\nIf the name is correct, make sure the python library that contains the var-adapter is installed in the same environment as freckles.".format(

@@ -89,8 +89,6 @@ context
     Allow all remote repositories.
  allow_remote_whitelist (list, default: ['https://gitlab.com/frecklets/*'])
     List of urls (or url regexes) of allowed remote repositories.
- ask_user (string, default: none)
-    when to ask the user for interactive input
  callback (['string', 'dict', 'list'], default: ['auto'])
     a list of callbacks to attach to a freckles run
  current_run_folder (string, default: /home/markus/.local/share/freckles/runs/current)

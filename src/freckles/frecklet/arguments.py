@@ -70,9 +70,6 @@ class CliArgumentsAttribute(TingAttribute):
 
         param_type = option_properties.pop("param_type")
 
-        if var.default_user_input() is not None:
-            option_properties["default"] = var.default_user_input()
-
         if not var.required:
             option_properties["required"] = False
         else:
@@ -218,15 +215,11 @@ ALLOWED_ARG_INHERIT_STRATEGIES = ["strict", "required"]
 
 class VariablesAttribute(TingAttribute):
     def __init__(
-        self,
-        target_attr_name="vars_frecklet",
-        default_argument_description=None,
-        interactive_input_strategy=None,
+        self, target_attr_name="vars_frecklet", default_argument_description=None
     ):
 
         self.target_attr_name = target_attr_name
         self.default_argument_description = default_argument_description
-        self.interactive_input_strategy = interactive_input_strategy
 
     def provides(self):
 
@@ -370,10 +363,7 @@ class VariablesAttribute(TingAttribute):
                     new_arg = arg
                 else:
                     new_arg = Arg(
-                        key,
-                        arg_config,
-                        default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-                        interactive_input_strategy=self.interactive_input_strategy,
+                        key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
                     )
                     new_arg.add_child(arg)
                     new_arg.var_template = parent_var
@@ -394,15 +384,11 @@ class VariablesAttribute(TingAttribute):
                                 {},
                                 default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                                 is_auto_arg=True,
-                                interactive_input_strategy=self.interactive_input_strategy,
                             )
                             new_arg.add_child(arg)
                     else:
                         new_arg = Arg(
-                            tk,
-                            arg_config,
-                            default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-                            interactive_input_strategy=self.interactive_input_strategy,
+                            tk, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
                         )
                         new_arg.add_child(arg)
 
@@ -455,7 +441,6 @@ class VariablesAttribute(TingAttribute):
                     arg,
                     default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
                     is_auto_arg=auto_arg,
-                    interactive_input_strategy=self.interactive_input_strategy,
                 )
                 root_tks[tk] = arg
 
@@ -473,10 +458,7 @@ class VariablesAttribute(TingAttribute):
         template_keys = root_node.data["root_frecklet"].template_keys
 
         args = Arg.from_keys(
-            template_keys,
-            available_args,
-            default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-            interactive_input_strategy=self.interactive_input_strategy,
+            template_keys, available_args, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
         )
         rest_path = reversed(path_to_leaf[0:-1])
 

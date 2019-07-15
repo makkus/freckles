@@ -193,14 +193,14 @@ class FrecklesContext(object):
         # ----------------------------------
         # changing load_config using context config
 
-        interactive_input_strategy = self.config_value("ask_user", "context")
-
-        for attr in self._frecklet_load_config["attributes"]:
-            if isinstance(attr, Mapping) and "VariablesAttribute" in attr.keys():
-                attr["VariablesAttribute"][
-                    "interactive_input_strategy"
-                ] = interactive_input_strategy
-                break
+        # interactive_input_strategy = self.config_value("ask_user", "context")
+        #
+        # for attr in self._frecklet_load_config["attributes"]:
+        #     if isinstance(attr, Mapping) and "VariablesAttribute" in attr.keys():
+        #         attr["VariablesAttribute"][
+        #             "interactive_input_strategy"
+        #         ] = interactive_input_strategy
+        #         break
 
         self.dynamic_frecklet_loader = augment_meta_loader_conf(
             self._frecklet_load_config
