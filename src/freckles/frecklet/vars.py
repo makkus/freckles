@@ -254,6 +254,10 @@ class VarAdapter(object):
 
 
 class FreckletPathVarAdapter(VarAdapter):
+    """
+    An adapter that returns the path to the frecklet that is currently executed.
+    """
+
     def __init__(self):
         pass
 
@@ -272,6 +276,10 @@ class FreckletPathVarAdapter(VarAdapter):
 
 
 class FreckletDirVarAdapter(VarAdapter):
+    """
+    An adapter that returns the path to the parent directory of the frecklet that is currently executed.
+    """
+
     def __init__(self):
         pass
 
@@ -290,6 +298,10 @@ class FreckletDirVarAdapter(VarAdapter):
 
 
 class PwdVarAdapter(VarAdapter):
+    """
+    An adapter that returns the current directory on the machine where freckles is executed.
+    """
+
     def __init__(self):
         pass
 
@@ -301,6 +313,10 @@ class PwdVarAdapter(VarAdapter):
 
 
 class RandomPasswordVarAdapter(VarAdapter):
+    """
+    A variable adapter that returns a random password string.
+    """
+
     def __init__(self):
         pass
 
@@ -314,6 +330,10 @@ class RandomPasswordVarAdapter(VarAdapter):
 
 
 class AskVarAdapter(VarAdapter):
+    """
+    A var-adapter that asks the user to enter the value for this variable interactively.
+    """
+
     def __init__(self):
         pass
 
