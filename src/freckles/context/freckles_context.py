@@ -689,11 +689,13 @@ class FrecklesContext(object):
                 }
             )
 
+        disable_duplicate_index_key_warning = self.config_value("disable_warnings")
         self._frecklet_index = TingTings.from_config(
             "frecklets",
             folder_index_conf,
             self._frecklet_load_config,
             indexes=["frecklet_name", "class_name"],
+            disable_duplicate_index_key_warning=disable_duplicate_index_key_warning,
         )
         return self._frecklet_index
 

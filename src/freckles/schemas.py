@@ -183,6 +183,12 @@ There are 3 special repository aliases that can be used instead of a path:
         },
         "tags": ["safe"],
     },
+    "disable_warnings": {
+        "type": "boolean",
+        "default": False,
+        "doc": {"short_help": "disable (most) warning messages"},
+        "tags": ["safe"],
+    },
 }
 
 
