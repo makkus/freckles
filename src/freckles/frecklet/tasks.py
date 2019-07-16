@@ -16,6 +16,7 @@ from freckles.defaults import (
     DEFAULT_FRECKLES_JINJA_ENV,
     FRECKLETS_KEY,
     FRECKLES_DEFAULT_ARG_SCHEMA,
+    CONST_KEY_NAME,
 )
 from freckles.exceptions import FrecklesConfigException, FreckletBuildException
 from frkl import FrklProcessor, Frkl
@@ -47,6 +48,9 @@ class FreckletsAttribute(ValueAttribute):
 
 
 def fill_defaults(task_item):
+
+    if CONST_KEY_NAME not in task_item.keys():
+        task_item[CONST_KEY_NAME] = {}
 
     if FRECKLET_KEY_NAME not in task_item.keys():
         task_item[FRECKLET_KEY_NAME] = {}
@@ -88,6 +92,7 @@ class ExplodedArgsProcessor(ConfigProcessor):
 
         new_config = self.current_input_config
         new_config["args"] = self.args
+        new_config.pop(CONST_KEY_NAME, None)
         return new_config
 
 
@@ -415,6 +420,7 @@ class TaskListDetailedAttribute(TingAttribute):
             "doc",
             # "frecklet_meta",
             "meta",
+            # "const",
             FRECKLET_KEY_NAME,
             TASK_KEY_NAME,
         ],
@@ -460,12 +466,16 @@ def prettyfiy_task(task_detailed, arg_map):
         t[TASK_KEY_NAME] = task_detailed[TASK_KEY_NAME]
     if VARS_KEY in task_detailed.keys():
         t[VARS_KEY] = task_detailed[VARS_KEY]
+    # if CONST_KEY_NAME in task_detailed.keys():
+    #     t[CONST_KEY_NAME] = task_detailed[CONST_KEY_NAME]
 
     tks = get_template_keys(t, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
     args = {}
 
     for tk in tks:
-        temp = arg_map[tk]
+        temp = arg_map.get(tk, None)
+        if temp is None:
+            continue
         # temp = task_detailed[ARGS_KEY][tk]
         args[tk] = special_dict_to_dict(temp)
     t[ARGS_KEY] = args

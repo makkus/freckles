@@ -7,7 +7,7 @@ from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
 from frutils import dict_merge
 from frutils.jinja2_filters import camelize_filter
-from ting.ting_attributes import MultiCacheResult
+from ting.ting_attributes import MultiCacheResult, Arg
 from .tasks import *  # noqa
 from ting.attributes.rendering import JinjaTemplateMixin  # noqa
 
@@ -102,13 +102,14 @@ class FreckletExplodedAttribute(TingAttribute):
 
     def requires(self):
 
-        return ["vars_frecklet", "doc", "tasklist"]
+        return ["vars_frecklet", "doc", "tasklist", "const"]
 
     def get_attribute(self, ting, attribute_name=None):
 
         result = CommentedMap()
 
         result["doc"] = ting.doc.exploded_dict()
+        result["const"] = ting.const
 
         result["args"] = CommentedMap()
 
@@ -125,6 +126,52 @@ class FreckletExplodedAttribute(TingAttribute):
             if VARS_KEY in task.keys() and task[VARS_KEY]:
                 r[VARS_KEY] = task[VARS_KEY]
             result["frecklets"].append(r)
+
+        return result
+
+
+class FreckletConstAttribute(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return [CONST_KEY_NAME]
+
+    def requires(self):
+        return ["_metadata"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        result = ting._metadata.get(CONST_KEY_NAME, {})
+        return result
+
+
+class FreckletConstArgsAttribute(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return ["vars_{}".format(CONST_KEY_NAME)]
+
+    def requires(self):
+        return ["const", "args"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        result = {}
+        for k, v in ting.const.items():
+
+            tks = get_template_keys(v, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+            for tk in tks:
+                if tk in result.keys():
+                    continue
+
+                arg = Arg(
+                    key=tk,
+                    arg_dict=ting.args.get(tk, None),
+                    default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                )
+                result[tk] = arg
 
         return result
 
@@ -300,6 +347,8 @@ FRECKLET_LOAD_CONFIG = {
         },
         {"DocAttribute": {"source_attr_name": "_metadata"}},
         {"FreckletMetaAttribute": {"default": {}}},
+        "FreckletConstAttribute",
+        "FreckletConstArgsAttribute",
         "FreckletClassNameAttribute",
         "FreckletAugmentMetadataAttribute",
         "FreckletsAttribute",
@@ -308,6 +357,7 @@ FRECKLET_LOAD_CONFIG = {
         "FreckletMarkdownAttribute",
         "FreckletExplodedAttribute",
         "FreckletValidAttribute",
+        "VarsAttribute",
         "TaskTreeAttribute",
         {
             "VariablesAttribute": {
@@ -318,14 +368,14 @@ FRECKLET_LOAD_CONFIG = {
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_required",
-                "source_attr_name": "vars_frecklet",
+                "source_attr_name": "vars",
                 "required": True,
             }
         },
         {
             "VariablesFilterAttribute": {
                 "target_attr_name": "vars_optional",
-                "source_attr_name": "vars_frecklet",
+                "source_attr_name": "vars",
                 "required": False,
             }
         },

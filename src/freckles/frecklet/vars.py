@@ -477,7 +477,7 @@ class Inventory(object):
 
         result = {}
         secret_keys = self.secret_keys()
-        for k, v in self._get_vars():
+        for k, v in self._get_vars().items():
             if k in secret_keys:
                 v = "__secret__"
             result[k] = v

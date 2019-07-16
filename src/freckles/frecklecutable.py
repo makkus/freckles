@@ -165,7 +165,7 @@ class Frecklecutable(object):
         )
         return processed
 
-    def _generate_schema(self, var_value_map, args, template_keys=None):
+    def _generate_schema(self, var_value_map, args, const_args, template_keys=None):
 
         if template_keys is None:
 
@@ -177,7 +177,10 @@ class Frecklecutable(object):
         secret_keys = set()
 
         for key in template_keys:
-            arg_obj = args[key]
+
+            arg_obj = const_args.get(key, None)
+            if arg_obj is None:
+                arg_obj = args[key]
 
             schema[key] = copy.copy(arg_obj.schema)
             # schema[key].pop("doc", None)
@@ -201,6 +204,11 @@ class Frecklecutable(object):
 
         _schema = copy.deepcopy(schema)
         _var_value_map = copy.deepcopy(var_value_map)
+
+        # import pp
+        # pp(_schema)
+        # pp(_var_value_map)
+
         _schema = special_dict_to_dict(schema)
         _var_value_map = special_dict_to_dict(_var_value_map)
         validator = TingValidator(
@@ -227,6 +235,7 @@ class Frecklecutable(object):
         processed_tree = self._calculate_task_plan(inventory=inventory)
 
         task_nodes = processed_tree.leaves()
+
         result = []
         task_id = 0
 
@@ -253,9 +262,11 @@ class Frecklecutable(object):
 
         task_path = []
 
+        const_cache = {}
         for tn in task_tree.all_nodes():
 
             task_id = tn.identifier
+
             if task_id == 0:
 
                 processed_tree.create_node(
@@ -269,16 +280,27 @@ class Frecklecutable(object):
             task_node = tn.data["task"]
 
             root_vars = task_tree.get_node(task_id).data["root_frecklet"].vars_frecklet
+            const_vars = task_tree.get_node(task_id).data["root_frecklet"].vars_const
+            const = task_tree.get_node(task_id).data["root_frecklet"].const
 
             parent_id = task_tree.parent(task_id).identifier
+            task_level = task_tree.level(task_id)
+            root_frecklet_id = task_tree.get_node(task_id).data["root_frecklet"].id
+
             if parent_id == 0:
+
                 parent = {}
-                template_keys = task_tree.get_node(0).data.template_keys
+                # template_keys = task_tree.get_node(0).data.template_keys
                 repl_vars = {}
-                for tk in template_keys:
-                    v = inventory.retrieve_value(tk)
-                    if v is not None:
-                        repl_vars[tk] = v
+                # import pp
+                # print("INV")
+                # pp(inventory.get_vars())
+                for k, v in inventory.get_vars(hide_secrets=False).items():
+                    repl_vars[k] = v
+                # for tk in template_keys:
+                #     v = inventory.retrieve_value(tk)
+                #     if v is not None:
+                #         repl_vars[tk] = v
                 task_path = []
                 parent_secret_keys = set()
                 parent_desc = {}
@@ -311,15 +333,59 @@ class Frecklecutable(object):
                 )
                 continue
 
+            if parent_id > 0:
+
+                if is_var_adapter(const):
+                    if (
+                        const_cache.get(task_level, {}).get(root_frecklet_id, None)
+                        is not None
+                    ):
+                        const = const_cache[task_level][root_frecklet_id]
+                    else:
+                        resolved_const = {}
+                        for k, v in const.items():
+                            if is_var_adapter(v):
+                                arg = const_vars.get(k, None)
+                                if arg is None:
+                                    arg = root_vars[k]
+                                new_value, is_sec, changed = get_resolved_var_adapter_object(
+                                    value=v,
+                                    key=k,
+                                    arg=arg,
+                                    frecklet=self.frecklet,
+                                    is_secret=arg.secret,
+                                    inventory=None,
+                                )
+                                v = new_value
+                            resolved_const[k] = v
+                            const_cache.setdefault(task_level, {})[
+                                root_frecklet_id
+                            ] = resolved_const
+                        const = resolved_const
+
+                for k, v in const.items():
+
+                    tks = get_template_keys(v, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+                    if tks:
+                        v = replace_strings_in_obj(
+                            v,
+                            replacement_dict=repl_vars,
+                            jinja_env=DEFAULT_FRECKLES_JINJA_ENV,
+                        )
+                    repl_vars[k] = v
+
             for k, v in repl_vars.items():
                 if is_var_adapter(v):
+                    arg = const_vars.get(k, None)
+                    if arg is None:
+                        arg = root_vars[k]
                     new_value, is_sec, changed = get_resolved_var_adapter_object(
                         value=v,
                         key=k,
-                        arg=root_vars[k],
+                        arg=arg,
                         root_arg=True,
                         frecklet=self.frecklet,
-                        is_secret=root_vars[k].secret,
+                        is_secret=arg.secret,
                         inventory=inventory,
                     )
                     repl_vars[k] = new_value
@@ -329,14 +395,15 @@ class Frecklecutable(object):
             frecklet = copy.copy(task_node[FRECKLET_KEY_NAME])
             task = copy.copy(task_node.get(TASK_KEY_NAME, {}))
 
-            skip = frecklet.get("skip", None)
+            target = frecklet.get("target", None)
 
             # first we get our target variable, as this will most likely determine the value of the var later on
-            target = frecklet.get("target", None)
+
             if target is not None:
                 template_keys = get_template_keys(
                     target, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
                 )
+
                 if template_keys:
                     target_value = self._replace_templated_var_value(
                         var_value=target, repl_dict=repl_vars, inventory=inventory
@@ -349,6 +416,7 @@ class Frecklecutable(object):
 
             # then we check if we can skip the task. For that we already need the target variable ready, as it might
             # be used for variable selection
+            skip = frecklet.get("skip", None)
             if skip is not None:
                 skip_value = self._replace_templated_var_value(
                     var_value=skip, repl_dict=repl_vars, inventory=inventory
@@ -390,7 +458,10 @@ class Frecklecutable(object):
             )
 
             schema, secret_keys = self._generate_schema(
-                var_value_map=task, args=root_vars, template_keys=template_keys
+                var_value_map=task,
+                args=root_vars,
+                const_args=const_vars,
+                template_keys=template_keys,
             )
 
             secret_keys.update(parent_secret_keys)
@@ -405,13 +476,6 @@ class Frecklecutable(object):
                 if k not in val_map.keys() and v is not None and v != "":
                     val_map[k] = v
 
-            # # process var adapters
-            # for k, v in val_map.items():
-            #     if is_var_adapter(v):
-            #
-            #         raise FrklException("Error when processing var '{}' with value '{}': this is a bug.".format(k, v))
-            # import pp
-            # pp(val_map)
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
                 schema=schema,
@@ -532,11 +596,57 @@ class Frecklecutable(object):
 
         run_inventory = VarsInventory()
 
+        # process constants
+        const_schema, sk = self._generate_schema(
+            var_value_map=self.frecklet.const,
+            args={},
+            const_args=self.frecklet.vars_const,
+        )
+        new_vars = self._validate_processed_vars(
+            var_value_map=inventory.get_vars(hide_secrets=False), schema=const_schema
+        )
+
+        consts_processed = self._replace_templated_var_value(
+            var_value=copy.deepcopy(self.frecklet.const),
+            repl_dict=new_vars,
+            inventory=inventory,
+        )
+
         asked = False
         inventory_secrets = inventory.secret_keys()
 
+        for k, v in consts_processed.items():
+
+            arg = self.frecklet.vars_const.get(k, None)
+            if arg is None:
+                arg = self.frecklet.vars_frecklet[k]
+
+            secret = k in secret_args or k in inventory_secrets
+
+            is_va = is_var_adapter(v)
+
+            if not is_va:
+                run_inventory.set_value(k, v, is_secret=secret)
+                continue
+
+            # otherwise, we load the var adapter and execute its 'retrive' method
+
+            var_value, var_is_sec, _ = get_resolved_var_adapter_object(
+                value=v,
+                key=k,
+                arg=arg,
+                frecklet=self.frecklet,
+                is_secret=secret,
+                inventory=inventory,
+            )
+
+            run_inventory.set_value(k, var_value, is_secret=secret)
+
         for key, arg in self.frecklet.vars_frecklet.items():
             value = inventory.retrieve_value(key)
+            if value is None:
+                continue
+
             secret = key in secret_args or key in inventory_secrets
 
             is_va = is_var_adapter(value)
@@ -619,6 +729,7 @@ class Frecklecutable(object):
         task_lists = []
 
         for task in tasks:
+
             elv = (
                 task[FRECKLET_KEY_NAME]
                 .get(FRECKLES_PROPERTIES_METADATA_KEY, {})

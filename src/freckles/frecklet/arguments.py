@@ -21,9 +21,7 @@ class CliArgumentsAttribute(TingAttribute):
 
     DEFAULT_CLI_SCHEMA = {"show_default": True, "param_type": "option"}
 
-    def __init__(
-        self, target_attr_name="cli_arguments", source_attr_name="vars_frecklet"
-    ):
+    def __init__(self, target_attr_name="cli_arguments", source_attr_name="vars"):
 
         self.target_attr_name = target_attr_name
         self.source_attr_name = source_attr_name
@@ -176,10 +174,7 @@ class CliArgumentsAttribute(TingAttribute):
 
 class VariablesFilterAttribute(TingAttribute):
     def __init__(
-        self,
-        source_attr_name="vars_frecklet",
-        target_attr_name="vars_required",
-        required=True,
+        self, source_attr_name="vars", target_attr_name="vars_required", required=True
     ):
 
         self.source_attr_name = source_attr_name
@@ -213,6 +208,32 @@ class VariablesFilterAttribute(TingAttribute):
 ALLOWED_ARG_INHERIT_STRATEGIES = ["strict", "required"]
 
 
+class VarsAttribute(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+        return ["vars"]
+
+    def requires(self):
+
+        return ["vars_frecklet", "vars_const", "const"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        result = {}
+        for k, v in ting.vars_const.items():
+            result[k] = v
+
+        for k, v in ting.vars_frecklet.items():
+            if k in ting.const.keys():
+                continue
+            if k not in result.keys():
+                result[k] = v
+
+        return result
+
+
 class VariablesAttribute(TingAttribute):
     def __init__(
         self, target_attr_name="vars_frecklet", default_argument_description=None
@@ -227,7 +248,7 @@ class VariablesAttribute(TingAttribute):
 
     def requires(self):
 
-        return ["task_tree"]
+        return ["task_tree", "const"]
 
     def get_attribute(self, ting, attribute_name=None):
 
@@ -239,6 +260,8 @@ class VariablesAttribute(TingAttribute):
             args = self.get_vars_from_path(path_to_leaf=path, tree=task_tree, ting=ting)
             vars_tree[leaf_node_id] = args
 
+        # import pp
+        # pp(vars_tree)
         vars = self.consolidate_vars(vars_tree, ting)
 
         result = {
@@ -293,13 +316,59 @@ class VariablesAttribute(TingAttribute):
 
         return ordered
 
+    def create_new_args_map(self, parent_var, key, available_args, arg):
+
+        args = {}
+        if parent_var == "{{{{:: {} ::}}}}".format(key):
+
+            # this means the var is just being carried forward, from the point of view of the parent frecklet task
+            arg_config = available_args.get(key, None)
+
+            if arg_config is None:
+                # print("USING CHILD ARG")
+                new_arg = arg
+            else:
+                new_arg = Arg(
+                    key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                )
+                new_arg.add_child(arg)
+                new_arg.var_template = parent_var
+
+            args[key] = new_arg
+        else:
+            template_keys = get_template_keys(
+                parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
+            )
+            for tk in template_keys:
+                arg_config = available_args.get(tk, None)
+                if arg_config is None:
+                    if tk == key:
+                        new_arg = arg
+                    else:
+                        new_arg = Arg(
+                            tk,
+                            {},
+                            default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                            is_auto_arg=True,
+                        )
+                        new_arg.add_child(arg)
+                else:
+                    new_arg = Arg(
+                        tk, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
+                    )
+                    new_arg.add_child(arg)
+
+                new_arg.var_template = parent_var
+                args[tk] = new_arg
+
+        return args
+
     def resolve_vars(
         self, current_args, rest_path, last_node, tree, ting, is_root_level
     ):
 
         current_node_id = next(rest_path)
 
-        # print("CURRENT: {}".format(current_node_id))
         current_node = tree.get_node(current_node_id)
 
         if current_node_id == 0:
@@ -307,6 +376,7 @@ class VariablesAttribute(TingAttribute):
 
             for key in current_args.keys():
                 vars[key] = "{{{{:: {} ::}}}}".format(key)
+
         else:
             vars = current_node.data["task"]["vars"]
 
@@ -319,14 +389,22 @@ class VariablesAttribute(TingAttribute):
 
         for key, arg in current_args.items():
 
-            if key not in vars.keys():
+            # if key in ting.const.keys():
+            #     parent_var = ting.const[key]
+            # print("---")
+            # print(parent_var)
+            if key in vars.keys():
+                parent_var = vars[key]
+
+            elif key not in vars.keys():
 
                 inherit = ting.meta.get("vars", {}).get("inherit", False)
                 if inherit:
                     vars[key] = "{{{{:: {} ::}}}}".format(key)
+                    parent_var = vars[key]
                 else:
 
-                    if arg.required and arg.default is None:
+                    if arg.required and arg.default:
 
                         # relevant frecklet root name: tree.get_node(0).tag,
                         raise FreckletBuildException(
@@ -347,53 +425,14 @@ class VariablesAttribute(TingAttribute):
                     else:
                         continue
 
-            parent_var = vars[key]
+            new_args = self.create_new_args_map(
+                parent_var=parent_var, key=key, available_args=available_args, arg=arg
+            )
 
-            # if is_var_adapter(parent_var):
-            #     parent_var = get_value_from_var_adapter(parent_var, key=key, arg=arg, frecklet=ting)
-
-            # print("PARENT VAR: {}".format(parent_var))
-            if parent_var == "{{{{:: {} ::}}}}".format(key):
-
-                # this means the var is just being carried forward, from the point of view of the parent frecklet task
-                arg_config = available_args.get(key, None)
-
-                if arg_config is None:
-                    # print("USING CHILD ARG")
-                    new_arg = arg
-                else:
-                    new_arg = Arg(
-                        key, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
-                    )
-                    new_arg.add_child(arg)
-                    new_arg.var_template = parent_var
-
-                args[key] = new_arg
-            else:
-                template_keys = get_template_keys(
-                    parent_var, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
-                )
-                for tk in template_keys:
-                    arg_config = available_args.get(tk, None)
-                    if arg_config is None:
-                        if tk == key:
-                            new_arg = arg
-                        else:
-                            new_arg = Arg(
-                                tk,
-                                {},
-                                default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
-                                is_auto_arg=True,
-                            )
-                            new_arg.add_child(arg)
-                    else:
-                        new_arg = Arg(
-                            tk, arg_config, default_schema=FRECKLES_DEFAULT_ARG_SCHEMA
-                        )
-                        new_arg.add_child(arg)
-
-                    new_arg.var_template = parent_var
-                    args[tk] = new_arg
+            for k, v in new_args.items():
+                # if k in args.keys():
+                #     log.warning("Duplicate arg key: {}".format(k))
+                args[k] = v
 
         if current_node_id != 0:
 
@@ -409,11 +448,28 @@ class VariablesAttribute(TingAttribute):
             return r
         else:
 
+            # new_args = {}
+            # replaced = []
+            # for key, arg in args.items():
+            #     if key in ting.const.keys():
+            #         replaced.append(key)
+            #         parent_var = ting.const[key]
+            #         temp_args = self.create_new_args_map(parent_var=parent_var, key=key, available_args=available_args, arg=args[key])
+            #         for k, v in temp_args.items():
+            #             new_args[k] = v
+            #     else:
+            #         new_args[key] = arg
+            #
+            # args = new_args
+
             root_task = last_node.data["task"]
             try:
                 tks = get_template_keys(root_task, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
             except (TemplateSyntaxError) as e:
                 raise FreckletException(ting, e, ting.id)
+
+            # for r in replaced:
+            #     tks.remove(r)
 
             root_tks = {}
             for tk in tks:
@@ -462,7 +518,7 @@ class VariablesAttribute(TingAttribute):
         )
         rest_path = reversed(path_to_leaf[0:-1])
 
-        return self.resolve_vars(
+        resolved = self.resolve_vars(
             current_args=args,
             rest_path=rest_path,
             last_node=root_node,
@@ -470,3 +526,7 @@ class VariablesAttribute(TingAttribute):
             ting=ting,
             is_root_level=True,
         )
+
+        # import pp
+        # pp(resolved)
+        return resolved
