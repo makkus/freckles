@@ -3,6 +3,7 @@
 import abc
 import copy
 import logging
+import os
 import sys
 
 import six
@@ -175,6 +176,10 @@ class FrecklesAdapter(object):
         result_callback,
         parent_task,
     ):
+
+        # creating the run_env directory
+        os.makedirs(run_env["env_dir"], exist_ok=True)
+        os.chmod(run_env["env_dir"], 0o0700)
 
         final_run_config = self.run_config(run_config)
 
