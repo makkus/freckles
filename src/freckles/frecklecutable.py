@@ -104,6 +104,29 @@ def remove_none_values(input):
         return input
 
 
+def set_run_defaults(inventory=None, run_config=None, run_vars=None):
+
+    if inventory is None:
+        inventory = VarsInventory()
+
+    if run_config is None:
+        run_config = FrecklesRunConfig()
+
+    if isinstance(run_config, string_types):
+        run_config = FrecklesRunConfig(target_string=run_config)
+
+    if isinstance(run_config, FrecklesRunConfig):
+        run_config = run_config.config
+
+    default_run_config = {"host": "localhost"}
+    run_config = dict_merge(default_run_config, run_config, copy_dct=False)
+
+    if run_vars is None:
+        run_vars = {}
+
+    return inventory, run_config, run_vars
+
+
 class Frecklecutable(object):
     def __init__(self, frecklet, context):
 
@@ -536,42 +559,11 @@ class Frecklecutable(object):
         prompt = "SUDO PASS (for '{}')".format(msg)
         run_secrets["become_pass"] = ask_password(prompt)
 
-    def run_frecklecutable(
-        self,
-        inventory=None,
-        run_config=None,
-        run_vars=None,
-        parent_task=None,
-        result_callback=None,
-        elevated=None,
-        env_dir=None,
-    ):
+    def create_run_inventory(self, inventory=None, run_config=None, run_vars=None):
 
-        if inventory is None:
-            inventory = VarsInventory()
-
-        if run_config is None:
-            run_config = FrecklesRunConfig()
-
-        if isinstance(run_config, string_types):
-            run_config = FrecklesRunConfig(target_string=run_config)
-
-        if isinstance(run_config, FrecklesRunConfig):
-            run_config = run_config.config
-
-        default_run_config = {"host": "localhost"}
-        run_config = dict_merge(default_run_config, run_config, copy_dct=False)
-
-        if parent_task is None:
-            i_am_root = True
-            result_callback = FrecklesResultCallback()
-        else:
-            i_am_root = False
-            if result_callback is None:
-                raise Exception("No result callback. This is a bug")
-
-        if run_vars is None:
-            run_vars = {}
+        inventory, run_config, run_vars = set_run_defaults(
+            inventory=inventory, run_config=run_config, run_vars=run_vars
+        )
 
         run_vars.setdefault("__freckles_run__", {})["pwd"] = os.path.realpath(
             os.getcwd()
@@ -584,15 +576,15 @@ class Frecklecutable(object):
             if arg.secret:
                 secret_args.append(arg_name)
 
-        paused = False
-        if parent_task is not None and (
-            secret_args
-            or run_config.get("become_pass", None) == "::ask::"
-            or run_config.get("login_pass", None) == "::ask::"
-        ):
-            # we need to pause our task callback because of user input
-            parent_task.pause()
-            paused = True
+        # paused = False
+        # if parent_task is not None and (
+        #     secret_args
+        #     or run_config.get("become_pass", None) == "::ask::"
+        #     or run_config.get("login_pass", None) == "::ask::"
+        # ):
+        #     # we need to pause our task callback because of user input
+        #     parent_task.pause()
+        #     paused = True
 
         run_inventory = VarsInventory()
 
@@ -612,7 +604,6 @@ class Frecklecutable(object):
             inventory=inventory,
         )
 
-        asked = False
         inventory_secrets = inventory.secret_keys()
 
         for k, v in consts_processed.items():
@@ -668,15 +659,48 @@ class Frecklecutable(object):
 
             run_inventory.set_value(key, var_value, is_secret=var_is_sec)
 
-        if asked:
-            click.echo()
+        return run_inventory, secret_args
 
+    def run_frecklecutable(
+        self,
+        inventory=None,
+        run_config=None,
+        run_vars=None,
+        parent_task=None,
+        result_callback=None,
+        elevated=None,
+        env_dir=None,
+    ):
+
+        inventory, run_config, run_vars = set_run_defaults(
+            inventory=inventory, run_config=run_config, run_vars=run_vars
+        )
+
+        run_inventory, secret_args = self.create_run_inventory(
+            inventory=inventory, run_config=run_config, run_vars=run_vars
+        )
+
+        if parent_task is None:
+            i_am_root = True
+            result_callback = FrecklesResultCallback()
+        else:
+            i_am_root = False
+            if result_callback is None:
+                raise Exception("No result callback. This is a bug")
+
+        # paused = False
+        # if parent_task is not None and (
+        #     secret_args
+        #     or run_config.get("become_pass", None) == "::ask::"
+        #     or run_config.get("login_pass", None) == "::ask::"
+        #     ):
+        #     paused = True
         asked = False
 
         run_secrets = {}
 
-        if parent_task is not None:
-            parent_task.pause()
+        # if parent_task is not None:
+        #     parent_task.pause()
 
         run_secrets["become_pass"] = run_config.pop("become_pass", None)
         if (
@@ -708,8 +732,8 @@ class Frecklecutable(object):
             run_secrets["login_pass"] = ask_password(prompt)
             asked = True
 
-        if paused:
-            parent_task.resume()
+        # if paused:
+        #     parent_task.resume()
 
         if asked:
             click.echo()

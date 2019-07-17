@@ -60,14 +60,15 @@ def describe_frecklet(context, frecklet, vars, auto_vars=False):
 
     auto_vars_dict = None
     if auto_vars:
-        params = fx.frecklet.vars_frecklet
+        params = fx.frecklet.vars
         auto_vars_dict = create_auto_vars(
             params, existing_vars=var_all, frecklet=fx.frecklet
         )
         var_all = dict_merge(auto_vars_dict, var_all, copy_dct=True)
 
     inv = VarsInventory(var_all)
-    tasks = fx.process_tasks(inventory=inv)
+    run_inventory, secret_vars = fx.create_run_inventory(inventory=inv)
+    tasks = fx.process_tasks(inventory=run_inventory)
 
     result = []
     for task in tasks:
