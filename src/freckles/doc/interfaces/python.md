@@ -43,9 +43,9 @@ ec2.security_groups = ["web-traffic"]  # already exists
 
 # create the instance
 run_context = create_pyckles_context(pyckles_packages="pycklets", debug=True)
-ec2_details = run_context.run(ec2)
+ec2_details = run_context.run_pycklets(ec2)
 
-ec2_ip = ec2_details.result["wp_box"]["public_ip_address"]
+ec2_ip = ec2_details["wp_box"]["public_ip_address"]
 
 wps = WordpressStandalone()
 wps.wp_title = "My wordpress site"
@@ -57,7 +57,7 @@ wps.wp_db_password = "wordpress_db_pw"
 
 # install Wordpress
 # this Debian image has a default user called 'admin'
-run_context.run(wps, run_config="admin@{}".format(ec2_ip))
+run_context.run_pycklets(wps, run_config="admin@{}".format(ec2_ip))
 
 print("Finished. Visit: http://{}".format(ec2_ip))
 ```
