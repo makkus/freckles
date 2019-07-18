@@ -53,6 +53,7 @@ wps.webserver = "nginx"
 wps.hostname = ec2_ip
 wps.wp_admin_email = "markus@frkl.io"
 wps.wp_admin_password = "password123"
+wps.wp_db_password = "wordpress_db_pw"
 
 # install Wordpress
 # this Debian image has a default user called 'admin'
