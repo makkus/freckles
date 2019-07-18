@@ -32,7 +32,7 @@ FRECKLES_CLICK_CEREBUS_ARG_MAP = {
     "integer": int,
     "boolean": bool,
     "dict": VarsTypeSimple(),
-    "password": str,
+    # "password": str,
     # "list": list
 }
 
