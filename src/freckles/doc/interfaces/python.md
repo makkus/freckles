@@ -29,7 +29,7 @@ Now, create a Python script 'pycklets_run.py', which contains:
 
 ```python
 from pycklets import Ec2InstanceExists, WordpressStandalone
-from pyckles.contexts import debug_context
+from pyckles import create_pyckles_context
 
 ec2 = Ec2InstanceExists()
 ec2.instance_name = "wordpress_server"
@@ -42,7 +42,8 @@ ec2.image_id = "ami-440d4837"          # Debian stretch
 ec2.security_groups = ["web-traffic"]  # already exists
 
 # create the instance
-ec2_details = debug_context.run(ec2)
+run_context = create_pyckles_context(pyckles_packages="pycklets", debug=True)
+ec2_details = run_context.run(ec2)
 
 ec2_ip = ec2_details["wp_box"]["public_ip_address"]
 
@@ -55,7 +56,7 @@ wps.wp_admin_password = "password123"
 
 # install Wordpress
 # this Debian image has a default user called 'admin'
-debug_context.run(wps, run_config="admin@{}".format(ec2_ip))
+run_context.run(wps, run_config="admin@{}".format(ec2_ip))
 
 print("Finished. Visit: http://{}".format(ec2_ip))
 ```
