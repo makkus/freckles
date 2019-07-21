@@ -260,8 +260,6 @@ class VariablesAttribute(TingAttribute):
             args = self.get_vars_from_path(path_to_leaf=path, tree=task_tree, ting=ting)
             vars_tree[leaf_node_id] = args
 
-        # import pp
-        # pp(vars_tree)
         vars = self.consolidate_vars(vars_tree, ting)
 
         result = {
@@ -284,9 +282,7 @@ class VariablesAttribute(TingAttribute):
                     and not arg.is_auto_arg
                     and result[arg_name].schema != arg.schema
                 ):
-                    # import pp
-                    # pp(result[arg_name].__dict__)
-                    # pp(arg.__dict__)
+
                     reason = (
                         "Two different argument schemes for the same argument name:\n\n"
                     )
@@ -527,6 +523,4 @@ class VariablesAttribute(TingAttribute):
             is_root_level=True,
         )
 
-        # import pp
-        # pp(resolved)
         return resolved

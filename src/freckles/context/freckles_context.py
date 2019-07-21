@@ -289,6 +289,7 @@ class FrecklesContext(object):
             content = f.exploded
         else:
             content = f._metadata_raw
+
         with io.open(dest_path_frecklet, "w", encoding="utf-8") as f:
             yaml.dump(content, f)
 

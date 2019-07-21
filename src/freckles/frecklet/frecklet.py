@@ -166,10 +166,14 @@ class FreckletConstArgsAttribute(TingAttribute):
                 if tk in result.keys():
                     continue
 
+                is_auto_arg = False
+                if ting.args.get(tk, None) is None:
+                    is_auto_arg = True
                 arg = Arg(
                     key=tk,
                     arg_dict=ting.args.get(tk, None),
                     default_schema=FRECKLES_DEFAULT_ARG_SCHEMA,
+                    is_auto_arg=is_auto_arg,
                 )
                 result[tk] = arg
 
