@@ -3,7 +3,7 @@ import copy
 import logging
 import os
 import shutil
-from collections import OrderedDict
+from collections import OrderedDict, Mapping
 
 import click
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
@@ -108,6 +108,9 @@ def set_run_defaults(inventory=None, run_config=None, run_vars=None):
 
     if inventory is None:
         inventory = VarsInventory()
+
+    if isinstance(inventory, Mapping):
+        inventory = VarsInventory(vars=inventory)
 
     if run_config is None:
         run_config = FrecklesRunConfig()
@@ -224,13 +227,8 @@ class Frecklecutable(object):
         vars_pre_clean=None,
         task=None,
     ):
-
         _schema = copy.deepcopy(schema)
         _var_value_map = copy.deepcopy(var_value_map)
-
-        # import pp
-        # pp(_schema)
-        # pp(_var_value_map)
 
         _schema = special_dict_to_dict(schema)
         _var_value_map = special_dict_to_dict(_var_value_map)
@@ -594,6 +592,7 @@ class Frecklecutable(object):
             args={},
             const_args=self.frecklet.vars_const,
         )
+
         new_vars = self._validate_processed_vars(
             var_value_map=inventory.get_vars(hide_secrets=False), schema=const_schema
         )
