@@ -84,15 +84,14 @@ class FrecklesVarException(FrklException):
         #     reason = Style.BRIGHT + "Vars:" + Style.RESET_ALL + "\n"
         reason = ""
         for var, error in self.errors.items():
+
             if isinstance(error, string_types):
                 error = [error]
+
             reason = reason + Style.DIM + "{}: ".format(var) + Style.RESET_ALL
-            if len(error) == 1:
-                reason = reason + error[0]
-            else:
-                reason = reason + "\n"
-                for e in error:
-                    reason = reason + "    - {}".format(e)
+
+            reason = reason + " - ".join(error)
+            reason = reason + "\n"
 
         super(FrecklesVarException, self).__init__(
             msg=msg, reason=reason, solution=solution, references=references
