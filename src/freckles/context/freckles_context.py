@@ -470,9 +470,10 @@ class FrecklesContext(object):
             if not os.path.exists(repo["path"]) and repo["path"] != "./.freckles":
 
                 if self.config_value("ignore_empty_repos"):
-                    log.warning(
-                        "Local repo '{}' empty, ignoring...".format(repo["path"])
-                    )
+                    if not repo["path"].endswith("{}.freckles".format(os.path.sep)):
+                        log.info(
+                            "Local repo '{}' empty, ignoring...".format(repo["path"])
+                        )
                 else:
                     raise FrecklesConfigException(
                         keys="repos",

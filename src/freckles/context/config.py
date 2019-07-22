@@ -255,11 +255,11 @@ class ContextConfig(object):
         if use_community:
             repos_to_add.append("community")
 
-        if extra_repos:
-            if isinstance(extra_repos, string_types):
-                repos_to_add.append(extra_repos)
+        if self._extra_repos:
+            if isinstance(self._extra_repos, string_types):
+                repos_to_add.append(self._extra_repos)
             else:
-                repos_to_add.extend(list(extra_repos))
+                repos_to_add.extend(list(self._extra_repos))
 
         merged.setdefault("repos", [])
         for repo in repos_to_add:
