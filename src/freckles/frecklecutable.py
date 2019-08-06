@@ -235,7 +235,6 @@ class Frecklecutable(object):
         validator = TingValidator(
             _schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
-
         valid = validator.validated(_var_value_map)
 
         if valid is None:
@@ -439,8 +438,36 @@ class Frecklecutable(object):
             # be used for variable selection
             skip = frecklet.get("skip", None)
             if skip is not None:
+                # TODO: validate vars against schema
+                skip_tks = get_template_keys(skip, jinja_env=DEFAULT_FRECKLES_JINJA_ENV)
+
+                skip_schema, _ = self._generate_schema(
+                    var_value_map=task,
+                    args=root_vars,
+                    const_args=const_vars,
+                    template_keys=skip_tks,
+                )
+                val_map = {}
+
+                for tk in skip_tks:
+                    val = repl_vars.get(tk, None)
+                    if val is not None:
+                        val_map[tk] = val
+
+                for k, v in inventory.get_vars().items():
+                    if k not in val_map.keys() and v is not None and v != "":
+                        val_map[k] = v
+
+                validated_val_map = self._validate_processed_vars(
+                    var_value_map=val_map,
+                    schema=skip_schema,
+                    task_path=task_path,
+                    vars_pre_clean=repl_vars,
+                    task=task_node,
+                )
+
                 skip_value = self._replace_templated_var_value(
-                    var_value=skip, repl_dict=repl_vars, inventory=inventory
+                    var_value=skip, repl_dict=validated_val_map, inventory=inventory
                 )
                 frecklet["skip"] = skip_value
                 if isinstance(skip_value, bool) and skip_value:
@@ -496,6 +523,10 @@ class Frecklecutable(object):
             for k, v in inventory.get_vars().items():
                 if k not in val_map.keys() and v is not None and v != "":
                     val_map[k] = v
+
+            # import pp
+            # pp(tn.data["task"]["frecklet"]["name"])
+            # pp(tn.data["task"]["frecklet"])
 
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
