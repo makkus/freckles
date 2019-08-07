@@ -8,8 +8,12 @@ from collections import Mapping
 import click
 import tabulate
 from colorama import Style, Fore
+from jinja2 import Environment, FileSystemLoader
+from six import string_types
 
+from freckles.defaults import DATACLASS_CERBERUS_TYPE_MAP
 from frutils import get_terminal_size
+from frutils.jinja2_filters import ALL_FILTERS
 
 
 def print_template_error(template_error):
@@ -171,3 +175,37 @@ def augment_meta_loader_conf(loader_conf_orig):
             break
 
     return loader_conf
+
+
+SRC_JINJA_ENV = None
+
+
+def generate_frecklet_src_jinja_env(template_dir, extra_filters=None):
+
+    global SRC_JINJA_ENV
+
+    if SRC_JINJA_ENV is not None:
+        return SRC_JINJA_ENV
+
+    template_filters = ALL_FILTERS
+
+    jinja_env = Environment(loader=FileSystemLoader(template_dir))
+
+    if template_filters:
+        for tn, tf in template_filters.items():
+            jinja_env.filters[tn] = tf["func"]
+
+    if extra_filters is not None:
+        for tn, tf in extra_filters.items():
+            jinja_env.filters[tn] = tf
+
+    SRC_JINJA_ENV = jinja_env
+
+    return jinja_env
+
+
+def convert_dataclass_type_filter(arg_type):
+
+    if not isinstance(arg_type, string_types):
+        return "Any"
+    return DATACLASS_CERBERUS_TYPE_MAP[arg_type]

@@ -3,15 +3,34 @@ from collections import Sequence
 
 from ruamel.yaml.comments import CommentedMap
 
+from freckles.defaults import freckles_src_template_dir
 from freckles.frecklecutable import FrecklecutableMixin
 from freckles.frecklet.doc import render_html, render_markdown
-from frutils import dict_merge
+from freckles.utils.utils import (
+    generate_frecklet_src_jinja_env,
+    convert_dataclass_type_filter,
+)
+from frutils import dict_merge, readable_yaml
 from frutils.jinja2_filters import camelize_filter
 from ting.ting_attributes import MultiCacheResult, Arg
 from .tasks import *  # noqa
 from ting.attributes.rendering import JinjaTemplateMixin  # noqa
 
 log = logging.getLogger("freckles")
+
+
+def get_src_template(template_name):
+
+    jinja_env = generate_frecklet_src_jinja_env(
+        template_dir=freckles_src_template_dir,
+        extra_filters={"get_dataclass_type": convert_dataclass_type_filter},
+    )
+
+    if template_name is None:
+        template_name = "python_3_src.j2"
+
+    template = jinja_env.get_template(name=template_name)
+    return template
 
 
 class FreckletsTemplateKeysAttribute(TingAttribute):
@@ -294,6 +313,28 @@ class PagelingContentAttribute(TingAttribute):
         return str(frecklet.doc)
 
 
+class PrettyPrintFrecklet(TingAttribute):
+    def __init__(self):
+        pass
+
+    def provides(self):
+
+        return ["pretty_print"]
+
+    def requires(self):
+
+        return ["_metadata"]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        result = CommentedMap()
+        for key in ["doc", "args", "meta", "frecklets"]:
+            if ting._metadata.get(key, None):
+                result[key] = ting._metadata[key]
+
+        return readable_yaml(result, ignore_aliases=True)
+
+
 class FreckletClassNameAttribute(TingAttribute):
     def __init__(self):
         pass
@@ -307,6 +348,38 @@ class FreckletClassNameAttribute(TingAttribute):
     def get_attribute(self, ting, attribute_name=None):
 
         return camelize_filter(ting.id, replace_dashes=True)
+
+
+class FreckletSrcAttribute(TingAttribute):
+    def __init__(self, template_name, target_attr=None):
+
+        self.package_name = "pycklets"
+        if target_attr is None:
+            target_attr = template_name
+        self.target_attr = target_attr
+        self.template = get_src_template(template_name=template_name)
+
+    def requires(self):
+
+        return ["render_template"]
+
+    def provides(self):
+
+        return [self.target_attr]
+
+    def get_attribute(self, ting, attribute_name=None):
+
+        module_name = ting.id.replace("-", "_")
+        src = ting.render_template(
+            ting_repl_name="frecklet",
+            template=self.template,
+            extra_repl_dict={
+                "package_name": self.package_name,
+                "module_name": module_name,
+            },
+        )
+
+        return src
 
 
 class PagelingNavPathAttribute(TingAttribute):
@@ -362,7 +435,20 @@ FRECKLET_LOAD_CONFIG = {
         "FreckletExplodedAttribute",
         "FreckletValidAttribute",
         "VarsAttribute",
+        "PrettyPrintFrecklet",
         "TaskTreeAttribute",
+        {
+            "FreckletSrcAttribute": {
+                "template_name": "python_3_src.j2",
+                "target_attr": "src_python_3",
+            }
+        },
+        {
+            "FreckletSrcAttribute": {
+                "template_name": "python_src.j2",
+                "target_attr": "src_python_2",
+            }
+        },
         {
             "VariablesAttribute": {
                 "target_attr_name": "vars_frecklet",

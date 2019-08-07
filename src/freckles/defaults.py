@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 from jinja2.nativetypes import NativeEnvironment
 
@@ -89,6 +90,16 @@ FRECKLES_EXTRA_LOOKUP_PATHS = [
     ),
 ]
 
+# templates
+if not hasattr(sys, "frozen"):
+    freckles_src_template_dir = os.path.join(
+        os.path.dirname(__file__), "templates", "src"
+    )
+else:
+    freckles_src_template_dir = os.path.join(
+        sys._MEIPASS, "freckles", "templates", "src"
+    )
+
 # ---------------------------------------------------------------
 # jinja-related defaults
 
@@ -102,3 +113,11 @@ DEFAULT_RUN_CONFIG_JINJA_ENV = NativeEnvironment(**JINJA_DELIMITER_PROFILES["def
 DEFAULT_FRECKLES_SSH_SESSION_SOCK = os.path.join(
     FRECKLES_SHARE_DIR, "ssh", "freckles_ssh_sock"
 )
+DATACLASS_CERBERUS_TYPE_MAP = {
+    "string": "str",
+    "float": "float",
+    "integer": "int",
+    "boolean": "bool",
+    "dict": "Dict",
+    "list": "List",
+}

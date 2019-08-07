@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+
+{% if package_name is defined %}
+#
+# module path: {{ package_name }}.{{ module_name }}.{{ frecklet.class_name }}
+#
+{% endif %}
+
+from pyckles import AutoPycklet, Pycklet
+
+class {{ frecklet.class_name }}(AutoPycklet):
+    """{{ frecklet.doc.get_help(use_short_help=True, default="No documentation available.") | indent(5) }}
+
+       Args:
+{% for an, a in frecklet.vars.items() %}         {{ an }}: {{ a.doc.get_short_help(use_help=True, default="n/a") }}
+{% endfor %}
+    """
+
+    FRECKLET_ID = "{{ frecklet.id }}"
+
+    def __init__(self, {% for an, a in frecklet.vars.items() %}{{ an }}={% if a.type == 'string' and a.default %}"{{ a.default }}"{% elif a.default %}{{ a.default }}{% else %}None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
+
+        super({{ frecklet.class_name }}, self).__init__(var_names=[{{ frecklet.vars.keys() | map('quote') | join(', ') }}])
+{% for arg_name, arg in frecklet.vars.items() %}        self._{{ arg_name }} = {{ arg_name }}
+{% endfor %}{% for arg_name, arg in frecklet.vars.items() %}
+    @property
+    def {{ arg_name }}(self):
+        return self._{{ arg_name }}
+
+    @{{ arg_name }}.setter
+    def {{ arg_name }}(self, {{ arg_name }}):
+        self._{{ arg_name }} = {{ arg_name }}
+{% endfor %}
+
+    def __add__(self, other):
+
+        if issubclass(other.__class__, Pycklet):
+            return [self, other]
+        elif isinstance(other, Sequence):
+            result = [self]
+            for o in other:
+              if issubclass(o.__class__, Pycklet):
+                 result.append(o)
+              else:
+                  raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
+            return result
+        else:
+            raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
+
+
+frecklet_class = {{ frecklet.class_name }}

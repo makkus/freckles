@@ -1,0 +1,21 @@
+<h2 class="section-title" id="code">Code</h2>
+
+<div class="section-block">
+
+    <div class="code-showcase" markdown="1">
+
+    {{
+        ['```yaml tab="Source"\n', frecklet.pretty_print, '\n```\n',
+        '\n```console tab="Command-line"\n', 'frecklecute ', frecklet | to_repo_alias, frecklet_name, ' --help\n\n', frecklet | to_cli_help_string, '\n```\n',
+        '\n```python tab="Python 3"\n', frecklet.src_python_3, '\n```\n',
+        '\n```python tab="Python 2"\n', frecklet.src_python_2, '\n```\n',
+
+        ]
+
+        | join('') | from_markdown
+
+        }}
+
+    </div>
+
+</div>

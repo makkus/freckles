@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa
+
+import os
+
+{% for f in imports | dictsort %}from .{{ f[0] }} import {{ f[1] }}
+{% endfor %}
+
+
+
+def get_class(frecklet_name):
+    frecklet_name = frecklet_name.replace("-", "_")
+
+    import importlib
+
+    module = importlib.import_module("{}.{}".format("{{ package_name }}", frecklet_name), package=None)
+
+    if not hasattr(module, "frecklet_class"):
+        return None
+    return getattr(module, "frecklet_class")
+
+def create_obj(_frecklet_name, **vars):
+    cl = class_wrapper_func(frecklet_name=_frecklet_name)
+    if cl is None:
+        return None
+
+    return cl(**vars)
+
+def get_resource_details():
+
+    path = os.path.abspath(os.path.dirname(__file__))
+    resources_dir = os.path.join(path, "resources")
+
+    resources = {}
+    for f in os.listdir(resources_dir):
+        full = os.path.join(resources_dir, f)
+        if os.path.isdir(full):
+            resources.setdefault(f, []).append(full)
+
+    result  = {
+        "module_base": path,
+        "resources_dir": resources_dir,
+        "resources": resources
+    }
+
+    return result
+
+def get_freckles_context():
