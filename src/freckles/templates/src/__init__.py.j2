@@ -6,8 +6,6 @@ import os
 {% for f in imports | dictsort %}from .{{ f[0] }} import {{ f[1] }}
 {% endfor %}
 
-
-
 def get_class(frecklet_name):
     frecklet_name = frecklet_name.replace("-", "_")
 
@@ -19,12 +17,14 @@ def get_class(frecklet_name):
         return None
     return getattr(module, "frecklet_class")
 
+
 def create_obj(_frecklet_name, **vars):
     cl = class_wrapper_func(frecklet_name=_frecklet_name)
     if cl is None:
         return None
 
     return cl(**vars)
+
 
 def get_resource_details():
 
