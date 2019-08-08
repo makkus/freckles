@@ -6,9 +6,7 @@
 #
 {% endif %}
 
-from collections import Sequence
-
-from pyckles import AutoPycklet, Pycklet
+from pyckles import AutoPycklet
 
 class {{ frecklet.class_name }}(AutoPycklet):
     """{{ frecklet.doc.get_help(use_short_help=True, default="No documentation available.") | indent(5) }}
@@ -33,21 +31,6 @@ class {{ frecklet.class_name }}(AutoPycklet):
     def {{ arg_name }}(self, {{ arg_name }}):
         self._{{ arg_name }} = {{ arg_name }}
 {% endfor %}
-
-    def __add__(self, other):
-
-        if issubclass(other.__class__, Pycklet):
-            return [self, other]
-        elif isinstance(other, Sequence):
-            result = [self]
-            for o in other:
-              if issubclass(o.__class__, Pycklet):
-                 result.append(o)
-              else:
-                  raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
-            return result
-        else:
-            raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
 
 
 frecklet_class = {{ frecklet.class_name }}

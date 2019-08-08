@@ -7,8 +7,7 @@
 {% endif %}
 
 from dataclasses import dataclass
-from pyckles import AutoPycklet, Pycklet
-from collections import Sequence
+from pyckles import AutoPycklet
 from typing import *    # noqa
 
 @dataclass
@@ -28,19 +27,5 @@ class {{ frecklet.class_name }}(AutoPycklet):
     def __post_init__(self):
         super({{ frecklet.class_name }}, self).__init__(var_names=[{{ frecklet.vars.keys() | map('quote') | join(', ') }}])
 
-    def __add__(self, other):
-
-        if issubclass(other.__class__, Pycklet):
-            return [self, other]
-        elif isinstance(other, Sequence):
-            result = [self]
-            for o in other:
-              if issubclass(o.__class__, Pycklet):
-                 result.append(o)
-              else:
-                  raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
-            return result
-        else:
-            raise Exception("Can't add to Pycklet, wrong type: {}".format(type(o)))
 
 frecklet_class = {{ frecklet.class_name }}
