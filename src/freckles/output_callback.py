@@ -35,6 +35,7 @@ class FrecklesRun(object):
         success,
         parent_result,
         root_task,
+        exception=None,
     ):
 
         self.run_id = run_id
@@ -52,6 +53,7 @@ class FrecklesRun(object):
 
         self.parent_result = parent_result
         self.root_task = root_task
+        self.exception = exception
 
     def __str__(self):
 

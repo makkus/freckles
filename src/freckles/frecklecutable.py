@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import copy
+import csv
+import io
 import logging
 import os
 import shutil
+import time
 from collections import OrderedDict, Mapping
 
 import click
+from fasteners import interprocess_locked
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
@@ -36,6 +40,9 @@ from .defaults import (
     FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY,
     FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
     DEFAULT_RUN_CONFIG_JINJA_ENV,
+    FRECKLES_RUN_LOG_FILE_LOCK,
+    FRECKLES_RUN_LOG_FILE_PATH,
+    FRECKLES_LAST_RUN_FILE_PATH,
 )
 from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
@@ -235,6 +242,7 @@ class Frecklecutable(object):
         validator = TingValidator(
             _schema, purge_unknown=purge_unknown, allow_unknown=allow_unknown
         )
+
         valid = validator.validated(_var_value_map)
 
         if valid is None:
@@ -691,6 +699,24 @@ class Frecklecutable(object):
 
         return run_inventory, secret_args
 
+    @interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
+    def write_runs_log(self, properties, adapter_name, state):
+
+        row = [
+            properties["uuid"],
+            adapter_name,
+            properties["env_dir"],
+            state,
+            time.time(),
+        ]
+        with io.open(FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
+
+        with io.open(FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
+
     def run_frecklecutable(
         self,
         inventory=None,
@@ -943,6 +969,17 @@ class Frecklecutable(object):
                         )
 
                 try:
+                    self.write_runs_log(
+                        properties=run_env_properties,
+                        adapter_name=adapter_name,
+                        state="started",
+                    )
+                    # from random import randint
+                    # from time import sleep
+                    # sec = randint(1, 10)
+                    # print("SLEEPING: {}".format(sec))
+                    # sleep(sec)
+                    run_properties = None
                     run_properties = adapter._run(
                         tasklist=current_tasklist,
                         run_vars=run_vars,
@@ -970,11 +1007,24 @@ class Frecklecutable(object):
                         parent_result=current_run_result,
                     )
                     current_run_result = run_result
+                    self.write_runs_log(
+                        properties=run_env_properties,
+                        adapter_name=adapter_name,
+                        state="success",
+                    )
 
                     if not root_run_task.success:
                         break
 
                 except (Exception) as e:
+
+                    # import traceback
+                    # traceback.print_exc()
+                    self.write_runs_log(
+                        properties=run_env_properties,
+                        adapter_name=adapter_name,
+                        state="failed",
+                    )
 
                     if isinstance(e, FrklException):
                         msg = e.message
@@ -984,10 +1034,25 @@ class Frecklecutable(object):
                         root_run_task.finish(success=False, error_msg=msg)
                     # click.echo("frecklecutable run failed: {}".format(e))
                     log.debug(e, exc_info=1)
+
+                    run_result = FrecklesRun(
+                        run_id=run_nr,
+                        adapter_name=adapter_name,
+                        task_list=current_tasklist,
+                        run_vars=run_vars,
+                        run_config=run_config,
+                        run_env=run_env_properties,
+                        run_properties=run_properties,
+                        result=copy.deepcopy(result_callback.result),
+                        success=root_run_task.success,
+                        root_task=root_run_task,
+                        parent_result=current_run_result,
+                        exception=e,
+                    )
+                    current_run_result = run_result
+
                     break
-                    # import traceback
-                    #
-                    # traceback.print_exc()
+
         finally:
             if root_task is None:
                 return current_run_result
@@ -1003,8 +1068,11 @@ class Frecklecutable(object):
                 env_dir_link = run_env_properties.get("env_dir_link", None)
 
                 if env_dir_link and os.path.realpath(env_dir_link) == env_dir:
-                    log.debug("removing env dir symlink: {}".format(env_dir_link))
-                    os.unlink(env_dir_link)
+                    try:
+                        log.debug("removing env dir symlink: {}".format(env_dir_link))
+                        os.unlink(env_dir_link)
+                    except (Exception):
+                        log.debug("Could not remove symlink.")
 
                 try:
                     log.debug("removing env dir: {}".format(env_dir))

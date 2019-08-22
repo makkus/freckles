@@ -18,12 +18,22 @@ def get_class(frecklet_name):
     return getattr(module, "frecklet_class")
 
 
-def create_obj(_frecklet_name, **vars):
+def create_obj(_frecklet_name, , _strict=False, _exception_on_not_found=True, **vars):
     cl = class_wrapper_func(frecklet_name=_frecklet_name)
     if cl is None:
-        return None
+        if _exception_on_not_found:
+            raise Exception("No frecklet found with name: {}".format(_frecklet_name))
+        else:
+            return None
 
-    return cl(**vars)
+    if _strict:
+        return cl(**vars)
+    else:
+        obj = cl()
+        for k, v in vars.items():
+            if hasattr(obj, k):
+                setattr(obj, k, v)
+        return obj
 
 
 def get_resource_details():

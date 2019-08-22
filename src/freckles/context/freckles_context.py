@@ -35,7 +35,6 @@ from frutils import (
     readable,
 )
 
-# from .output_callback import DefaultCallback
 from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback
 from frutils.tasks.tasks import Tasks
@@ -909,8 +908,11 @@ class FrecklesContext(object):
     def create_run_environment(self, adapter, env_dir=None):
 
         result = {}
+        symlink = self.config_value("create_current_symlink")
+        symlink_path = os.path.expanduser(self.config_value("current_run_folder"))
 
-        symlink = os.path.expanduser(self.config_value("current_run_folder"))
+        run_uuid = str(uuid.uuid4())
+        result["uuid"] = run_uuid
 
         if env_dir is None:
 
@@ -931,8 +933,7 @@ class FrecklesContext(object):
                 env_dir = os.path.join(dirname, "{}_{}".format(basename, date_string))
 
             if add_uuid:
-                u = str(uuid.uuid4())
-                env_dir = "{}_{}".format(env_dir, u)
+                env_dir = "{}_{}".format(env_dir, run_uuid)
 
             if os.path.exists(env_dir):
                 if not force:
@@ -945,18 +946,24 @@ class FrecklesContext(object):
         result["env_dir"] = env_dir
 
         if symlink:
-            link_path = os.path.expanduser(symlink)
-            if os.path.exists(link_path) or os.path.islink(link_path):
-                os.unlink(link_path)
-            link_parent = os.path.abspath(os.path.join(link_path, os.pardir))
             try:
-                os.makedirs(link_parent)
-            except (Exception):
+                link_path = os.path.expanduser(symlink_path)
+                if os.path.exists(link_path) or os.path.islink(link_path):
+                    os.unlink(link_path)
+                link_parent = os.path.abspath(os.path.join(link_path, os.pardir))
+                try:
+                    os.makedirs(link_parent)
+                except (Exception):
+                    pass
+
+                os.symlink(env_dir, link_path)
+
+                result["env_dir_link"] = link_path
+            except (Exception) as e:
+                log.debug(
+                    "Could not create symlink to current run folder: {}".format(e)
+                )
                 pass
-
-            os.symlink(env_dir, link_path)
-
-            result["env_dir_link"] = link_path
 
         # resource_path = os.path.join(env_dir, "resources")
         # os.mkdir(resource_path)

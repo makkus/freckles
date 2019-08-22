@@ -2,6 +2,7 @@
 
 import os
 import sys
+import tempfile
 
 from jinja2.nativetypes import NativeEnvironment
 
@@ -33,7 +34,6 @@ FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY = "elevated"
 
 
 FRECKLES_DEFAULT_ARG_SCHEMA = {"required": True, "empty": False}
-
 
 # ---------------------------------------------------------------
 # folder / filesystem defaults
@@ -90,6 +90,17 @@ FRECKLES_EXTRA_LOOKUP_PATHS = [
     ),
 ]
 
+FRECKLES_RUNS_LOG_FILE_NAME = ".runs_log"
+FRECKLES_LAST_RUN_FILE_NAME = ".runs_last"
+FRECKLES_RUN_LOG_FILE_PATH = os.path.join(
+    FRECKLES_SHARE_DIR, FRECKLES_RUNS_LOG_FILE_NAME
+)
+FRECKLES_RUN_LOG_FILE_LOCK = os.path.join(
+    tempfile.gettempdir(), "_freckles_run_log_lock"
+)
+FRECKLES_LAST_RUN_FILE_PATH = os.path.join(
+    FRECKLES_SHARE_DIR, FRECKLES_LAST_RUN_FILE_NAME
+)
 # templates
 if not hasattr(sys, "frozen"):
     freckles_src_template_dir = os.path.join(

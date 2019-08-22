@@ -103,6 +103,14 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {"short_help": "the target for the generated run environment"},
         "tags": ["safe"],
     },
+    "create_current_symlink": {
+        "type": "boolean",
+        "default": False,
+        "doc": {
+            "short_help": "whether to create a symlink to the last freckles run (also check 'current_run_folder')"
+        },
+        "tags": ["safe"],
+    },
     "current_run_folder": {
         "type": "string",
         "default": FRECKLES_CURRENT_RUN_SYMLINK,
