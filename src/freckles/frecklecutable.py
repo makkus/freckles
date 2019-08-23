@@ -968,6 +968,7 @@ class Frecklecutable(object):
                             jinja_env=DEFAULT_RUN_CONFIG_JINJA_ENV,
                         )
 
+                run_properties = None
                 try:
                     self.write_runs_log(
                         properties=run_env_properties,
@@ -979,7 +980,7 @@ class Frecklecutable(object):
                     # sec = randint(1, 10)
                     # print("SLEEPING: {}".format(sec))
                     # sleep(sec)
-                    run_properties = None
+
                     run_properties = adapter._run(
                         tasklist=current_tasklist,
                         run_vars=run_vars,

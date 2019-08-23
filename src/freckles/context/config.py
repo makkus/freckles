@@ -88,6 +88,7 @@ class ContextConfigs(TingTings):
         self._default_config_path = os.path.join(FRECKLES_CONFIG_DIR, "default.context")
         try:
             with io.open(self._default_config_path, "r", encoding="utf-8") as f:
+                yaml = YAML()
                 default_context_dict = yaml.load(f)
                 self._config_unlocked = (
                     default_context_dict.get(ACCEPT_FRECKLES_LICENSE_KEYNAME, False)
