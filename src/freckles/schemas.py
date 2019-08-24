@@ -164,6 +164,14 @@ There are 3 special repository aliases that can be used instead of a path:
         },
         "tags": ["safe"],
     },
+    "write_run_log": {
+        "type": "boolean",
+        "default": True,
+        "doc": {
+            "short_help": "whether to write a 'run_log.json' log file in the root of the run environment folder"
+        },
+        "tags": ["safe"],
+    },
     "keep_ssh_agent": {
         "type": "boolean",
         "default": False,

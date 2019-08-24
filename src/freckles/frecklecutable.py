@@ -5,6 +5,7 @@ import io
 import logging
 import os
 import shutil
+import threading
 import time
 from collections import OrderedDict, Mapping
 
@@ -14,6 +15,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
+from frutils.tasks.callback import load_callback
 from .frecklet.vars import (
     VarsInventory,
     is_var_adapter,
@@ -48,6 +50,8 @@ from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
+
+run_log_lock = threading.Lock()
 
 
 def ask_password(prompt):
@@ -702,20 +706,56 @@ class Frecklecutable(object):
     @interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
     def write_runs_log(self, properties, adapter_name, state):
 
-        row = [
-            properties["uuid"],
-            adapter_name,
-            properties["env_dir"],
-            state,
-            time.time(),
-        ]
-        with io.open(FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        keep_logs = False
 
-        with io.open(FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        with run_log_lock:
+
+            if keep_logs:
+                row = [
+                    properties["uuid"],
+                    properties["frecklet_name"],
+                    adapter_name,
+                    properties["env_dir"],
+                    state,
+                    time.time(),
+                ]
+                with io.open(
+                    FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
+                ) as f:
+                    writer = csv.writer(f)
+                    writer.writerow(row)
+
+                with io.open(
+                    FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
+                ) as f:
+                    writer = csv.writer(f)
+                    writer.writerow(row)
+            else:
+                if state == "started":
+                    row = [
+                        properties["uuid"],
+                        properties["frecklet_name"],
+                        adapter_name,
+                        properties["env_dir"],
+                        state,
+                        time.time(),
+                    ]
+                    with io.open(
+                        FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
+                    ) as f:
+                        writer = csv.writer(f)
+                        writer.writerow(row)
+                else:
+                    with open(FRECKLES_RUN_LOG_FILE_PATH, "r") as inp, open(
+                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", "w", buffering=1
+                    ) as out:
+                        writer = csv.writer(out)
+                        for row in csv.reader(inp):
+                            if row[0] != properties["uuid"]:
+                                writer.writerow(row)
+                    os.rename(
+                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", FRECKLES_RUN_LOG_FILE_PATH
+                    )
 
     def run_frecklecutable(
         self,
@@ -902,18 +942,32 @@ class Frecklecutable(object):
                 run_env_properties = self.context.create_run_environment(
                     adapter, env_dir=env_dir
                 )
+                run_env_properties["frecklet_name"] = self.frecklet.id
 
                 # preparing execution environment...
                 self._context._run_info.get("prepared_execution_environments", {}).get(
                     current_adapter, None
                 )
 
+                cbs = self._callbacks
+                if self.context.config_value("write_run_log"):
+                    c_config = {
+                        "path": os.path.join(
+                            run_env_properties["env_dir"], "run_log.json"
+                        )
+                    }
+                    log_file_callback = load_callback(
+                        "logfile", callback_config=c_config
+                    )
+
+                    cbs = cbs + [log_file_callback]
+
                 if parent_task is None:
                     root_task = Tasks(
                         "env_prepare_adapter_{}".format(adapter_name),
                         msg="starting run",
                         category="run",
-                        callbacks=self._callbacks,
+                        callbacks=cbs,
                         is_utility_task=False,
                     )
                     parent_task = root_task.start()

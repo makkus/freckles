@@ -811,7 +811,7 @@ class FrecklesContext(object):
                 else:
                     frecklet_data = path_or_frecklet_content
 
-                id = str(uuid.uuid4())
+                id = "__dyn_" + str(uuid.uuid4())
 
                 data = {id: frecklet_data}
 
