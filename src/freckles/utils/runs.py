@@ -546,12 +546,16 @@ class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
 
     def updated_adapter(self, data):
 
-        color_index = len(FrecklesRunLogTerminalOutput.COLORS) % self._index
-        color = FrecklesRunLogTerminalOutput.COLORS[color_index]
-        reset = Fore.RESET
+        if self._index < len(FrecklesRunLogTerminalOutput.COLORS):
+            color_index = self._index
+        else:
+            color_index = self._index % len(FrecklesRunLogTerminalOutput.COLORS)
 
+        color = FrecklesRunLogTerminalOutput.COLORS[color_index]
         for line in data:
-            click.echo("{}{}: {}{}".format(color, self._alias, line, reset), nl=False)
+            click.echo(
+                "{}{}: {}{}".format(color, self._alias, line, Fore.RESET), nl=False
+            )
 
     def updated_log(self, data):
 
