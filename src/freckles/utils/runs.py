@@ -162,6 +162,12 @@ def write_runs_log(properties, adapter_name, state):
                     ) as f:
                         writer = csv.writer(f)
                         writer.writerow(row)
+
+                    with io.open(
+                        FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
+                    ) as f:
+                        writer = csv.writer(f)
+                        writer.writerow(row)
                 else:
                     with open(FRECKLES_RUN_LOG_FILE_PATH, "r") as inp, open(
                         FRECKLES_RUN_LOG_FILE_PATH + ".tmp", "w", buffering=1
@@ -201,6 +207,24 @@ def get_current_runs():
             continue
         result[uuid] = data
     return result
+
+
+def get_last_run():
+
+    if not os.path.exists(FRECKLES_LAST_RUN_FILE_PATH):
+        return None
+
+    with io.open(FRECKLES_LAST_RUN_FILE_PATH, "r", encoding="utf-8") as f:
+        for row in csv.reader(f):
+            if not row:
+                continue
+            data = convert_log_file_row(row)
+            break
+
+    if not os.path.exists(data["env_dir"]):
+        return None
+
+    return data
 
 
 class RunWatchManager(object):
@@ -443,6 +467,44 @@ class FrecklesRunsLogTerminalOutput(FrecklesRunWatcher):
         self._log_file_printers = {}
 
 
+def print_task_detail(run_detail, alias=None, color=None):
+
+    if color is None:
+        color = ""
+        reset = ""
+    else:
+        reset = Fore.RESET
+
+    if alias:
+        alias = "{}: ".format(alias)
+    else:
+        alias = ""
+
+    level = run_detail["level"]
+    msg = run_detail["msg"]
+    finished = run_detail["finished"]
+    success = run_detail.get("success", None)
+    skipped = run_detail.get("skipped", None)
+    # changed = d.get("changed", None)
+    # messages = d["messages"]
+    error_messages = run_detail["error_messages"]
+    padding = "  " * level
+
+    if not finished:
+        click.echo("{}{}{}- {}{}".format(color, alias, padding, msg, reset))
+    else:
+        if success:
+            if skipped:
+                status = "skipped"
+            else:
+                status = "ok"
+        click.echo("{}{}{}- {}: {}{}".format(color, alias, padding, msg, status, reset))
+        if not success:
+            if alias:
+                alias = alias[0:-1]
+            click.echo("{}{}      -> {}{}".format(color, alias, error_messages, reset))
+
+
 class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
 
     COLORS = [
@@ -499,40 +561,9 @@ class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
             color_index = self._index % len(FrecklesRunLogTerminalOutput.COLORS)
 
         color = FrecklesRunLogTerminalOutput.COLORS[color_index]
-        reset = Fore.RESET
 
         for d in data:
-            level = d["level"]
-            msg = d["msg"]
-            finished = d["finished"]
-            success = d.get("success", None)
-            skipped = d.get("skipped", None)
-            # changed = d.get("changed", None)
-            # messages = d["messages"]
-            error_messages = d["error_messages"]
-            padding = "  " * level
-
-            if not finished:
-                click.echo(
-                    "{}{}: {}- {}{}".format(color, self._alias, padding, msg, reset)
-                )
-            else:
-                if success:
-                    if skipped:
-                        status = "skipped"
-                    else:
-                        status = "ok"
-                click.echo(
-                    "{}{}: {}- {}: {}{}".format(
-                        color, self._alias, padding, msg, status, reset
-                    )
-                )
-                if not success:
-                    click.echo(
-                        "{}{}      -> {}{}".format(
-                            color, self._alias, error_messages, reset
-                        )
-                    )
+            print_task_detail(d, alias=self._alias, color=color)
 
     def finished(self, print_status=True):
 
