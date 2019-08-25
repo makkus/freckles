@@ -196,7 +196,12 @@ class FrecklesRunTarget(object):
 
 class FrecklesRunConfig(FrecklesRunTarget):
     def __init__(
-        self, target_dict=None, target_string=None, elevated=None, no_run=False
+        self,
+        target_dict=None,
+        target_string=None,
+        elevated=None,
+        no_run=False,
+        metadata=None,
     ):
 
         super(FrecklesRunConfig, self).__init__(
@@ -204,6 +209,9 @@ class FrecklesRunConfig(FrecklesRunTarget):
         )
         self._elevated = elevated
         self._no_run = no_run
+        if metadata is None:
+            metadata = {}
+        self._metadata = metadata
 
     def _init_config(self):
 
@@ -230,10 +238,19 @@ class FrecklesRunConfig(FrecklesRunTarget):
         self._no_run = no_run
 
     @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, metadata):
+        self._metadata = metadata
+
+    @property
     def config(self):
 
         temp = super(FrecklesRunConfig, self).config
         temp["no_run"] = self.no_run
+        temp["metadata"] = self.metadata
         if self.elevated is not None:
             temp["elevated"] = self.elevated
 

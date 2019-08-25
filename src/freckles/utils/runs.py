@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import abc
 import csv
 import io
 import json
@@ -7,27 +8,33 @@ import threading
 
 import click
 import fasteners
+import six
+from colorama import Fore
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from freckles.defaults import FRECKLES_RUN_LOG_FILE_PATH
+from frutils.exceptions import FrklException
 
 
 def convert_log_file_row(row):
 
     data = {}
     data["uuid"] = row[0]
-    data["frecklet_name"] = row[1]
-    data["adapter"] = row[2]
-    data["env_dir"] = row[3]
-    data["state"] = row[4]
-    data["timestamp"] = row[5]
+    data["run_alias"] = row[1]
+    data["frecklet_name"] = row[2]
+    data["adapter"] = row[3]
+    data["env_dir"] = row[4]
+    data["state"] = row[5]
+    data["timestamp"] = row[6]
 
     return data
 
 
 def get_current_runs():
 
+    if not os.path.exists(FRECKLES_RUN_LOG_FILE_PATH):
+        return {}
     content = {}
     with io.open(FRECKLES_RUN_LOG_FILE_PATH, "r", encoding="utf-8") as f:
         for row in csv.reader(f):
@@ -41,8 +48,10 @@ def get_current_runs():
     return content
 
 
-class RunsWatcher(object):
-    def __init__(self):
+class RunWatchManager(object):
+    def __init__(self, *run_watchers):
+
+        self._run_watchers = run_watchers
 
         self._lock = threading.Lock()
         self._current_runs = None
@@ -52,9 +61,8 @@ class RunsWatcher(object):
         )
         self._runs_observer = None
 
-        self._log_file_watchers = {}
-
         self._aliases = {}
+        self._unique_index = {}
 
     def start(self):
 
@@ -65,10 +73,9 @@ class RunsWatcher(object):
 
     def stop(self):
 
-        for fw in self._log_file_watchers.values():
-            fw.finished()
+        for watcher in self._run_watchers:
+            watcher.stop()
 
-        self._log_file_watchers = {}
         self._runs_observer.stop()
 
     def join_runs_watch(self):
@@ -78,14 +85,22 @@ class RunsWatcher(object):
     @fasteners.locked
     def update_current_runs(self, current_runs):
 
+        if self._current_runs:
+            old_current = self._current_runs
+        else:
+            old_current = {}
         self._current_runs = current_runs
 
         for uuid, r in self._current_runs.items():
 
-            if uuid in self._log_file_watchers.keys():
+            if uuid in old_current.keys():
                 continue
 
-            alias = r["frecklet_name"]
+            index = 0
+            while index in self._unique_index.values():
+                index = index + 1
+
+            alias = r["run_alias"]
             if alias.startswith("__dyn_"):
                 alias = "no_name"
             elif os.path.sep in alias:
@@ -99,39 +114,86 @@ class RunsWatcher(object):
                 current = current + 1
                 alias_new = "{}_{}".format(alias, current)
                 self._aliases[alias] = current
-            self._log_file_watchers[uuid] = FrecklesRunLogWatcher(alias_new, r)
+
+            self.task_started(uuid=uuid, alias=alias_new, run_data=r, index=index)
+            old_current[uuid] = r
+            self._unique_index[uuid] = index
 
         remove = []
-        for uuid, fw in self._log_file_watchers.items():
+        for uuid, run_data in old_current.items():
 
             if uuid in self._current_runs.keys():
                 continue
 
-            fw.finished()
             remove.append(uuid)
 
         for r in remove:
-            self._log_file_watchers.pop(r)
+            self.task_finished(r)
+            self._unique_index.pop(r)
 
-        if not self._log_file_watchers:
+        if not self._current_runs:
             self._aliases = {}
+            self._unique_index = {}
+
+    def task_started(self, uuid, alias, run_data, index):
+
+        for watcher in self._run_watchers:
+            watcher.task_started(uuid=uuid, alias=alias, run_data=run_data, index=index)
+
+    def task_finished(self, uuid):
+
+        for watcher in self._run_watchers:
+            watcher.task_finished(uuid=uuid)
 
 
 class FrecklesLogFileHander(FileSystemEventHandler):
-    def __init__(self, created_callback=None, callback=None, finished_callback=None):
+    def __init__(
+        self,
+        run_alias,
+        watch_path=None,
+        created_callback=None,
+        callback=None,
+        finished_callback=None,
+        adapter_log=None,
+        index=0,
+    ):
 
+        if adapter_log and watch_path:
+            raise FrklException(
+                msg="Can only watch either the adapter log, or a specific path."
+            )
+
+        if watch_path is None:
+            watch_path = "run_log.json"
+
+        if run_alias.startswith("__dyn_"):
+            run_alias = "_no_name_"
+        self._alias = run_alias
+        self._index = index
+        self._watch_path = watch_path
         self._created_callback = created_callback
         self._callback = callback
         self._finished_callback = finished_callback
         self._last_file_pos = 0
+        self._adapter_log = adapter_log
+        if not self._adapter_log:
+            self._log_file = os.path.join(self._env_dir, self._watch_path)
+        else:
+            if self._adapter == "nsbl":
+                self._log_file = os.path.join(
+                    self._env_dir, "nsbl/logs/ansible_run_log"
+                )
+            else:
+                raise FrklException(msg="Watching logs for adapter '{}' not supported.")
+        self._watch_dir = os.path.dirname(self._log_file)
 
     def on_created(self, event):
 
         if not self._created_callback:
             return
 
-        if not event.src_path.endswith(os.path.sep + "run_log.json"):
-            return
+            if event.src_path != self._log_file:
+                return
 
         self._created_callback(event.src_path)
 
@@ -140,7 +202,7 @@ class FrecklesLogFileHander(FileSystemEventHandler):
         if not self._callback:
             return
 
-        if not event.src_path.endswith(os.path.sep + "run_log.json"):
+        if event.src_path != self._log_file:
             return
 
         if not os.path.exists(event.src_path):
@@ -151,10 +213,13 @@ class FrecklesLogFileHander(FileSystemEventHandler):
             data = f.readlines()
             self._last_file_pos = f.tell()
 
-        result = []
-        for line in data:
-            d = json.loads(line)
-            result.append(d)
+        if not self._adapter_log:
+            result = []
+            for line in data:
+                d = json.loads(line)
+                result.append(d)
+        else:
+            result = data
 
         return self._callback(result)
 
@@ -163,34 +228,110 @@ class FrecklesLogFileHander(FileSystemEventHandler):
         if not self._finished_callback:
             return
 
-        if not event.src_path.endswith(os.path.sep + "run_log.json"):
+        if event.src_path != self._log_file:
             return
 
         self._finished_callback()
 
 
-class FrecklesRunLogWatcher(FrecklesLogFileHander):
-    def __init__(self, alias, run_data):
+@six.add_metaclass(abc.ABCMeta)
+class FrecklesRunWatcher(object):
+    @abc.abstractmethod
+    def task_started(self, uuid, alias, run_data, index):
+        pass
 
-        self._alias = alias
+    @abc.abstractmethod
+    def task_finished(self, uuid):
+        pass
+
+    @abc.abstractmethod
+    def stop(self):
+        pass
+
+
+class FrecklesRunsLogTerminalOutput(FrecklesRunWatcher):
+    def __init__(self, watch_path=None, adapter_log=False):
+
+        if adapter_log and watch_path:
+            raise FrklException(
+                msg="Can only watch either the adapter log, or a specific path."
+            )
+
+        self._watch_path = watch_path
+        self._adapter_log = adapter_log
+        self._log_file_printers = {}
+
+    def task_started(self, uuid, alias, run_data, index):
+
+        fw = FrecklesRunLogTerminalOutput(
+            alias,
+            run_data,
+            watch_path=self._watch_path,
+            adapter_log=self._adapter_log,
+            index=index,
+        )
+        self._log_file_printers[uuid] = fw
+
+    def task_finished(self, uuid):
+
+        fw = self._log_file_printers[uuid]
+        fw.finished()
+        self._log_file_printers.pop(uuid)
+
+    def stop(self):
+
+        for uuid in self._log_file_printers.keys():
+            fw = self._log_file_printers[uuid]
+            fw.finished(print_status=False)
+
+        self._log_file_printers = {}
+
+
+class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
+
+    COLORS = [Fore.BLUE, Fore.MAGENTA, Fore.GREEN, Fore.CYAN, Fore.RED, Fore.YELLOW]
+
+    def __init__(self, run_alias, run_data, watch_path=None, adapter_log=None, index=0):
+
         self._run_data = run_data
         self._uuid = self._run_data["uuid"]
-        self._frecklet_name = self._run_data["frecklet_name"]
-        if self._frecklet_name.startswith("__dyn_"):
-            self._frecklet_name = "_no_name_"
         self._adapter = self._run_data["adapter"]
         self._env_dir = self._run_data["env_dir"]
         self._started = self._run_data["timestamp"]
-        self._log_file = os.path.join(self._env_dir, "run_log.json")
 
-        super(FrecklesRunLogWatcher, self).__init__(
-            callback=self.updated, finished_callback=self.finished
+        super(FrecklesRunLogTerminalOutput, self).__init__(
+            run_alias=run_alias,
+            watch_path=watch_path,
+            callback=self.updated,
+            finished_callback=self.finished,
+            adapter_log=adapter_log,
+            index=index,
         )
 
-        self._observer = watch_log_file(self._env_dir, self)
+        self._observer = watch_log_file(self._watch_dir, self)
         self._finished = False
 
     def updated(self, data):
+
+        if not self._adapter_log:
+            self.updated_log(data)
+        else:
+            self.updated_adapter(data)
+
+    def updated_adapter(self, data):
+
+        color_index = len(FrecklesRunLogTerminalOutput.COLORS) % self._index
+        color = FrecklesRunLogTerminalOutput.COLORS[color_index]
+        reset = Fore.RESET
+
+        for line in data:
+            click.echo("{}{}: {}{}".format(color, self._alias, line, reset), nl=False)
+
+    def updated_log(self, data):
+
+        color_index = len(FrecklesRunLogTerminalOutput.COLORS) % self._index
+        color = FrecklesRunLogTerminalOutput.COLORS[color_index]
+        reset = Fore.RESET
 
         for d in data:
             level = d["level"]
@@ -204,22 +345,33 @@ class FrecklesRunLogWatcher(FrecklesLogFileHander):
             padding = "  " * level
 
             if not finished:
-                click.echo("{}: {}- {}".format(self._alias, padding, msg))
+                click.echo(
+                    "{}{}: {}- {}{}".format(color, self._alias, padding, msg, reset)
+                )
             else:
                 if success:
                     if skipped:
                         status = "skipped"
                     else:
                         status = "ok"
-                click.echo("{}: {}- {}: {}".format(self._alias, padding, msg, status))
+                click.echo(
+                    "{}{}: {}- {}: {}{}".format(
+                        color, self._alias, padding, msg, status, reset
+                    )
+                )
                 if not success:
-                    click.echo("{}      -> {}".format(error_messages))
+                    click.echo(
+                        "{}{}      -> {}{}".format(
+                            color, self._alias, error_messages, reset
+                        )
+                    )
 
-    def finished(self):
+    def finished(self, print_status=True):
 
         if not self._finished:
             self._finished = True
-            click.echo("{}: finished".format(self._alias))
+            if print_status:
+                click.echo("{}: finished".format(self._alias))
             self._observer.stop()
 
 

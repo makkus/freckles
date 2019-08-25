@@ -713,6 +713,9 @@ class Frecklecutable(object):
             if keep_logs:
                 row = [
                     properties["uuid"],
+                    properties["run_metadata"].get(
+                        "run_alias", properties["frecklet_name"]
+                    ),
                     properties["frecklet_name"],
                     adapter_name,
                     properties["env_dir"],
@@ -734,6 +737,9 @@ class Frecklecutable(object):
                 if state == "started":
                     row = [
                         properties["uuid"],
+                        properties["run_metadata"].get(
+                            "run_alias", properties["frecklet_name"]
+                        ),
                         properties["frecklet_name"],
                         adapter_name,
                         properties["env_dir"],
@@ -943,6 +949,7 @@ class Frecklecutable(object):
                     adapter, env_dir=env_dir
                 )
                 run_env_properties["frecklet_name"] = self.frecklet.id
+                run_env_properties["run_metadata"] = run_config.get("metadata", {})
 
                 # preparing execution environment...
                 self._context._run_info.get("prepared_execution_environments", {}).get(
