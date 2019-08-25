@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 import copy
-import csv
-import io
 import logging
 import os
 import shutil
-import threading
-import time
 from collections import OrderedDict, Mapping
 
 import click
-from fasteners import interprocess_locked
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
+from freckles.utils.runs import write_runs_log
 from frutils.tasks.callback import load_callback
 from .frecklet.vars import (
     VarsInventory,
@@ -42,16 +38,11 @@ from .defaults import (
     FRECKLES_PROPERTIES_IDEMPOTENT_METADATA_KEY,
     FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
     DEFAULT_RUN_CONFIG_JINJA_ENV,
-    FRECKLES_RUN_LOG_FILE_LOCK,
-    FRECKLES_RUN_LOG_FILE_PATH,
-    FRECKLES_LAST_RUN_FILE_PATH,
 )
 from .exceptions import FrecklesVarException
 from .output_callback import FrecklesRun, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
-
-run_log_lock = threading.Lock()
 
 
 def ask_password(prompt):
@@ -703,66 +694,6 @@ class Frecklecutable(object):
 
         return run_inventory, secret_args
 
-    @interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
-    def write_runs_log(self, properties, adapter_name, state):
-
-        keep_logs = False
-
-        with run_log_lock:
-
-            if keep_logs:
-                row = [
-                    properties["uuid"],
-                    properties["run_metadata"].get(
-                        "run_alias", properties["frecklet_name"]
-                    ),
-                    properties["frecklet_name"],
-                    adapter_name,
-                    properties["env_dir"],
-                    state,
-                    time.time(),
-                ]
-                with io.open(
-                    FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
-                ) as f:
-                    writer = csv.writer(f)
-                    writer.writerow(row)
-
-                with io.open(
-                    FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
-                ) as f:
-                    writer = csv.writer(f)
-                    writer.writerow(row)
-            else:
-                if state == "started":
-                    row = [
-                        properties["uuid"],
-                        properties["run_metadata"].get(
-                            "run_alias", properties["frecklet_name"]
-                        ),
-                        properties["frecklet_name"],
-                        adapter_name,
-                        properties["env_dir"],
-                        state,
-                        time.time(),
-                    ]
-                    with io.open(
-                        FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
-                    ) as f:
-                        writer = csv.writer(f)
-                        writer.writerow(row)
-                else:
-                    with open(FRECKLES_RUN_LOG_FILE_PATH, "r") as inp, open(
-                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", "w", buffering=1
-                    ) as out:
-                        writer = csv.writer(out)
-                        for row in csv.reader(inp):
-                            if row[0] != properties["uuid"]:
-                                writer.writerow(row)
-                    os.rename(
-                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", FRECKLES_RUN_LOG_FILE_PATH
-                    )
-
     def run_frecklecutable(
         self,
         inventory=None,
@@ -1031,7 +962,7 @@ class Frecklecutable(object):
 
                 run_properties = None
                 try:
-                    self.write_runs_log(
+                    write_runs_log(
                         properties=run_env_properties,
                         adapter_name=adapter_name,
                         state="started",
@@ -1069,7 +1000,7 @@ class Frecklecutable(object):
                         parent_result=current_run_result,
                     )
                     current_run_result = run_result
-                    self.write_runs_log(
+                    write_runs_log(
                         properties=run_env_properties,
                         adapter_name=adapter_name,
                         state="success",
@@ -1082,7 +1013,7 @@ class Frecklecutable(object):
 
                     # import traceback
                     # traceback.print_exc()
-                    self.write_runs_log(
+                    write_runs_log(
                         properties=run_env_properties,
                         adapter_name=adapter_name,
                         state="failed",
