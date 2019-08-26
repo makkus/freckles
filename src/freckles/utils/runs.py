@@ -69,81 +69,55 @@ def freckles_run_process_exists(run_data):
 
 
 # This should never be called manually, only once using the 'atexit' register method in freckles.py
-@fasteners.interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
+# @fasteners.interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
 def clean_runs_log_file():
 
     try:
-        with run_log_lock:
+        with fasteners.InterProcessLock(FRECKLES_RUN_LOG_FILE_LOCK):
+            with run_log_lock:
 
-            with io.open(FRECKLES_RUN_LOG_FILE_PATH, "r", encoding="utf-8") as f:
-                lines = f.readlines()
+                with io.open(FRECKLES_RUN_LOG_FILE_PATH, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
 
-            result = []
-            for line in lines:
-                if not line.strip():
-                    continue
-                data = convert_log_file_row(line.split(","))
-                if data["state"] != "started":
-                    continue
-                # if data["pid"] == os.getpid():
-                #     continue
-                if not freckles_run_process_exists(data):
-                    continue
+                result = []
+                for line in lines:
+                    if not line.strip():
+                        continue
+                    data = convert_log_file_row(line.split(","))
+                    if data["state"] != "started":
+                        continue
+                    # if data["pid"] == os.getpid():
+                    #     continue
+                    if not freckles_run_process_exists(data):
+                        continue
 
-                result.append(line)
+                    result.append(line)
 
-            with io.open(FRECKLES_RUN_LOG_FILE_PATH, "w", encoding="utf-8") as f:
-                f.write("".join(result))
+                with io.open(FRECKLES_RUN_LOG_FILE_PATH, "w", encoding="utf-8") as f:
+                    f.write("".join(result))
 
     except (Exception) as e:
         log.debug("Could not clean up runs log file: {}".format(e))
 
 
-@fasteners.interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
+# @fasteners.interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
 def write_runs_log(properties, adapter_name, state):
 
     try:
-
         # currently, keeping logs is not supported
         # the cleanup function above needs to be adjusted for that
         keep_logs = False
+        with fasteners.InterProcessLock(FRECKLES_RUN_LOG_FILE_LOCK):
+            with run_log_lock:
 
-        with run_log_lock:
-
-            if state == "started":
-                pid = os.getpid()
-                proc_name = psutil.Process(pid).name()
-            else:
-                pid = -1
-                proc_name = "-"
-
-            if keep_logs:
-                row = [
-                    properties["uuid"],
-                    properties["run_metadata"].get(
-                        "run_alias", properties["frecklet_name"]
-                    ),
-                    properties["frecklet_name"],
-                    adapter_name,
-                    properties["env_dir"],
-                    state,
-                    time.time(),
-                    pid,
-                    proc_name,
-                ]
-                with io.open(
-                    FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
-                ) as f:
-                    writer = csv.writer(f)
-                    writer.writerow(row)
-
-                with io.open(
-                    FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
-                ) as f:
-                    writer = csv.writer(f)
-                    writer.writerow(row)
-            else:
                 if state == "started":
+                    pid = os.getpid()
+                    proc_name = psutil.Process(pid).name()
+                else:
+                    pid = -1
+                    proc_name = "-"
+
+                if keep_logs:
                     row = [
                         properties["uuid"],
                         properties["run_metadata"].get(
@@ -158,29 +132,62 @@ def write_runs_log(properties, adapter_name, state):
                         proc_name,
                     ]
                     with io.open(
-                        FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
+                        FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
                     ) as f:
                         writer = csv.writer(f)
                         writer.writerow(row)
 
                     with io.open(
-                        FRECKLES_LAST_RUN_FILE_PATH, "w", encoding="utf-8", buffering=1
+                        FRECKLES_RUN_LOG_FILE_PATH, "a", encoding="utf-8", buffering=1
                     ) as f:
                         writer = csv.writer(f)
                         writer.writerow(row)
                 else:
-                    with open(FRECKLES_RUN_LOG_FILE_PATH, "r") as inp, open(
-                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", "w", buffering=1
-                    ) as out:
-                        writer = csv.writer(out)
-                        for row in csv.reader(inp):
-                            if not row:
-                                continue
-                            if row[0] != properties["uuid"]:
-                                writer.writerow(row)
-                    os.rename(
-                        FRECKLES_RUN_LOG_FILE_PATH + ".tmp", FRECKLES_RUN_LOG_FILE_PATH
-                    )
+                    if state == "started":
+                        row = [
+                            properties["uuid"],
+                            properties["run_metadata"].get(
+                                "run_alias", properties["frecklet_name"]
+                            ),
+                            properties["frecklet_name"],
+                            adapter_name,
+                            properties["env_dir"],
+                            state,
+                            time.time(),
+                            pid,
+                            proc_name,
+                        ]
+                        with io.open(
+                            FRECKLES_RUN_LOG_FILE_PATH,
+                            "a",
+                            encoding="utf-8",
+                            buffering=1,
+                        ) as f:
+                            writer = csv.writer(f)
+                            writer.writerow(row)
+
+                        with io.open(
+                            FRECKLES_LAST_RUN_FILE_PATH,
+                            "w",
+                            encoding="utf-8",
+                            buffering=1,
+                        ) as f:
+                            writer = csv.writer(f)
+                            writer.writerow(row)
+                    else:
+                        with open(FRECKLES_RUN_LOG_FILE_PATH, "r") as inp, open(
+                            FRECKLES_RUN_LOG_FILE_PATH + ".tmp", "w", buffering=1
+                        ) as out:
+                            writer = csv.writer(out)
+                            for row in csv.reader(inp):
+                                if not row:
+                                    continue
+                                if row[0] != properties["uuid"]:
+                                    writer.writerow(row)
+                        os.rename(
+                            FRECKLES_RUN_LOG_FILE_PATH + ".tmp",
+                            FRECKLES_RUN_LOG_FILE_PATH,
+                        )
     except (Exception) as e:
         log.debug("Could not write run log file: {}".format(e))
 
