@@ -89,7 +89,6 @@ Options:
 
 <!-- list available frecklets -->
 ### List available *frecklets* {: .block-title}
-
 <div class="section-block" markdown="1">
 
 Let's get a list of all the *frecklets* that are supported out of the box, use the ``--list`` flag (this might take a few moments, as it needs to process the current context):
