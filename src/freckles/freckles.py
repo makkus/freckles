@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import atexit
 
+from cursor import cursor
+
 from freckles.utils.runs import clean_runs_log_file
 from .defaults import FRECKLES_CONFIG_DIR
 from .context.config import ContextConfigs
 from .context.freckles_context import FrecklesContext
 
 atexit.register(clean_runs_log_file)
+atexit.register(cursor.show)
 
 
 class Freckles(object):

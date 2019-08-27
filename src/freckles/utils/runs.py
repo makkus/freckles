@@ -97,6 +97,7 @@ def clean_runs_log_file():
                     f.write("".join(result))
 
     except (Exception) as e:
+        print("CLEANUP FAILED")
         log.debug("Could not clean up runs log file: {}".format(e))
 
 
@@ -189,6 +190,7 @@ def write_runs_log(properties, adapter_name, state):
                             FRECKLES_RUN_LOG_FILE_PATH,
                         )
     except (Exception) as e:
+        print("COULD NOT WRITE JOBS LOG: {}".format(e))
         log.debug("Could not write run log file: {}".format(e))
 
 
@@ -301,7 +303,7 @@ class RunWatchManager(object):
                 alias_new = "{}_{}".format(alias, current)
                 self._aliases[alias] = current
 
-            self.task_started(uuid=uuid, alias=alias_new, run_data=r, index=index)
+            self.run_started(uuid=uuid, alias=alias_new, run_data=r, index=index)
             old_current[uuid] = r
             self._unique_index[uuid] = index
 
@@ -315,22 +317,22 @@ class RunWatchManager(object):
                 remove.append(uuid)
 
         for r in remove:
-            self.task_finished(r)
+            self.run_finished(r)
             self._unique_index.pop(r)
 
         if not self._current_runs:
             self._aliases = {}
             self._unique_index = {}
 
-    def task_started(self, uuid, alias, run_data, index):
+    def run_started(self, uuid, alias, run_data, index):
 
         for watcher in self._run_watchers:
-            watcher.task_started(uuid=uuid, alias=alias, run_data=run_data, index=index)
+            watcher.run_started(uuid=uuid, alias=alias, run_data=run_data, index=index)
 
-    def task_finished(self, uuid):
+    def run_finished(self, uuid):
 
         for watcher in self._run_watchers:
-            watcher.task_finished(uuid=uuid)
+            watcher.run_finished(uuid=uuid)
 
 
 class FrecklesLogFileHander(FileSystemEventHandler):
@@ -424,15 +426,55 @@ class FrecklesLogFileHander(FileSystemEventHandler):
 @six.add_metaclass(abc.ABCMeta)
 class FrecklesRunWatcher(object):
     @abc.abstractmethod
-    def task_started(self, uuid, alias, run_data, index):
+    def run_started(self, uuid, alias, run_data, index):
         pass
 
     @abc.abstractmethod
-    def task_finished(self, uuid):
+    def run_finished(self, uuid):
         pass
 
     @abc.abstractmethod
     def stop(self):
+        pass
+
+
+class FrecklesCurrentRunsWatcher(FrecklesRunWatcher):
+    def __init__(self):
+
+        self._current_runs = None
+
+    @property
+    def current_runs(self):
+
+        if self._current_runs is not None:
+            return self._current_runs
+
+        self._current_runs = get_current_runs()
+        return self._current_runs
+
+    def run_started(self, uuid, alias, run_data, index):
+
+        click.echo("run started: {}".format(run_data["run_alias"]))
+        self.current_runs[uuid] = run_data
+        click.echo("\ncurrent runs:")
+        for r in self.current_runs.values():
+            click.echo("  - {}".format(r["run_alias"]))
+        click.echo()
+
+    def run_finished(self, uuid):
+
+        click.echo("run finished: {}".format(self.current_runs[uuid]["run_alias"]))
+        self.current_runs.pop(uuid)
+        if not self.current_runs:
+            click.echo("\ncurrent runs: none")
+        else:
+            click.echo("\ncurrent runs:")
+            for r in self.current_runs.values():
+                click.echo("  - {}".format(r["run_alias"]))
+            click.echo()
+
+    def stop(self):
+
         pass
 
 
@@ -448,7 +490,7 @@ class FrecklesRunsLogTerminalOutput(FrecklesRunWatcher):
         self._adapter_log = adapter_log
         self._log_file_printers = {}
 
-    def task_started(self, uuid, alias, run_data, index):
+    def run_started(self, uuid, alias, run_data, index):
 
         fw = FrecklesRunLogTerminalOutput(
             alias,
@@ -459,7 +501,7 @@ class FrecklesRunsLogTerminalOutput(FrecklesRunWatcher):
         )
         self._log_file_printers[uuid] = fw
 
-    def task_finished(self, uuid):
+    def run_finished(self, uuid):
 
         fw = self._log_file_printers[uuid]
         fw.finished()
