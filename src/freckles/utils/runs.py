@@ -72,7 +72,11 @@ def freckles_run_process_exists(run_data):
 # @fasteners.interprocess_locked(path=FRECKLES_RUN_LOG_FILE_LOCK)
 def clean_runs_log_file():
 
+    if not os.path.exists(FRECKLES_RUN_LOG_FILE_PATH):
+        return
+
     try:
+
         with fasteners.InterProcessLock(FRECKLES_RUN_LOG_FILE_LOCK):
             with run_log_lock:
 
