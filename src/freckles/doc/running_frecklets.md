@@ -1,5 +1,5 @@
 ---
-title: Executing 'frecklets'
+title: Running 'frecklets'
 url_path_prio: 160
 draft: false
 ---
