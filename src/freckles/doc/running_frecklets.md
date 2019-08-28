@@ -246,17 +246,28 @@ root@ubuntu:~#
 ## Elevated permissions {: .section-title}
 <div class="section-block" markdown="1">
 
-Most *frecklets* that are bundled with *freckles* contain metadata about whether they need elevated permissions
-to be executed. 'Elevated permission' basically means they are (directly) executed by the root user, or (indirectly) via the [sudo](https://kb.iu.edu/d/amyi) command. The latter has to be installed and configured on a host if it is to be used (see below).
+Most *frecklets* that are bundled with *freckles* contain metadata about whether they need elevated permissions to be executed, or not. Requiring elevated permissions is a common case, for tasks like creating users, installing packages with the system package manager, etc.
+
+In case you are uncertain: 'elevated permission' basically means tasks are (directly) executed by the root user, or (indirectly) via the [sudo](https://kb.iu.edu/d/amyi) command. The latter has to be installed and configured on a host if it is to be used (see below).
 
 ### the '--elevated' flag {: .block-title}
 
-If a task needs elevated permissions, but its metadata doesn't indicate that, your task will fail. You can manually hint to *freckles* to assume elevated permissions are necessary by using the ``--elevated/-e`` command-line flag:
+If a task/*frecklet* needs elevated permissions, but its metadata doesn't indicate that, your task will fail. You can manually hint to *freckles* to assume elevated permissions are necessary by using the ``--elevated/-e`` command-line flag:
 
 ```
 frecklecute --elevated <frecklet_name>
 ```
 
+This flag is not necessary if you log-in as the root user onto a remote host (as you'll automatically have elevated permissions), or if the user you log in as can use *sudo* without having to provide a password.
+
 #### ``sudo`` {: .block-title}
+
+As mentioned earlier, there are two ways you can execute tasks that require elevated permissions: by using/logging in as the root user, or by using the sudo *sudo* command. *freckles* will try to do the later automatically for you, in case tasks requests those permissions.
+
+In provisioning scenarios, it's quite common to setup an admin user that does not need to provide a password when using *sudo* (see ``initial-system-setup`` example above). This is handy, because otherwise it would not be possible running those sorts of tasks in an automated way (as there would always be user-interaction when typing in a password).
+
+In cases where you use *freckles* with a remote target, and a login user that *does* need to provide a password to be able to use *sudo*, you need to add the ``--ask-become-pass`` to your command-line. *freckles* will prompt for the password before the run commences in that case.
+
+By default, if you specify a non-root login user on a remote host, and the *frecklet* you run requires elevated permissions, *freckles* will assume the login user can do passwordless sudo.
 
 </div>
