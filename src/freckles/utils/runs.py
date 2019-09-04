@@ -544,7 +544,7 @@ def print_task_detail(run_detail, alias=None, color=None):
     padding = "  " * level
 
     if not finished:
-        click.echo("{}{}{}- {}{}".format(color, alias, padding, msg, reset))
+        click.echo("{}{}{}- {} -> started{}".format(color, alias, padding, msg, reset))
     else:
         if success:
             if skipped:
