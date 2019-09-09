@@ -916,6 +916,7 @@ class Frecklecutable(object):
                 )
 
                 try:
+
                     adapter.prepare_execution_requirements(
                         run_config=run_config,
                         task_list=current_tasklist,

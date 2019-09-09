@@ -551,6 +551,8 @@ def print_task_detail(run_detail, alias=None, color=None):
                 status = "skipped"
             else:
                 status = "ok"
+        else:
+            status = "failed"
         click.echo("{}{}{}- {}: {}{}".format(color, alias, padding, msg, status, reset))
         if not success:
             if alias:
