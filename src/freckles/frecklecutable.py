@@ -715,7 +715,6 @@ class Frecklecutable(object):
         if password_callback is None:
             password_callback = ask_password
 
-        print(password_callback)
         inventory, run_config, run_vars = set_run_defaults(
             inventory=inventory, run_config=run_config, run_vars=run_vars
         )
