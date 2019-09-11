@@ -343,7 +343,7 @@ class ContextConfigs(TingTings):
         elif not isinstance(config_chain, Iterable):
             config_chain = [config_chain]
 
-        if not config_chain and config_chain[0] != "default":
+        if not config_chain or config_chain[0] != "default":
             config_chain.insert(0, "default")
 
         final_config = self.resolve_context_config_dict(config_chain=config_chain)
