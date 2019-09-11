@@ -16,7 +16,6 @@ from freckles.defaults import (
     MIXED_CONTENT_TYPE,
     FRECKLES_CACHE_BASE,
     FRECKLES_RUN_INFO_FILE,
-    ACCEPT_FRECKLES_LICENSE_KEYNAME,
     FRECKLES_SHARE_DIR,
     FRECKLES_CONFIG_DIR,
     FRECKLES_EXTRA_LOOKUP_PATHS,
@@ -32,7 +31,6 @@ from frutils import (
     is_url_or_abbrev,
     DEFAULT_URL_ABBREVIATIONS_REPO,
     calculate_cache_location_for_url,
-    readable,
 )
 
 from frutils.frutils import auto_parse_string
@@ -875,35 +873,6 @@ class FrecklesContext(object):
 
         frecklecutable = frecklet.create_frecklecutable(context=self)
         return frecklecutable
-
-    def unlock_config(self, user_accepts=False, use_community=False, save=True):
-
-        if not user_accepts:
-            raise Exception(
-                "Need user acceptance of freckles license to unlock configuration."
-            )
-
-        target = os.path.join(FRECKLES_CONFIG_DIR, "default.context")
-
-        if os.path.exists(target):
-            with io.open(target, "r", encoding="utf-8") as f:
-                current_content = yaml.load(f)
-        else:
-            current_content = {}
-
-        current_content[ACCEPT_FRECKLES_LICENSE_KEYNAME] = user_accepts
-        if use_community:
-            repos = current_content.setdefault("repos", [])
-            if "community" not in repos:
-                repos.append("community")
-
-        if save:
-            with io.open(target, "w", encoding="utf-8") as f:
-                f.write(
-                    readable(
-                        current_content, out="yaml", sort_keys=True, ignore_aliases=True
-                    )
-                )
 
     def create_run_environment(self, adapter, env_dir=None):
 

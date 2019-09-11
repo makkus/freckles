@@ -7,13 +7,13 @@ from collections import Mapping, Iterable
 
 from ruamel.yaml import YAML
 
-from freckles.defaults import ACCEPT_FRECKLES_LICENSE_KEYNAME, FRECKLES_CONFIG_DIR
-from freckles.exceptions import FrecklesConfigException, FrecklesUnlockException
+from freckles.defaults import FRECKLES_CONFIG_DIR, FRECKLES_CONFIG_UNLOCK_FILES
+from freckles.exceptions import FrecklesUnlockException
 from freckles.frecklet.arguments import *  # noqa
 from freckles.schemas import FRECKLES_CONTEXT_SCHEMA, PROFILE_LOAD_CONFIG_SCHEMA
 from frutils.config.cnf import Cnf
 
-# from .output_callback import DefaultCallback
+from frutils.exceptions import FrklException
 from ting.ting_attributes import (
     FrontmatterAndContentAttribute,
     DictContentAttribute,
@@ -26,6 +26,98 @@ from ting.tings import TingTings
 log = logging.getLogger("freckles")
 
 yaml = YAML()
+
+UNLOCK_STRING = "I know what I'm doing and this is not just copy and pasted from a random blog post on the internet. Also, I accept the freckles license."
+
+
+def is_unlocked():
+
+    unlocked = False
+
+    for f in FRECKLES_CONFIG_UNLOCK_FILES:
+
+        if not os.path.isfile(f):
+            continue
+
+        with io.open(f, "r", encoding="utf-8") as uf:
+            content = uf.read()
+
+            if UNLOCK_STRING.lower() in content.lower():
+                unlocked = True
+                break
+    return unlocked
+
+
+def unlock():
+
+    f = FRECKLES_CONFIG_UNLOCK_FILES[0]
+    with io.open(f, "w", encoding="utf-8") as uf:
+        uf.write(UNLOCK_STRING)
+
+
+def lock():
+
+    for f in FRECKLES_CONFIG_UNLOCK_FILES:
+
+        if os.path.isfile(f):
+            os.unlink(f)
+
+
+DEFAULT_CONFIG_DICTS = {
+    "default": {"parents": [{"repos": ["default", "user", "./.freckles"]}]},
+    "community": {
+        "parents": [
+            "default",
+            {"repos": ["default", "community", "user", "./.freckles"]},
+        ]
+    },
+    "latest": {
+        "parents": [
+            "default",
+            {
+                "repos": [
+                    "frecklet::gl:frecklets/frecklets-nsbl-default::develop::",
+                    "tempting::gl:frecklets/temptings-default::develop::",
+                    "ansible-role::gl:frecklets/frecklets-nsbl-default-resources::develop::",
+                    "ansible-tasklist::gl:frecklets/frecklets-nsbl-default-resources::develop::",
+                    "user",
+                    "./.freckles",
+                ]
+            },
+        ]
+    },
+    "latest-community": {
+        "parents": [
+            "default",
+            {
+                "repos": [
+                    "frecklet::gl:frecklets/frecklets-nsbl-default::develop::",
+                    "tempting::gl:frecklets/temptings-default::develop::",
+                    "ansible-role::gl:frecklets/frecklets-nsbl-default-resources::develop::",
+                    "ansible-tasklist::gl:frecklets/frecklets-nsbl-default-resources::develop::",
+                    "frecklet::gl:frecklets/frecklets-nsbl-community::develop::",
+                    "ansible-role::gl:frecklets/frecklets-nsbl-community-resources::develop::",
+                    "ansible-tasklist::gl:frecklets/frecklets-nsbl-community::develop::",
+                    "user",
+                    "./.freckles",
+                ]
+            },
+        ]
+    },
+    "shell": {"parents": ["default", {"adapters": ["shell", "freckles"]}]},
+    "debug": {
+        "parents": [
+            "default",
+            {
+                "keep_run_folder": True,
+                "force_show_log": True,
+                "create_current_symlink": True,
+                "callback": "default::full",
+            },
+        ]
+    },
+    "empty": {"parents": [{"repos": []}]},
+}
 
 
 class ContextConfigTingCast(TingCast):
@@ -62,14 +154,23 @@ class ContextConfigs(TingTings):
     (per profile). It also checks whether there exists a 'default.profile' file with the 'accept_freckles_license' value
     set to 'true'. Only if that is the case will it allow custom profiles (mainly for security reasons - the user should
     explicitely accept that certain configurations can be insecure).
+
+    Args:
+        repos (str, list): a list of local folders containing '*.context' files
+    Returns:
+        TingTings: an index of config files
     """
 
     DEFAULT_TING_CAST = ContextConfigTingCast
 
     @classmethod
-    def load_configs(cls, repos):
+    def load_user_context_configs(cls, repos=None):
+
+        if repos is None:
+            repos = FRECKLES_CONFIG_DIR
 
         cnf = Cnf({})
+        # this is the 'root' configuration for the actual config objectx
         cnf.add_interpreter("root_config", FRECKLES_CONTEXT_SCHEMA)
 
         profile_load_config = cnf.add_interpreter(
@@ -77,25 +178,34 @@ class ContextConfigs(TingTings):
         )
 
         configs = ContextConfigs.from_folders(
-            "cnf_profiles", repos, load_config=profile_load_config, cnf=cnf
+            "user_contexts", repos, load_config=profile_load_config, cnf=cnf
         )
 
         return configs
 
-    def __init__(self, repo_name, tingsets, cnf, **kwargs):
+    def __init__(self, repo_name, tingsets, cnf, default_config_dicts=None, **kwargs):
 
-        # check whether freckles license is accepted
-        self._default_config_path = os.path.join(FRECKLES_CONFIG_DIR, "default.context")
-        try:
-            with io.open(self._default_config_path, "r", encoding="utf-8") as f:
-                yaml = YAML()
-                default_context_dict = yaml.load(f)
-                self._config_unlocked = (
-                    default_context_dict.get(ACCEPT_FRECKLES_LICENSE_KEYNAME, False)
-                    is True
-                )
-        except (Exception):
-            self._config_unlocked = False
+        if default_config_dicts is None:
+            default_config_dicts = DEFAULT_CONFIG_DICTS
+
+        self.default_config_dicts = copy.deepcopy(default_config_dicts)
+
+        invalid = []
+        for tings in tingsets:
+            for ting in tings.values():
+                if ting.id in self.default_config_dicts.keys():
+                    invalid.append(ting.id)
+
+        if invalid:
+            raise FrklException(
+                msg="Invalid context name(s) for '{}': {}".format(
+                    repo_name, ", ".join(invalid)
+                ),
+                reason="Context config files named after reserved context names in repo: {}".format(
+                    ", ".join(repo_name)
+                ),
+                solution="Rename affected context configs.",
+            )
 
         if cnf is None:
             raise Exception("Base configuration object can't be None.")
@@ -110,8 +220,6 @@ class ContextConfigs(TingTings):
         self._cnf = cnf
         self._root_config = cnf.get_interpreter("root_config").config
 
-        self._default_profile_values = None
-
         super(ContextConfigs, self).__init__(
             repo_name=repo_name,
             tingsets=tingsets,
@@ -119,9 +227,111 @@ class ContextConfigs(TingTings):
             indexes=["filename_no_ext"],
         )
 
-    def create_context_config(
-        self, context_name, config_chain=None, extra_repos=None, use_community=False
-    ):
+    def get_config_type(self, config_obj):
+
+        if isinstance(config_obj, string_types):
+            config_obj = config_obj.strip()
+            if config_obj.startswith("{") and config_obj.endswith("}"):
+                return "json"
+            elif "=" in config_obj:
+                return "key_value"
+            elif config_obj in self.default_config_dicts.keys():
+                return "default_config_dict"
+            elif config_obj in self.keys():
+                return "user_config_dict"
+            else:
+                all_context_names = list(self.default_config_dicts.keys()) + list(
+                    self.keys()
+                )
+                raise FrklException(
+                    msg="Can't determine config type for string '{}'".format(
+                        config_obj
+                    ),
+                    solution="Value needs to be either json string, key/value pair (separated with '='), or the name of a default or user context config: {}".format(
+                        ", ".join(all_context_names)
+                    ),
+                )
+        elif isinstance(config_obj, Mapping):
+            return "dict"
+        else:
+            raise FrklException(
+                msg="Invalid config type '{}' for object: {}".format(
+                    type(config_obj), config_obj
+                ),
+                solution="Needs to be either string, or dict.",
+            )
+
+    def resolve_context_config_dict(self, config_chain, current_config_dict=None):
+
+        if current_config_dict is None:
+            current_config_dict = {}
+
+        for config in config_chain:
+
+            config_type = self.get_config_type(config)
+
+            if config_type == "dict":
+                config_dict = copy.deepcopy(config)
+
+            elif config_type == "json":
+                try:
+                    config_dict = json.loads(config)
+                except (Exception):
+                    raise FrklException(
+                        msg="Can't parse json config object: {}".format(config),
+                        solution="Check json format.",
+                    )
+
+            elif config_type == "key_value":
+                key, value = config.split("=", 1)
+                if value == "":
+                    raise FrklException(
+                        msg="No value provided for key/value config object: {}".format(
+                            config
+                        )
+                    )
+                if value.lower() in ["true", "yes"]:
+                    value = True
+                elif value.lower() in ["false", "no"]:
+                    value = False
+                else:
+                    try:
+                        value = int(value)
+                    except (Exception):
+                        # fine, we'll just use the string
+                        # TODO: support lists
+                        pass
+                config_dict = {key: value}
+
+            elif config_type == "default_config_dict":
+                config_dict = copy.deepcopy(self.default_config_dicts[config])
+            elif config_type == "user_config_dict":
+                config_dict = copy.deepcopy(self[config])
+            else:
+                raise FrklException(msg="Invalid config type: {}".format(config_type))
+
+            config_parents = config_dict.pop("parents", [])
+            config_extra_repos = config_dict.pop("extra_repos", [])
+            if isinstance(config_extra_repos, string_types) or not isinstance(
+                config_extra_repos, Sequence
+            ):
+                config_extra_repos = [config_extra_repos]
+
+            self.resolve_context_config_dict(
+                config_chain=config_parents, current_config_dict=current_config_dict
+            )
+            dict_merge(current_config_dict, config_dict, copy_dct=False)
+
+            if config_extra_repos:
+                current_config_dict.setdefault("repos", []).extend(config_extra_repos)
+
+        return current_config_dict
+
+    def create_context_config(self, context_name, config_chain=None, extra_repos=None):
+        """Creates a new context configuration out of the provided config_chain and extra repos.
+
+        If the config_chain argument is empty, the 'default' profile will be used.
+        """
 
         if config_chain is None:
             config_chain = []
@@ -133,140 +343,42 @@ class ContextConfigs(TingTings):
         elif not isinstance(config_chain, Iterable):
             config_chain = [config_chain]
 
-        dict_chain = [self._root_config]
-        if os.path.exists(self._default_config_path):
-            # always use default config
-            config_chain.insert(0, "default")
+        config_chain.insert(0, "default")
 
-        for index, config in enumerate(config_chain):
-
-            # check if string
-            if isinstance(config, string_types):
-                config = config.strip()
-
-                if config in self.keys():
-
-                    if not self._config_unlocked and config != "default":
-                        raise FrecklesUnlockException(
-                            "Access to context '{}' not allowed.".format(config)
-                        )
-                    # means we want the config from the file
-                    config = self.get(config).config_dict
-
-                elif not config.startswith("{") and "=" in config:
-                    key, value = config.split("=", 1)
-                    if value.lower() in ["true", "yes"]:
-                        value = True
-                    elif value.lower() in ["false", "no"]:
-                        value = False
-                    # elif "::" in value:
-                    #     value = value.split("::")
-                    else:
-                        try:
-                            value = int(value)
-                        except (Exception):
-                            # fine, we'll just use the string
-                            # TODO: support lists
-                            pass
-                    config = {key: value}
-                elif config.startswith("{"):
-                    # trying to read json
-                    try:
-                        config = json.loads(config)
-                    except (Exception):
-                        raise Exception(
-                            "Can't assemble profile configuration, don't know how to handle: {}".format(
-                                config
-                            )
-                        )
-                else:
-
-                    if "=" not in config:
-                        if config == "default":
-                            config = {}
-                        else:
-                            raise FrecklesConfigException(
-                                msg="Could not assemble context configuration.",
-                                reason="No configuration file '{}.context' in config dir.".format(
-                                    config
-                                ),
-                                solution="Create context config '{}.context' in '{}' or use correct configuration syntax if that is not what you intended.".format(
-                                    config, FRECKLES_CONFIG_DIR
-                                ),
-                                references={
-                                    "freckles configuration documentation": "https://freckles.io/doc/configuration"
-                                },
-                            )
-                    else:
-                        raise Exception(
-                            "Can't create profile configuration, invalid config: {}.".format(
-                                config
-                            )
-                        )
-
-            if isinstance(config, Mapping):
-                dict_chain.append(config)
-            else:
-                raise Exception(
-                    "Can't assemble profile configuration, unknown type '{}' for value '{}'".format(
-                        type(config), config
-                    )
-                )
+        final_config = self.resolve_context_config_dict(config_chain=config_chain)
 
         cc = ContextConfig(
-            alias=context_name,
-            config_chain=dict_chain,
-            extra_repos=extra_repos,
-            use_community=use_community,
-            config_unlocked=self._config_unlocked,
+            alias=context_name, config_dict=final_config, extra_repos=extra_repos
         )
 
         return cc
 
 
 class ContextConfig(object):
-    def __init__(
-        self,
-        alias,
-        config_chain=None,
-        extra_repos=None,
-        use_community=False,
-        config_unlocked=False,
-    ):
+    def __init__(self, alias, config_dict, extra_repos=None, config_unlocked=None):
 
-        if config_chain is None:
-            config_chain = []
+        self._default_config = Cnf({})
+        self._root_config = Cnf(config_dict)
 
-        if len(config_chain) > 0:
-            self._root_config = Cnf(config_chain[0])
+        if isinstance(config_unlocked, bool):
+            self._config_unlocked = config_unlocked
         else:
-            self._root_config = Cnf({})
+            self._config_unlocked = is_unlocked()
 
-        self._config_unlocked = config_unlocked
         self._alias = alias
-        self._config_chain = config_chain
+        if isinstance(extra_repos, string_types) or not isinstance(
+            extra_repos, Sequence
+        ):
+            extra_repos = [extra_repos]
+        if not extra_repos:
+            extra_repos = []
         self._extra_repos = extra_repos
-        self._use_community = use_community
 
-        merged = {}
-        for d in config_chain:
-            dict_merge(merged, d, copy_dct=False)
-
-        repos_to_add = []
-        if use_community:
-            repos_to_add.append("community")
-
-        if self._extra_repos:
-            if isinstance(self._extra_repos, string_types):
-                repos_to_add.append(self._extra_repos)
-            else:
-                repos_to_add.extend(list(self._extra_repos))
-
-        merged.setdefault("repos", [])
-        for repo in repos_to_add:
-            merged["repos"].append(repo)
-
-        self._config_dict = merged
+        config_dict.setdefault("repos", [])
+        for r in self._extra_repos:
+            if r not in config_dict["repos"]:
+                config_dict["repos"].append(r)
+        self._config_dict = config_dict
 
         self._cnf = Cnf(self._config_dict)
 
@@ -276,14 +388,11 @@ class ContextConfig(object):
     def cnf(self):
         return self._cnf
 
-    @property
-    def config_unlocked(self):
-        return self._config_unlocked
-
     def add_cnf_interpreter(self, interpreter_name, schema):
 
         # we need that to compare with 'no config' option
         self._root_config.add_interpreter(interpreter_name, schema)
+        self._default_config.add_interpreter(interpreter_name, schema)
         self._cnf.add_interpreter(interpreter_name, schema)
 
     def config(self, interpreter_name, *overlays):
@@ -339,7 +448,7 @@ class ContextConfig(object):
         value = interpreter.get(key)
         if "safe" not in tags:
 
-            orig_value = self._root_config.get_interpreter_value(
+            orig_value = self._default_config.get_interpreter_value(
                 interpreter_name, key, None
             )
 

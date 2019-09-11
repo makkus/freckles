@@ -320,7 +320,7 @@ class FrecklesUnlockException(FrklException):
         if not message:
             message = "Access to context config denied."
 
-        solution = "Unlock freckles configuration with: 'freckles context unlock'"
+        solution = "Unlock freckles configuration with: 'freckles config unlock'"
         references = {
             "freckles configuration documentation": "https://freckles.io/doc/configuration"
         }

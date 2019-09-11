@@ -4,7 +4,6 @@ import atexit
 from cursor import cursor
 
 from freckles.utils.runs import clean_runs_log_file
-from .defaults import FRECKLES_CONFIG_DIR
 from .context.config import ContextConfigs
 from .context.freckles_context import FrecklesContext
 
@@ -31,43 +30,28 @@ class Freckles(object):
        auto-parsing will be used to determine whether the value is a bool or integer).
 
        Args:
-         use_community (bool): whether to use the community repo
-         default_context_config: the default configuration that underlies everything
+         context_config: the default configuration that underlies everything
          extra_repos (list): a list of extra repositories to search for frecklets and resources (see above for format)
          config_repos (dict, string): a single path or a dictionary of alias/path to point to folders containing context configurations
     """
 
-    def __init__(
-        self,
-        use_community=False,
-        default_context_config=None,
-        extra_repos=None,
-        config_repos=None,
-    ):
+    def __init__(self, context_config=None, extra_repos=None, config_repos=None):
 
-        if config_repos is None:
-            config_repos = {}
-
-        config_repos = FRECKLES_CONFIG_DIR
-        self._context_configs = ContextConfigs.load_configs(repos=config_repos)
+        self._context_configs = ContextConfigs.load_user_context_configs(
+            repos=config_repos
+        )
 
         self._contexts = {}
         self._current_context = None
 
         self.create_context(
             context_name="default",
-            context_config=default_context_config,
+            context_config=context_config,
             extra_repos=extra_repos,
-            use_community=use_community,
         )
 
     def create_context(
-        self,
-        context_name,
-        context_config,
-        set_current=False,
-        extra_repos=None,
-        use_community=False,
+        self, context_name, context_config, set_current=False, extra_repos=None
     ):
 
         if not context_name:
@@ -80,7 +64,6 @@ class Freckles(object):
             context_name=context_name,
             config_chain=context_config,
             extra_repos=extra_repos,
-            use_community=use_community,
         )
 
         context = FrecklesContext(context_name=context_name, config=context_config)

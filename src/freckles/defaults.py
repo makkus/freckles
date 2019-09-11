@@ -49,6 +49,11 @@ if XDG_CONFIG_HOME:
 else:
     FRECKLES_CONFIG_DIR = os.path.expanduser("~/.config/freckles")
 
+FRECKLES_CONFIG_UNLOCK_FILES = [
+    os.path.join(FRECKLES_CONFIG_DIR, ".freckles_config_unlocked"),
+    os.path.join(os.path.expanduser("~"), ".freckles_config_unlocked"),
+]
+
 XDG_DATA_HOME = os.getenv("XDG_DATA_HOME")
 if XDG_DATA_HOME:
     FRECKLES_SHARE_DIR = os.path.join(XDG_DATA_HOME, "freckles")
