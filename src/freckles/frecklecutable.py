@@ -571,7 +571,9 @@ class Frecklecutable(object):
 
         return processed_tree
 
-    def check_become_pass(self, run_config, run_secrets, parent_task):
+    def check_become_pass(
+        self, run_config, run_secrets, parent_task, password_callback
+    ):
 
         if parent_task is not None:
             return
@@ -593,7 +595,7 @@ class Frecklecutable(object):
             msg = "{}@".format(run_config["user"])
         msg = msg + run_config.get("host", "localhost")
         prompt = "SUDO PASS (for '{}')".format(msg)
-        run_secrets["become_pass"] = ask_password(prompt)
+        run_secrets["become_pass"] = password_callback(prompt)
 
     def create_run_inventory(self, inventory=None, run_config=None, run_vars=None):
 
@@ -707,8 +709,13 @@ class Frecklecutable(object):
         result_callback=None,
         elevated=None,
         env_dir=None,
+        password_callback=None,
     ):
 
+        if password_callback is None:
+            password_callback = ask_password
+
+        print(password_callback)
         inventory, run_config, run_vars = set_run_defaults(
             inventory=inventory, run_config=run_config, run_vars=run_vars
         )
@@ -751,7 +758,7 @@ class Frecklecutable(object):
 
             prompt = "SUDO PASS (for '{}')".format(msg)
 
-            run_secrets["become_pass"] = ask_password(prompt)
+            run_secrets["become_pass"] = password_callback(prompt)
             asked = True
 
         run_secrets["login_pass"] = run_config.pop("login_pass", None)
@@ -766,7 +773,7 @@ class Frecklecutable(object):
 
             prompt = "LOGIN/SSH PASS (for '{}')".format(msg)
 
-            run_secrets["login_pass"] = ask_password(prompt)
+            run_secrets["login_pass"] = password_callback(prompt)
             asked = True
 
         # if paused:
@@ -837,7 +844,12 @@ class Frecklecutable(object):
                     "elevated": tasks_elevated,
                 }
                 if tasks_elevated:
-                    self.check_become_pass(run_config, run_secrets, parent_task)
+                    self.check_become_pass(
+                        run_config,
+                        run_secrets,
+                        parent_task,
+                        password_callback=password_callback,
+                    )
                 task_lists.append(new_tasklist)
                 current_adapter = adapter_name
                 idempotent_cache = []
@@ -862,7 +874,12 @@ class Frecklecutable(object):
             "elevated": tasks_elevated,
         }
         if tasks_elevated:
-            self.check_become_pass(run_config, run_secrets, parent_task)
+            self.check_become_pass(
+                run_config,
+                run_secrets,
+                parent_task,
+                password_callback=password_callback,
+            )
         task_lists.append(new_tasklist)
 
         current_run_result = None

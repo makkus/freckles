@@ -410,7 +410,7 @@ class FrecklesLogFileHander(FileSystemEventHandler):
             result = []
             for line in data:
                 d = json.loads(line)
-                result.append(d)
+                result.append(d["value"])
         else:
             result = data
 
@@ -563,9 +563,9 @@ def print_task_detail(run_detail, alias=None, color=None):
 class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
 
     COLORS = [
-        Fore.BLUE,
         Fore.GREEN,
         Fore.CYAN,
+        Fore.BLUE,
         Fore.LIGHTRED_EX,
         Fore.MAGENTA,
         Fore.YELLOW,
@@ -629,7 +629,11 @@ class FrecklesRunLogTerminalOutput(FrecklesLogFileHander):
         if not self._finished:
             self._finished = True
             if print_status:
-                click.echo("{}: finished".format(self._alias))
+                click.echo(
+                    "{}: finished (some log output might not have been printed if 'keep_run_folder' is set to false)".format(
+                        self._alias
+                    )
+                )
             self._observer.stop()
 
 
