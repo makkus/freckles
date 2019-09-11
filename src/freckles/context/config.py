@@ -366,12 +366,14 @@ class ContextConfig(object):
             self._config_unlocked = is_unlocked()
 
         self._alias = alias
+        if not extra_repos:
+            extra_repos = []
+
         if isinstance(extra_repos, string_types) or not isinstance(
             extra_repos, Sequence
         ):
             extra_repos = [extra_repos]
-        if not extra_repos:
-            extra_repos = []
+
         self._extra_repos = extra_repos
 
         config_dict.setdefault("repos", [])

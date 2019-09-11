@@ -35,7 +35,13 @@ class Freckles(object):
          config_repos (dict, string): a single path or a dictionary of alias/path to point to folders containing context configurations
     """
 
-    def __init__(self, context_config=None, extra_repos=None, config_repos=None):
+    def __init__(
+        self,
+        context_config=None,
+        extra_repos=None,
+        config_repos=None,
+        default__context_name="default",
+    ):
 
         self._context_configs = ContextConfigs.load_user_context_configs(
             repos=config_repos
@@ -45,7 +51,7 @@ class Freckles(object):
         self._current_context = None
 
         self.create_context(
-            context_name="default",
+            context_name=default__context_name,
             context_config=context_config,
             extra_repos=extra_repos,
         )

@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 import copy
+import json
 import logging
 import os
 import shutil
 from collections import OrderedDict, Mapping
 
 import click
+from colorama import Style
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from six import string_types
 from treelib import Tree
 
 from freckles.utils.runs import write_runs_log
+from frutils.frutils_cli import output_to_terminal
 from frutils.tasks.callback import load_callback
 from .frecklet.vars import (
     VarsInventory,
@@ -24,6 +27,7 @@ from frutils import (
     can_passwordless_sudo,
     dict_merge,
     special_dict_to_dict,
+    readable,
 )
 from frutils.exceptions import FrklException
 from frutils.tasks.tasks import Tasks
@@ -1077,5 +1081,42 @@ class Frecklecutable(object):
                             env_dir, e
                         )
                     )
+
+        if current_run_result:
+            result_dict = current_run_result.result
+            success = current_run_result.success
+        else:
+            success = False
+
+        if success:
+            if not result_dict:
+                result_dict = {}
+            else:
+                result_dict = special_dict_to_dict(result_dict)
+            for cb in self.context.result_callback:
+                if cb[0] == "pretty":
+                    click.echo()
+                    if result_dict:
+                        result_yaml = readable(result_dict, out="yaml", indent=4)
+                        msg = (
+                            Style.BRIGHT
+                            + "Result:"
+                            + Style.RESET_ALL
+                            + "\n\n"
+                            + Style.DIM
+                            + result_yaml
+                            + Style.RESET_ALL
+                        )
+                        output_to_terminal(msg)
+                        click.echo()
+                elif cb[0] == "json":
+                    result_json = json.dumps(
+                        {"output_type": "freckles_run_result", "value": result_dict}
+                    )
+                    output_to_terminal(result_json, nl=True)
+                elif str(cb[0].lower()) in ["false", "no", "silent"]:
+                    continue
+                else:
+                    log.warning("Result callback '{}' not supported.".format(cb[0]))
 
         return current_run_result

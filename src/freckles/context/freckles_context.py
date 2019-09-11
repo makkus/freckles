@@ -114,31 +114,19 @@ class FrecklesContext(object):
 
             callback_config = temp
 
-        self.print_result = False
         if not isinstance(callback_config, Sequence):
             callback_config = [callback_config]
-            # raise Exception(
-            #     "Invalid callback config type '{}': {}".format(
-            #         type(callback_config, callback_config)
-            #     )
-            # )
 
-        if callback_config == ["result"]:
-            callback_config.append("silent")
-
-        _print_result = False
-        for _cc in callback_config:
-            if _cc == "result":
-                _print_result = True
-                break
-
-        if _print_result:
-            self.print_result = True
-            callback_config.remove("result")
-
+        use_stderr = self.config_value("use_stderr")
         for cc in callback_config:
+
             if isinstance(cc, string_types):
-                c = load_callback(cc)
+                if "::" in cc:
+                    cc, _p = cc.split("::")
+                    c = load_callback(cc, callback_config={"profile": _p})
+                else:
+                    c = load_callback(cc)
+
             elif isinstance(cc, Mapping):
                 if len(cc) != 1:
                     raise Exception(
@@ -152,10 +140,33 @@ class FrecklesContext(object):
             else:
                 raise Exception("Invalid callback config: {}".format(cc))
 
-            if self.print_result:
-                c.use_stderr = True
-
+            c.use_stderr = use_stderr
             self._callbacks.append(c)
+
+        result = self.config_value("result")
+        if isinstance(result, bool):
+            if result:
+                result = [("pretty", {})]
+            else:
+                result = []
+        elif isinstance(result, string_types):
+            result = [(result, {})]
+        elif isinstance(result, dict):
+            temp = []
+            for k, v in result.items():
+                temp.append((k, v))
+            result = temp
+        elif isinstance(result, Sequence):
+            tmp = []
+            for r in result:
+                if isinstance(r, string_types):
+                    tmp.append((r, {}))
+                elif isinstance(r, Mapping):
+                    for k, v in r.items():
+                        tmp.append((k, v))
+            result = tmp
+
+        self.result_callback = result
 
         self._adapters = {}
         self._adapter_tasktype_map = {}
