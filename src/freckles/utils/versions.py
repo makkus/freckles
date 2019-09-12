@@ -37,13 +37,27 @@ def get_versions():
     except (Exception):
         freckles_adapter_nsbl_version = "0.0.0"
     try:
+        from freckles_adapter_terraform import (
+            __version__ as freckles_adapter_terraform_version,
+        )
+    except (Exception):
+        freckles_adapter_terraform_version = "0.0.0"
+    try:
+        from freckworks import __version__ as freckworks_version
+    except (Exception):
+        freckworks_version = "0.0.0"
+    try:
         from freckles_cli import __version__ as freckles_cli_version
     except (Exception):
         freckles_cli_version = "0.0.0"
     try:
-        from pyckles import __version__ as pyckles_cli_version
+        from pyckles import __version__ as pyckles_version
     except (Exception):
-        pyckles_cli_version = "0.0.0"
+        pyckles_version = "0.0.0"
+    try:
+        from shellting import __version__ as shellting_version
+    except (Exception):
+        shellting_version = "0.0.0"
 
     versions = CommentedMap()
     versions["freckles"] = freckles_version
@@ -51,10 +65,16 @@ def get_versions():
     versions["frkl"] = frkl_version
     versions["frkl_pkg"] = frkl_pkg_version
     versions["ting"] = ting_version
-    versions["nsbl"] = nsbl_version
-    versions["tempting"] = tempting_version
-    versions["freckles_adapter_nsbl"] = freckles_adapter_nsbl_version
+    versions["pyckles"] = pyckles_version
     versions["freckles_cli"] = freckles_cli_version
-    versions["pyckles"] = pyckles_cli_version
+    if freckworks_version != "0.0.0":
+        versions["freckworks"] = freckworks_version
+    versions["tempting"] = tempting_version
+    if shellting_version != "0.0.0":
+        versions["shellting"] = shellting_version
+    versions["freckles_adapter_nsbl"] = freckles_adapter_nsbl_version
+    versions["nsbl"] = nsbl_version
+    if freckles_adapter_terraform_version != "0.0.0":
+        versions["freckles_adapter_terraform"] = freckles_adapter_terraform_version
 
     return versions
