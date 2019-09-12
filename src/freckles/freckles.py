@@ -40,7 +40,7 @@ class Freckles(object):
         context_config=None,
         extra_repos=None,
         config_repos=None,
-        default__context_name="default",
+        default_context_name="default",
     ):
 
         self._context_configs = ContextConfigs.load_user_context_configs(
@@ -51,7 +51,7 @@ class Freckles(object):
         self._current_context = None
 
         self.create_context(
-            context_name=default__context_name,
+            context_name=default_context_name,
             context_config=context_config,
             extra_repos=extra_repos,
         )
