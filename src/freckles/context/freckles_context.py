@@ -32,6 +32,7 @@ from frutils import (
     DEFAULT_URL_ABBREVIATIONS_REPO,
     calculate_cache_location_for_url,
 )
+from frutils.exceptions import FrklException
 
 from frutils.frutils import auto_parse_string
 from frutils.tasks.callback import load_callback
@@ -729,9 +730,20 @@ class FrecklesContext(object):
                 frecklet = self.get_frecklet(frecklet_name, validate=validate)
                 return (frecklet, frecklet_name)
 
-            if self.config_value("allow_remote") and is_url_or_abbrev(
-                frecklet_full_path_or_name_or_content
-            ):
+            if is_url_or_abbrev(frecklet_full_path_or_name_or_content):
+
+                if not self.config_value("allow_remote"):
+                    raise FrklException(
+                        msg="Loading remote frecklet from not allowed: {}".format(
+                            frecklet_full_path_or_name_or_content
+                        ),
+                        reason="Context config value 'allow_remote' set to 'false'.",
+                        solution="Set config value 'allow_remote' to 'true', e.g. via the '--context allow_remote=true' cli argument.",
+                        references={
+                            "freckles remote configuration": "https://freckles.io/doc/security#remote-repo-permission-config"
+                        },
+                    )
+
                 content = content_from_url(
                     frecklet_full_path_or_name_or_content,
                     update=True,
