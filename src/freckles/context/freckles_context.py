@@ -761,7 +761,9 @@ class FrecklesContext(object):
                 )
                 return (frecklet, frecklet_full_path_or_name_or_content)
 
-        frecklet_name = self.add_dynamic_frecklet(frecklet_full_path_or_name_or_content)
+        frecklet_name = self.add_dynamic_frecklet(
+            frecklet_full_path_or_name_or_content, validate=validate
+        )
         if frecklet_name:
             frecklet = self.get_frecklet(frecklet_name, validate=validate)
             return (frecklet, frecklet_name)
@@ -876,7 +878,8 @@ class FrecklesContext(object):
 
         if validate:
             f = self.get_frecklet(local_frecklet_name)
-            f.valid
+            if not f.valid:
+                return None
 
         return local_frecklet_name
 
