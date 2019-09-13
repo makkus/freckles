@@ -78,6 +78,7 @@ FRECKLES_VENV_ENV_PATH = os.path.join(
 )
 
 # FRECKLES_LOOKUP_PATHS = LOOKUP_PATHS + ":" + ":".join(os.path.join(FRECKLES_VENV_ENV_PATH, "bin"), os.path.join(FRECKLES_CONDA_ENV_PATH, "bin"), os.path.join(FRECKLES_CONDA_INSTALL_PATH, "bin"))
+FRECKLES_RUN_ARCHIVE = os.path.join(FRECKLES_SHARE_DIR, "runs", "archive")
 
 FRECKLES_RUN_DIR = os.path.expanduser("~/.local/share/freckles/runs/archive/run")
 FRECKLES_CURRENT_RUN_SYMLINK = os.path.expanduser(
