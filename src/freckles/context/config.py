@@ -306,7 +306,7 @@ class ContextConfigs(TingTings):
             elif config_type == "default_config_dict":
                 config_dict = copy.deepcopy(self.default_config_dicts[config])
             elif config_type == "user_config_dict":
-                config_dict = copy.deepcopy(self[config])
+                config_dict = copy.deepcopy(self.get(config).config_dict)
             else:
                 raise FrklException(msg="Invalid config type: {}".format(config_type))
 
