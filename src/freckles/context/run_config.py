@@ -2,9 +2,12 @@
 import abc
 
 import six
+import logging
 
 from freckles.utils.host_utils import parse_target_string
 from frutils import dict_merge
+
+log = logging.getLogger("freckles")
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -28,6 +31,8 @@ class FrecklesRunTarget(object):
         self._ssh_key = None
         self._become_pass = None
         self._login_pass = None
+
+        self._warning_showed = False
 
         self._invalidated = True
 
@@ -53,6 +58,20 @@ class FrecklesRunTarget(object):
         self._ssh_key = self._config.get("ssh_key", None)
         self._become_pass = self._config.get("become_pass", None)
         self._login_pass = self._config.get("login_pass", None)
+
+        if self._connection_type == "lxd":
+            if self._user is None:
+                self._user = "root"
+
+            if self._user != "root":
+                if not self._warning_showed:
+                    log.warning(
+                        "lxd connection type does not support different user than 'root', ignoring specified user: {}".format(
+                            self._user
+                        )
+                    )
+                    self._warning_showed = True
+                self._user = "root"
 
         self._invalidated = False
 

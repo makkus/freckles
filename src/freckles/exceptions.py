@@ -29,9 +29,9 @@ class FrecklesConfigException(FrklException):
 
         if solution is None:
             if not keys:
-                solution = "Check documentaiton for configuration key."
+                solution = "Check documentation for configuration key."
             else:
-                solution = "Check documentaiton for configuration key(s): {}.".format(
+                solution = "Check documentation for configuration key(s): {}.".format(
                     ", ".join(keys)
                 )
 

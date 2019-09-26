@@ -5,13 +5,19 @@ import os
 import sys
 
 from ruamel.yaml import YAML
+from six import string_types
 
 from freckles.adapters import FrecklesAdapter
-from freckles.defaults import VARS_KEY, FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY
+from freckles.defaults import (
+    VARS_KEY,
+    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
+    FRECKLET_KEY_NAME,
+)
 from freckles.exceptions import InvalidFreckletException
 from freckles.frecklet.vars import VarsInventory
 from freckles.context.run_config import FrecklesRunTarget
-from frutils import dict_merge
+from frutils import dict_merge, readable
+from frutils.exceptions import FrklException
 
 log = logging.getLogger("freckles")
 
@@ -114,9 +120,21 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
         current_result = None
 
         for task_nr, task in enumerate(tasklist):
+
             vars_dict = task[VARS_KEY]
 
-            frecklet_name = vars_dict["frecklet"]
+            frecklet_dict = task[FRECKLET_KEY_NAME]
+            frecklet_name = frecklet_dict.get("name", None)
+
+            if frecklet_name is None:
+                raise FrklException(
+                    "Can't parse task for frecklet type 'frecklecutable'.".format(task),
+                    reason="Missing 'frecklet.name' key: \n\n{}".format(
+                        readable(task, out="yaml", indent=2)
+                    ),
+                    solution="Provide a valid frecklet name for the 'frecklet.name' key.",
+                )
+
             frecklet = self.context.get_frecklet(frecklet_name=frecklet_name)
 
             if frecklet is None:
@@ -129,12 +147,39 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
                 elevated = run_elevated
             target = vars_dict.get("target", "localhost")
 
-            run_target = FrecklesRunTarget(target_string=target)
-            run_target.login_pass = vars_dict.get("login_pass", None)
-            run_target.become_pass = vars_dict.get("become_pass", None)
+            if isinstance(target, string_types):
+                run_target = FrecklesRunTarget(target_string=target)
+            else:
+                run_target = FrecklesRunTarget(target_dict=target)
+
+            login_pass = vars_dict.get("login_pass", None)
+            become_pass = vars_dict.get("become_pass", None)
+            if (
+                run_target.login_pass
+                and login_pass
+                and run_target.login_pass != login_pass
+            ):
+                raise FrklException(
+                    msg="Can't assemble run configuration.",
+                    reason="Two different login passwords provided.",
+                    solution="Either use the root-level 'login_pass' key, or 'target.login_pass', but not both.",
+                )
+            if (
+                run_target.become_pass
+                and become_pass
+                and run_target.become_pass != become_pass
+            ):
+                raise FrklException(
+                    msg="Can't assemble run configuration.",
+                    reason="Two different become passwords provided.",
+                    solution="Either use the root-level 'become_pass' key, or 'target.become_pass', but not both.",
+                )
+            if not run_target.login_pass:
+                run_target.login_pass = login_pass
+            if not run_target.become_pass:
+                run_target.become_pass = become_pass
 
             task_run_config = dict_merge(run_config, run_target.config, copy_dct=True)
-
             fx = frecklet.create_frecklecutable(self.context)
 
             vars = vars_dict.get(VARS_KEY, {})

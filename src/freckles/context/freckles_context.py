@@ -725,7 +725,7 @@ class FrecklesContext(object):
 
             if os.path.isfile(frecklet_full_path_or_name_or_content):
                 frecklet_name = self.add_dynamic_frecklet(
-                    path_or_frecklet_content=full_path, validate=validate
+                    path_or_frecklet_content=full_path, validate=False
                 )
                 frecklet = self.get_frecklet(frecklet_name, validate=validate)
                 return (frecklet, frecklet_name)
@@ -772,11 +772,15 @@ class FrecklesContext(object):
 
     def get_frecklet(self, frecklet_name, validate=False, index_name=None):
 
+        if frecklet_name is None:
+            raise FrklException("Can't retrieve frecklet, no 'frecklet_name' provided.")
+
         result = self.frecklet_index.get_from_index(
             frecklet_name, index_name=index_name
         )
 
         if validate:
+
             valid = result.valid
             if not valid:
 

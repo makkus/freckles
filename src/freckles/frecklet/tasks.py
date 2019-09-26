@@ -437,7 +437,6 @@ class TaskListDetailedAttribute(TingAttribute):
         return ["args", "_meta_parent_repo", "_metadata"]
 
     def get_attribute(self, ting, attribute_name=None):
-
         log.debug("Processing tasklist for frecklet: {}".format(ting.id))
         chain = [
             ExplodedArgsProcessor(args=ting.args),

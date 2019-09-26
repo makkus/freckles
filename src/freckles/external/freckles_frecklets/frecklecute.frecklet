@@ -27,8 +27,10 @@ args:
         - "-e/-ne"
   target:
     doc:
-      short_help: "The target string for this run."
-    type: string
+      short_help: "The target for this run."
+    type:
+      - string
+      - dict
     required: false
     default: localhost
     cli:
