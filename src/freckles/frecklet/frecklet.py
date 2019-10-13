@@ -469,21 +469,6 @@ FRECKLET_LOAD_CONFIG = {
                 "required": False,
             }
         },
-        # {
-        #     "JinjaTemplateAttribute": {
-        #         "template": "python_src.j2",
-        #         "template_dir": "/home/markus/projects/freckles-dev/freckles/src/freckles/templates/src",
-        #         "target_attr_name": "python_src",
-        #         "required_attrs": [
-        #             "class_name",
-        #             "id",
-        #             # "args",
-        #             "vars_frecklet",
-        #             "vars_required",
-        #             "vars_optional",
-        #         ],
-        #     }
-        # },
         "FreckletsTemplateKeysAttribute",
         "CliArgumentsAttribute",
         "TaskListAttribute",
