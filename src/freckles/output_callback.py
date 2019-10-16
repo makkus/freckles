@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
+import uuid
+from collections import Mapping
 
 import colorama
 import dpath
 from ruamel.yaml.comments import CommentedMap
+from six import string_types
+from slugify import slugify
 
-from frutils import readable_yaml, dict_merge
+from freckles.defaults import DEFAULT_RUN_CONFIG_JINJA_ENV
+from frutils import readable_yaml, dict_merge, replace_strings_in_obj
 from frutils.exceptions import FrklException
 
 colorama.init()
@@ -74,26 +79,78 @@ class FrecklesResultCallback(object):
     def __init__(self):
 
         self._result = CommentedMap()
+        self._registers = {}
 
-    def add_result(self, result_var, result, query=None):
+    def register_task(self, frecklet_metadata):
 
-        if query is not None:
-            try:
-                result = dpath.util.get(result, query)
-            except (Exception):
+        register = frecklet_metadata.get("register", None)
+        if register is None:
+            return
+
+        if isinstance(register, string_types):
+            register = {"target": register}
+
+        if not isinstance(register, Mapping):
+            raise TypeError(
+                "Invalid type for 'register' value: {}".format(type(register))
+            )
+
+        if "value" not in register.keys():
+            register["value"] = None
+
+        if "id" not in register.keys():
+            register_id = str(uuid.uuid4())
+            register_id = slugify("result_" + register_id, separator="_")
+            register_id.replace("-", "_")
+            register["id"] = register_id
+
+        if register["id"] in self._registers.keys():
+            raise FrklException(
+                "Can't register result with 'id': {}".format(register["id"]),
+                reason="Id already registered.",
+                solution="Specify a different id.",
+            )
+
+        self._registers[register["id"]] = register
+
+        frecklet_metadata["register"] = register
+
+    def add_result(self, result_id, result):
+
+        try:
+            registered = self._registers.get(result_id, None)
+            if registered is None:
                 raise FrklException(
-                    msg="Could not query registered result using query string '{}'".format(
-                        query
-                    ),
-                    solution="Check query string and make sure the format of the result is supported",
-                    references={
-                        "dpath documentation": "https://github.com/akesterson/dpath-python"
-                    },
+                    msg="Result for id '{}' not registered, this is most likely a bug.".format(
+                        result_id
+                    )
                 )
 
-        new_value = {result_var: result}
+            value_template = registered.get("value", None)
+            if value_template is not None:
+                new_value = replace_strings_in_obj(
+                    value_template,
+                    replacement_dict={"__result__": result},
+                    jinja_env=DEFAULT_RUN_CONFIG_JINJA_ENV,
+                )
+            else:
+                new_value = result
 
-        dict_merge(self._result, new_value, copy_dct=False)
+            target = registered.get("target", None)
+            if target is None:
+                if not isinstance(result, Mapping):
+                    raise FrklException(
+                        msg="Can't merge result id '{}'".format(result_id),
+                        reason="Value for result-id '{}' not a mapping, and no 'target' provided.",
+                        solution="Either provide a 'target' value, or use the 'value' template to convert the result.",
+                    )
+                dict_merge(self._result, new_value, copy_dct=False)
+            else:
+                temp = {}
+                dpath.new(temp, target, new_value, separator=".")
+                dict_merge(self._result, temp, copy_dct=False)
+        except (Exception) as e:
+            log.error("Could not register result '{}': {}".format(result_id, e))
 
     @property
     def result(self):

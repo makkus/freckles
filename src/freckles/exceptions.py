@@ -331,3 +331,21 @@ class FrecklesUnlockException(FrklException):
             references=references,
             reason="freckles config not unlocked.",
         )
+
+
+class FrecklesRunException(FrklException):
+    def __init__(self, msg=None, run_info=None):
+
+        self._run_info = run_info
+        if msg is None:
+            if run_info is None:
+                msg = "n/a"
+            else:
+                e = run_info.exception
+                if e:
+                    if isinstance(e, FrklException):
+                        msg = e.message
+                    else:
+                        msg = str(e)
+
+        super(FrecklesRunException, self).__init__(msg)

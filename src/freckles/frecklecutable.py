@@ -895,6 +895,11 @@ class Frecklecutable(object):
                 if not current_tasklist:
                     continue
 
+                # augmenting result properties
+                for t in current_tasklist:
+                    if "register" in t.get(FRECKLET_KEY_NAME, {}).keys():
+                        result_callback.register_task(t[FRECKLET_KEY_NAME])
+
                 adapter = self.context._adapters[current_adapter]
                 run_env_properties = self.context.create_run_environment(
                     adapter, env_dir=env_dir
@@ -1066,7 +1071,8 @@ class Frecklecutable(object):
                     current_run_result = run_result
 
                     break
-
+        except (Exception) as e:
+            log.error(e)
         finally:
             if root_task is None:
                 return current_run_result
