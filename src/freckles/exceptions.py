@@ -337,6 +337,7 @@ class FrecklesRunException(FrklException):
     def __init__(self, msg=None, run_info=None):
 
         self._run_info = run_info
+        reason = None
         if msg is None:
             if run_info is None:
                 msg = "n/a"
@@ -347,5 +348,18 @@ class FrecklesRunException(FrklException):
                         msg = e.message
                     else:
                         msg = str(e)
+            self._failed_tasks = None
+        if self._run_info:
+            self._failed_tasks = self._run_info.root_task._tasks.get_failed_tasks()
+            if self._failed_tasks:
+                reason = "failed tasks:\n"
+            for t in self._failed_tasks:
+                reason = reason + "\n  {}\n".format(t._task_name)
+                t_msg = t.get_messages()
+                if t_msg:
+                    reason = reason + "    {}\n".format(t_msg)
+                err = t.get_error_messages()
+                if err:
+                    reason = reason + "    {}\n".format(err)
 
-        super(FrecklesRunException, self).__init__(msg)
+        super(FrecklesRunException, self).__init__(msg, reason=reason)
