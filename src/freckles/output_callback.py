@@ -95,6 +95,10 @@ class FrecklesResultCallback(object):
                 "Invalid type for 'register' value: {}".format(type(register))
             )
 
+        if not register.get("target", None):
+            frecklet_metadata.pop("register", None)
+            return
+
         if "value" not in register.keys():
             register["value"] = None
 
