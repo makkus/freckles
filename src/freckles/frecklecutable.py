@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import shutil
-from collections import OrderedDict, Mapping
+from collections import OrderedDict, Mapping, Sequence
 
 import click
 from colorama import Style
@@ -710,6 +710,7 @@ class Frecklecutable(object):
         elevated=None,
         env_dir=None,
         password_callback=None,
+        extra_callbacks=None,
     ):
 
         if password_callback is None:
@@ -912,7 +913,13 @@ class Frecklecutable(object):
                     current_adapter, None
                 )
 
-                cbs = self._callbacks
+                if extra_callbacks:
+                    if not isinstance(extra_callbacks, Sequence):
+                        extra_callbacks = [extra_callbacks]
+                    cbs = extra_callbacks + self._callbacks
+                else:
+                    cbs = self._callbacks
+
                 if self.context.config_value("write_run_log"):
                     c_config = {
                         "path": os.path.join(
