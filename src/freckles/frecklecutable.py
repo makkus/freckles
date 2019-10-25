@@ -195,6 +195,7 @@ class Frecklecutable(object):
         processed = replace_strings_in_obj(
             var_value, replacement_dict=repl_dict, jinja_env=DEFAULT_FRECKLES_JINJA_ENV
         )
+
         return processed
 
     def _generate_schema(self, var_value_map, args, const_args, template_keys=None):
@@ -472,7 +473,6 @@ class Frecklecutable(object):
                     vars_pre_clean=repl_vars,
                     task=task_node,
                 )
-
                 skip_value = self._replace_templated_var_value(
                     var_value=skip, repl_dict=validated_val_map, inventory=inventory
                 )
@@ -531,10 +531,6 @@ class Frecklecutable(object):
                 if k not in val_map.keys() and v is not None and v != "":
                     val_map[k] = v
 
-            # import pp
-            # pp(tn.data["task"]["frecklet"]["name"])
-            # pp(tn.data["task"]["frecklet"])
-
             validated_val_map = self._validate_processed_vars(
                 var_value_map=val_map,
                 schema=schema,
@@ -554,6 +550,7 @@ class Frecklecutable(object):
             task_processed = self._replace_templated_var_value(
                 var_value=task, repl_dict=validated_val_map, inventory=inventory
             )
+
             task_processed = remove_none_values(task_processed)
 
             task_processed[FRECKLET_KEY_NAME]["secret_vars"] = list(new_secret_keys)

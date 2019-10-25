@@ -184,6 +184,7 @@ def get_value_from_var_adapter_string(
         )
         if sec:
             is_sec = True
+
         result_string = result_string.replace(match, temp, 1)
 
     return result_string, is_sec, True
