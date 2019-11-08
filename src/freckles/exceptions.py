@@ -142,11 +142,11 @@ class InvalidFreckletException(FrklException):
 
         reason = None
         if self.frecklet_name is not None:
-            solution = "Check '{}' is a frecklet in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
+            solution = "Check '{}' is a frecklet in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check its syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
                 frecklet_name
             )
         else:
-            solution = "Check frecklet is in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check it's syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
+            solution = "Check frecklet is in any of the repositories of this context, or is a local file. In case you provided a yaml/json/toml string, check its syntax.\n\nIf the frecklet was created dynamically, check the upstream adapter whether there was an error.".format(
                 frecklet_name
             )
         references = {"frecklet documentation": "https://freckles.io/doc/frecklets"}

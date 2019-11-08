@@ -357,7 +357,6 @@ class TaskTreeAttribute(TingAttribute):
         parent_id = counter.current_count
 
         for task in ting.tasklist_detailed:
-
             task_name = task["task"][FRECKLET_KEY_NAME]["name"]
             task_type = task["task"][FRECKLET_KEY_NAME].get("type", "frecklet")
 

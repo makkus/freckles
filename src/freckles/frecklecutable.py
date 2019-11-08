@@ -800,6 +800,7 @@ class Frecklecutable(object):
                 .get(FRECKLES_PROPERTIES_METADATA_KEY, {})
                 .get(FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY, False)
             )
+
             # just converting from string to boolean
             if isinstance(elv, string_types):
                 if elv.lower() in ["true", "1", "yes"]:

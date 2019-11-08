@@ -8,11 +8,7 @@ from ruamel.yaml import YAML
 from six import string_types
 
 from freckles.adapters import FrecklesAdapter
-from freckles.defaults import (
-    VARS_KEY,
-    FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY,
-    FRECKLET_KEY_NAME,
-)
+from freckles.defaults import VARS_KEY, FRECKLES_PROPERTIES_ELEVATED_METADATA_KEY
 from freckles.exceptions import InvalidFreckletException
 from freckles.frecklet.vars import VarsInventory
 from freckles.context.run_config import FrecklesRunTarget
@@ -123,16 +119,16 @@ class FrecklesAdapterFreckles(FrecklesAdapter):
 
             vars_dict = task[VARS_KEY]
 
-            frecklet_dict = task[FRECKLET_KEY_NAME]
-            frecklet_name = frecklet_dict.get("name", None)
+            # frecklet_dict = task[FRECKLET_KEY_NAME]
+            frecklet_name = vars_dict.get("frecklet", None)
 
             if frecklet_name is None:
                 raise FrklException(
                     "Can't parse task for frecklet type 'frecklecutable'.".format(task),
-                    reason="Missing 'frecklet.name' key: \n\n{}".format(
+                    reason="Missing 'vars.frecklet' key: \n\n{}".format(
                         readable(task, out="yaml", indent=2)
                     ),
-                    solution="Provide a valid frecklet name for the 'frecklet.name' key.",
+                    solution="Provide a valid frecklet name for the 'vars.frecklet' key.",
                 )
 
             frecklet = self.context.get_frecklet(frecklet_name=frecklet_name)
