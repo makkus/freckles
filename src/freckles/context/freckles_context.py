@@ -91,6 +91,14 @@ class FrecklesContext(object):
 
                 self._run_info = yaml.load(f)
 
+        self._frecklet_filters = self.config_value("frecklet_filters")
+        if not self._frecklet_filters:
+            self._frecklet_filters = ["*"]
+        elif isinstance(self._frecklet_filters, string_types):
+            self._frecklet_filters = [self._frecklet_filters]
+
+        self._frecklet_filters_cache = None
+
         # from config
         # self._callback = DefaultCallback(profile="verbose")
         # self._callback = SimpleCallback()
@@ -794,7 +802,22 @@ class FrecklesContext(object):
 
     def get_frecklet_names(self):
 
-        return self.frecklet_index.keys()
+        if "*" in self._frecklet_filters:
+            return self.frecklet_index.keys()
+        else:
+            if self._frecklet_filters_cache is not None:
+                return self._frecklet_filters_cache
+
+            all_frecklets = self.frecklet_index.keys()
+            temp = set()
+            for f in all_frecklets:
+                for filter in self._frecklet_filters:
+                    if fnmatch.fnmatch(f, filter):
+                        temp.add(f)
+                        break
+
+            self._frecklet_filters_cache = list(temp)
+            return self._frecklet_filters_cache
 
     def add_dynamic_frecklet(
         self, path_or_frecklet_content, validate=False, check_path=True

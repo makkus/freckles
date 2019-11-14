@@ -203,6 +203,15 @@ There are 3 special repository aliases that can be used instead of a path:
         "doc": {"short_help": "disable (most) warning messages"},
         "tags": ["safe"],
     },
+    "frecklet_filters": {
+        "type": ["string", "list"],
+        "required": False,
+        "empty": True,
+        "default": ["*"],
+        "doc": {
+            "short_help": "one or several filter strings to determine which frecklets to expose to the user"
+        },
+    },
 }
 
 

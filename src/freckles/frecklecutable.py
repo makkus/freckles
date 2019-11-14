@@ -44,7 +44,7 @@ from .defaults import (
     DEFAULT_RUN_CONFIG_JINJA_ENV,
 )
 from .exceptions import FrecklesVarException
-from .output_callback import FrecklesRun, FrecklesResultCallback
+from .output_callback import FrecklesRunRecord, FrecklesResultCallback
 
 log = logging.getLogger("freckles")
 
@@ -1017,7 +1017,7 @@ class Frecklecutable(object):
                     if not root_run_task.finished:
                         root_run_task.finish()
 
-                    run_result = FrecklesRun(
+                    run_result = FrecklesRunRecord(
                         run_id=run_nr,
                         adapter_name=adapter_name,
                         task_list=current_tasklist,
@@ -1059,7 +1059,7 @@ class Frecklecutable(object):
                     # click.echo("frecklecutable run failed: {}".format(e))
                     log.debug(e, exc_info=1)
 
-                    run_result = FrecklesRun(
+                    run_result = FrecklesRunRecord(
                         run_id=run_nr,
                         adapter_name=adapter_name,
                         task_list=current_tasklist,

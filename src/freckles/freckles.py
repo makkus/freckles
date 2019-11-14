@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import atexit
+from collections import Mapping
 
+from freckles.context.run_config import FrecklesRunConfig
 from freckles.utils.runs import clean_runs_log_file
 from .context.config import ContextConfigs
 from .context.freckles_context import FrecklesContext
@@ -129,3 +131,150 @@ class Freckles(object):
 
         ctx = self.get_context(context_name)
         return ctx.create_frecklecutable(frecklet_name)
+
+
+class FrecklesDesc(object):
+    @classmethod
+    def from_dict(cls, context_config=None, extra_repos=None, context_alias="default"):
+
+        return FrecklesDesc(
+            context_config=context_config,
+            extra_repos=extra_repos,
+            context_alias=context_alias,
+        )
+
+    def __init__(self, context_config=None, extra_repos=None, context_alias=None):
+
+        self._context_config = context_config
+        self._extra_repos = extra_repos
+        if not context_alias:
+            context_alias = "default"
+        self._context_alias = context_alias
+        self._freckles_obj = None
+        self._context = None
+
+    def to_dict(self):
+
+        return {
+            "context_config": self.context_config,
+            "extra_repos": self.extra_repos,
+            "context_alias": self.context_alias,
+        }
+
+    @property
+    def context_config(self):
+        return self._context_config
+
+    @property
+    def extra_repos(self):
+        return self._extra_repos
+
+    @property
+    def context_alias(self):
+        return self._context_alias
+
+    @property
+    def freckles_obj(self):
+
+        if self._freckles_obj is not None:
+            return self._freckles_obj
+
+        freckles = Freckles(
+            context_config=self.context_config,
+            extra_repos=self.extra_repos,
+            default_context_name=self.context_alias,
+        )
+        self._context = freckles.get_context(self.context_alias)
+
+    def context(self):
+
+        if self._context is None:
+            self.freckles_obj
+
+        return self._context
+
+
+class FrecklesRunDesc(object):
+    @classmethod
+    def from_dict(
+        cls,
+        frecklet_name,
+        vars=None,
+        run_config=None,
+        context_config=None,
+        extra_repos=None,
+        context_alias=None,
+    ):
+
+        freckles_desc = FrecklesDesc(
+            context_config=context_config,
+            extra_repos=extra_repos,
+            context_alias=context_alias,
+        )
+        return FrecklesRunDesc(
+            frecklet_name=frecklet_name,
+            vars=vars,
+            run_config=run_config,
+            freckles_desc=freckles_desc,
+        )
+
+    def __init__(self, frecklet_name, vars=None, run_config=None, freckles_desc=None):
+
+        self._frecklet_name = frecklet_name
+        if vars is None:
+            vars = {}
+        self._vars = vars
+        self._run_config = FrecklesRunConfig.create(run_config)
+        if freckles_desc is None:
+            freckles_desc = FrecklesDesc()
+        elif isinstance(freckles_desc, Mapping):
+            freckles_desc = FrecklesDesc.from_dict(**freckles_desc)
+        self._freckles_desc = freckles_desc
+
+    @property
+    def frecklet_name(self):
+        return self._frecklet_name
+
+    @frecklet_name.setter
+    def frecklet_name(self, frecklet_name):
+        self._frecklet_name = frecklet_name
+
+    @property
+    def vars(self):
+        return self._vars
+
+    @vars.setter
+    def vars(self, vars):
+
+        if vars is None:
+            vars = {}
+        self._vars = vars
+
+    @property
+    def run_config(self):
+
+        return self._run_config
+
+    def to_dict(self):
+
+        return {
+            "frecklet_name": self._frecklet_name,
+            "vars": self._vars,
+            "run_config": self._run_config.config,
+            "freckles_desc": self._freckles_desc.to_dict(),
+        }
+
+    def run_frecklet(self, password_callback=None):
+
+        context = self._freckles_desc.context()
+        frecklet, _ = context.load_frecklet(self._frecklet_name)
+
+        fx = frecklet.create_frecklecutable(context=self._freckles_desc.context())
+
+        run_record = fx.run_frecklecutable(
+            inventory=self.vars,
+            run_config=self.run_config,
+            password_callback=password_callback,
+        )
+
+        return run_record

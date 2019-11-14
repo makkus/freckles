@@ -214,6 +214,27 @@ class FrecklesRunTarget(object):
 
 
 class FrecklesRunConfig(FrecklesRunTarget):
+    @classmethod
+    def create(self, target_dict_or_string, elevated=None, no_run=False, metadata=None):
+
+        if isinstance(target_dict_or_string, six.string_types):
+            run_config = FrecklesRunConfig(
+                target_string=target_dict_or_string,
+                target_dict=None,
+                elevated=elevated,
+                no_run=no_run,
+                metadata=metadata,
+            )
+        else:
+            run_config = FrecklesRunConfig(
+                target_string=None,
+                target_dict=target_dict_or_string,
+                elevated=elevated,
+                no_run=no_run,
+                metadata=metadata,
+            )
+        return run_config
+
     def __init__(
         self,
         target_dict=None,

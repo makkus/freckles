@@ -26,7 +26,7 @@ ALLOWED_STATUS = ["ok", "skipped", "changed", "failed"]
 # ------------------------------------------------------------------------
 
 
-class FrecklesRun(object):
+class FrecklesRunRecord(object):
     def __init__(
         self,
         run_id,
