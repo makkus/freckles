@@ -139,3 +139,5 @@ DATACLASS_CERBERUS_TYPE_MAP = {
     "dict": "Dict",
     "list": "List",
 }
+
+FRECKLES_FREQL_GRAPHQL_FILES = os.path.join(MODULE_FOLDER, "external", "freql")
