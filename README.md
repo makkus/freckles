@@ -10,7 +10,17 @@
 
 ## Description
 
-Documentation still to be done.
+For details, visit: https://freckles.io
+
+Although this is tagged as version 1.0.0, it should not be considered 'production-grade' code. This version is a (well-working)
+proof-of-concept prototype, and I've used it without problems for the last few months, but it doesn't have (many) tests, and
+the code is not as well documented as it should be. Also, even though I'm mostly happy with the overall architecture of this
+version of *freckles*, there are a few pockets of complexity that I want to get rid of (as much as that will be possible)
+ before I'm entirely happy.
+
+I'm currently re-working the code (and it's dependency libraries), and the plan is for *freckles v2* to be the first
+production-ready version.
+
 
 # Development
 
